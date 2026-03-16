@@ -1,0 +1,1740 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WebGIS · Vườn Cây Cao Su</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+:root {
+  --bg:       #080d18;
+  --s1:       #0f1729;
+  --s2:       #151f35;
+  --s3:       #1c2844;
+  --border:   rgba(255,255,255,0.07);
+  --border2:  rgba(255,255,255,0.12);
+  --text:     #e8eeff;
+  --muted:    #5a6a8a;
+  --muted2:   #8a9ab8;
+  --accent:   #00d68f;
+  --accentB:  #00b4ff;
+  --warn:     #f59e0b;
+  --danger:   #f4656a;
+  --purple:   #a78bfa;
+  --font-d:   'Syne', sans-serif;
+  --font-b:   'Be Vietnam Pro', sans-serif;
+  --nav-w:    220px;
+  --top-h:    56px;
+  --r:        8px;
+  --r-lg:     12px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-b);background:var(--bg);color:var(--text);height:100vh;overflow:hidden;display:flex;flex-direction:column}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--s3);border-radius:2px}
+
+/* ── TOP BAR ── */
+#topbar{
+  height:var(--top-h);flex-shrink:0;
+  background:var(--s1);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 20px;gap:16px;
+  position:relative;z-index:100;
+}
+#topbar::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(0,214,143,0.3),transparent);
+}
+.tb-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.tb-icon{
+  width:34px;height:34px;border-radius:9px;
+  background:linear-gradient(135deg,var(--accent),var(--accentB));
+  display:flex;align-items:center;justify-content:center;font-size:17px;
+  box-shadow:0 0 20px rgba(0,214,143,0.25);flex-shrink:0;
+}
+.tb-title{font-family:var(--font-d);font-size:14px;letter-spacing:.06em;color:var(--text)}
+.tb-sub{font-size:10px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase}
+.tb-sep{width:1px;height:28px;background:var(--border);margin:0 4px}
+.tb-pill{
+  background:var(--s2);border:1px solid var(--border);border-radius:6px;
+  padding:5px 12px;font-size:11px;color:var(--muted2);display:flex;align-items:center;gap:6px;
+}
+.tb-pill strong{color:var(--text);font-size:13px}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 6px var(--accent);animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.tb-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.tb-avatar{
+  width:32px;height:32px;border-radius:50%;
+  background:linear-gradient(135deg,#00b4ff,#a78bfa);
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:600;color:#fff;cursor:pointer;
+  border:2px solid var(--border2);transition:.2s;
+}
+.tb-avatar:hover{border-color:var(--accent)}
+.tb-user-info{text-align:right}
+.tb-user-name{font-size:12px;font-weight:500;color:var(--text)}
+.tb-user-role{font-size:10px;color:var(--muted)}
+.icon-btn{
+  width:32px;height:32px;border-radius:var(--r);border:1px solid var(--border);
+  background:transparent;color:var(--muted);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:.2s;
+}
+.icon-btn:hover{border-color:var(--accentB);color:var(--accentB)}
+.notif-wrap{position:relative}
+.notif-badge{
+  position:absolute;top:-3px;right:-3px;
+  width:14px;height:14px;border-radius:50%;
+  background:var(--danger);font-size:8px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  border:2px solid var(--bg);color:#fff;
+}
+
+/* ── BODY ── */
+#body{display:flex;flex:1;overflow:hidden}
+
+/* ── NAV SIDEBAR ── */
+#nav{
+  width:var(--nav-w);flex-shrink:0;
+  background:var(--s1);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;overflow:hidden;
+  padding:16px 10px;gap:4px;
+}
+.nav-section-label{
+  font-size:10px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--muted);padding:8px 10px 4px;margin-top:4px;
+}
+.nav-item{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 12px;border-radius:var(--r);
+  cursor:pointer;transition:all .18s;color:var(--muted2);
+  font-size:13px;font-weight:400;border:1px solid transparent;
+  position:relative;text-decoration:none;
+}
+.nav-item:hover{background:var(--s2);color:var(--text)}
+.nav-item.active{
+  background:rgba(0,214,143,0.1);
+  border-color:rgba(0,214,143,0.2);
+  color:var(--accent);font-weight:500;
+}
+.nav-item.active::before{
+  content:'';position:absolute;left:0;top:20%;bottom:20%;
+  width:3px;border-radius:0 2px 2px 0;background:var(--accent);
+}
+.nav-icon{width:16px;height:16px;flex-shrink:0;opacity:.7}
+.nav-item.active .nav-icon,.nav-item:hover .nav-icon{opacity:1}
+.nav-badge{
+  margin-left:auto;background:rgba(244,101,106,.15);color:var(--danger);
+  font-size:10px;font-weight:600;padding:2px 6px;border-radius:10px;
+}
+.nav-footer{margin-top:auto;padding-top:12px;border-top:1px solid var(--border)}
+
+/* ── CONTENT ── */
+#content{flex:1;overflow-y:auto;padding:24px}
+.page{display:none;animation:pageIn .25s ease}
+.page.active{display:block}
+@keyframes pageIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── COMMON ── */
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px}
+.page-title{font-family:var(--font-d);font-size:22px;font-weight:800;color:var(--text);letter-spacing:.03em}
+.page-subtitle{font-size:12px;color:var(--muted);margin-top:3px}
+.btn{
+  padding:9px 18px;border-radius:var(--r);font-family:var(--font-b);
+  font-size:12px;font-weight:500;cursor:pointer;
+  display:inline-flex;align-items:center;gap:7px;transition:all .18s;border:none;
+}
+.btn-primary{background:var(--accent);color:#080d18}
+.btn-primary:hover{background:#00f0a0;box-shadow:0 4px 16px rgba(0,214,143,.3)}
+.btn-outline{background:transparent;border:1px solid var(--border2);color:var(--muted2)}
+.btn-outline:hover{border-color:var(--accentB);color:var(--accentB)}
+.btn-danger{background:rgba(244,101,106,.1);border:1px solid rgba(244,101,106,.3);color:var(--danger)}
+.btn-danger:hover{background:rgba(244,101,106,.2)}
+.btn-sm{padding:6px 14px;font-size:11px}
+
+.card{
+  background:var(--s1);border:1px solid var(--border);
+  border-radius:var(--r-lg);padding:18px 20px;
+}
+.card:hover{border-color:var(--border2);transition:.2s}
+
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+
+/* KPI */
+.kpi{background:var(--s2);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px 18px;transition:.2s}
+.kpi:hover{border-color:var(--border2);transform:translateY(-1px)}
+.kpi-label{font-size:11px;color:var(--muted);margin-bottom:8px;font-weight:400;display:flex;align-items:center;gap:6px}
+.kpi-value{font-family:var(--font-d);font-size:24px;font-weight:700;color:var(--text);letter-spacing:-.02em}
+.kpi-value span{font-family:var(--font-b);font-size:12px;color:var(--muted);font-weight:400;margin-left:3px}
+.kpi-delta{font-size:11px;margin-top:6px;display:flex;align-items:center;gap:4px}
+.delta-up{color:var(--accent)}
+.delta-down{color:var(--danger)}
+.kpi-icon{
+  width:36px;height:36px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;font-size:16px;
+  margin-bottom:10px;
+}
+
+/* Badge */
+.badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:10px;font-size:11px;font-weight:500}
+.badge-green{background:rgba(0,214,143,.12);color:var(--accent)}
+.badge-yellow{background:rgba(245,158,11,.12);color:var(--warn)}
+.badge-red{background:rgba(244,101,106,.12);color:var(--danger)}
+.badge-blue{background:rgba(0,180,255,.12);color:var(--accentB)}
+.badge-purple{background:rgba(167,139,250,.12);color:var(--purple)}
+
+/* Table */
+.tbl-wrap{overflow-x:auto;margin-top:4px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead th{
+  font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--muted);padding:10px 14px;border-bottom:1px solid var(--border);
+  text-align:left;white-space:nowrap;
+}
+tbody tr{border-bottom:1px solid var(--border);transition:.15s}
+tbody tr:hover{background:var(--s2)}
+tbody tr:last-child{border-bottom:none}
+td{padding:11px 14px;color:var(--muted2);vertical-align:middle}
+td strong{color:var(--text);font-weight:500}
+td.mono{font-family:monospace;font-size:11px;color:var(--muted)}
+
+/* Form */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-group.full{grid-column:1/-1}
+.form-label{font-size:11px;font-weight:500;color:var(--muted2);letter-spacing:.05em;text-transform:uppercase}
+.form-input,.form-select,.form-textarea{
+  background:var(--s2);border:1px solid var(--border);
+  border-radius:var(--r);padding:10px 14px;
+  color:var(--text);font-family:var(--font-b);font-size:13px;outline:none;
+  transition:.18s;width:100%;
+}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,214,143,.1)}
+.form-input::placeholder,.form-textarea::placeholder{color:var(--muted)}
+.form-select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%235a6a8a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
+.form-select option{background:var(--s1)}
+.form-textarea{resize:vertical;min-height:90px;line-height:1.6}
+.form-section-title{font-family:var(--font-d);font-size:14px;font-weight:700;color:var(--text);margin:24px 0 16px;display:flex;align-items:center;gap:8px}
+.form-section-title::before{content:'';flex:none;width:3px;height:16px;background:var(--accent);border-radius:2px}
+.form-hint{font-size:11px;color:var(--muted);margin-top:3px}
+
+/* Search bar */
+.search-bar{
+  display:flex;align-items:center;gap:8px;
+  background:var(--s2);border:1px solid var(--border);
+  border-radius:var(--r);padding:0 12px;
+  flex:1;max-width:320px;transition:.18s;
+}
+.search-bar:focus-within{border-color:var(--accentB)}
+.search-bar input{
+  background:transparent;border:none;outline:none;
+  color:var(--text);font-family:var(--font-b);font-size:12px;
+  padding:9px 0;width:100%;
+}
+.search-bar input::placeholder{color:var(--muted)}
+
+/* Progress bar */
+.prog-track{height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden;margin-top:8px}
+.prog-fill{height:100%;border-radius:2px;transition:width .6s ease}
+
+/* Chart containers */
+.chart-box{position:relative;width:100%;height:220px}
+.chart-box-sm{position:relative;width:100%;height:170px}
+.chart-box-lg{position:relative;width:100%;height:280px}
+
+/* ══════════════════════════════════
+   PAGE 1: DASHBOARD
+══════════════════════════════════ */
+.activity-item{
+  display:flex;align-items:flex-start;gap:12px;
+  padding:10px 0;border-bottom:1px solid var(--border);
+}
+.activity-item:last-child{border-bottom:none}
+.act-icon{
+  width:32px;height:32px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;font-size:14px;
+  flex-shrink:0;
+}
+.act-text{font-size:12px;color:var(--muted2);line-height:1.5}
+.act-text strong{color:var(--text);font-weight:500}
+.act-time{font-size:10px;color:var(--muted);margin-top:2px}
+
+.weather-row{display:flex;gap:12px;margin-top:12px}
+.weather-day{
+  flex:1;background:var(--s2);border:1px solid var(--border);
+  border-radius:var(--r);padding:10px;text-align:center;
+}
+.weather-day .wd-label{font-size:10px;color:var(--muted);margin-bottom:4px}
+.weather-day .wd-icon{font-size:22px;margin:4px 0}
+.weather-day .wd-temp{font-size:13px;font-weight:500;color:var(--text)}
+
+/* ══════════════════════════════════
+   PAGE 2: QUẢN LÝ LÔ CÂY
+══════════════════════════════════ */
+.filter-row{display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap}
+.lo-detail-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:16px}
+.detail-chip{
+  background:var(--s2);border:1px solid var(--border);border-radius:var(--r);
+  padding:10px 14px;
+}
+.detail-chip .dc-label{font-size:10px;color:var(--muted);margin-bottom:3px;text-transform:uppercase;letter-spacing:.08em}
+.detail-chip .dc-val{font-size:14px;font-weight:500;color:var(--text)}
+
+/* ══════════════════════════════════
+   PAGE 4: THỐNG KÊ
+══════════════════════════════════ */
+.stat-tab-row{display:flex;gap:4px;margin-bottom:20px;background:var(--s2);padding:4px;border-radius:var(--r);width:fit-content}
+.stat-tab{
+  padding:8px 18px;border-radius:6px;font-size:12px;font-weight:500;
+  cursor:pointer;color:var(--muted2);transition:.18s;
+}
+.stat-tab.active{background:var(--s3);color:var(--text)}
+
+/* ══════════════════════════════════
+   PAGE 5: QUẢN LÝ NGƯỜI DÙNG
+══════════════════════════════════ */
+.user-card{
+  background:var(--s2);border:1px solid var(--border);border-radius:var(--r-lg);
+  padding:16px;display:flex;flex-direction:column;align-items:center;
+  gap:8px;text-align:center;transition:.2s;cursor:pointer;
+}
+.user-card:hover{border-color:var(--border2);transform:translateY(-2px)}
+.user-avatar{
+  width:52px;height:52px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;font-weight:700;color:#fff;
+  border:2px solid var(--border2);
+}
+.user-name{font-size:13px;font-weight:500;color:var(--text)}
+.user-role{font-size:11px;color:var(--muted)}
+.user-meta{font-size:10px;color:var(--muted);display:flex;gap:10px;margin-top:4px}
+
+/* Toast */
+.toast{
+  position:fixed;bottom:24px;right:24px;
+  background:var(--s1);border:1px solid var(--border);border-radius:var(--r);
+  padding:12px 18px;font-size:13px;color:var(--text);
+  display:flex;align-items:center;gap:10px;
+  box-shadow:0 8px 32px rgba(0,0,0,.4);z-index:9999;
+  transform:translateY(60px);opacity:0;transition:.3s;pointer-events:none;
+}
+.toast.show{transform:translateY(0);opacity:1}
+.toast-icon{font-size:16px}
+
+/* Map panel tabs */
+.mpanel-tab{
+  flex:1;padding:9px 8px;text-align:center;font-size:11px;font-weight:500;
+  color:var(--muted);cursor:pointer;transition:.15s;border-bottom:2px solid transparent;
+}
+.mpanel-tab:hover{color:var(--text)}
+.mpanel-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+/* Doi toggle */
+.doi-toggle-item{
+  display:flex;align-items:center;gap:7px;padding:4px 6px;
+  border-radius:5px;cursor:pointer;transition:.15s;margin-bottom:3px;
+}
+.doi-toggle-item:hover{background:var(--s2)}
+.doi-toggle-item input[type=checkbox]{accent-color:var(--accent);cursor:pointer}
+.doi-toggle-item label{font-size:11px;color:var(--muted2);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* Lot list in panel */
+.lot-list-item{
+  display:flex;align-items:center;gap:10px;padding:9px 12px;
+  border-bottom:1px solid var(--border);cursor:pointer;transition:.15s;
+}
+.lot-list-item:hover{background:var(--s2)}
+.lot-list-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+.lot-list-ma{font-size:12px;font-weight:500;color:var(--text)}
+.lot-list-meta{font-size:10px;color:var(--muted)}
+
+
+.map-section{
+  background:var(--s1);border:1px solid var(--border);
+  border-radius:var(--r-lg);overflow:hidden;margin-bottom:18px;
+}
+.map-toolbar{
+  padding:12px 16px;display:flex;align-items:center;gap:10px;
+  border-bottom:1px solid var(--border);flex-wrap:wrap;
+}
+.map-toolbar-title{font-size:13px;font-weight:500;color:var(--text);margin-right:4px}
+.map-filter-btn{
+  padding:5px 12px;border-radius:6px;font-size:11px;font-weight:500;
+  cursor:pointer;border:1px solid var(--border);background:transparent;
+  color:var(--muted2);transition:.15s;font-family:var(--font-b);
+}
+.map-filter-btn:hover{border-color:var(--border2);color:var(--text)}
+.map-filter-btn.on{background:rgba(0,214,143,.1);border-color:rgba(0,214,143,.3);color:var(--accent)}
+.map-filter-btn.tt-ktcm.on{background:rgba(245,158,11,.1);border-color:rgba(245,158,11,.3);color:var(--warn)}
+.map-filter-btn.tt-tctm.on{background:rgba(0,180,255,.1);border-color:rgba(0,180,255,.3);color:var(--accentB)}
+.map-filter-btn.tt-tlgv.on{background:rgba(244,101,106,.1);border-color:rgba(244,101,106,.3);color:var(--danger)}
+.map-sep{width:1px;height:22px;background:var(--border);margin:0 4px}
+#dashMap{height:420px;width:100%;background:#0d1a2e}
+.map-legend{
+  padding:12px 16px;border-top:1px solid var(--border);
+  display:flex;gap:20px;flex-wrap:wrap;align-items:center;
+}
+.map-leg-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted2)}
+.map-leg-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+
+/* Leaflet overrides dark */
+.leaflet-container{background:#0d1a2e}
+.leaflet-control-attribution{display:none}
+.leaflet-bar a{background:var(--s2)!important;color:var(--text)!important;border-color:var(--border)!important}
+.leaflet-bar a:hover{background:var(--s3)!important}
+.leaflet-popup-content-wrapper{
+  background:var(--s1)!important;color:var(--text)!important;
+  border:1px solid var(--border)!important;border-radius:var(--r)!important;
+  box-shadow:0 8px 32px rgba(0,0,0,.5)!important;
+}
+.leaflet-popup-tip{background:var(--s1)!important}
+.leaflet-popup-content{margin:12px 16px!important;font-family:var(--font-b)!important}
+.lo-popup-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:8px}
+.lo-popup-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;font-size:11px}
+.lo-popup-label{color:var(--muted)}
+.lo-popup-val{color:var(--text);font-weight:500}
+.lo-popup-badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600}
+
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div id="topbar">
+  <div class="tb-logo">
+    <div class="tb-icon">🌿</div>
+    <div>
+      <div class="tb-title">WEBGIS CAO SU</div>
+      <div class="tb-sub">Tổng Công ty</div>
+    </div>
+  </div>
+  <div class="tb-sep"></div>
+  <div class="tb-pill"><div class="live-dot"></div>Trực tuyến</div>
+  <div class="tb-pill">Lô vườn <strong>2.141</strong></div>
+  <div class="tb-pill">Diện tích <strong>31.354 ha</strong></div>
+  <div class="tb-right">
+    <div class="notif-wrap">
+      <button class="icon-btn" title="Thông báo" onclick="showToast('Bạn có 3 thông báo mới','📬')">
+        <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      </button>
+      <div class="notif-badge">3</div>
+    </div>
+    <button class="icon-btn" title="Cài đặt">
+      <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
+    <div class="tb-user-info">
+      <div class="tb-user-name">Nguyễn Văn An</div>
+      <div class="tb-user-role">Quản trị viên</div>
+    </div>
+    <div class="tb-avatar">NA</div>
+  </div>
+</div>
+
+<!-- BODY -->
+<div id="body">
+
+<!-- NAV -->
+<nav id="nav">
+  <div class="nav-section-label">Chính</div>
+  <div class="nav-item active" onclick="goTo('dashboard',this)">
+    <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+    Dashboard
+  </div>
+  <div class="nav-item" onclick="goTo('lo-cay',this)">
+    <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    Quản lý lô cây
+  </div>
+  <div class="nav-item" onclick="goTo('them-du-lieu',this)">
+    <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+    Thêm dữ liệu
+  </div>
+
+  <div class="nav-section-label">Phân tích</div>
+  <div class="nav-item" onclick="goTo('thong-ke',this)">
+    <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    Thống kê
+  </div>
+
+  <div class="nav-section-label">Hệ thống</div>
+  <div class="nav-item" onclick="goTo('nguoi-dung',this)">
+    <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    Quản lý người dùng
+    <span class="nav-badge">2</span>
+  </div>
+
+  <div class="nav-footer">
+    <div class="nav-item" style="color:var(--danger)">
+      <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Đăng xuất
+    </div>
+  </div>
+</nav>
+
+<!-- CONTENT -->
+<div id="content">
+
+<!-- ════════════ PAGE: DASHBOARD ════════════ -->
+<div class="page active" id="page-dashboard">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Dashboard</div>
+      <div class="page-subtitle">Tổng quan hoạt động vườn cây — cập nhật lúc 07:42, 16/03/2026</div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-outline btn-sm">
+        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Xuất báo cáo
+      </button>
+      <button class="btn btn-primary btn-sm" onclick="goTo('them-du-lieu',document.querySelector('[onclick*=them-du-lieu]'))">
+        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Thêm dữ liệu
+      </button>
+    </div>
+  </div>
+
+  <!-- KPI Row -->
+  <div class="grid-4" style="margin-bottom:18px">
+    <div class="kpi">
+      <div class="kpi-icon" style="background:rgba(0,214,143,.1)">🌳</div>
+      <div class="kpi-label">Tổng lô vườn cây</div>
+      <div class="kpi-value">2.141 <span>lô</span></div>
+      <div class="kpi-delta delta-up">▲ +18 lô so tháng trước</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-icon" style="background:rgba(0,180,255,.1)">🗺</div>
+      <div class="kpi-label">Tổng diện tích</div>
+      <div class="kpi-value">31.354 <span>ha</span></div>
+      <div class="kpi-delta delta-up">▲ +142 ha</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-icon" style="background:rgba(245,158,11,.1)">⚡</div>
+      <div class="kpi-label">Đang khai thác (CS.KD)</div>
+      <div class="kpi-value">19.711 <span>ha</span></div>
+      <div class="kpi-delta" style="color:var(--muted)">63% tổng diện tích</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-icon" style="background:rgba(167,139,250,.1)">📋</div>
+      <div class="kpi-label">Số đội trực thuộc</div>
+      <div class="kpi-value">3 <span>đội</span></div>
+      <div class="kpi-delta delta-up">▲ Hoạt động bình thường</div>
+    </div>
+  </div>
+
+  <!-- ── BẢN ĐỒ TRUNG TÂM ── -->
+  <div class="map-section">
+    <div class="map-toolbar">
+      <span class="map-toolbar-title">🗺 Bản đồ vườn cây cao su</span>
+      <div class="map-sep"></div>
+      <span style="font-size:11px;color:var(--muted)">Hiện trạng:</span>
+      <button class="map-filter-btn on" id="flt-cskd" onclick="toggleMapFilter('CS.KD',this)">CS.KD</button>
+      <button class="map-filter-btn tt-ktcm on" id="flt-ktcm" onclick="toggleMapFilter('KTCM',this)">KTCM</button>
+      <button class="map-filter-btn tt-tctm on" id="flt-tctm" onclick="toggleMapFilter('TCTM',this)">TCTM</button>
+      <button class="map-filter-btn tt-tlgv on" id="flt-tlgv" onclick="toggleMapFilter('TLGV',this)">TLGV</button>
+      <div class="map-sep"></div>
+      <span style="font-size:11px;color:var(--muted)">Màu theo:</span>
+      <button class="map-filter-btn on" id="mview-tt"    onclick="switchMapView('tt',this)">Hiện trạng</button>
+      <button class="map-filter-btn"    id="mview-nam"   onclick="switchMapView('nam',this)">Năm trồng</button>
+      <button class="map-filter-btn"    id="mview-giong" onclick="switchMapView('giong',this)">Giống cây</button>
+      <div style="margin-left:auto;display:flex;gap:8px">
+        <button class="map-filter-btn" onclick="dashMap.setView([11.95,107.85],11)">⌂ Tổng</button>
+        <button class="map-filter-btn" onclick="showToast('Đã xuất bản đồ PNG','🗺')">↓ Xuất</button>
+      </div>
+    </div>
+
+    <div style="display:flex;height:480px">
+      <!-- MAP -->
+      <div style="flex:1;position:relative">
+        <div id="dashMap" style="height:100%;width:100%"></div>
+        <!-- Search overlay -->
+        <div style="position:absolute;top:12px;left:12px;z-index:1000;display:flex;gap:8px;align-items:center">
+          <div style="display:flex;align-items:center;gap:8px;background:rgba(15,23,41,0.92);backdrop-filter:blur(8px);border:1px solid var(--border2);border-radius:var(--r);padding:7px 12px;width:260px">
+            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="#5a6a8a" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <input id="mapSearch" type="text" placeholder="Tìm mã lô, giống, đội..." oninput="searchMapLot(this.value)"
+              style="background:transparent;border:none;outline:none;color:var(--text);font-family:'Be Vietnam Pro',sans-serif;font-size:12px;width:100%">
+          </div>
+          <div id="mapSearchCount" style="background:rgba(15,23,41,0.88);backdrop-filter:blur(6px);border:1px solid var(--border);border-radius:var(--r);padding:7px 12px;font-size:11px;color:var(--muted);white-space:nowrap"></div>
+        </div>
+        <!-- Year filter overlay -->
+        <div style="position:absolute;bottom:12px;left:12px;z-index:1000;background:rgba(15,23,41,0.92);backdrop-filter:blur(8px);border:1px solid var(--border2);border-radius:var(--r);padding:10px 14px;min-width:230px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:7px">
+            <span style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em">Lọc năm trồng</span>
+            <span id="yearRangeLabel" style="font-size:11px;color:var(--accent);font-weight:600">2007 – 2022</span>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center">
+            <span style="font-size:10px;color:var(--muted)">2007</span>
+            <input type="range" id="yearFrom" min="2007" max="2022" value="2007" step="1" style="flex:1" oninput="updateYearFilter()">
+            <input type="range" id="yearTo"   min="2007" max="2022" value="2022" step="1" style="flex:1" oninput="updateYearFilter()">
+            <span style="font-size:10px;color:var(--muted)">2022</span>
+          </div>
+        </div>
+        <!-- Doi toggle overlay -->
+        <div style="position:absolute;top:12px;right:12px;z-index:1000;background:rgba(15,23,41,0.92);backdrop-filter:blur(8px);border:1px solid var(--border2);border-radius:var(--r);padding:8px 10px;max-width:150px">
+          <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:7px">Đội</div>
+          <div id="doiToggleList"></div>
+        </div>
+      </div>
+
+      <!-- SIDE PANEL -->
+      <div style="width:270px;flex-shrink:0;border-left:1px solid var(--border);display:flex;flex-direction:column;background:var(--s1);overflow:hidden">
+        <div style="display:flex;border-bottom:1px solid var(--border)">
+          <div class="mpanel-tab active" id="mptab-info"  onclick="switchMpTab('info',this)">Chi tiết</div>
+          <div class="mpanel-tab"        id="mptab-list"  onclick="switchMpTab('list',this)">Danh sách</div>
+          <div class="mpanel-tab"        id="mptab-doi"   onclick="switchMpTab('doi',this)">Theo đội</div>
+        </div>
+
+        <!-- Tab: info -->
+        <div id="mpcontent-info" style="flex:1;overflow-y:auto;padding:14px">
+          <div id="mpanel-placeholder" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:180px;gap:10px;opacity:.35">
+            <div style="font-size:36px">📍</div>
+            <div style="font-size:12px;color:var(--muted);text-align:center;line-height:1.6">Nhấp vào lô trên bản đồ<br>để xem thông tin chi tiết</div>
+          </div>
+          <div id="mpanel-detail" style="display:none">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+              <div id="mpd-ma" style="font-size:15px;font-weight:600;color:var(--text)"></div>
+              <div id="mpd-tt-badge" class="badge"></div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+              <div class="detail-chip"><div class="dc-label">Đội</div><div class="dc-val" id="mpd-doi" style="font-size:12px"></div></div>
+              <div class="detail-chip"><div class="dc-label">Năm trồng</div><div class="dc-val" id="mpd-year"></div></div>
+              <div class="detail-chip"><div class="dc-label">Giống cây</div><div class="dc-val" id="mpd-giong" style="font-size:12px"></div></div>
+              <div class="detail-chip"><div class="dc-label">Diện tích</div><div class="dc-val" id="mpd-dt"></div></div>
+              <div class="detail-chip"><div class="dc-label">Năng suất</div><div class="dc-val" id="mpd-ns"></div></div>
+              <div class="detail-chip"><div class="dc-label">Tuổi cây</div><div class="dc-val" id="mpd-age"></div></div>
+            </div>
+            <div style="background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:12px;margin-bottom:10px">
+              <div style="font-size:10px;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.08em">NS so với trung bình đội</div>
+              <div style="position:relative;height:6px;background:rgba(255,255,255,0.06);border-radius:3px;margin-bottom:6px">
+                <div id="mpd-ns-bar" style="position:absolute;left:0;top:0;height:100%;border-radius:3px;transition:width .5s ease"></div>
+                <div id="mpd-avg-line" style="position:absolute;top:-2px;width:2px;height:10px;background:rgba(255,255,255,.4);border-radius:1px"></div>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted)">
+                <span>0</span><span id="mpd-avg-label" style="color:var(--muted2)">TB: — t/ha</span><span>3.0</span>
+              </div>
+            </div>
+            <div style="background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:12px;margin-bottom:12px">
+              <div style="font-size:10px;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.08em">Ghi chú kỹ thuật</div>
+              <div id="mpd-note" style="font-size:12px;color:var(--muted2);line-height:1.6"></div>
+            </div>
+            <button class="btn btn-outline btn-sm" style="width:100%;justify-content:center;font-size:11px" onclick="showToast('Mở hồ sơ lô đầy đủ','📋')">
+              Xem hồ sơ đầy đủ →
+            </button>
+          </div>
+        </div>
+
+        <!-- Tab: list -->
+        <div id="mpcontent-list" style="flex:1;overflow-y:auto;display:none">
+          <div style="padding:10px 12px;border-bottom:1px solid var(--border);font-size:11px;color:var(--muted)" id="mplist-count"></div>
+          <div id="mpanel-lot-list"></div>
+        </div>
+
+        <!-- Tab: doi -->
+        <div id="mpcontent-doi" style="flex:1;overflow-y:auto;padding:12px;display:none">
+          <div id="mpanel-doi-stats"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="map-legend" id="mapLegend"></div>
+  </div>
+
+  <div class="grid-2" style="margin-bottom:18px">
+    <!-- Sản lượng mủ -->
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <div style="font-size:13px;font-weight:500;color:var(--text)">Sản lượng mủ cao su</div>
+        <span class="badge badge-green">Tháng 3/2026</span>
+      </div>
+      <div class="chart-box"><canvas id="chartSanLuong"></canvas></div>
+    </div>
+
+    <!-- Hiện trạng vườn cây -->
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <div style="font-size:13px;font-weight:500;color:var(--text)">Cơ cấu hiện trạng</div>
+        <span class="badge badge-blue">2025 – 2026</span>
+      </div>
+      <div class="chart-box"><canvas id="chartHienTrang"></canvas></div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <!-- Hoạt động gần đây -->
+    <div class="card">
+      <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:14px">Hoạt động gần đây</div>
+      <div class="activity-item">
+        <div class="act-icon" style="background:rgba(0,214,143,.1)">🌱</div>
+        <div><div class="act-text"><strong>Đội Cầm Quyền</strong> cập nhật 12 lô KTCM mới</div><div class="act-time">2 giờ trước</div></div>
+      </div>
+      <div class="activity-item">
+        <div class="act-icon" style="background:rgba(0,180,255,.1)">📍</div>
+        <div><div class="act-text">Thêm lô <strong>CQ-2024-047</strong> vào bản đồ GIS</div><div class="act-time">5 giờ trước</div></div>
+      </div>
+      <div class="activity-item">
+        <div class="act-icon" style="background:rgba(245,158,11,.1)">⚠️</div>
+        <div><div class="act-text"><strong>Lô BL-2019-023</strong> cần kiểm tra — năng suất giảm</div><div class="act-time">Hôm qua</div></div>
+      </div>
+      <div class="activity-item">
+        <div class="act-icon" style="background:rgba(167,139,250,.1)">👤</div>
+        <div><div class="act-text"><strong>Trần Thị Bình</strong> cập nhật dữ liệu Đội Suối Ngo</div><div class="act-time">Hôm qua</div></div>
+      </div>
+      <div class="activity-item">
+        <div class="act-icon" style="background:rgba(0,214,143,.1)">📊</div>
+        <div><div class="act-text">Xuất báo cáo tháng 2/2026 hoàn tất</div><div class="act-time">2 ngày trước</div></div>
+      </div>
+    </div>
+
+    <!-- Thời tiết + Top đội -->
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div class="card">
+        <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px">Thời tiết vùng trồng</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:12px">Bình Phước · Hôm nay 16/03</div>
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:12px">
+          <div style="font-size:42px">⛅</div>
+          <div>
+            <div style="font-family:var(--font-d);font-size:32px;font-weight:700;color:var(--text)">34°C</div>
+            <div style="font-size:11px;color:var(--muted)">Nắng nhẹ, có mây rải rác</div>
+            <div style="font-size:11px;color:var(--muted)">Độ ẩm 72% · Gió NĐ 12 km/h</div>
+          </div>
+        </div>
+        <div class="weather-row">
+          <div class="weather-day"><div class="wd-label">T4</div><div class="wd-icon">🌤</div><div class="wd-temp">33°</div></div>
+          <div class="weather-day"><div class="wd-label">T5</div><div class="wd-icon">🌧</div><div class="wd-temp">28°</div></div>
+          <div class="weather-day"><div class="wd-label">T6</div><div class="wd-icon">⛈</div><div class="wd-temp">26°</div></div>
+          <div class="weather-day"><div class="wd-label">T7</div><div class="wd-icon">☀️</div><div class="wd-temp">35°</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:14px">Top đội — diện tích CS.KD</div>
+        <div id="topDoiList"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ PAGE: QUẢN LÝ LÔ CÂY ════════════ -->
+<div class="page" id="page-lo-cay">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Quản lý lô cây</div>
+      <div class="page-subtitle">Toàn bộ 2.141 lô vườn cây — 3 đội trực thuộc</div>
+    </div>
+    <button class="btn btn-primary btn-sm" onclick="goTo('them-du-lieu',document.querySelector('[onclick*=them-du-lieu]'))">
+      <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Thêm lô mới
+    </button>
+  </div>
+
+  <div class="filter-row">
+    <div class="search-bar">
+      <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="#5a6a8a" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      <input type="text" placeholder="Tìm lô theo mã, đội, giống cây..." id="loSearch" oninput="filterTable()">
+    </div>
+    <select class="form-select" style="width:160px;padding:9px 30px 9px 12px" onchange="filterTable()" id="doiFilter">
+      <option value="">Tất cả đội</option>
+      <option>Cầm Quyền</option>
+      <option>Cầm Đường</option>
+      <option>Suối Ngo</option>
+      <option>Bắc Lân</option>
+      <option>Nam Cát</option>
+      <option>Tây Nguyên</option>
+    </select>
+    <select class="form-select" style="width:150px;padding:9px 30px 9px 12px" onchange="filterTable()" id="ttFilter">
+      <option value="">Tất cả trạng thái</option>
+      <option>CS.KD</option>
+      <option>KTCM</option>
+      <option>TCTM</option>
+      <option>TLGV</option>
+    </select>
+    <span style="font-size:12px;color:var(--muted);margin-left:auto" id="tableCount">Hiển thị 20 / 2.141 lô</span>
+  </div>
+
+  <div class="card" style="padding:0;overflow:hidden">
+    <div class="tbl-wrap">
+      <table id="loTable">
+        <thead>
+          <tr>
+            <th>Mã lô</th>
+            <th>Đội</th>
+            <th>Năm trồng</th>
+            <th>Giống</th>
+            <th>Diện tích</th>
+            <th>Trạng thái</th>
+            <th>Năng suất</th>
+            <th>Cập nhật</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="loTableBody"></tbody>
+      </table>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-top:1px solid var(--border)">
+      <span style="font-size:12px;color:var(--muted)">Trang 1 / 108</span>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-outline btn-sm">← Trước</button>
+        <button class="btn btn-outline btn-sm" style="border-color:var(--accent);color:var(--accent)">1</button>
+        <button class="btn btn-outline btn-sm">2</button>
+        <button class="btn btn-outline btn-sm">3</button>
+        <button class="btn btn-outline btn-sm">Sau →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ PAGE: THÊM DỮ LIỆU ════════════ -->
+<div class="page" id="page-them-du-lieu">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Thêm dữ liệu</div>
+      <div class="page-subtitle">Nhập thông tin lô vườn cây mới vào hệ thống</div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 340px;gap:20px">
+    <div>
+      <!-- Form -->
+      <div class="card">
+        <div class="form-section-title">Thông tin cơ bản</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Mã lô *</label>
+            <input type="text" class="form-input" placeholder="VD: CQ-2024-048" id="f-ma-lo">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Đội trực thuộc *</label>
+            <select class="form-select" id="f-doi">
+              <option value="">— Chọn đội —</option>
+              <option>Cầm Quyền</option>
+              <option>Cầm Đường</option>
+              <option>Suối Ngo</option>
+              <option>Bắc Lân</option>
+              <option>Nam Cát</option>
+              <option>Tây Nguyên</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Năm trồng *</label>
+            <input type="number" class="form-input" placeholder="2024" min="1990" max="2030" id="f-nam">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Giống cây *</label>
+            <select class="form-select" id="f-giong">
+              <option value="">— Chọn giống —</option>
+              <option>RRIV 1</option>
+              <option>PB 260</option>
+              <option>RRIV 4</option>
+              <option>IRCA 130</option>
+              <option>GT 1</option>
+              <option>Khác</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Diện tích (ha) *</label>
+            <input type="number" class="form-input" placeholder="0.00" step="0.01" id="f-dien-tich">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Hiện trạng *</label>
+            <select class="form-select" id="f-hien-trang">
+              <option value="">— Chọn —</option>
+              <option>CS.KD — Cây sản xuất kinh doanh</option>
+              <option>KTCM — Kiến thiết cơ mới</option>
+              <option>TCTM — Tái canh tái mới</option>
+              <option>TLGV — Thanh lý gốc vườn</option>
+              <option>LC — Lô chuyển đổi</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-section-title">Vị trí địa lý</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Vĩ độ (Latitude)</label>
+            <input type="text" class="form-input" placeholder="11.9523" id="f-lat">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Kinh độ (Longitude)</label>
+            <input type="text" class="form-input" placeholder="107.8734" id="f-lng">
+          </div>
+          <div class="form-group full">
+            <label class="form-label">Địa chỉ / Mô tả vị trí</label>
+            <input type="text" class="form-input" placeholder="Xã Tân Thành, huyện Đồng Phú, Bình Phước" id="f-diachi">
+          </div>
+        </div>
+
+        <div class="form-section-title">Thông tin sản xuất</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Ngày cạo mủ đầu tiên</label>
+            <input type="date" class="form-input" id="f-ngay-cao">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Năng suất dự kiến (tấn/ha)</label>
+            <input type="number" class="form-input" placeholder="1.8" step="0.1" id="f-nang-suat">
+          </div>
+          <div class="form-group full">
+            <label class="form-label">Ghi chú</label>
+            <textarea class="form-textarea" placeholder="Thêm ghi chú về lô vườn cây..." id="f-ghi-chu"></textarea>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">
+          <button class="btn btn-primary" onclick="submitForm()">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            Lưu lô vườn cây
+          </button>
+          <button class="btn btn-outline" onclick="resetForm()">Đặt lại</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right panel -->
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div class="card">
+        <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:14px">Hướng dẫn nhập liệu</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;gap:10px;font-size:12px;color:var(--muted2)">
+            <div style="width:20px;height:20px;border-radius:50%;background:rgba(0,214,143,.1);border:1px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--accent);flex-shrink:0;font-weight:600">1</div>
+            Điền đầy đủ các trường có dấu <span style="color:var(--danger)">*</span>
+          </div>
+          <div style="display:flex;gap:10px;font-size:12px;color:var(--muted2)">
+            <div style="width:20px;height:20px;border-radius:50%;background:rgba(0,180,255,.1);border:1px solid var(--accentB);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--accentB);flex-shrink:0;font-weight:600">2</div>
+            Mã lô theo chuẩn: <strong style="color:var(--text)">[ĐỘI]-[NĂM]-[STT]</strong>
+          </div>
+          <div style="display:flex;gap:10px;font-size:12px;color:var(--muted2)">
+            <div style="width:20px;height:20px;border-radius:50%;background:rgba(245,158,11,.1);border:1px solid var(--warn);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--warn);flex-shrink:0;font-weight:600">3</div>
+            Tọa độ GPS lấy từ bản đồ GIS
+          </div>
+          <div style="display:flex;gap:10px;font-size:12px;color:var(--muted2)">
+            <div style="width:20px;height:20px;border-radius:50%;background:rgba(167,139,250,.1);border:1px solid var(--purple);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--purple);flex-shrink:0;font-weight:600">4</div>
+            Kiểm tra lại trước khi lưu
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:12px">Nhập từ file</div>
+        <div style="border:2px dashed var(--border2);border-radius:var(--r);padding:24px;text-align:center;cursor:pointer;transition:.2s" onmouseover="this.style.borderColor='#00d68f'" onmouseout="this.style.borderColor='var(--border2)'">
+          <div style="font-size:28px;margin-bottom:8px">📂</div>
+          <div style="font-size:12px;color:var(--muted2)">Kéo thả hoặc nhấp để chọn file</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:4px">Hỗ trợ: .xlsx, .csv, .geojson</div>
+        </div>
+        <button class="btn btn-outline btn-sm" style="width:100%;margin-top:10px;justify-content:center">
+          📥 Tải mẫu file nhập liệu
+        </button>
+      </div>
+
+      <div class="card">
+        <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:12px">Số liệu hôm nay</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;justify-content:space-between;font-size:12px">
+            <span style="color:var(--muted)">Lô đã thêm hôm nay</span>
+            <strong style="color:var(--accent)">3 lô</strong>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:12px">
+            <span style="color:var(--muted)">Cập nhật trong tuần</span>
+            <strong style="color:var(--accentB)">47 lô</strong>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:12px">
+            <span style="color:var(--muted)">Chờ duyệt</span>
+            <strong style="color:var(--warn)">5 lô</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ PAGE: THỐNG KÊ ════════════ -->
+<div class="page" id="page-thong-ke">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Thống kê</div>
+      <div class="page-subtitle">Phân tích dữ liệu vườn cây theo thời gian và đội</div>
+    </div>
+    <button class="btn btn-outline btn-sm">
+      <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Xuất Excel
+    </button>
+  </div>
+
+  <div class="stat-tab-row">
+    <div class="stat-tab active" onclick="switchStatTab(this,'tab-sanluong')">Sản lượng mủ</div>
+    <div class="stat-tab" onclick="switchStatTab(this,'tab-dientich')">Diện tích</div>
+    <div class="stat-tab" onclick="switchStatTab(this,'tab-giong')">Cơ cấu giống</div>
+  </div>
+
+  <!-- Tab: sản lượng -->
+  <div id="tab-sanluong">
+    <div class="grid-4" style="margin-bottom:18px">
+      <div class="kpi">
+        <div class="kpi-label">SL mủ tháng này</div>
+        <div class="kpi-value">1.847 <span>tấn</span></div>
+        <div class="kpi-delta delta-up">▲ +12% so cùng kỳ</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Năng suất bình quân</div>
+        <div class="kpi-value">1.93 <span>tấn/ha</span></div>
+        <div class="kpi-delta delta-up">▲ +0.08</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Đội năng suất cao nhất</div>
+        <div class="kpi-value" style="font-size:16px">Nam Cát</div>
+        <div class="kpi-delta" style="color:var(--accent)">2.31 tấn/ha</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Doanh thu ước tính</div>
+        <div class="kpi-value" style="font-size:18px">47.8 <span>tỷ VNĐ</span></div>
+        <div class="kpi-delta delta-up">▲ +8% YoY</div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:18px">
+      <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:16px">Sản lượng mủ 12 tháng qua — theo đội</div>
+      <div class="chart-box-lg"><canvas id="chartSanLuong12T"></canvas></div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:16px">Biểu đồ radar — chỉ số đội</div>
+        <div class="chart-box"><canvas id="chartRadar"></canvas></div>
+      </div>
+      <div class="card">
+        <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:16px">So sánh năng suất các đội (tấn/ha)</div>
+        <div class="chart-box"><canvas id="chartNangSuat"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-dientich" style="display:none">
+    <div class="card" style="margin-bottom:18px">
+      <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:16px">Biến động diện tích theo năm</div>
+      <div class="chart-box-lg"><canvas id="chartDienTichYear"></canvas></div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:16px">Phân bổ diện tích theo đội</div>
+        <div class="chart-box"><canvas id="chartDienTichDoi"></canvas></div>
+      </div>
+      <div class="card">
+        <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:16px">Cơ cấu hiện trạng vườn cây</div>
+        <div class="chart-box"><canvas id="chartHienTrang2"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-giong" style="display:none">
+    <div class="grid-2">
+      <div class="card">
+        <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:16px">Tỷ lệ giống cây cao su</div>
+        <div class="chart-box-lg"><canvas id="chartGiongPie"></canvas></div>
+      </div>
+      <div class="card">
+        <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:16px">Năng suất theo giống (tấn/ha)</div>
+        <div class="chart-box-lg"><canvas id="chartGiongBar"></canvas></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ PAGE: QUẢN LÝ NGƯỜI DÙNG ════════════ -->
+<div class="page" id="page-nguoi-dung">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Quản lý người dùng</div>
+      <div class="page-subtitle">Phân quyền và quản lý tài khoản hệ thống</div>
+    </div>
+    <button class="btn btn-primary btn-sm" onclick="showToast('Mở form thêm người dùng','👤')">
+      <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Thêm người dùng
+    </button>
+  </div>
+
+  <!-- Stats row -->
+  <div class="grid-4" style="margin-bottom:20px">
+    <div class="kpi">
+      <div class="kpi-label">Tổng tài khoản</div>
+      <div class="kpi-value">24 <span>người dùng</span></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Đang hoạt động</div>
+      <div class="kpi-value" style="color:var(--accent)">19</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Chờ phê duyệt</div>
+      <div class="kpi-value" style="color:var(--warn)">2</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Đã tạm khóa</div>
+      <div class="kpi-value" style="color:var(--danger)">3</div>
+    </div>
+  </div>
+
+  <!-- User grid -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:24px">
+    <div id="userCardGrid"></div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:24px" id="userCards"></div>
+
+  <!-- Table -->
+  <div class="card" style="padding:0;overflow:hidden">
+    <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:13px;font-weight:500;color:var(--text)">Danh sách tài khoản</span>
+      <div class="search-bar" style="max-width:240px">
+        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="#5a6a8a" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input type="text" placeholder="Tìm người dùng...">
+      </div>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Tên đầy đủ</th>
+            <th>Email</th>
+            <th>Vai trò</th>
+            <th>Đội phụ trách</th>
+            <th>Trạng thái</th>
+            <th>Đăng nhập lần cuối</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="userTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+</div><!-- /content -->
+</div><!-- /body -->
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <span class="toast-icon" id="toastIcon">✅</span>
+  <span id="toastMsg">Thao tác thành công</span>
+</div>
+
+<script>
+/* ══════════ DATA ══════════ */
+const doiColors = ['#00d68f','#00b4ff','#f59e0b','#f4656a','#a78bfa','#34d399'];
+const doiNames = ['Cầm Quyền','Cầm Đường','Suối Ngo','Bắc Lân','Nam Cát','Tây Nguyên'];
+const doiArea  = [6200,5800,4900,6100,5700,4155];
+const doiLo    = [420,380,290,410,300,341];
+
+const loData = [];
+const giongs = ['RRIV 1','PB 260','RRIV 4','IRCA 130','GT 1'];
+const ttList  = ['CS.KD','CS.KD','CS.KD','KTCM','KTCM','TCTM','TLGV'];
+const ttBadge = {
+  'CS.KD':'badge-green','KTCM':'badge-yellow','TCTM':'badge-blue','TLGV':'badge-red','LC':'badge-purple'
+};
+for(let i=0;i<20;i++){
+  const doi  = doiNames[i%6];
+  const prefix = doi.split(' ').map(w=>w[0]).join('').toUpperCase();
+  const year = 2010 + Math.floor(Math.random()*14);
+  const tt   = ttList[Math.floor(Math.random()*ttList.length)];
+  loData.push({
+    ma: `${prefix}-${year}-0${String(i+1).padStart(2,'0')}`,
+    doi, year,
+    giong: giongs[Math.floor(Math.random()*giongs.length)],
+    dt: (0.5 + Math.random()*4.5).toFixed(2),
+    tt, ns: (1.2 + Math.random()*1.4).toFixed(2),
+    cap: `${Math.floor(Math.random()*28)+1}/03/2026`
+  });
+}
+
+const userData = [
+  {name:'Nguyễn Văn An',  email:'nv.an@caosu.vn',   role:'Quản trị viên',doi:'Tổng công ty',status:'active', last:'16/03/2026',avatar:'NA',color:'#00b4ff'},
+  {name:'Trần Thị Bình',  email:'tt.binh@caosu.vn',  role:'Quản lý đội',  doi:'Suối Ngo',   status:'active', last:'15/03/2026',avatar:'TB',color:'#00d68f'},
+  {name:'Lê Văn Cường',   email:'lv.cuong@caosu.vn', role:'Kỹ thuật viên',doi:'Cầm Quyền',  status:'active', last:'16/03/2026',avatar:'LC',color:'#f59e0b'},
+  {name:'Phạm Thị Dung',  email:'pt.dung@caosu.vn',  role:'Kỹ thuật viên',doi:'Bắc Lân',    status:'active', last:'14/03/2026',avatar:'PD',color:'#a78bfa'},
+  {name:'Hoàng Văn Em',   email:'hv.em@caosu.vn',    role:'Nhập liệu',    doi:'Nam Cát',     status:'pending',last:'Chưa đăng nhập',avatar:'HE',color:'#f59e0b'},
+  {name:'Vũ Thị Fương',   email:'vt.fuong@caosu.vn', role:'Nhập liệu',    doi:'Cầm Đường',   status:'locked', last:'01/02/2026',avatar:'VF',color:'#f4656a'},
+  {name:'Đặng Văn Giang', email:'dv.giang@caosu.vn', role:'Quản lý đội',  doi:'Tây Nguyên',  status:'active', last:'16/03/2026',avatar:'DG',color:'#34d399'},
+  {name:'Mai Thị Hoa',    email:'mt.hoa@caosu.vn',   role:'Kỹ thuật viên',doi:'Cầm Quyền',   status:'active', last:'13/03/2026',avatar:'MH',color:'#00b4ff'},
+];
+
+/* ══════════ NAVIGATION ══════════ */
+function goTo(id, el) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  if(el) el.classList.add('active');
+  if(id==='thong-ke') initStatCharts();
+  if(id==='dashboard') setTimeout(()=>dashMap&&dashMap.invalidateSize(),100);
+}
+
+/* ══════════ DASHBOARD MAP ══════════ */
+// Palette per view mode
+const ttColors  = {'CS.KD':'#00d68f','KTCM':'#f59e0b','TCTM':'#00b4ff','TLGV':'#f4656a','LC':'#a78bfa'};
+const namColors = c=>{
+  if(c<=2010) return '#a78bfa';
+  if(c<=2013) return '#00b4ff';
+  if(c<=2016) return '#00d68f';
+  if(c<=2019) return '#f59e0b';
+  return '#f4656a';
+};
+const giongColors={'RRIV 1':'#00d68f','PB 260':'#00b4ff','RRIV 4':'#a78bfa','IRCA 130':'#f59e0b','GT 1':'#34d399'};
+
+// Generate 60 fake lots around Binh Phuoc
+const seed = (n)=>{let x=Math.sin(n)*10000;return x-Math.floor(x)};
+const mapLots = [];
+const doiCenters=[
+  [11.97,107.82],[11.93,107.87],[11.99,107.91],
+  [11.91,107.80],[12.02,107.85],[11.87,107.76]
+];
+const giongs2=['RRIV 1','PB 260','RRIV 4','IRCA 130','GT 1'];
+const ttWeights=['CS.KD','CS.KD','CS.KD','KTCM','KTCM','TCTM','TLGV'];
+for(let i=0;i<60;i++){
+  const di=i%6;
+  const c=doiCenters[di];
+  const lat=c[0]+(seed(i*3)-.5)*0.08;
+  const lng=c[1]+(seed(i*7)-.5)*0.08;
+  const year=2007+Math.floor(seed(i*11)*16);
+  const tt=ttWeights[Math.floor(seed(i*17)*ttWeights.length)];
+  const giong=giongs2[Math.floor(seed(i*13)*giongs2.length)];
+  const dt=(0.5+seed(i*5)*4).toFixed(2);
+  const ns=(1.2+seed(i*9)*1.3).toFixed(2);
+  const prefix=doiNames[di].split(' ').map(w=>w[0]).join('').toUpperCase();
+  mapLots.push({
+    ma:`${prefix}-${year}-${String(i+1).padStart(3,'0')}`,
+    doi:doiNames[di], lat, lng, year, tt, giong, dt, ns,
+    poly:makeSquarePoly(lat,lng,0.008+seed(i*19)*0.012)
+  });
+}
+function makeSquarePoly(lat,lng,sz){
+  const r=(seed(lat*100)-.5)*.3;
+  const pts=[[lat+sz,lng-sz],[lat+sz,lng+sz],[lat-sz,lng+sz],[lat-sz,lng-sz]];
+  return pts.map(([a,b])=>{
+    const cosa=Math.cos(r),sina=Math.sin(r);
+    const da=a-lat,db=b-lng;
+    return [lat+da*cosa-db*sina, lng+da*sina+db*cosa];
+  });
+}
+
+let dashMap, mapLayers=[], mapViewMode='tt',
+    mapActiveFilters=new Set(['CS.KD','KTCM','TCTM','TLGV','LC']),
+    mapActiveDoi=new Set(doiNames),
+    yearFromVal=2007, yearToVal=2022;
+
+function initDashMap(){
+  dashMap=L.map('dashMap',{zoomControl:true,attributionControl:false}).setView([11.95,107.85],11);
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19}).addTo(dashMap);
+
+  // Build doi toggles
+  const dtList = document.getElementById('doiToggleList');
+  doiNames.forEach((n,i)=>{
+    const id='dchk-'+i;
+    dtList.innerHTML+=`<div class="doi-toggle-item">
+      <input type="checkbox" id="${id}" checked onchange="toggleDoiFilter('${n}',this)">
+      <label for="${id}" style="color:${doiColors[i]}">${n.replace('Đội ','')}</label>
+    </div>`;
+  });
+
+  renderMapLots();
+  renderMpDoi();
+  document.getElementById('mapSearchCount').textContent='60 lô';
+}
+
+function getLotColor(lot){
+  if(mapViewMode==='tt')    return ttColors[lot.tt]||'#5a6a8a';
+  if(mapViewMode==='nam')   return namColors(lot.year);
+  if(mapViewMode==='giong') return giongColors[lot.giong]||'#5a6a8a';
+}
+
+function renderMapLots(highlightMa){
+  mapLayers.forEach(l=>dashMap.removeLayer(l));
+  mapLayers=[];
+  let visible=0;
+  mapLots.forEach(lot=>{
+    if(!mapActiveFilters.has(lot.tt)) return;
+    if(!mapActiveDoi.has(lot.doi)) return;
+    if(lot.year < yearFromVal || lot.year > yearToVal) return;
+    const col=getLotColor(lot);
+    const isHL = highlightMa && lot.ma===highlightMa;
+    const poly=L.polygon(lot.poly,{
+      color: isHL?'#fff':col, weight: isHL?2.5:1.5,
+      fillColor:col, fillOpacity: isHL?.65:.3,
+      dashArray: isHL ? null : undefined
+    }).addTo(dashMap);
+
+    poly.on('click',()=>selectLot(lot));
+    poly.on('mouseover',function(){this.setStyle({fillOpacity:.6,weight:2.5})});
+    poly.on('mouseout', function(){this.setStyle({fillOpacity:isHL?.65:.3,weight:isHL?2.5:1.5})});
+    lot._poly = poly;
+    mapLayers.push(poly);
+    visible++;
+  });
+  renderMapLegend();
+  renderMpList();
+  document.getElementById('mapSearchCount').textContent=visible+' lô';
+}
+
+const notes=['Cây sinh trưởng tốt, cần theo dõi sâu bệnh định kỳ.','Năng suất ổn định, đang trong giai đoạn khai thác chính.','Cần bổ sung phân bón đợt 2 trong tháng tới.','Lô đã qua đỉnh năng suất, dự kiến thanh lý sau 2 năm.','Giống mới, theo dõi thích nghi đất đai địa phương.'];
+
+function selectLot(lot){
+  document.getElementById('mpanel-placeholder').style.display='none';
+  document.getElementById('mpanel-detail').style.display='block';
+  document.getElementById('mpd-ma').textContent=lot.ma;
+  document.getElementById('mpd-doi').textContent=lot.doi;
+  document.getElementById('mpd-year').textContent=lot.year;
+  document.getElementById('mpd-giong').textContent=lot.giong;
+  document.getElementById('mpd-dt').textContent=lot.dt+' ha';
+  document.getElementById('mpd-ns').textContent=lot.ns+' t/ha';
+  document.getElementById('mpd-age').textContent=(2026-lot.year)+' năm';
+  const ttb=document.getElementById('mpd-tt-badge');
+  const ttClass={'CS.KD':'badge-green','KTCM':'badge-yellow','TCTM':'badge-blue','TLGV':'badge-red'};
+  ttb.className='badge '+(ttClass[lot.tt]||'badge-blue');
+  ttb.textContent=lot.tt;
+  // NS bar
+  const ns=parseFloat(lot.ns), max=3.0, avg=1.65;
+  const barPct=Math.min(ns/max*100,100);
+  const avgPct=avg/max*100;
+  const barColor=ns>=avg?'#00d68f':'#f59e0b';
+  document.getElementById('mpd-ns-bar').style.cssText=`position:absolute;left:0;top:0;height:100%;border-radius:3px;width:${barPct}%;background:${barColor};transition:width .5s ease`;
+  document.getElementById('mpd-avg-line').style.left=avgPct+'%';
+  document.getElementById('mpd-avg-label').textContent=`TB: ${avg} t/ha`;
+  document.getElementById('mpd-note').textContent=notes[Math.floor(Math.random()*notes.length)];
+  // Fly to lot
+  dashMap.flyTo([lot.lat,lot.lng],14,{duration:.8});
+  // Switch to info tab
+  switchMpTab('info',document.getElementById('mptab-info'));
+}
+
+function renderMapLegend(){
+  const leg=document.getElementById('mapLegend');
+  leg.innerHTML='';
+  if(mapViewMode==='tt'){
+    Object.entries(ttColors).forEach(([k,v])=>{
+      leg.innerHTML+=`<div class="map-leg-item"><div class="map-leg-dot" style="background:${v}"></div>${k}</div>`;
+    });
+  } else if(mapViewMode==='nam'){
+    [['≤2010','#a78bfa'],['2011–13','#00b4ff'],['2014–16','#00d68f'],['2017–19','#f59e0b'],['2020+','#f4656a']].forEach(([k,v])=>{
+      leg.innerHTML+=`<div class="map-leg-item"><div class="map-leg-dot" style="background:${v}"></div>${k}</div>`;
+    });
+  } else {
+    Object.entries(giongColors).forEach(([k,v])=>{
+      leg.innerHTML+=`<div class="map-leg-item"><div class="map-leg-dot" style="background:${v}"></div>${k}</div>`;
+    });
+  }
+  const cnt=mapLayers.length;
+  leg.innerHTML+=`<span style="margin-left:auto;font-size:11px;color:var(--muted)">${cnt} lô hiển thị</span>`;
+}
+
+function renderMpList(){
+  const list=document.getElementById('mpanel-lot-list');
+  const visible=mapLots.filter(l=>
+    mapActiveFilters.has(l.tt) && mapActiveDoi.has(l.doi) &&
+    l.year>=yearFromVal && l.year<=yearToVal
+  );
+  document.getElementById('mplist-count').textContent=visible.length+' lô đang hiển thị';
+  list.innerHTML=visible.map(lot=>{
+    const col=getLotColor(lot);
+    return `<div class="lot-list-item" onclick="selectLot(mapLots.find(l=>l.ma==='${lot.ma}'))">
+      <div class="lot-list-dot" style="background:${col}"></div>
+      <div><div class="lot-list-ma">${lot.ma}</div><div class="lot-list-meta">${lot.doi.replace('Đội ','')} · ${lot.year} · ${lot.giong}</div></div>
+      <div style="margin-left:auto;font-size:11px;color:var(--muted2)">${lot.dt}ha</div>
+    </div>`;
+  }).join('');
+}
+
+function renderMpDoi(){
+  const el=document.getElementById('mpanel-doi-stats');
+  el.innerHTML='<div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px">Phân bổ lô theo đội</div>';
+  doiNames.forEach((n,i)=>{
+    const cnt=mapLots.filter(l=>l.doi===n).length;
+    const pct=Math.round(cnt/mapLots.length*100);
+    el.innerHTML+=`
+      <div style="margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px">
+          <span style="color:${doiColors[i]};font-weight:500">${n}</span>
+          <span style="color:var(--muted2)">${cnt} lô · ${pct}%</span>
+        </div>
+        <div style="height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden">
+          <div style="height:100%;width:${pct}%;background:${doiColors[i]};border-radius:2px;transition:width .5s ease"></div>
+        </div>
+      </div>`;
+  });
+}
+
+function toggleMapFilter(tt, btn){
+  if(mapActiveFilters.has(tt)){mapActiveFilters.delete(tt);btn.classList.remove('on')}
+  else{mapActiveFilters.add(tt);btn.classList.add('on')}
+  renderMapLots();
+}
+function toggleDoiFilter(doi, chk){
+  if(chk.checked) mapActiveDoi.add(doi); else mapActiveDoi.delete(doi);
+  renderMapLots();
+}
+function switchMapView(mode, btn){
+  mapViewMode=mode;
+  document.querySelectorAll('[id^=mview-]').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  renderMapLots();
+}
+function updateYearFilter(){
+  const f=parseInt(document.getElementById('yearFrom').value);
+  const t=parseInt(document.getElementById('yearTo').value);
+  yearFromVal=Math.min(f,t); yearToVal=Math.max(f,t);
+  document.getElementById('yearRangeLabel').textContent=yearFromVal+' – '+yearToVal;
+  renderMapLots();
+}
+function searchMapLot(q){
+  q=q.trim().toLowerCase();
+  if(!q){ renderMapLots(); return; }
+  const match=mapLots.find(l=>l.ma.toLowerCase().includes(q)||l.giong.toLowerCase().includes(q)||l.doi.toLowerCase().includes(q));
+  renderMapLots(match?match.ma:null);
+  if(match) selectLot(match);
+}
+function switchMpTab(tab, el){
+  document.querySelectorAll('.mpanel-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  ['info','list','doi'].forEach(t=>{
+    document.getElementById('mpcontent-'+t).style.display = t===tab ? 'block' : 'none';
+  });
+  if(tab==='info') document.getElementById('mpcontent-info').style.flex='1';
+}
+
+setTimeout(initDashMap, 200);
+
+
+/* ══════════ TOAST ══════════ */
+function showToast(msg, icon='✅') {
+  const t=document.getElementById('toast');
+  document.getElementById('toastMsg').textContent=msg;
+  document.getElementById('toastIcon').textContent=icon;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+/* ══════════ CHART HELPERS ══════════ */
+const C = {
+  grid: 'rgba(255,255,255,0.05)',
+  tick: '#5a6a8a',
+  tooltip: { backgroundColor:'#1c2844', titleColor:'#e8eeff', bodyColor:'#8a9ab8', borderColor:'rgba(255,255,255,0.08)', borderWidth:1 }
+};
+function baseOpts(indexAxis='x') {
+  return {
+    responsive:true, maintainAspectRatio:false,
+    indexAxis,
+    plugins:{ legend:{display:false}, tooltip:C.tooltip },
+    scales:{
+      x:{ grid:{color:C.grid}, ticks:{color:C.tick, font:{size:10, family:"'Be Vietnam Pro'"}} },
+      y:{ grid:{color:C.grid}, ticks:{color:C.tick, font:{size:10, family:"'Be Vietnam Pro'"}} }
+    }
+  };
+}
+
+/* ══════════ DASHBOARD CHARTS ══════════ */
+const months = ['T4','T5','T6','T7','T8','T9','T10','T11','T12','T1','T2','T3'];
+new Chart(document.getElementById('chartSanLuong'),{
+  type:'line',
+  data:{
+    labels:months,
+    datasets:[
+      {label:'2026',data:[1420,1580,1350,1190,980,1100,1340,1520,1680,1540,1720,1847],
+       borderColor:'#00d68f',backgroundColor:'rgba(0,214,143,0.08)',fill:true,tension:.4,borderWidth:2.5,pointRadius:0},
+      {label:'2025',data:[1280,1410,1200,1050,890,980,1180,1350,1510,1380,1590,1640],
+       borderColor:'rgba(255,255,255,0.2)',borderDash:[4,3],fill:false,tension:.4,borderWidth:1.5,pointRadius:0}
+    ]
+  },
+  options:{
+    ...baseOpts(),
+    plugins:{
+      legend:{display:true,position:'top',labels:{color:C.tick,font:{size:10},boxWidth:20,usePointStyle:true}},
+      tooltip:C.tooltip
+    },
+    scales:{
+      x:{grid:{color:C.grid},ticks:{color:C.tick,font:{size:10}}},
+      y:{grid:{color:C.grid},ticks:{color:C.tick,font:{size:10},callback:v=>v+'t'}}
+    }
+  }
+});
+
+new Chart(document.getElementById('chartHienTrang'),{
+  type:'doughnut',
+  data:{
+    labels:['CS.KD','KTCM','TCTM','TLGV','LC','Khác'],
+    datasets:[{
+      data:[63,23,4,4,4,2],
+      backgroundColor:['#00d68f','#f59e0b','#00b4ff','#f4656a','#a78bfa','#5a6a8a'],
+      borderColor:'#0f1729',borderWidth:2,hoverBorderWidth:3
+    }]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,cutout:'62%',
+    plugins:{
+      legend:{position:'right',labels:{color:C.tick,font:{size:10},padding:10,boxWidth:10,usePointStyle:true}},
+      tooltip:C.tooltip
+    }
+  }
+});
+
+/* Top đội list */
+const topDoi = [...doiArea.map((a,i)=>({name:doiNames[i],area:a,color:doiColors[i]}))].sort((a,b)=>b.area-a.area);
+const topEl = document.getElementById('topDoiList');
+topDoi.forEach((d,i)=>{
+  const pct = Math.round(d.area/doiArea.reduce((s,x)=>s+x,0)*100);
+  topEl.innerHTML+=`
+    <div style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px">
+        <span style="color:var(--muted2)">${i+1}. ${d.name}</span>
+        <span style="color:var(--text);font-weight:500">${d.area.toLocaleString('vi')} ha</span>
+      </div>
+      <div class="prog-track"><div class="prog-fill" style="width:${pct}%;background:${d.color}"></div></div>
+    </div>`;
+});
+
+/* ══════════ TABLE ══════════ */
+function renderTable(data) {
+  const tbody = document.getElementById('loTableBody');
+  tbody.innerHTML = data.map(r=>`
+    <tr>
+      <td><strong>${r.ma}</strong></td>
+      <td>${r.doi}</td>
+      <td class="mono">${r.year}</td>
+      <td>${r.giong}</td>
+      <td>${r.dt} ha</td>
+      <td><span class="badge ${ttBadge[r.tt]||'badge-blue'}">${r.tt}</span></td>
+      <td>${r.ns} t/ha</td>
+      <td class="mono">${r.cap}</td>
+      <td>
+        <div style="display:flex;gap:4px">
+          <button class="btn btn-outline btn-sm" onclick="showToast('Xem chi tiết lô ${r.ma}','📋')" style="padding:4px 8px">Xem</button>
+          <button class="btn btn-danger btn-sm" onclick="showToast('Đã xóa lô ${r.ma}','🗑')" style="padding:4px 8px">Xóa</button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+renderTable(loData);
+function filterTable(){
+  const q = document.getElementById('loSearch').value.toLowerCase();
+  const d = document.getElementById('doiFilter').value;
+  const t = document.getElementById('ttFilter').value;
+  const filtered = loData.filter(r=>
+    (!q || r.ma.toLowerCase().includes(q) || r.doi.toLowerCase().includes(q) || r.giong.toLowerCase().includes(q)) &&
+    (!d || r.doi===d) && (!t || r.tt===t)
+  );
+  renderTable(filtered);
+  document.getElementById('tableCount').textContent=`Hiển thị ${filtered.length} / 2.141 lô`;
+}
+
+/* ══════════ FORM ══════════ */
+function submitForm(){
+  const ma = document.getElementById('f-ma-lo').value;
+  const doi = document.getElementById('f-doi').value;
+  if(!ma||!doi){ showToast('Vui lòng điền đủ thông tin bắt buộc!','⚠️'); return; }
+  showToast(`Đã lưu lô ${ma} thành công!`,'✅');
+  resetForm();
+}
+function resetForm(){
+  ['f-ma-lo','f-doi','f-nam','f-giong','f-dien-tich','f-hien-trang','f-lat','f-lng','f-diachi','f-ngay-cao','f-nang-suat','f-ghi-chu'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.value='';
+  });
+}
+
+/* ══════════ STAT CHARTS (lazy) ══════════ */
+let statInit = false;
+function initStatCharts(){
+  if(statInit) return; statInit=true;
+  const m12 = ['T4','T5','T6','T7','T8','T9','T10','T11','T12','T1','T2','T3'];
+
+  new Chart(document.getElementById('chartSanLuong12T'),{
+    type:'bar',
+    data:{
+      labels:m12,
+      datasets:doiNames.map((n,i)=>({
+        label:n,
+        data:m12.map(()=>Math.floor(150+Math.random()*250)),
+        backgroundColor:doiColors[i]+'88',
+        borderColor:doiColors[i],
+        borderWidth:1,borderRadius:3
+      }))
+    },
+    options:{
+      ...baseOpts(),
+      plugins:{
+        legend:{display:true,position:'top',labels:{color:C.tick,font:{size:10},boxWidth:10,usePointStyle:true}},
+        tooltip:C.tooltip
+      },
+      scales:{
+        x:{stacked:true,grid:{color:C.grid},ticks:{color:C.tick,font:{size:10}}},
+        y:{stacked:true,grid:{color:C.grid},ticks:{color:C.tick,font:{size:10},callback:v=>v+'t'}}
+      }
+    }
+  });
+
+  new Chart(document.getElementById('chartRadar'),{
+    type:'radar',
+    data:{
+      labels:['Diện tích','Năng suất','Sản lượng','Số lô','Độ phủ','Hiệu quả'],
+      datasets:doiNames.slice(0,3).map((n,i)=>({
+        label:n,
+        data:[6,5,7,8,6,7].map(v=>v+Math.random()*2-1),
+        borderColor:doiColors[i],backgroundColor:doiColors[i]+'22',borderWidth:1.5,pointRadius:3
+      }))
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      scales:{r:{grid:{color:C.grid},pointLabels:{color:C.tick,font:{size:10}},ticks:{display:false}}},
+      plugins:{
+        legend:{display:true,position:'bottom',labels:{color:C.tick,font:{size:10},boxWidth:10}},
+        tooltip:C.tooltip
+      }
+    }
+  });
+
+  new Chart(document.getElementById('chartNangSuat'),{
+    type:'bar',
+    data:{
+      labels:doiNames,
+      datasets:[{
+        label:'Năng suất (tấn/ha)',
+        data:[1.85,1.72,1.94,1.89,2.31,1.68],
+        backgroundColor:doiColors.map(c=>c+'99'),
+        borderColor:doiColors,borderWidth:1.5,borderRadius:4
+      }]
+    },
+    options:{
+      ...baseOpts('y'),
+      plugins:{legend:{display:false},tooltip:C.tooltip},
+      scales:{
+        x:{grid:{color:C.grid},ticks:{color:C.tick,font:{size:10},callback:v=>v+'t/ha'}},
+        y:{grid:{display:false},ticks:{color:C.tick,font:{size:10}}}
+      }
+    }
+  });
+
+  new Chart(document.getElementById('chartDienTichYear'),{
+    type:'line',
+    data:{
+      labels:['2018','2019','2020','2021','2022','2023','2024','2025','2026'],
+      datasets:[
+        {label:'CS.KD',data:[16200,17000,17800,18200,18900,19200,19500,19711,19850],borderColor:'#00d68f',backgroundColor:'rgba(0,214,143,0.07)',fill:true,tension:.4,borderWidth:2,pointRadius:3,pointBackgroundColor:'#00d68f'},
+        {label:'KTCM', data:[8200,7900,7600,7400,7100,6900,7000,7165,7300],borderColor:'#f59e0b',fill:false,tension:.4,borderWidth:1.5,borderDash:[4,3],pointRadius:2},
+        {label:'TCTM', data:[1800,1600,1400,1300,1250,1200,1180,1167,1100],borderColor:'#00b4ff',fill:false,tension:.4,borderWidth:1.5,borderDash:[4,3],pointRadius:2},
+      ]
+    },
+    options:{
+      ...baseOpts(),
+      plugins:{
+        legend:{display:true,position:'top',labels:{color:C.tick,font:{size:10},boxWidth:20,usePointStyle:true}},
+        tooltip:C.tooltip
+      },
+      scales:{
+        x:{grid:{color:C.grid},ticks:{color:C.tick,font:{size:10}}},
+        y:{grid:{color:C.grid},ticks:{color:C.tick,font:{size:10},callback:v=>(v/1000).toFixed(0)+'k ha'}}
+      }
+    }
+  });
+
+  new Chart(document.getElementById('chartDienTichDoi'),{
+    type:'doughnut',
+    data:{
+      labels:doiNames,
+      datasets:[{data:doiArea,backgroundColor:doiColors.map(c=>c+'cc'),borderColor:'#0f1729',borderWidth:2}]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,cutout:'55%',
+      plugins:{
+        legend:{position:'bottom',labels:{color:C.tick,font:{size:10},padding:8,boxWidth:10,usePointStyle:true}},
+        tooltip:{...C.tooltip,callbacks:{label:ctx=>` ${ctx.label}: ${ctx.parsed.toLocaleString('vi')} ha`}}
+      }
+    }
+  });
+
+  new Chart(document.getElementById('chartHienTrang2'),{
+    type:'doughnut',
+    data:{
+      labels:['CS.KD','KTCM','TCTM','TLGV','LC','Khác'],
+      datasets:[{data:[63,23,4,4,4,2],backgroundColor:['#00d68f','#f59e0b','#00b4ff','#f4656a','#a78bfa','#5a6a8a'],borderColor:'#0f1729',borderWidth:2}]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,cutout:'55%',
+      plugins:{
+        legend:{position:'bottom',labels:{color:C.tick,font:{size:10},padding:8,boxWidth:10,usePointStyle:true}},
+        tooltip:{...C.tooltip,callbacks:{label:ctx=>` ${ctx.label}: ${ctx.parsed}%`}}
+      }
+    }
+  });
+
+  new Chart(document.getElementById('chartGiongPie'),{
+    type:'doughnut',
+    data:{
+      labels:['RRIV 1','PB 260','RRIV 4','IRCA 130','GT 1','Khác'],
+      datasets:[{data:[35,28,18,10,6,3],backgroundColor:['#00d68f','#00b4ff','#a78bfa','#f59e0b','#34d399','#5a6a8a'],borderColor:'#0f1729',borderWidth:2}]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,cutout:'55%',
+      plugins:{
+        legend:{position:'right',labels:{color:C.tick,font:{size:11},padding:12,boxWidth:10,usePointStyle:true}},
+        tooltip:{...C.tooltip,callbacks:{label:ctx=>` ${ctx.label}: ${ctx.parsed}%`}}
+      }
+    }
+  });
+
+  new Chart(document.getElementById('chartGiongBar'),{
+    type:'bar',
+    data:{
+      labels:['RRIV 1','PB 260','RRIV 4','IRCA 130','GT 1'],
+      datasets:[{
+        label:'tấn/ha',
+        data:[2.05,1.88,1.94,2.18,1.72],
+        backgroundColor:['#00d68f99','#00b4ff99','#a78bfa99','#f59e0b99','#34d39999'],
+        borderColor:['#00d68f','#00b4ff','#a78bfa','#f59e0b','#34d399'],
+        borderWidth:1.5,borderRadius:4
+      }]
+    },
+    options:{
+      ...baseOpts('y'),
+      plugins:{legend:{display:false},tooltip:C.tooltip},
+      scales:{
+        x:{grid:{color:C.grid},ticks:{color:C.tick,font:{size:10},callback:v=>v+'t'}},
+        y:{grid:{display:false},ticks:{color:C.tick,font:{size:11}}}
+      }
+    }
+  });
+}
+
+/* ══════════ STAT TABS ══════════ */
+function switchStatTab(el, tabId){
+  document.querySelectorAll('.stat-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  ['tab-sanluong','tab-dientich','tab-giong'].forEach(id=>{
+    document.getElementById(id).style.display = id===tabId?'block':'none';
+  });
+}
+
+/* ══════════ USER CARDS ══════════ */
+const statusMap = {active:{cls:'badge-green',txt:'Hoạt động'},pending:{cls:'badge-yellow',txt:'Chờ duyệt'},locked:{cls:'badge-red',txt:'Đã khóa'}};
+const ucEl = document.getElementById('userCards');
+userData.forEach(u=>{
+  ucEl.innerHTML+=`
+    <div class="user-card" onclick="showToast('Xem hồ sơ: ${u.name}','👤')">
+      <div class="user-avatar" style="background:${u.color}22;border-color:${u.color}44;color:${u.color}">${u.avatar}</div>
+      <div class="user-name">${u.name}</div>
+      <div class="user-role">${u.role}</div>
+      <span class="badge ${statusMap[u.status].cls}">${statusMap[u.status].txt}</span>
+      <div class="user-meta"><span>📋 ${u.doi}</span></div>
+    </div>`;
+});
+
+const utEl = document.getElementById('userTableBody');
+userData.forEach(u=>{
+  utEl.innerHTML+=`
+    <tr>
+      <td><div style="display:flex;align-items:center;gap:10px"><div style="width:28px;height:28px;border-radius:50%;background:${u.color}22;color:${u.color};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;flex-shrink:0">${u.avatar}</div><strong>${u.name}</strong></div></td>
+      <td class="mono">${u.email}</td>
+      <td><span class="badge badge-blue">${u.role}</span></td>
+      <td>${u.doi}</td>
+      <td><span class="badge ${statusMap[u.status].cls}">${statusMap[u.status].txt}</span></td>
+      <td class="mono">${u.last}</td>
+      <td><div style="display:flex;gap:4px">
+        <button class="btn btn-outline btn-sm" style="padding:4px 8px" onclick="showToast('Chỉnh sửa: ${u.name}','✏️')">Sửa</button>
+        <button class="btn btn-danger btn-sm" style="padding:4px 8px" onclick="showToast('Đã xử lý tài khoản ${u.name}','🔒')">Khóa</button>
+      </div></td>
+    </tr>`;
+});
+</script>
+</body>
+</html>
