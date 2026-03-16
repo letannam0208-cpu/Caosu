@@ -386,6 +386,36 @@ td.mono{font-family:monospace;font-size:11px;color:var(--muted)}
 .mc-btn:hover{background:rgba(255,255,255,0.08);color:var(--text)}
 .mc-btn.active{background:rgba(0,214,143,0.15);color:var(--accent)}
 .mc-btn svg{flex-shrink:0}
+
+/* Zoom level badge between +/- */
+.mc-zoom-badge{
+  width:36px;height:28px;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(0,0,0,.2);border-bottom:1px solid rgba(255,255,255,0.06);
+  position:relative;cursor:default;
+}
+#mc-zoom-num{
+  font-size:11px;font-weight:700;color:var(--accentB);
+  font-family:var(--font-d);letter-spacing:.02em;
+}
+
+/* Home button accent */
+.mc-btn-home{color:var(--accentB)!important}
+.mc-btn-home:hover{background:rgba(0,180,255,.15)!important;color:#fff!important}
+
+/* Compass */
+.mc-compass{cursor:default!important;color:var(--muted2)}
+.mc-compass:hover{background:transparent!important}
+
+/* ── Zoom/Pan/Home button enhancements ── */
+.mc-btn-zoom-flash{animation:zoomFlash .18s ease}
+@keyframes zoomFlash{0%{background:rgba(0,214,143,.3)}100%{background:transparent}}
+.mc-btn-home-spin svg{transition:transform .4s ease}
+.mc-btn-home:active svg{transform:scale(.85)}
+
+/* Pan mode cursor */
+.pan-mode #dashMap{cursor:grab!important}
+.pan-mode #dashMap:active{cursor:grabbing!important}
 .mc-tooltip{
   position:absolute;left:calc(100% + 8px);top:50%;transform:translateY(-50%);
   background:rgba(15,23,41,0.95);border:1px solid var(--border);
@@ -415,6 +445,77 @@ td.mono{font-family:monospace;font-size:11px;color:var(--muted)}
 }
 .coord-item{display:flex;align-items:center;gap:6px}
 .coord-sep{width:1px;height:12px;background:var(--border)}
+
+/* ══ MEASURE TOOL ══ */
+.measure-panel{
+  position:absolute;left:56px;bottom:40px;z-index:1001;
+  background:rgba(15,23,41,0.96);border:1px solid rgba(255,255,255,0.15);
+  border-radius:var(--r);width:260px;backdrop-filter:blur(12px);
+  display:none;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.5);
+}
+.measure-panel.show{display:block}
+.msr-header{
+  padding:10px 14px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.msr-title{font-size:12px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:7px}
+.msr-close{cursor:pointer;color:var(--muted);font-size:14px;padding:2px 4px;border-radius:3px;transition:.15s}
+.msr-close:hover{color:var(--text);background:rgba(255,255,255,.1)}
+.msr-tabs{display:flex;border-bottom:1px solid var(--border)}
+.msr-tab{
+  flex:1;padding:8px 0;text-align:center;font-size:11px;font-weight:500;
+  color:var(--muted);cursor:pointer;transition:.15s;border-bottom:2px solid transparent;
+}
+.msr-tab:hover{color:var(--text)}
+.msr-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.msr-body{padding:12px 14px}
+.msr-instruction{
+  font-size:11px;color:var(--muted2);line-height:1.6;margin-bottom:10px;
+  background:rgba(0,180,255,.06);border:1px solid rgba(0,180,255,.15);
+  border-radius:5px;padding:8px 10px;
+}
+.msr-result{
+  background:var(--s2);border:1px solid var(--border);border-radius:var(--r);
+  padding:10px 12px;margin-bottom:10px;min-height:56px;
+}
+.msr-result-label{font-size:10px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.08em}
+.msr-result-value{font-size:20px;font-weight:700;color:var(--accent);font-family:var(--font-d)}
+.msr-result-sub{font-size:11px;color:var(--muted2);margin-top:2px}
+.msr-points{font-size:10px;color:var(--muted);margin-bottom:8px}
+.msr-btns{display:flex;gap:6px}
+.msr-btn{
+  flex:1;padding:7px 0;border-radius:5px;font-size:11px;font-weight:500;
+  border:1px solid var(--border);background:transparent;color:var(--muted2);
+  cursor:pointer;font-family:var(--font-b);transition:.15s;text-align:center;
+}
+.msr-btn:hover{border-color:var(--border2);color:var(--text);background:var(--s3)}
+.msr-btn.primary{background:rgba(0,214,143,.1);border-color:rgba(0,214,143,.3);color:var(--accent)}
+.msr-btn.primary:hover{background:rgba(0,214,143,.2)}
+.msr-btn.danger{background:rgba(244,101,106,.08);border-color:rgba(244,101,106,.25);color:var(--danger)}
+.msr-btn.danger:hover{background:rgba(244,101,106,.18)}
+.measuring-distance #dashMap,.measuring-area #dashMap{cursor:crosshair!important}
+
+/* Fullscreen mode — CSS-based (works in iframe) */
+.map-canvas-wrap.is-fullscreen {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 99999 !important;
+  border-radius: 0 !important;
+}
+.map-canvas-wrap.is-fullscreen #dashMap {
+  height: 100vh !important;
+  width: 100vw !important;
+}
+/* Default (non-fullscreen) — always 460px */
+.map-canvas-wrap:not(.is-fullscreen) {
+  height: 460px !important;
+}
+.map-canvas-wrap:not(.is-fullscreen) #dashMap {
+  height: 100% !important;
+  width: 100% !important;
+}
 
 /* Layer panel */
 .map-layer-panel{
@@ -623,7 +724,7 @@ td.mono{font-family:monospace;font-size:11px;color:var(--muted)}
       <button class="map-chip on" id="mview-nt"    onclick="switchMapView('nt',this)">Nông trường</button>
       <div style="margin-left:auto;display:flex;gap:6px;align-items:center">
         <span id="selCountTop" style="font-size:11px;color:var(--muted)">425 lô hiển thị</span>
-        <button class="map-chip" onclick="dashMap.flyTo([12.524,105.452],12)">⌂ Toàn vùng</button>
+        <button class="map-chip" onclick="goHome()">⌂ Toàn vùng</button>
         <button class="map-chip" onclick="showToast('Đã xuất bản đồ PNG','🗺')">↓ Xuất</button>
       </div>
     </div>
@@ -645,48 +746,67 @@ td.mono{font-family:monospace;font-size:11px;color:var(--muted)}
 
       <!-- LEFT TOOLBAR -->
       <div class="map-ctrl-left">
-        <!-- Zoom group -->
+        <!-- Zoom group with level display -->
         <div class="map-ctrl-group">
-          <button class="mc-btn" onclick="dashMap.zoomIn()" title="">
-            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            <span class="mc-tooltip">Phóng to</span>
+          <button class="mc-btn" id="btn-zoom-in" onclick="mapZoomIn()" title="">
+            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <span class="mc-tooltip">Phóng to  (Scroll ↑)</span>
           </button>
-          <button class="mc-btn" onclick="dashMap.zoomOut()" title="">
-            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            <span class="mc-tooltip">Thu nhỏ</span>
+          <!-- Zoom level badge -->
+          <div class="mc-zoom-badge" id="mc-zoom-badge" title="">
+            <span id="mc-zoom-num">12</span>
+            <span class="mc-tooltip">Mức zoom hiện tại</span>
+          </div>
+          <button class="mc-btn" id="btn-zoom-out" onclick="mapZoomOut()" title="">
+            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <span class="mc-tooltip">Thu nhỏ  (Scroll ↓)</span>
           </button>
         </div>
-        <!-- Select tools group -->
+
+        <!-- Pan tool -->
         <div class="map-ctrl-group">
-          <button class="mc-btn active" id="tool-pointer" onclick="setMapTool('pointer',this)" title="">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M4 0l16 12-7 1-4 8z"/></svg>
-            <span class="mc-tooltip">Chọn đối tượng</span>
+          <button class="mc-btn active" id="tool-pan" onclick="setMapTool('pan', this)" title="">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+              <path d="M12 2v4M12 18v4M2 12h4M18 12h4"/>
+              <path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"/>
+            </svg>
+            <span class="mc-tooltip">Di chuyển bản đồ  (Pan)</span>
           </button>
-          <button class="mc-btn" id="tool-rect" onclick="setMapTool('rect',this)" title="">
-            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="1" stroke-dasharray="3 2"/></svg>
-            <span class="mc-tooltip">Chọn vùng chữ nhật</span>
+          <button class="mc-btn" id="tool-pointer" onclick="setMapTool('pointer',this)" title="">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M4 0l16 12-7 1-4 8z"/></svg>
+            <span class="mc-tooltip">Chọn lô cao su</span>
           </button>
           <button class="mc-btn" id="tool-clear" onclick="clearSelection()" title="">
             <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             <span class="mc-tooltip">Bỏ chọn tất cả</span>
           </button>
         </div>
-        <!-- Home + compass -->
+
+        <!-- Home button — prominent -->
         <div class="map-ctrl-group">
-          <button class="mc-btn" onclick="dashMap.setView([11.95,107.85],11)" title="">
-            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
-            <span class="mc-tooltip">Về trang chủ</span>
+          <button class="mc-btn mc-btn-home" id="btn-home" onclick="goHome()" title="">
+            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+              <polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
+            <span class="mc-tooltip">Về vị trí mặc định</span>
           </button>
           <button class="mc-btn" id="gps-btn" onclick="locateUser()" title="">
             <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="7" stroke-dasharray="2 2"/></svg>
             <span class="mc-tooltip">Vị trí của tôi</span>
           </button>
         </div>
-        <!-- Compass rose -->
+
+        <!-- Compass -->
         <div class="map-ctrl-group">
-          <button class="mc-btn" style="font-size:16px;font-weight:700;color:var(--muted2)" title="">
-            <span style="color:var(--danger);font-weight:800;font-size:12px;line-height:1">N</span>
-            <span class="mc-tooltip">Hướng Bắc</span>
+          <button class="mc-btn mc-compass" title="">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1" opacity=".3"/>
+              <polygon points="12,3 14,12 12,10 10,12" fill="#f4656a"/>
+              <polygon points="12,21 14,12 12,14 10,12" fill="rgba(255,255,255,0.4)"/>
+              <circle cx="12" cy="12" r="2" fill="currentColor" opacity=".5"/>
+            </svg>
+            <span class="mc-tooltip">Hướng Bắc (N)</span>
           </button>
         </div>
       </div>
@@ -720,14 +840,56 @@ td.mono{font-family:monospace;font-size:11px;color:var(--muted)}
         </div>
         <!-- Measure / fullscreen -->
         <div class="map-ctrl-group">
-          <button class="mc-btn" onclick="showToast('Công cụ đo diện tích','📐')" title="">
-            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M2 20h20M6 20V8l6-6 6 6v12"/><line x1="10" y1="20" x2="10" y2="14"/><line x1="14" y1="20" x2="14" y2="14"/></svg>
+          <button class="mc-btn" id="btn-measure-dist" onclick="openMeasure('distance')" title="">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <line x1="2" y1="12" x2="22" y2="12"/>
+              <polyline points="8 8 2 12 8 16"/>
+              <polyline points="16 8 22 12 16 16"/>
+            </svg>
+            <span class="mc-tooltip mc-tooltip-right">Đo khoảng cách</span>
+          </button>
+          <button class="mc-btn" id="btn-measure-area" onclick="openMeasure('area')" title="">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <polygon points="3 6 12 3 21 6 21 18 12 21 3 18"/>
+            </svg>
             <span class="mc-tooltip mc-tooltip-right">Đo diện tích</span>
           </button>
           <button class="mc-btn" onclick="toggleFullscreen()" title="">
             <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
             <span class="mc-tooltip mc-tooltip-right">Toàn màn hình</span>
           </button>
+        </div>
+      </div>
+
+      <!-- MEASURE PANEL -->
+      <div class="measure-panel" id="measure-panel">
+        <div class="msr-header">
+          <div class="msr-title">
+            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="2" y1="12" x2="22" y2="12"/><polyline points="8 8 2 12 8 16"/><polyline points="16 8 22 12 16 16"/></svg>
+            <span id="msr-panel-title">Công cụ đo</span>
+          </div>
+          <span class="msr-close" onclick="closeMeasure()">✕</span>
+        </div>
+        <div class="msr-tabs">
+          <div class="msr-tab active" id="msr-tab-dist" onclick="switchMeasureTab('distance')">📏 Khoảng cách</div>
+          <div class="msr-tab" id="msr-tab-area" onclick="switchMeasureTab('area')">⬡ Diện tích</div>
+        </div>
+        <div class="msr-body">
+          <div class="msr-instruction" id="msr-instruction">
+            Click lên bản đồ để thêm điểm.<br>
+            Click điểm đầu để <strong>hoàn thành</strong>.
+          </div>
+          <div class="msr-result">
+            <div class="msr-result-label" id="msr-result-label">Khoảng cách</div>
+            <div class="msr-result-value" id="msr-result-value">—</div>
+            <div class="msr-result-sub" id="msr-result-sub">Chưa có điểm nào</div>
+          </div>
+          <div class="msr-points" id="msr-points-count">0 điểm</div>
+          <div class="msr-btns">
+            <button class="msr-btn primary" onclick="finishMeasure()">✓ Hoàn thành</button>
+            <button class="msr-btn" onclick="undoMeasurePoint()">↩ Xóa điểm</button>
+            <button class="msr-btn danger" onclick="resetMeasure()">✕ Xóa tất cả</button>
+          </div>
         </div>
       </div>
 
@@ -1413,7 +1575,22 @@ function initDashMap() {
   }).addTo(dashMap);
   xaLayer.bindTooltip('Xã Kraya · Huyện Santuk · Kampong Thom', {sticky:true});
 
-  // Build sidebar filter UI
+  // Set initial zoom badge
+  const badge = document.getElementById('mc-zoom-num');
+  if (badge) badge.textContent = dashMap.getZoom();
+
+  // Default tool = pan
+  const panBtn = document.getElementById('tool-pan');
+  if (panBtn) setMapTool('pan', panBtn);
+
+  // Keyboard shortcuts: +/- for zoom, H for home
+  document.addEventListener('keydown', e => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (e.key === '+' || e.key === '=') mapZoomIn();
+    if (e.key === '-' || e.key === '_') mapZoomOut();
+    if (e.key === 'h' || e.key === 'H') goHome();
+  });
+
   buildFilterUI();
 
   // Render lots
@@ -1425,7 +1602,15 @@ function initDashMap() {
     document.getElementById('coordLng').textContent = `Lng: ${e.latlng.lng.toFixed(5)}`;
   });
   dashMap.on('zoom', () => {
-    document.getElementById('zoomLevel').textContent = `Zoom: ${dashMap.getZoom()}`;
+    const z = dashMap.getZoom();
+    document.getElementById('zoomLevel').textContent = `Zoom: ${z}`;
+    const badge = document.getElementById('mc-zoom-num');
+    if (badge) badge.textContent = z;
+    // Dim +/- buttons at min/max zoom
+    const btnIn  = document.getElementById('btn-zoom-in');
+    const btnOut = document.getElementById('btn-zoom-out');
+    if (btnIn)  btnIn.style.opacity  = z >= 19 ? '0.3' : '1';
+    if (btnOut) btnOut.style.opacity = z <= 1  ? '0.3' : '1';
     renderRealLots();
   });
   dashMap.on('click', () => {
@@ -1570,11 +1755,70 @@ function clearSelection() {
   renderRealLots();
 }
 
+/* ── Zoom / Pan / Home controls ── */
+const MAP_DEFAULT_CENTER = [12.524, 105.452];
+const MAP_DEFAULT_ZOOM   = 12;
+
+function mapZoomIn() {
+  if (!dashMap) return;
+  const z = dashMap.getZoom();
+  if (z >= 19) return;
+  dashMap.setZoom(z + 1, { animate: true });
+  const btn = document.getElementById('btn-zoom-in');
+  if (btn) { btn.classList.add('active'); setTimeout(() => btn.classList.remove('active'), 250); }
+}
+
+function mapZoomOut() {
+  if (!dashMap) return;
+  const z = dashMap.getZoom();
+  if (z <= 1) return;
+  dashMap.setZoom(z - 1, { animate: true });
+  const btn = document.getElementById('btn-zoom-out');
+  if (btn) { btn.classList.add('active'); setTimeout(() => btn.classList.remove('active'), 250); }
+}
+
+function goHome() {
+  if (!dashMap) return;
+  const btn = document.getElementById('btn-home');
+  if (btn) { btn.classList.add('active'); setTimeout(() => btn.classList.remove('active'), 1500); }
+  dashMap.flyTo(MAP_DEFAULT_CENTER, MAP_DEFAULT_ZOOM, {
+    animate: true,
+    duration: 1.2,
+    easeLinearity: 0.35
+  });
+  showToast('Đã quay về vị trí mặc định', '🏠');
+}
+
 function setMapTool(tool, btn) {
   currentTool = tool;
-  document.querySelectorAll('[id^=tool-]').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  dashMap.getContainer().style.cursor = tool === 'rect' ? 'crosshair' : 'default';
+  ['tool-pan','tool-pointer','tool-rect'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('active');
+  });
+  if (btn) btn.classList.add('active');
+
+  const wrap = document.querySelector('.map-canvas-wrap');
+  const map  = document.getElementById('dashMap');
+
+  if (tool === 'pan') {
+    dashMap.dragging.enable();
+    dashMap.scrollWheelZoom.enable();
+    dashMap.doubleClickZoom.enable();
+    if (map) map.style.cursor = 'grab';
+    wrap.classList.add('pan-mode');
+    wrap.classList.remove('measuring-distance','measuring-area');
+  } else if (tool === 'pointer') {
+    dashMap.dragging.enable();
+    dashMap.scrollWheelZoom.enable();
+    dashMap.doubleClickZoom.disable(); // avoid accidental zoom when clicking lots
+    if (map) map.style.cursor = 'default';
+    wrap.classList.remove('pan-mode','measuring-distance','measuring-area');
+  } else if (tool === 'rect') {
+    dashMap.dragging.disable();
+    dashMap.scrollWheelZoom.disable();
+    if (map) map.style.cursor = 'crosshair';
+    wrap.classList.remove('pan-mode');
+  }
 }
 
 function toggleLotLabels(btn) {
@@ -1621,9 +1865,36 @@ function locateUser() {
 
 function toggleFullscreen() {
   const wrap = document.querySelector('.map-canvas-wrap');
-  if (!document.fullscreenElement) wrap.requestFullscreen && wrap.requestFullscreen();
-  else document.exitFullscreen && document.exitFullscreen();
+  const btn  = document.querySelector('[onclick="toggleFullscreen()"]');
+  const isFs = wrap.classList.contains('is-fullscreen');
+
+  if (!isFs) {
+    wrap.classList.add('is-fullscreen');
+    btn.innerHTML = `<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <path d="M8 3v3a2 2 0 0 1-2 2H3M21 8h-3a2 2 0 0 1-2-2V3M3 16h3a2 2 0 0 0 2 2v3M16 21v-3a2 2 0 0 1 2-2h3"/>
+    </svg><span class="mc-tooltip mc-tooltip-right">Thoát toàn màn hình</span>`;
+    btn.classList.add('active');
+  } else {
+    wrap.classList.remove('is-fullscreen');
+    // Remove any inline height so CSS :not(.is-fullscreen) takes over
+    wrap.style.removeProperty('height');
+    document.getElementById('dashMap').style.removeProperty('height');
+    btn.innerHTML = `<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"/>
+    </svg><span class="mc-tooltip mc-tooltip-right">Toàn màn hình</span>`;
+    btn.classList.remove('active');
+  }
+
+  setTimeout(() => dashMap && dashMap.invalidateSize(), 100);
 }
+
+// Escape key exits fullscreen
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    const wrap = document.querySelector('.map-canvas-wrap');
+    if (wrap.classList.contains('is-fullscreen')) toggleFullscreen();
+  }
+});
 
 // ── Real map search ──
 function mapSearch(q) {
@@ -1696,6 +1967,244 @@ function buildFilterUI() {
     btn.onclick = () => toggleMapFilter('giong', g, btn);
     giongEl.appendChild(btn);
   });
+}
+
+/* ══════════ MEASURE TOOL ══════════ */
+let msrMode        = 'distance';  // 'distance' | 'area'
+let msrActive      = false;
+let msrPoints      = [];          // [{lat,lng}]
+let msrPolyline    = null;
+let msrPolygon     = null;
+let msrMarkers     = [];
+let msrTempLine    = null;        // rubber-band line to cursor
+let msrLabels      = [];          // distance segment labels
+
+// Haversine distance (m)
+function haversine(a, b) {
+  const R = 6371000;
+  const dLat = (b.lat - a.lat) * Math.PI / 180;
+  const dLng = (b.lng - a.lng) * Math.PI / 180;
+  const s = Math.sin(dLat/2)**2 + Math.cos(a.lat*Math.PI/180)*Math.cos(b.lat*Math.PI/180)*Math.sin(dLng/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(s), Math.sqrt(1-s));
+}
+
+// Shoelace polygon area (m²) using geographic coords
+function polygonArea(pts) {
+  if (pts.length < 3) return 0;
+  // Convert to approximate planar (metres) using first point as origin
+  const R = 6371000;
+  const lat0 = pts[0].lat * Math.PI / 180;
+  const pts2 = pts.map(p => ({
+    x: (p.lng - pts[0].lng) * Math.PI / 180 * R * Math.cos(lat0),
+    y: (p.lat - pts[0].lat) * Math.PI / 180 * R
+  }));
+  let area = 0;
+  for (let i = 0, j = pts2.length - 1; i < pts2.length; j = i++) {
+    area += (pts2[j].x + pts2[i].x) * (pts2[j].y - pts2[i].y);
+  }
+  return Math.abs(area / 2);
+}
+
+function fmtDistance(m) {
+  if (m >= 1000) return (m/1000).toFixed(3) + ' km';
+  return Math.round(m) + ' m';
+}
+function fmtArea(m2) {
+  const ha = m2 / 10000;
+  if (ha >= 1) return ha.toFixed(4) + ' ha';
+  return Math.round(m2).toLocaleString('vi') + ' m²';
+}
+function fmtAreaSub(m2) {
+  const ha = m2 / 10000;
+  return `${Math.round(m2).toLocaleString('vi')} m²  ·  ${ha.toFixed(4)} ha`;
+}
+
+function openMeasure(mode) {
+  msrMode = mode;
+  document.getElementById('measure-panel').classList.add('show');
+  // Close other panels
+  document.getElementById('map-layer-panel').classList.remove('show');
+  document.getElementById('map-search-panel').classList.remove('show');
+  switchMeasureTab(mode);
+  startMeasureCapture();
+}
+
+function closeMeasure() {
+  document.getElementById('measure-panel').classList.remove('show');
+  stopMeasureCapture();
+  resetMeasure();
+  document.getElementById('btn-measure-dist').classList.remove('active');
+  document.getElementById('btn-measure-area').classList.remove('active');
+}
+
+function switchMeasureTab(mode) {
+  msrMode = mode;
+  document.getElementById('msr-tab-dist').classList.toggle('active', mode==='distance');
+  document.getElementById('msr-tab-area').classList.toggle('active', mode==='area');
+  if (mode === 'distance') {
+    document.getElementById('msr-instruction').innerHTML = 'Click bản đồ để thêm điểm đo.<br>Double-click hoặc nhấn <strong>Hoàn thành</strong> để kết thúc.';
+    document.getElementById('msr-result-label').textContent = 'Khoảng cách';
+  } else {
+    document.getElementById('msr-instruction').innerHTML = 'Click bản đồ để vẽ vùng đo.<br>Click điểm đầu hoặc nhấn <strong>Hoàn thành</strong> để đóng vùng.';
+    document.getElementById('msr-result-label').textContent = 'Diện tích';
+  }
+  document.getElementById('btn-measure-dist').classList.toggle('active', mode==='distance');
+  document.getElementById('btn-measure-area').classList.toggle('active', mode==='area');
+  resetMeasure();
+}
+
+function startMeasureCapture() {
+  msrActive = true;
+  dashMap.getContainer().style.cursor = 'crosshair';
+  dashMap.on('click', onMsrClick);
+  dashMap.on('mousemove', onMsrMove);
+  dashMap.on('dblclick', onMsrDblClick);
+  // Disable popup on lots while measuring
+  dashMap.dragging.enable();
+}
+
+function stopMeasureCapture() {
+  msrActive = false;
+  dashMap.getContainer().style.cursor = '';
+  dashMap.off('click', onMsrClick);
+  dashMap.off('mousemove', onMsrMove);
+  dashMap.off('dblclick', onMsrDblClick);
+}
+
+function onMsrClick(e) {
+  if (!msrActive) return;
+  const pt = {lat: e.latlng.lat, lng: e.latlng.lng};
+
+  // Check if clicking near first point to close polygon
+  if (msrMode === 'area' && msrPoints.length >= 3) {
+    const first = msrPoints[0];
+    const distToFirst = haversine(pt, first);
+    if (distToFirst < 20) { finishMeasure(); return; }
+  }
+
+  msrPoints.push(pt);
+
+  // Add marker
+  const isFirst = msrPoints.length === 1;
+  const marker = L.circleMarker([pt.lat, pt.lng], {
+    radius: isFirst ? 6 : 4,
+    fillColor: isFirst ? '#f59e0b' : '#00d68f',
+    color: '#fff', weight: 1.5, fillOpacity: 1
+  }).addTo(dashMap);
+  msrMarkers.push(marker);
+
+  updateMeasureGraphics();
+  updateMeasureResult();
+}
+
+function onMsrMove(e) {
+  if (!msrActive || msrPoints.length === 0) return;
+  const last = msrPoints[msrPoints.length - 1];
+  const cur  = e.latlng;
+
+  if (msrTempLine) dashMap.removeLayer(msrTempLine);
+  msrTempLine = L.polyline([[last.lat, last.lng], [cur.lat, cur.lng]], {
+    color: '#00b4ff', weight: 1.5, dashArray: '5,4', opacity: 0.7
+  }).addTo(dashMap);
+}
+
+function onMsrDblClick(e) {
+  L.DomEvent.stopPropagation(e);
+  finishMeasure();
+}
+
+function updateMeasureGraphics() {
+  // Remove old graphics
+  if (msrPolyline) { dashMap.removeLayer(msrPolyline); msrPolyline = null; }
+  if (msrPolygon)  { dashMap.removeLayer(msrPolygon);  msrPolygon  = null; }
+  msrLabels.forEach(l => dashMap.removeLayer(l));
+  msrLabels = [];
+
+  if (msrPoints.length < 2) return;
+  const latlngs = msrPoints.map(p => [p.lat, p.lng]);
+
+  if (msrMode === 'distance') {
+    msrPolyline = L.polyline(latlngs, { color:'#00d68f', weight:2.5, opacity:.9 }).addTo(dashMap);
+    // Segment distance labels
+    for (let i = 1; i < msrPoints.length; i++) {
+      const d = haversine(msrPoints[i-1], msrPoints[i]);
+      const midLat = (msrPoints[i-1].lat + msrPoints[i].lat) / 2;
+      const midLng = (msrPoints[i-1].lng + msrPoints[i].lng) / 2;
+      const lbl = L.marker([midLat, midLng], { icon: L.divIcon({
+        html: `<div style="background:rgba(0,214,143,.9);color:#080d18;font-size:10px;font-weight:700;padding:2px 6px;border-radius:10px;white-space:nowrap;font-family:'Be Vietnam Pro',sans-serif">${fmtDistance(d)}</div>`,
+        className:'', iconAnchor:[0,0]
+      })}).addTo(dashMap);
+      msrLabels.push(lbl);
+    }
+  } else {
+    // Area polygon
+    msrPolygon = L.polygon(latlngs, {
+      color:'#f59e0b', weight:2, fillColor:'#f59e0b', fillOpacity:.15
+    }).addTo(dashMap);
+    msrPolyline = L.polyline(latlngs, { color:'#f59e0b', weight:2.5, opacity:.9 }).addTo(dashMap);
+  }
+}
+
+function updateMeasureResult() {
+  const cnt = msrPoints.length;
+  document.getElementById('msr-points-count').textContent = `${cnt} điểm`;
+
+  if (msrMode === 'distance') {
+    if (cnt < 2) {
+      document.getElementById('msr-result-value').textContent = '—';
+      document.getElementById('msr-result-sub').textContent = 'Cần ít nhất 2 điểm';
+      return;
+    }
+    let total = 0;
+    for (let i = 1; i < cnt; i++) total += haversine(msrPoints[i-1], msrPoints[i]);
+    document.getElementById('msr-result-value').textContent = fmtDistance(total);
+    document.getElementById('msr-result-sub').textContent = `${Math.round(total).toLocaleString('vi')} m  ·  ${cnt - 1} đoạn`;
+  } else {
+    if (cnt < 3) {
+      document.getElementById('msr-result-value').textContent = '—';
+      document.getElementById('msr-result-sub').textContent = 'Cần ít nhất 3 điểm';
+      return;
+    }
+    const area = polygonArea(msrPoints);
+    document.getElementById('msr-result-value').textContent = fmtArea(area);
+    document.getElementById('msr-result-sub').textContent = fmtAreaSub(area);
+  }
+}
+
+function finishMeasure() {
+  if (msrPoints.length < 2) return;
+  // Close polygon visually
+  if (msrMode === 'area' && msrPoints.length >= 3) {
+    updateMeasureGraphics();
+  }
+  if (msrTempLine) { dashMap.removeLayer(msrTempLine); msrTempLine = null; }
+  updateMeasureResult();
+  showToast(msrMode === 'distance'
+    ? `Khoảng cách: ${fmtDistance(msrPoints.slice(1).reduce((s,p,i)=>s+haversine(msrPoints[i],p),0))}`
+    : `Diện tích: ${fmtArea(polygonArea(msrPoints))}`,
+    msrMode === 'distance' ? '📏' : '⬡');
+}
+
+function undoMeasurePoint() {
+  if (msrPoints.length === 0) return;
+  msrPoints.pop();
+  const m = msrMarkers.pop();
+  if (m) dashMap.removeLayer(m);
+  if (msrTempLine) { dashMap.removeLayer(msrTempLine); msrTempLine = null; }
+  updateMeasureGraphics();
+  updateMeasureResult();
+}
+
+function resetMeasure() {
+  msrPoints = [];
+  msrMarkers.forEach(m => dashMap.removeLayer(m)); msrMarkers = [];
+  msrLabels.forEach(l => dashMap.removeLayer(l));  msrLabels  = [];
+  if (msrPolyline) { dashMap.removeLayer(msrPolyline); msrPolyline = null; }
+  if (msrPolygon)  { dashMap.removeLayer(msrPolygon);  msrPolygon  = null; }
+  if (msrTempLine) { dashMap.removeLayer(msrTempLine); msrTempLine = null; }
+  document.getElementById('msr-result-value').textContent = '—';
+  document.getElementById('msr-result-sub').textContent   = 'Chưa có điểm nào';
+  document.getElementById('msr-points-count').textContent = '0 điểm';
 }
 
 setTimeout(initDashMap, 200);
