@@ -1,0 +1,204 @@
+<!-- NAV -->
+<nav id="nav">
+  <div class="nav-section-label">Chính</div>
+  <div class="nav-item active" onclick="goTo('dashboard',this)">
+    <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+    Dashboard
+  </div>
+  <div class="nav-item" onclick="goTo('lo-cay',this)">
+    <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    Quản lý lô cây
+  </div>
+  <div class="nav-item" onclick="goTo('them-du-lieu',this)">
+    <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+    Thêm dữ liệu
+  </div>
+
+  <div class="nav-section-label">Phân tích</div>
+  <div class="nav-item" onclick="goTo('thong-ke',this)">
+    <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    Thống kê
+  </div>
+
+  <div class="nav-section-label">Hệ thống</div>
+  <div class="nav-item" onclick="goTo('nguoi-dung',this)">
+    <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    Quản lý người dùng
+    <span class="nav-badge">2</span>
+  </div>
+
+  <div class="nav-footer">
+    <div class="nav-item" style="color:var(--danger)">
+      <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Đăng xuất
+    </div>
+  </div>
+</nav>
+<!-- ════════════ PAGE: THÊM DỮ LIỆU ════════════ -->
+<div class="page" id="page-them-du-lieu">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Thêm dữ liệu</div>
+      <div class="page-subtitle">Nhập thông tin lô vườn cây mới vào hệ thống</div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 340px;gap:20px">
+    <div>
+      <!-- Form -->
+      <div class="card">
+        <div class="form-section-title">Thông tin cơ bản</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Mã lô *</label>
+            <input type="text" class="form-input" placeholder="VD: 5.15TK.N1.10.093" id="f-ma-lo">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Đội trực thuộc *</label>
+            <select class="form-select" id="f-doi">
+              <option value="">— Chọn đội —</option>
+              <option>NT 1</option>
+              <option>NT 2</option>
+              <option>NT 3</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Năm trồng *</label>
+            <input type="number" class="form-input" placeholder="2024" min="1990" max="2030" id="f-nam">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Giống cây *</label>
+            <select class="form-select" id="f-giong">
+              <option value="">— Chọn giống —</option>
+              <option>PB 260</option>
+              <option>RRIV 4</option>
+              <option>RRIV 1</option>
+              <option>PB 255</option>
+              <option>IRCA 130</option>
+              <option>RRIV 3</option>
+              <option>RRIV 107</option>
+              <option>RRIV 2</option>
+              <option>RRIV 106</option>
+              <option>RRIC 121</option>
+              <option>RRIV 124</option>
+              <option>RRIV 5</option>
+              <option>RRIV 112</option>
+              <option>RRIV 117</option>
+              <option>RRIV 201</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Diện tích (ha) *</label>
+            <input type="number" class="form-input" placeholder="0.00" step="0.01" id="f-dien-tich">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Hiện trạng *</label>
+            <select class="form-select" id="f-hien-trang">
+              <option value="">— Chọn —</option>
+              <option>CS.KD — Cây sản xuất kinh doanh</option>
+              <option>KTCM — Kiến thiết cơ mới</option>
+              <option>TCTM — Tái canh tái mới</option>
+              <option>TLGV — Thanh lý gốc vườn</option>
+              <option>LC — Lô chuyển đổi</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-section-title">Vị trí địa lý</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Vĩ độ (Latitude)</label>
+            <input type="text" class="form-input" placeholder="11.9523" id="f-lat">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Kinh độ (Longitude)</label>
+            <input type="text" class="form-input" placeholder="107.8734" id="f-lng">
+          </div>
+          <div class="form-group full">
+            <label class="form-label">Địa chỉ / Mô tả vị trí</label>
+            <input type="text" class="form-input" placeholder="Xã Kraya, Huyện Santuk, Kampong Thom, Cambodia" id="f-diachi">
+          </div>
+        </div>
+
+        <div class="form-section-title">Thông tin sản xuất</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Ngày cạo mủ đầu tiên</label>
+            <input type="date" class="form-input" id="f-ngay-cao">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Năng suất dự kiến (tấn/ha)</label>
+            <input type="number" class="form-input" placeholder="1.8" step="0.1" id="f-nang-suat">
+          </div>
+          <div class="form-group full">
+            <label class="form-label">Ghi chú</label>
+            <textarea class="form-textarea" placeholder="Thêm ghi chú về lô vườn cây..." id="f-ghi-chu"></textarea>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">
+          <button class="btn btn-primary" onclick="submitForm()">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            Lưu lô vườn cây
+          </button>
+          <button class="btn btn-outline" onclick="resetForm()">Đặt lại</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right panel -->
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div class="card">
+        <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:14px">Hướng dẫn nhập liệu</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;gap:10px;font-size:12px;color:var(--muted2)">
+            <div style="width:20px;height:20px;border-radius:50%;background:rgba(0,214,143,.1);border:1px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--accent);flex-shrink:0;font-weight:600">1</div>
+            Điền đầy đủ các trường có dấu <span style="color:var(--danger)">*</span>
+          </div>
+          <div style="display:flex;gap:10px;font-size:12px;color:var(--muted2)">
+            <div style="width:20px;height:20px;border-radius:50%;background:rgba(0,180,255,.1);border:1px solid var(--accentB);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--accentB);flex-shrink:0;font-weight:600">2</div>
+            Mã lô cty theo chuẩn: <strong style="color:var(--text)">5.15TK.N[NT].[NĂM].[STT]</strong>
+          </div>
+          <div style="display:flex;gap:10px;font-size:12px;color:var(--muted2)">
+            <div style="width:20px;height:20px;border-radius:50%;background:rgba(245,158,11,.1);border:1px solid var(--warn);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--warn);flex-shrink:0;font-weight:600">3</div>
+            Tọa độ GPS lấy từ bản đồ GIS
+          </div>
+          <div style="display:flex;gap:10px;font-size:12px;color:var(--muted2)">
+            <div style="width:20px;height:20px;border-radius:50%;background:rgba(167,139,250,.1);border:1px solid var(--purple);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--purple);flex-shrink:0;font-weight:600">4</div>
+            Kiểm tra lại trước khi lưu
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:12px">Nhập từ file</div>
+        <div style="border:2px dashed var(--border2);border-radius:var(--r);padding:24px;text-align:center;cursor:pointer;transition:.2s" onmouseover="this.style.borderColor='#00d68f'" onmouseout="this.style.borderColor='var(--border2)'">
+          <div style="font-size:28px;margin-bottom:8px">📂</div>
+          <div style="font-size:12px;color:var(--muted2)">Kéo thả hoặc nhấp để chọn file</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:4px">Hỗ trợ: .xlsx, .csv, .geojson</div>
+        </div>
+        <button class="btn btn-outline btn-sm" style="width:100%;margin-top:10px;justify-content:center">
+          📥 Tải mẫu file nhập liệu
+        </button>
+      </div>
+
+      <div class="card">
+        <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:12px">Số liệu hôm nay</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;justify-content:space-between;font-size:12px">
+            <span style="color:var(--muted)">Lô đã thêm hôm nay</span>
+            <strong style="color:var(--accent)">3 lô</strong>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:12px">
+            <span style="color:var(--muted)">Cập nhật trong tuần</span>
+            <strong style="color:var(--accentB)">47 lô</strong>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:12px">
+            <span style="color:var(--muted)">Chờ duyệt</span>
+            <strong style="color:var(--warn)">5 lô</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

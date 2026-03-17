@@ -1,0 +1,134 @@
+<!-- NAV -->
+<nav id="nav">
+  <div class="nav-section-label">Chính</div>
+  <div class="nav-item active" onclick="goTo('dashboard',this)">
+    <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+    Dashboard
+  </div>
+  <div class="nav-item" onclick="goTo('lo-cay',this)">
+    <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    Quản lý lô cây
+  </div>
+  <div class="nav-item" onclick="goTo('them-du-lieu',this)">
+    <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+    Thêm dữ liệu
+  </div>
+
+  <div class="nav-section-label">Phân tích</div>
+  <div class="nav-item" onclick="goTo('thong-ke',this)">
+    <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    Thống kê
+  </div>
+
+  <div class="nav-section-label">Hệ thống</div>
+  <div class="nav-item" onclick="goTo('nguoi-dung',this)">
+    <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    Quản lý người dùng
+    <span class="nav-badge">2</span>
+  </div>
+
+  <div class="nav-footer">
+    <div class="nav-item" style="color:var(--danger)">
+      <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Đăng xuất
+    </div>
+  </div>
+</nav>
+/* ══════════════════════════════════
+   PAGE 4: THỐNG KÊ
+══════════════════════════════════ */
+.stat-tab-row{display:flex;gap:4px;margin-bottom:20px;background:var(--s2);padding:4px;border-radius:var(--r);width:fit-content}
+.stat-tab{
+  padding:8px 18px;border-radius:6px;font-size:12px;font-weight:500;
+  cursor:pointer;color:var(--muted2);transition:.18s;
+}
+.stat-tab.active{background:var(--s3);color:var(--text)}
+<!-- ════════════ PAGE: THỐNG KÊ ════════════ -->
+<div class="page" id="page-thong-ke">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Thống kê</div>
+      <div class="page-subtitle">Phân tích dữ liệu vườn cây theo thời gian và đội</div>
+    </div>
+    <button class="btn btn-outline btn-sm">
+      <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Xuất Excel
+    </button>
+  </div>
+
+  <div class="stat-tab-row">
+    <div class="stat-tab active" onclick="switchStatTab(this,'tab-sanluong')">Theo nông trường</div>
+    <div class="stat-tab" onclick="switchStatTab(this,'tab-dientich')">Diện tích theo năm</div>
+    <div class="stat-tab" onclick="switchStatTab(this,'tab-giong')">Cơ cấu giống</div>
+  </div>
+
+  <!-- Tab: nông trường -->
+  <div id="tab-sanluong">
+    <div class="grid-4" style="margin-bottom:18px">
+      <div class="kpi">
+        <div class="kpi-label">Tổng diện tích</div>
+        <div class="kpi-value">7.244 <span>ha</span></div>
+        <div class="kpi-delta delta-up">425 lô cao su</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Bình quân / lô</div>
+        <div class="kpi-value">17,0 <span>ha</span></div>
+        <div class="kpi-delta" style="color:var(--muted)">Min 0,3 ha · Max 30,9 ha</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Nông trường lớn nhất</div>
+        <div class="kpi-value" style="font-size:16px">NT 3</div>
+        <div class="kpi-delta" style="color:var(--accent)">171 lô · 2.987,8 ha (41,3%)</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Giống chủ lực</div>
+        <div class="kpi-value" style="font-size:16px">PB 260</div>
+        <div class="kpi-delta" style="color:var(--accentB)">165 lô · 2.947,5 ha · 40,7%</div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:18px">
+      <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:16px">Diện tích & số lô theo nông trường</div>
+      <div class="chart-box-lg"><canvas id="chartSanLuong12T"></canvas></div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:16px">Cơ cấu giống theo nông trường</div>
+        <div class="chart-box"><canvas id="chartRadar"></canvas></div>
+      </div>
+      <div class="card">
+        <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:16px">Diện tích các tổ (Top 10 tổ lớn nhất)</div>
+        <div class="chart-box"><canvas id="chartNangSuat"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-dientich" style="display:none">
+    <div class="card" style="margin-bottom:18px">
+      <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:16px">Diện tích trồng theo năm (2007–2012)</div>
+      <div class="chart-box-lg"><canvas id="chartDienTichYear"></canvas></div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:16px">Phân bổ diện tích theo nông trường</div>
+        <div class="chart-box"><canvas id="chartDienTichDoi"></canvas></div>
+      </div>
+      <div class="card">
+        <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:16px">Số lô theo năm trồng</div>
+        <div class="chart-box"><canvas id="chartHienTrang2"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-giong" style="display:none">
+    <div class="grid-2">
+      <div class="card">
+        <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:16px">Tỷ lệ diện tích theo giống cây</div>
+        <div class="chart-box-lg"><canvas id="chartGiongPie"></canvas></div>
+      </div>
+      <div class="card">
+        <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:16px">Diện tích theo từng giống (ha)</div>
+        <div class="chart-box-lg"><canvas id="chartGiongBar"></canvas></div>
+      </div>
+    </div>
+  </div>
+</div>
