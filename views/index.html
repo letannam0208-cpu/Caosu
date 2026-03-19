@@ -605,11 +605,11 @@ td.mono{font-family:monospace;font-size:11px;color:var(--muted)}
 }
 .leaflet-popup-tip{background:rgba(15,23,41,0.97)!important}
 .leaflet-popup-content{margin:14px 16px!important;font-family:var(--font-b)!important}
-.lo-popup-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:8px}
-.lo-popup-grid{display:grid;grid-template-columns:auto 1fr;gap:5px 12px;font-size:11px}
-.lo-popup-label{color:var(--muted);white-space:nowrap}
-.lo-popup-val{color:var(--text);font-weight:500}
-.lo-popup-badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600}
+.lo-popup-title{font-size:18px;font-weight:700;color:#ffffff;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.lo-popup-grid{display:grid;grid-template-columns:auto 1fr;gap:8px 16px;font-size:14px}
+.lo-popup-label{color:#e0e0e0;white-space:nowrap;font-weight:500}
+.lo-popup-val{color:#ffffff;font-weight:600;font-size:15px}
+.lo-popup-badge{display:inline-flex;align-items:center;padding:4px 12px;border-radius:10px;font-size:12px;font-weight:600}
 .lo-popup-actions{display:flex;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.07)}
 .lo-popup-btn{flex:1;padding:5px 0;border-radius:5px;font-size:11px;font-weight:500;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);color:var(--muted2);cursor:pointer;text-align:center;font-family:var(--font-b);transition:.15s}
 .lo-popup-btn:hover{background:rgba(0,214,143,0.1);border-color:rgba(0,214,143,0.3);color:var(--accent)}
@@ -623,8 +623,7 @@ td.mono{font-family:monospace;font-size:11px;color:var(--muted)}
   <div class="tb-logo">
     <div class="tb-icon">🌿</div>
     <div>
-      <div class="tb-title">WEBGIS CAO SU</div>
-      <div class="tb-sub">Tổng Công ty</div>
+      <div class="tb-title">GIS_TBKRUCO</div>
     </div>
   </div>
   <div class="tb-sep"></div>
@@ -1163,8 +1162,8 @@ td.mono{font-family:monospace;font-size:11px;color:var(--muted)}
             <th>Mã lô (cty)</th>
             <th>Nông trường</th>
             <th>Tổ</th>
-            <th>Năm trồng</th>
-            <th>Giống cây</th>
+            <th style="color:#ffffff;font-weight:700;background:rgba(0,214,143,0.15);padding:10px 14px;border-radius:4px">Năm trồng</th>
+            <th style="color:#ffffff;font-weight:700;background:rgba(0,180,255,0.15);padding:10px 14px;border-radius:4px">Giống cây</th>
             <th>Diện tích</th>
             <th>Khu vực</th>
             <th></th>
@@ -1836,7 +1835,14 @@ function renderRealLots() {
     // ─── RENDER LABELS (independently from lot layer visibility) ───
     if (labelsVis && p.Ten_lo) {
       const z = dashMap.getZoom();
-      const fs = z >= 15 ? 10 : z >= 13 ? 9 : z >= 12 ? 8 : 0;
+      // Formula: Font size scales proportionally with zoom
+      // At zoom 16: fs = 13px
+      // At zoom 12: fs = 9px
+      // At zoom 8: fs = 5px
+      // Formula: fs = (z - 3) * 0.75
+      const baseFs = Math.max(2, (z - 3) * 0.75);
+      const fs = baseFs;
+      
       if (fs > 0) {
         // We need to get bounds from the feature itself
         const tempLayer = L.geoJSON(feat);
@@ -1845,23 +1851,30 @@ function renderRealLots() {
         const col = getLotColorReal(p, mapViewMode);
         // Remove "- KV X" suffix from label
         const cleanName = p.Ten_lo.replace(/\s*-\s*KV\s*\d+\s*$/i, '');
-        const line1 = cleanName || '';
-        const line2 = [p.Giong, p.Nam_trong].filter(Boolean).join(' · ');
+        const namCuoi = p.Nam_trong ? String(p.Nam_trong).slice(-2) : '';
+        const line1 = namCuoi ? `${cleanName} - ${namCuoi}` : cleanName;
+        const line2 = p.Giong || '';
         const html = `<div style="
-          background:rgba(8,13,24,.88);
-          color:#e8eeff;
+          background:transparent;
+          color:#ffffff;
           font-size:${fs}px;
-          padding:2px 5px;
-          border-radius:3px;
-          border-left:2px solid ${col};
-          border-top:1px solid rgba(255,255,255,.12);
-          border-right:1px solid rgba(255,255,255,.12);
-          border-bottom:1px solid rgba(255,255,255,.12);
+          padding:${Math.max(2, fs * 0.4)}px ${Math.max(4, fs * 0.7)}px;
+          border-radius:4px;
+          border-left:${Math.max(2, fs * 0.25)}px solid ${col};
           white-space:nowrap;
           pointer-events:none;
           font-family:'Be Vietnam Pro',sans-serif;
-          line-height:1.5;
-        "><strong style="color:#fff">${line1}</strong>${line2 ? `<br><span style="color:#8a9ab8;font-size:${fs-1}px">${line2}</span>` : ''}</div>`;
+          line-height:1.6;
+          font-weight:700;
+          text-shadow:0 1px 3px rgba(0,0,0,0.5);
+          transform:scale(${z / 16});
+          transform-origin:top left;
+          text-align:center;
+          display:flex;
+          flex-direction:column;
+          align-items:center;
+          justify-content:center;
+        "><strong style="color:#ffffff;font-size:${fs * 1.1}px;letter-spacing:${fs * 0.05}px;display:block">${line1}</strong>${line2 ? `<span style="color:#ffffff;font-size:${fs * 1.35}px;font-weight:700;display:block;margin-top:2px">${line2}</span>` : ''}</div>`;
         const lbl = L.marker(center, { icon: L.divIcon({
           html, className:'', iconAnchor:[0,0]
         })}).addTo(dashMap);
@@ -2504,20 +2517,21 @@ function renderTable(data) {
     const nt  = p.Ten_NT || '—';
     const to  = p.To != null ? p.To : '—';
     const nam = p.Nam_trong || '—';
+    const namCuoi = nam !== '—' ? String(nam).slice(-2) : '—';
     const g   = p.Giong || '—';
     const dt  = p.Dien_tich ? `${parseFloat(p.Dien_tich).toFixed(1)} ha` : '—';
     const xa  = `${p.XA||''}, ${p.HUYEN||''}`;
     const col = giongPalette[p.Giong] || '#5a6a8a';
     const ntCol = ntPalette[p.Ten_NT] || '#5a6a8a';
     return `<tr>
-      <td><strong>${ten}</strong></td>
-      <td class="mono" style="font-size:10px">${ma}</td>
-      <td><span style="display:inline-flex;align-items:center;gap:4px"><span style="width:6px;height:6px;border-radius:50%;background:${ntCol};flex-shrink:0"></span>${nt}</span></td>
-      <td class="mono">${to}</td>
-      <td class="mono">${nam}</td>
-      <td><span style="background:${col}18;color:${col};border:1px solid ${col}40;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:500">${g}</span></td>
-      <td>${dt}</td>
-      <td style="font-size:11px;color:var(--muted)">${xa}</td>
+      <td><strong style="font-size:14px">${ten}<span style="margin-left:12px;color:var(--muted2);font-weight:400;font-size:13px">'${namCuoi}</span></strong></td>
+      <td class="mono" style="font-size:11px">${ma}</td>
+      <td><span style="display:inline-flex;align-items:center;gap:4px;font-size:13px"><span style="width:6px;height:6px;border-radius:50%;background:${ntCol};flex-shrink:0"></span>${nt}</span></td>
+      <td class="mono" style="font-size:13px">${to}</td>
+      <td class="mono" style="font-size:13px">${nam}</td>
+      <td><span style="background:${col}22;color:${col};border:1px solid ${col}60;padding:4px 10px;border-radius:10px;font-size:12px;font-weight:600">${g}</span></td>
+      <td style="font-size:13px">${dt}</td>
+      <td style="font-size:12px;color:var(--muted)">${xa}</td>
       <td>
         <div style="display:flex;gap:4px">
           <button class="btn btn-outline btn-sm" onclick="flyToByName('${ten.replace(/'/g,"\\'")}');showToast('Zoom đến lô ${ten.replace(/'/g,"\\'")}','📍')" style="padding:4px 8px">📍</button>
