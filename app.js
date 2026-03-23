@@ -33,9 +33,9 @@ const renderPage = (res, viewName, title, extraData = {}) => {
   });
 };
 
-// Trang chủ / dashboard
+// Routes chính
 app.get('/', (req, res) => {
-  res.locals.path = '/dashboard';
+  res.locals.path = '/';
   renderPage(res, 'index', 'WebGIS · Vườn Cây Cao Su', {
     stats: { totalLots: 425, totalArea: '7,244 ha' }
   });
@@ -46,7 +46,7 @@ app.get('/dashboard', (req, res) => {
   renderPage(res, 'index', 'Dashboard - WebGIS Cao Su');
 });
 
-// API mock (không cần DB, trả GeoJSON giả để Leaflet chạy)
+// API mock GeoJSON cho Leaflet
 app.get('/api/lo-cao-su', (req, res) => {
   res.json({
     type: "FeatureCollection",
@@ -83,7 +83,7 @@ app.get('/api/lo-cao-su', (req, res) => {
   });
 });
 
-// Quản lý lô cây (mock data)
+// Quản lý lô cây (với mock data)
 app.get('/quan-ly-lo-cay', (req, res) => {
   const mockStats = {
     total: 425,
@@ -94,7 +94,7 @@ app.get('/quan-ly-lo-cay', (req, res) => {
     { id: 1, ten_lo: "AB 15.1 - KV1", ma_lo: "5.515TK.01.001", doi: "NT 1", so_cay: 1200, nam_trong: 2015, giong: "PB 260", dien_tich_ha: 8.5, vi_tri: "Kraya, Santuk" },
     { id: 2, ten_lo: "CD 20.3 - KV2", ma_lo: "5.515TK.02.015", doi: "NT 2", so_cay: 950, nam_trong: 2018, giong: "RRIV 4", dien_tich_ha: 6.2, vi_tri: "Santuk" },
     { id: 3, ten_lo: "EF 10.5 - KV3", ma_lo: "5.515TK.03.008", doi: "NT 3", so_cay: 1100, nam_trong: 2017, giong: "PB 255", dien_tich_ha: 7.8, vi_tri: "Baray, Kampong Thom" },
-    // Bạn có thể thêm nhiều hơn nếu muốn
+    // Có thể thêm dữ liệu mock khác ở đây
   ];
 
   res.locals.path = '/quan-ly-lo-cay';
@@ -106,25 +106,23 @@ app.get('/quan-ly-lo-cay', (req, res) => {
   });
 });
 
-// Quản lý người dùng (dùng dữ liệu cứng trong EJS, không cần xử lý ở đây)
+// Các trang khác
 app.get('/quan-ly-nguoi-dung', (req, res) => {
   res.locals.path = '/quan-ly-nguoi-dung';
   renderPage(res, 'quan-ly-nguoi-dung', 'Quản Lý Người Dùng - WebGIS Cao Su');
 });
 
-// Thêm dữ liệu lô cây
-app.get('/them-du-lieu-lo-cay', (req, res) => {
-  res.locals.path = '/cndl';
-  renderPage(res, 'them-du-lieu-lo-cay', 'Thêm Dữ Liệu Lô Cây - WebGIS Cao Su');
-});
-
-// Thống kê
 app.get('/thong-ke', (req, res) => {
   res.locals.path = '/thong-ke';
   renderPage(res, 'thong-ke', 'Thống Kê - WebGIS Cao Su');
 });
 
-// Placeholder routes
+app.get('/them-du-lieu-lo-cay', (req, res) => {
+  res.locals.path = '/them-du-lieu-lo-cay';
+  renderPage(res, 'them-du-lieu-lo-cay', 'Thêm Dữ Liệu Lô Cây - WebGIS Cao Su');
+});
+
+// Placeholder routes cho các trang đang phát triển
 const placeholderRoutes = [
   '/motadulieu', '/cndl', '/qldl', '/hsnd', '/lichsu',
   '/total-score', '/doimatkhau', '/xbtk'
@@ -156,7 +154,7 @@ app.use((req, res) => {
   });
 });
 
-// Khởi động server (local) và export cho Vercel
+// Khởi động server (chỉ chạy local, Vercel sẽ tự handle)
 if (process.env.NODE_ENV !== 'production') {
   app.listen(port, () => {
     console.log(`Server chạy tại → http://localhost:${port}`);
