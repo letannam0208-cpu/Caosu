@@ -1,15 +1,9 @@
 {
   "version": 2,
-  "builds": [
+  "rewrites": [
     {
-      "src": "app.js",          // hoặc "server.js" nếu bạn rename file chính thành server.js
-      "use": "@vercel/node"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "app.js"          // phải khớp với tên file server ở trên
+      "source": "/(.*)",
+      "destination": "/app.js"
     }
   ]
 }

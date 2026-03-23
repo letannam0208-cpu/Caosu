@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-  "start": "node app.js"
-},
+    "start": "node app.js"
+  },
   "dependencies": {
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",
@@ -13,6 +13,6 @@
     "pg": "^8.20.0"
   },
   "engines": {
-    "node": "24.x"
+    "node": "24.x"   // hoặc "24.x" nếu bạn muốn mới nhất
   }
 }
