@@ -580,37 +580,36 @@
 </div>
 
 <div id="body">
-  <div id="nav">
-    <div class="nav-section-label">CHÍNH</div>
-    <a href="/dashboard" class="nav-item">
-      <i class="fas fa-th-large"></i><span>Dashboard</span>
-    </a>
-    <a href="/quan-ly-lo-cay" class="nav-item">
-      <i class="fas fa-seedling"></i><span>Quản lý lô cây</span>
-    </a>
-    <a href="/them-du-lieu" class="nav-item">
-      <i class="fas fa-plus-circle"></i><span>Thêm dữ liệu</span>
-    </a>
-
-    <div class="nav-section-label">PHÂN TÍCH</div>
-    <a href="/thong-ke" class="nav-item">
-      <i class="fas fa-chart-bar"></i><span>Thống kê</span>
-    </a>
-
-    <div class="nav-section-label">HỆ THỐNG</div>
-    <a href="/users" class="nav-item active">
-      <i class="fas fa-users"></i>
-      <span>Quản lý người dùng</span>
-      <span class="nav-badge">2</span>
-    </a>
-
-    <div class="nav-logout">
-      <a href="/logout" class="nav-item">
-        <i class="fas fa-sign-out-alt"></i>
-        <span>Đăng xuất</span>
+  <nav id="nav">
+      <div class="nav-section-label">Tổng quan</div>
+      <a href="/" class="nav-item <%= (path === '/' || path === '/dashboard') ? 'active' : '' %>">
+        <i class="fas fa-home nav-icon"></i> Dashboard
       </a>
-    </div>
-  </div>
+
+      <div class="nav-section-label">Quản lý dữ liệu</div>
+      <a href="/quan-ly-lo-cay" class="nav-item <%= path === '/quan-ly-lo-cay' ? 'active' : '' %>">
+        <i class="fas fa-tree nav-icon"></i> Quản lý lô cây
+      </a>
+      <a href="/them-du-lieu-lo-cay" class="nav-item <%= path === '/them-du-lieu-lo-cay' ? 'active' : '' %>">
+        <i class="fas fa-plus-circle nav-icon"></i> Thêm dữ liệu lô
+      </a>
+
+      <div class="nav-section-label">Người dùng & Phân quyền</div>
+      <a href="/quan-ly-nguoi-dung" class="nav-item <%= path === '/quan-ly-nguoi-dung' ? 'active' : '' %>">
+        <i class="fas fa-users nav-icon"></i> Quản lý người dùng
+      </a>
+
+      <div class="nav-section-label">Phân tích</div>
+      <a href="/thong-ke" class="nav-item <%= path === '/thong-ke' ? 'active' : '' %>">
+        <i class="fas fa-chart-bar nav-icon"></i> Thống kê
+      </a>
+
+      <div class="nav-logout" style="margin-top: auto; border-top: 1px solid var(--border); padding-top: 12px;">
+        <a href="/logout" class="nav-item">
+          <i class="fas fa-sign-out-alt nav-icon"></i> Đăng xuất
+        </a>
+      </div>
+    </nav>
 
   <div id="content">
     <div class="page-header">
@@ -789,15 +788,45 @@
 </div>
 
 <script>
-// Navigation active state
+// Chuyển tab nội dung
+function switchTab(tabId, button) {
+  document.querySelectorAll('.tab-content').forEach(tab => tab.style.display = 'none');
+  document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+
+  document.getElementById(tabId).style.display = 'block';
+  button.classList.add('active');
+}
+
+// Highlight menu sidebar khi click
 document.querySelectorAll('.nav-item').forEach(item => {
   item.addEventListener('click', function(e) {
+    // Nếu là logout thì không xử lý thêm
     if (this.getAttribute('href') === '/logout') return;
+
+    // Xóa active cũ, thêm active mới
     document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
     this.classList.add('active');
+    // Không preventDefault → cho phép chuyển trang thật
   });
 });
 
+// Tự động highlight menu dựa trên URL hiện tại khi load trang
+window.addEventListener('load', () => {
+  const currentPath = window.location.pathname;
+  document.querySelectorAll('.nav-item').forEach(item => {
+    const href = item.getAttribute('href');
+    if (href && (currentPath === href || (currentPath === '/dashboard' && href === '/'))) {
+      item.classList.add('active');
+    }
+  });
+});
+
+// Logout (nếu cần confirm trước khi redirect)
+function logout() {
+  if (confirm('Bạn có chắc muốn đăng xuất?')) {
+    window.location.href = '/logout';
+  }
+}
 // Search functionality
 const searchBox = document.querySelector('.search-box');
 if (searchBox) {
