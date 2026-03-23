@@ -93,6 +93,36 @@ body{font-family:var(--font-b);background:var(--bg);color:var(--text);height:100
   border:2px solid var(--bg);color:#fff;
 }
 
+/* ── LANGUAGE MENU ── */
+.lang-menu{
+  position:absolute;top:56px;right:40px;width:320px;max-height:500px;
+  background:var(--s1);border:1px solid var(--border);border-radius:var(--r-lg);
+  box-shadow:0 10px 40px rgba(0,0,0,0.4);z-index:1000;overflow:hidden;
+  display:flex;flex-direction:column;
+}
+.lang-search{
+  padding:12px;border-bottom:1px solid var(--border);
+}
+.lang-search input{
+  width:100%;padding:8px 12px;border:1px solid var(--border);
+  border-radius:var(--r);background:var(--s2);color:var(--text);
+  font-size:12px;font-family:var(--font-b);
+}
+.lang-search input::placeholder{color:var(--muted)}
+.lang-list{
+  overflow-y:auto;max-height:430px;
+}
+.lang-item{
+  padding:12px 16px;cursor:pointer;display:flex;align-items:center;
+  gap:10px;border-bottom:1px solid rgba(255,255,255,0.03);transition:.2s;
+}
+.lang-item:hover{background:var(--s2)}
+.lang-item.active{background:rgba(0,214,143,0.1);border-left:3px solid var(--accent)}
+.lang-flag{font-size:18px;width:24px;flex-shrink:0}
+.lang-name{flex:1}
+.lang-name-main{font-size:13px;color:var(--text);font-weight:500}
+.lang-name-en{font-size:11px;color:var(--muted)}
+
 /* ── BODY ── */
 #body{display:flex;flex:1;overflow:hidden}
 
@@ -133,7 +163,7 @@ body{font-family:var(--font-b);background:var(--bg);color:var(--text);height:100
 .nav-footer{margin-top:auto;padding-top:12px;border-top:1px solid var(--border)}
 
 /* ── CONTENT ── */
-#content{flex:1;overflow-y:auto;padding:24px}
+#content{flex:1;overflow-y:auto;padding:12px}
 .page{display:none;animation:pageIn .25s ease}
 .page.active{display:block}
 @keyframes pageIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
@@ -354,7 +384,7 @@ td.mono{font-family:monospace;font-size:11px;color:var(--muted)}
 .map-label{font-size:10px;color:var(--muted);white-space:nowrap}
 
 /* Map canvas wrapper */
-.map-canvas-wrap{position:relative;height:460px}
+.map-canvas-wrap{position:relative;height:5500px}
 #dashMap{height:100%;width:100%;background:#0d1a2e}
 
 /* ── LEFT TOOLBAR — redesigned ── */
@@ -624,26 +654,35 @@ td.mono{font-family:monospace;font-size:11px;color:var(--muted)}
     <div class="tb-icon">🌿</div>
     <div>
       <div class="tb-title">WEBGIS CAO SU</div>
-      <div class="tb-sub">Tổng Công ty</div>
+      <div class="tb-sub" data-lang="tong-cty">Tổng Công ty</div>
     </div>
   </div>
   <div class="tb-sep"></div>
-  <div class="tb-pill"><div class="live-dot"></div>Trực tuyến</div>
-  <div class="tb-pill">Lô vườn <strong>425</strong></div>
-  <div class="tb-pill">Diện tích <strong>7.244 ha</strong></div>
+  <div class="tb-pill"><div class="live-dot"></div><span data-lang="online">Trực tuyến</span></div>
+  <div class="tb-pill"><span data-lang="farms">Lô vườn</span> <strong>425</strong></div>
+  <div class="tb-pill"><span data-lang="area">Diện tích</span> <strong>7.244 ha</strong></div>
   <div class="tb-right">
     <div class="notif-wrap">
-      <button class="icon-btn" title="Thông báo" onclick="showToast('Bạn có 3 thông báo mới','📬')">
+      <button class="icon-btn" title="Thông báo" data-lang-title="notification" onclick="showToast('Bạn có 3 thông báo mới','📬')">
         <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
       </button>
       <div class="notif-badge">3</div>
+    </div>
+    <button class="icon-btn" title="Thay đổi ngôn ngữ" onclick="toggleLanguageMenu()" id="langBtn">
+      <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+    </button>
+    <div class="lang-menu" id="langMenu" style="display:none">
+      <div class="lang-search">
+        <input type="text" placeholder="Tìm ngôn ngữ..." id="langSearch" oninput="filterLanguages()">
+      </div>
+      <div class="lang-list" id="langList"></div>
     </div>
     <button class="icon-btn" title="Cài đặt">
       <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     </button>
     <div class="tb-user-info">
       <div class="tb-user-name">Nguyễn Văn An</div>
-      <div class="tb-user-role">Quản trị viên</div>
+      <div class="tb-user-role" data-lang="admin">Quản trị viên</div>
     </div>
     <div class="tb-avatar">NA</div>
   </div>
@@ -657,34 +696,34 @@ td.mono{font-family:monospace;font-size:11px;color:var(--muted)}
   <div class="nav-section-label">Chính</div>
   <div class="nav-item active" onclick="goTo('dashboard',this)">
     <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-    Dashboard
+    <span data-lang="dashboard">Dashboard</span>
   </div>
   <div class="nav-item" onclick="goTo('lo-cay',this)">
     <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-    Quản lý lô cây
+    <span data-lang="lo-cay">Quản lý lô cây</span>
   </div>
   <div class="nav-item" onclick="goTo('them-du-lieu',this)">
     <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-    Thêm dữ liệu
+    <span data-lang="them-du-lieu">Thêm dữ liệu</span>
   </div>
 
   <div class="nav-section-label">Phân tích</div>
   <div class="nav-item" onclick="goTo('thong-ke',this)">
     <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-    Thống kê
+    <span data-lang="thong-ke">Thống kê</span>
   </div>
 
   <div class="nav-section-label">Hệ thống</div>
   <div class="nav-item" onclick="goTo('nguoi-dung',this)">
     <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-    Quản lý người dùng
+    <span data-lang="nguoi-dung">Quản lý người dùng</span>
     <span class="nav-badge">2</span>
   </div>
 
   <div class="nav-footer">
     <div class="nav-item" style="color:var(--danger)">
       <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-      Đăng xuất
+      <span data-lang="logout">Đăng xuất</span>
     </div>
   </div>
 </nav>
@@ -696,17 +735,17 @@ td.mono{font-family:monospace;font-size:11px;color:var(--muted)}
 <div class="page active" id="page-dashboard">
   <div class="page-header">
     <div>
-      <div class="page-title">Dashboard</div>
+      <div class="page-title" data-lang="dashboard">Dashboard</div>
       <div class="page-subtitle">Tổng quan hoạt động vườn cây — cập nhật lúc 07:42, 16/03/2026</div>
     </div>
     <div style="display:flex;gap:8px">
       <button class="btn btn-outline btn-sm">
         <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Xuất báo cáo
+        <span data-lang="export">Xuất báo cáo</span>
       </button>
       <button class="btn btn-primary btn-sm" onclick="goTo('them-du-lieu',document.querySelector('[onclick*=them-du-lieu]'))">
         <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Thêm dữ liệu
+        <span data-lang="them-du-lieu">Thêm dữ liệu</span>
       </button>
     </div>
   </div>
@@ -715,25 +754,25 @@ td.mono{font-family:monospace;font-size:11px;color:var(--muted)}
   <div class="grid-4" style="margin-bottom:18px">
     <div class="kpi">
       <div class="kpi-icon" style="background:rgba(0,214,143,.1)">🌳</div>
-      <div class="kpi-label">Tổng lô cao su</div>
+      <div class="kpi-label" data-lang="total-farms">Tổng lô cao su</div>
       <div class="kpi-value">425 <span>lô</span></div>
       <div class="kpi-delta delta-up">▲ 509 đối tượng (gồm sông suối, nhà đội…)</div>
     </div>
     <div class="kpi">
       <div class="kpi-icon" style="background:rgba(0,180,255,.1)">🗺</div>
-      <div class="kpi-label">Tổng diện tích</div>
+      <div class="kpi-label" data-lang="total-area">Tổng diện tích</div>
       <div class="kpi-value">7.244 <span>ha</span></div>
       <div class="kpi-delta delta-up">▲ Bình quân 17,04 ha/lô</div>
     </div>
     <div class="kpi">
       <div class="kpi-icon" style="background:rgba(245,158,11,.1)">🌱</div>
-      <div class="kpi-label">Số giống cao su</div>
+      <div class="kpi-label" data-lang="total-species">Số giống cao su</div>
       <div class="kpi-value">15 <span>giống</span></div>
       <div class="kpi-delta" style="color:var(--accentB)">PB 260: 40.7% · RRIV 4: 16.5%</div>
     </div>
     <div class="kpi">
       <div class="kpi-icon" style="background:rgba(167,139,250,.1)">🏢</div>
-      <div class="kpi-label">Số lượng Đội</div>
+      <div class="kpi-label" data-lang="total-teams">Số lượng Đội</div>
       <div class="kpi-value">3 <span>Đội</span></div>
       <div class="kpi-delta" style="color:var(--muted)">Xã Kraya · Santuk · Kampong Thom</div>
     </div>
@@ -745,46 +784,46 @@ td.mono{font-family:monospace;font-size:11px;color:var(--muted)}
     <div class="map-topbar">
       <span class="map-topbar-title">
         <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
-        Bản đồ vườn cây cao su — Kampong Thom, Cambodia
+        <span data-lang="map-title">Bản đồ vườn cây cao su</span> — Kampong Thom, Cambodia
       </span>
       <div class="map-sep"></div>
-      <span class="map-label">Tô màu theo:</span>
+      <span class="map-label" data-lang="color-by">Tô màu theo:</span>
       <button class="map-chip"    id="mview-giong" onclick="switchMapView('giong',this)">Giống cây</button>
-      <button class="map-chip"    id="mview-nam"   onclick="switchMapView('nam',this)">Năm trồng</button>
-      <button class="map-chip on" id="mview-nt"    onclick="switchMapView('nt',this)">Nông trường</button>
+      <button class="map-chip"    id="mview-nam"   onclick="switchMapView('nam',this)" data-lang="plant-year">Năm trồng</button>
+      <button class="map-chip on" id="mview-nt"    onclick="switchMapView('nt',this)" data-lang="farm-owner">Nông trường</button>
       <div style="margin-left:auto;display:flex;gap:6px;align-items:center">
         <span id="selCountTop" style="font-size:11px;color:var(--muted)">425 lô hiển thị</span>
-        <button class="map-chip" onclick="goHome()">⌂ Toàn vùng</button>
-        <button class="map-chip" onclick="showToast('Đã xuất bản đồ PNG','🗺')">↓ Xuất</button>
+        <button class="map-chip" onclick="goHome()">⌂ <span data-lang="all-area">Toàn vùng</span></button>
+        <button class="map-chip" onclick="showToast('Đã xuất bản đồ PNG','🗺')">↓ <span data-lang="export-map">Xuất</span></button>
       </div>
     </div>
     <!-- Row 2: filters with dropdowns -->
     <div class="map-topbar" style="background:rgba(15,23,41,0.6);padding:7px 14px;gap:12px;display:flex;align-items:center">
-      <span class="map-label" style="flex-shrink:0">Nông trường:</span>
+      <span class="map-label" style="flex-shrink:0" data-lang="farm-owner">Nông trường:</span>
       <select id="filter-nt" style="
         background:var(--s2);border:1px solid var(--border);border-radius:var(--r);
         color:var(--muted2);padding:6px 10px;font-size:11px;font-family:var(--font-b);
         cursor:pointer;transition:.2s;max-width:120px;
       " onchange="updateMapFilters('NT', this)">
-        <option value="all">Tất cả</option>
+        <option value="all" data-lang="all-farms">Tất cả</option>
       </select>
       <div class="map-sep"></div>
-      <span class="map-label" style="flex-shrink:0">Năm trồng:</span>
+      <span class="map-label" style="flex-shrink:0" data-lang="plant-year">Năm trồng:</span>
       <select id="filter-nam" style="
         background:var(--s2);border:1px solid var(--border);border-radius:var(--r);
         color:var(--muted2);padding:6px 10px;font-size:11px;font-family:var(--font-b);
         cursor:pointer;transition:.2s;max-width:120px;
       " onchange="updateMapFilters('nam', this)">
-        <option value="all">Tất cả</option>
+        <option value="all" data-lang="all-years">Tất cả</option>
       </select>
       <div class="map-sep"></div>
-      <span class="map-label" style="flex-shrink:0">Giống cây:</span>
+      <span class="map-label" style="flex-shrink:0" data-lang="species">Giống cây:</span>
       <select id="filter-giong" style="
         background:var(--s2);border:1px solid var(--border);border-radius:var(--r);
         color:var(--muted2);padding:6px 10px;font-size:11px;font-family:var(--font-b);
         cursor:pointer;transition:.2s;max-width:120px;
       " onchange="updateMapFilters('giong', this)">
-        <option value="all">Tất cả</option>
+        <option value="all" data-lang="all-species">Tất cả</option>
       </select>
     </div>
 
@@ -1027,23 +1066,6 @@ td.mono{font-family:monospace;font-size:11px;color:var(--muted)}
   </div>
 
   <div class="grid-2" style="margin-bottom:18px">
-    <!-- Diện tích theo nông trường -->
-    <div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-        <div style="font-size:13px;font-weight:500;color:var(--text)">Diện tích theo nông trường</div>
-        <span class="badge badge-green">NT 1 · NT 2 · NT 3</span>
-      </div>
-      <div class="chart-box"><canvas id="chartSanLuong"></canvas></div>
-    </div>
-
-    <!-- Cơ cấu giống cây -->
-    <div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-        <div style="font-size:13px;font-weight:500;color:var(--text)">Cơ cấu giống cao su</div>
-        <span class="badge badge-blue">425 lô · 7.244 ha</span>
-      </div>
-      <div class="chart-box"><canvas id="chartHienTrang"></canvas></div>
-    </div>
   </div>
 
   <div class="grid-2">
@@ -1104,28 +1126,28 @@ td.mono{font-family:monospace;font-size:11px;color:var(--muted)}
 <div class="page" id="page-lo-cay">
   <div class="page-header">
     <div>
-      <div class="page-title">Quản lý lô cây</div>
+      <div class="page-title" data-lang="lo-cay">Quản lý lô cây</div>
       <div class="page-subtitle">425 lô cao su · 3 nông trường · Xã Kraya, Santuk, Kampong Thom</div>
     </div>
     <button class="btn btn-primary btn-sm" onclick="goTo('them-du-lieu',document.querySelector('[onclick*=them-du-lieu]'))">
       <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      Thêm lô mới
+      <span data-lang="add-new">Thêm lô mới</span>
     </button>
   </div>
 
   <div class="filter-row">
     <div class="search-bar">
       <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="#5a6a8a" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-      <input type="text" placeholder="Tìm lô theo mã, đội, giống cây..." id="loSearch" oninput="filterTable()">
+      <input type="text" placeholder="Tìm lô theo mã, đội, giống cây..." data-lang-placeholder="search" id="loSearch" oninput="filterTable()">
     </div>
     <select class="form-select" style="width:150px;padding:9px 30px 9px 12px" onchange="filterTable()" id="doiFilter">
-      <option value="">Tất cả NT</option>
+      <option value="" data-lang="all-farms">Tất cả NT</option>
       <option>NT 1</option>
       <option>NT 2</option>
       <option>NT 3</option>
     </select>
     <select class="form-select" style="width:160px;padding:9px 30px 9px 12px" onchange="filterTable()" id="ttFilter">
-      <option value="">Tất cả giống</option>
+      <option value="" data-lang="all-species">Tất cả giống</option>
       <option>PB 260</option>
       <option>RRIV 4</option>
       <option>RRIV 1</option>
@@ -1143,13 +1165,25 @@ td.mono{font-family:monospace;font-size:11px;color:var(--muted)}
       <option>RRIV 201</option>
     </select>
     <select class="form-select" style="width:130px;padding:9px 30px 9px 12px" onchange="filterTable()" id="namFilter">
-      <option value="">Tất cả năm</option>
+      <option value="" data-lang="all-years">Tất cả năm</option>
       <option>2007</option>
       <option>2008</option>
       <option>2009</option>
       <option>2010</option>
       <option>2011</option>
       <option>2012</option>
+    </select>
+    <select class="form-select" style="width:140px;padding:9px 30px 9px 12px" onchange="filterTable()" id="phienCaoFilter">
+      <option value="" data-lang="all-session">Tất cả phiên cạo</option>
+      <option>A</option>
+      <option>B</option>
+      <option>C</option>
+      <option>D</option>
+    </select>
+    <select class="form-select" style="width:140px;padding:9px 30px 9px 12px" onchange="filterTable()" id="nhipDoFilter">
+      <option value="" data-lang="all-rhythm">Tất cả nhịp độ</option>
+      <option>d3</option>
+      <option>d4</option>
     </select>
     <span style="font-size:12px;color:var(--muted);margin-left:auto" id="tableCount">Hiển thị 20 / 425 lô</span>
   </div>
@@ -1159,15 +1193,17 @@ td.mono{font-family:monospace;font-size:11px;color:var(--muted)}
       <table id="loTable">
         <thead>
           <tr>
-            <th>Tên lô</th>
-            <th>Mã lô (cty)</th>
-            <th>Nông trường</th>
-            <th>Tổ</th>
-            <th style="color:#ffffff;font-weight:700;background:rgba(0,214,143,0.15);padding:10px 14px;border-radius:4px">Năm trồng</th>
-            <th style="color:#ffffff;font-weight:700;background:rgba(0,180,255,0.15);padding:10px 14px;border-radius:4px">Giống cây</th>
-            <th>Diện tích</th>
-            <th>Khu vực</th>
-            <th></th>
+            <th data-lang="farm-name">Tên lô</th>
+            <th data-lang="farm-code">Mã lô (cty)</th>
+            <th data-lang="farm-owner">Nông trường</th>
+            <th data-lang="group">Tổ</th>
+            <th style="color:#ffffff;font-weight:700;background:rgba(0,214,143,0.15);padding:10px 14px;border-radius:4px" data-lang="plant-year">Năm trồng</th>
+            <th style="color:#ffffff;font-weight:700;background:rgba(0,180,255,0.15);padding:10px 14px;border-radius:4px" data-lang="species">Giống cây</th>
+            <th data-lang="area-label">Diện tích</th>
+            <th data-lang="region">Khu vực</th>
+            <th data-lang="session">Phiên cạo</th>
+            <th data-lang="rhythm">Nhịp độ cạo</th>
+            <th data-lang="action">Hành động</th>
           </tr>
         </thead>
         <tbody id="loTableBody"></tbody>
@@ -1190,7 +1226,7 @@ td.mono{font-family:monospace;font-size:11px;color:var(--muted)}
 <div class="page" id="page-them-du-lieu">
   <div class="page-header">
     <div>
-      <div class="page-title">Thêm dữ liệu</div>
+      <div class="page-title" data-lang="them-du-lieu">Thêm dữ liệu</div>
       <div class="page-subtitle">Nhập thông tin lô vườn cây mới vào hệ thống</div>
     </div>
   </div>
@@ -1199,29 +1235,29 @@ td.mono{font-family:monospace;font-size:11px;color:var(--muted)}
     <div>
       <!-- Form -->
       <div class="card">
-        <div class="form-section-title">Thông tin cơ bản</div>
+        <div class="form-section-title" data-lang="basic-info">Thông tin cơ bản</div>
         <div class="form-grid">
           <div class="form-group">
-            <label class="form-label">Mã lô *</label>
+            <label class="form-label" data-lang="farm-code-label">Mã lô *</label>
             <input type="text" class="form-input" placeholder="VD: 5.15TK.N1.10.093" id="f-ma-lo">
           </div>
           <div class="form-group">
-            <label class="form-label">Đội trực thuộc *</label>
+            <label class="form-label" data-lang="team">Đội trực thuộc *</label>
             <select class="form-select" id="f-doi">
-              <option value="">— Chọn đội —</option>
+              <option value="" data-lang="select">— Chọn đội —</option>
               <option>NT 1</option>
               <option>NT 2</option>
               <option>NT 3</option>
             </select>
           </div>
           <div class="form-group">
-            <label class="form-label">Năm trồng *</label>
+            <label class="form-label" data-lang="plant-year-label">Năm trồng *</label>
             <input type="number" class="form-input" placeholder="2024" min="1990" max="2030" id="f-nam">
           </div>
           <div class="form-group">
-            <label class="form-label">Giống cây *</label>
+            <label class="form-label" data-lang="species-label">Giống cây *</label>
             <select class="form-select" id="f-giong">
-              <option value="">— Chọn giống —</option>
+              <option value="" data-lang="select">— Chọn giống —</option>
               <option>PB 260</option>
               <option>RRIV 4</option>
               <option>RRIV 1</option>
@@ -1240,13 +1276,13 @@ td.mono{font-family:monospace;font-size:11px;color:var(--muted)}
             </select>
           </div>
           <div class="form-group">
-            <label class="form-label">Diện tích (ha) *</label>
+            <label class="form-label" data-lang="area-input">Diện tích (ha) *</label>
             <input type="number" class="form-input" placeholder="0.00" step="0.01" id="f-dien-tich">
           </div>
           <div class="form-group">
-            <label class="form-label">Hiện trạng *</label>
+            <label class="form-label" data-lang="status">Hiện trạng *</label>
             <select class="form-select" id="f-hien-trang">
-              <option value="">— Chọn —</option>
+              <option value="" data-lang="select">— Chọn —</option>
               <option>CS.KD — Cây sản xuất kinh doanh</option>
               <option>KTCM — Kiến thiết cơ mới</option>
               <option>TCTM — Tái canh tái mới</option>
@@ -1359,56 +1395,56 @@ td.mono{font-family:monospace;font-size:11px;color:var(--muted)}
 <div class="page" id="page-thong-ke">
   <div class="page-header">
     <div>
-      <div class="page-title">Thống kê</div>
+      <div class="page-title" data-lang="thong-ke">Thống kê</div>
       <div class="page-subtitle">Phân tích dữ liệu vườn cây theo thời gian và đội</div>
     </div>
     <button class="btn btn-outline btn-sm">
       <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-      Xuất Excel
+      <span data-lang="export-excel">Xuất Excel</span>
     </button>
   </div>
 
   <div class="stat-tab-row">
-    <div class="stat-tab active" onclick="switchStatTab(this,'tab-sanluong')">Theo nông trường</div>
-    <div class="stat-tab" onclick="switchStatTab(this,'tab-dientich')">Diện tích theo năm</div>
-    <div class="stat-tab" onclick="switchStatTab(this,'tab-giong')">Cơ cấu giống</div>
+    <div class="stat-tab active" onclick="switchStatTab(this,'tab-sanluong')" data-lang="by-farm">Theo nông trường</div>
+    <div class="stat-tab" onclick="switchStatTab(this,'tab-dientich')" data-lang="area-by-year">Diện tích theo năm</div>
+    <div class="stat-tab" onclick="switchStatTab(this,'tab-giong')" data-lang="species-structure">Cơ cấu giống</div>
   </div>
 
   <!-- Tab: nông trường -->
   <div id="tab-sanluong">
     <div class="grid-4" style="margin-bottom:18px">
       <div class="kpi">
-        <div class="kpi-label">Tổng diện tích</div>
+        <div class="kpi-label" data-lang="total-area">Tổng diện tích</div>
         <div class="kpi-value">7.244 <span>ha</span></div>
         <div class="kpi-delta delta-up">425 lô cao su</div>
       </div>
       <div class="kpi">
-        <div class="kpi-label">Bình quân / lô</div>
+        <div class="kpi-label" data-lang="avg-per-farm">Bình quân / lô</div>
         <div class="kpi-value">17,0 <span>ha</span></div>
         <div class="kpi-delta" style="color:var(--muted)">Min 0,3 ha · Max 30,9 ha</div>
       </div>
       <div class="kpi">
-        <div class="kpi-label">Nông trường lớn nhất</div>
+        <div class="kpi-label" data-lang="largest-farm">Nông trường lớn nhất</div>
         <div class="kpi-value" style="font-size:16px">NT 3</div>
         <div class="kpi-delta" style="color:var(--accent)">171 lô · 2.987,8 ha (41,3%)</div>
       </div>
       <div class="kpi">
-        <div class="kpi-label">Giống chủ lực</div>
+        <div class="kpi-label" data-lang="main-species">Giống chủ lực</div>
         <div class="kpi-value" style="font-size:16px">PB 260</div>
         <div class="kpi-delta" style="color:var(--accentB)">165 lô · 2.947,5 ha · 40,7%</div>
       </div>
     </div>
     <div class="card" style="margin-bottom:18px">
-      <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:16px">Diện tích & số lô theo nông trường</div>
+      <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:16px" data-lang="area-and-farms">Diện tích & số lô theo nông trường</div>
       <div class="chart-box-lg"><canvas id="chartSanLuong12T"></canvas></div>
     </div>
     <div class="grid-2">
       <div class="card">
-        <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:16px">Cơ cấu giống theo nông trường</div>
+        <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:16px" data-lang="species-by-farm">Cơ cấu giống theo nông trường</div>
         <div class="chart-box"><canvas id="chartRadar"></canvas></div>
       </div>
       <div class="card">
-        <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:16px">Diện tích các tổ (Top 10 tổ lớn nhất)</div>
+        <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:16px" data-lang="top-groups">Diện tích các tổ (Top 10 tổ lớn nhất)</div>
         <div class="chart-box"><canvas id="chartNangSuat"></canvas></div>
       </div>
     </div>
@@ -1442,6 +1478,23 @@ td.mono{font-family:monospace;font-size:11px;color:var(--muted)}
         <div class="chart-box-lg"><canvas id="chartGiongBar"></canvas></div>
       </div>
     </div>
+    <div class="grid-2" style="margin-top:18px">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <div style="font-size:13px;font-weight:500;color:var(--text)">Diện tích theo nông trường</div>
+          <span class="badge badge-green">NT 1 · NT 2 · NT 3</span>
+        </div>
+        <div class="chart-box"><canvas id="chartSanLuong"></canvas></div>
+      </div>
+
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <div style="font-size:13px;font-weight:500;color:var(--text)">Cơ cấu giống cao su</div>
+          <span class="badge badge-blue">425 lô · 7.244 ha</span>
+        </div>
+        <div class="chart-box"><canvas id="chartHienTrang"></canvas></div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1449,31 +1502,31 @@ td.mono{font-family:monospace;font-size:11px;color:var(--muted)}
 <div class="page" id="page-nguoi-dung">
   <div class="page-header">
     <div>
-      <div class="page-title">Quản lý người dùng</div>
+      <div class="page-title" data-lang="nguoi-dung">Quản lý người dùng</div>
       <div class="page-subtitle">Phân quyền và quản lý tài khoản hệ thống</div>
     </div>
     <button class="btn btn-primary btn-sm" onclick="showToast('Mở form thêm người dùng','👤')">
       <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      Thêm người dùng
+      <span data-lang="add-new">Thêm người dùng</span>
     </button>
   </div>
 
   <!-- Stats row -->
   <div class="grid-4" style="margin-bottom:20px">
     <div class="kpi">
-      <div class="kpi-label">Tổng tài khoản</div>
+      <div class="kpi-label" data-lang="total-users">Tổng tài khoản</div>
       <div class="kpi-value">24 <span>người dùng</span></div>
     </div>
     <div class="kpi">
-      <div class="kpi-label">Đang hoạt động</div>
+      <div class="kpi-label" data-lang="active-users">Đang hoạt động</div>
       <div class="kpi-value" style="color:var(--accent)">19</div>
     </div>
     <div class="kpi">
-      <div class="kpi-label">Chờ phê duyệt</div>
+      <div class="kpi-label" data-lang="pending-approval">Chờ phê duyệt</div>
       <div class="kpi-value" style="color:var(--warn)">2</div>
     </div>
     <div class="kpi">
-      <div class="kpi-label">Đã tạm khóa</div>
+      <div class="kpi-label" data-lang="locked">Đã tạm khóa</div>
       <div class="kpi-value" style="color:var(--danger)">3</div>
     </div>
   </div>
@@ -1490,7 +1543,7 @@ td.mono{font-family:monospace;font-size:11px;color:var(--muted)}
       <span style="font-size:13px;font-weight:500;color:var(--text)">Danh sách tài khoản</span>
       <div class="search-bar" style="max-width:240px">
         <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="#5a6a8a" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-        <input type="text" placeholder="Tìm người dùng...">
+        <input type="text" placeholder="Tìm người dùng..." data-lang-placeholder="search-user">
       </div>
     </div>
     <div class="tbl-wrap">
@@ -1501,9 +1554,9 @@ td.mono{font-family:monospace;font-size:11px;color:var(--muted)}
             <th>Email</th>
             <th>Vai trò</th>
             <th>Đội phụ trách</th>
-            <th>Trạng thái</th>
+            <th data-lang="status">Trạng thái</th>
             <th>Đăng nhập lần cuối</th>
-            <th></th>
+            <th data-lang="action"></th>
           </tr>
         </thead>
         <tbody id="userTableBody"></tbody>
@@ -1832,11 +1885,18 @@ function renderRealLots() {
       layer.addTo(dashMap);
       lotLayers.push({layer, p, idx});
     }
-// nhẫn dán của bản đồ
+
     // ─── RENDER LABELS (independently from lot layer visibility) ───
     if (labelsVis && p.Ten_lo) {
       const z = dashMap.getZoom();
-      const fs = z >= 15 ? 12 : z >= 13 ? 11 : z >= 12 ? 10 : 0;
+      // Formula: Font size scales proportionally with zoom
+      // At zoom 16: fs = 13px
+      // At zoom 12: fs = 9px
+      // At zoom 8: fs = 5px
+      // Formula: fs = (z - 3) * 0.75
+      const baseFs = Math.max(2, (z - 3) * 0.75);
+      const fs = baseFs;
+      
       if (fs > 0) {
         // We need to get bounds from the feature itself
         const tempLayer = L.geoJSON(feat);
@@ -1845,22 +1905,30 @@ function renderRealLots() {
         const col = getLotColorReal(p, mapViewMode);
         // Remove "- KV X" suffix from label
         const cleanName = p.Ten_lo.replace(/\s*-\s*KV\s*\d+\s*$/i, '');
-        const line1 = cleanName || '';
-        const line2 = [p.Giong, p.Nam_trong].filter(Boolean).join(' · ');
+        const namCuoi = p.Nam_trong ? String(p.Nam_trong).slice(-2) : '';
+        const line1 = namCuoi ? `${cleanName} - ${namCuoi}` : cleanName;
+        const line2 = p.Giong || '';
         const html = `<div style="
           background:transparent;
           color:#ffffff;
-          font-size:${fs+2}px;
-          padding:4px 8px;
+          font-size:${fs}px;
+          padding:${Math.max(2, fs * 0.4)}px ${Math.max(4, fs * 0.7)}px;
           border-radius:4px;
-          border-left:3px solid ${col};
+          border-left:${Math.max(2, fs * 0.25)}px solid ${col};
           white-space:nowrap;
           pointer-events:none;
           font-family:'Be Vietnam Pro',sans-serif;
           line-height:1.6;
           font-weight:700;
           text-shadow:0 1px 3px rgba(0,0,0,0.5);
-        "><strong style="color:#ffff00;font-size:${fs+3}px;letter-spacing:0.5px">${line1}</strong>${line2 ? `<br><span style="color:#ffffff;font-size:${fs+1}px;font-weight:600">${line2}</span>` : ''}</div>`;
+          transform:scale(${z / 16});
+          transform-origin:top left;
+          text-align:center;
+          display:flex;
+          flex-direction:column;
+          align-items:center;
+          justify-content:center;
+        "><strong style="color:#ffffff;font-size:${fs * 1.1}px;letter-spacing:${fs * 0.05}px;display:block">${line1}</strong>${line2 ? `<span style="color:#ffffff;font-size:${fs * 1.35}px;font-weight:700;display:block;margin-top:2px">${line2}</span>` : ''}</div>`;
         const lbl = L.marker(center, { icon: L.divIcon({
           html, className:'', iconAnchor:[0,0]
         })}).addTo(dashMap);
@@ -2507,6 +2575,8 @@ function renderTable(data) {
     const g   = p.Giong || '—';
     const dt  = p.Dien_tich ? `${parseFloat(p.Dien_tich).toFixed(1)} ha` : '—';
     const xa  = `${p.XA||''}, ${p.HUYEN||''}`;
+    const phienCao = p.Phien_cao || '—';
+    const nhipDo = p.Nhip_do || '—';
     const col = giongPalette[p.Giong] || '#5a6a8a';
     const ntCol = ntPalette[p.Ten_NT] || '#5a6a8a';
     return `<tr>
@@ -2518,6 +2588,8 @@ function renderTable(data) {
       <td><span style="background:${col}22;color:${col};border:1px solid ${col}60;padding:4px 10px;border-radius:10px;font-size:12px;font-weight:600">${g}</span></td>
       <td style="font-size:13px">${dt}</td>
       <td style="font-size:12px;color:var(--muted)">${xa}</td>
+      <td><span style="background:rgba(0,214,143,.15);color:#00d68f;border:1px solid rgba(0,214,143,.3);padding:4px 10px;border-radius:10px;font-size:12px;font-weight:600">${phienCao}</span></td>
+      <td><span style="background:rgba(0,180,255,.15);color:#00b4ff;border:1px solid rgba(0,180,255,.3);padding:4px 10px;border-radius:10px;font-size:12px;font-weight:600">${nhipDo}</span></td>
       <td>
         <div style="display:flex;gap:4px">
           <button class="btn btn-outline btn-sm" onclick="flyToByName('${ten.replace(/'/g,"\\'")}');showToast('Zoom đến lô ${ten.replace(/'/g,"\\'")}','📍')" style="padding:4px 8px">📍</button>
@@ -2539,17 +2611,22 @@ function flyToByName(tenLo) {
 renderTable(loDataReal);
 
 function filterTable() {
-  const q   = document.getElementById('loSearch').value.toLowerCase();
-  const nt  = document.getElementById('doiFilter').value;
-  const g   = document.getElementById('ttFilter').value;
-  const nam = document.getElementById('namFilter') ? document.getElementById('namFilter').value : '';
+  const q        = document.getElementById('loSearch').value.toLowerCase();
+  const nt       = document.getElementById('doiFilter').value;
+  const g        = document.getElementById('ttFilter').value;
+  const nam      = document.getElementById('namFilter') ? document.getElementById('namFilter').value : '';
+  const phienCao = document.getElementById('phienCaoFilter') ? document.getElementById('phienCaoFilter').value : '';
+  const nhipDo   = document.getElementById('nhipDoFilter') ? document.getElementById('nhipDoFilter').value : '';
+  
   const filtered = loDataReal.filter(p =>
-    (!q   || (p.Ten_lo||'').toLowerCase().includes(q)
-           || (p.Malo_cty||'').toLowerCase().includes(q)
-           || (p.Giong||'').toLowerCase().includes(q)) &&
-    (!nt  || p.Ten_NT === nt) &&
-    (!g   || p.Giong === g) &&
-    (!nam || String(p.Nam_trong) === nam)
+    (!q        || (p.Ten_lo||'').toLowerCase().includes(q)
+               || (p.Malo_cty||'').toLowerCase().includes(q)
+               || (p.Giong||'').toLowerCase().includes(q)) &&
+    (!nt       || p.Ten_NT === nt) &&
+    (!g        || p.Giong === g) &&
+    (!nam      || String(p.Nam_trong) === nam) &&
+    (!phienCao || (p.Phien_cao||'') === phienCao) &&
+    (!nhipDo   || (p.Nhip_do||'') === nhipDo)
   );
   renderTable(filtered);
   document.getElementById('tableCount').textContent = `Hiển thị ${Math.min(20,filtered.length)} / ${filtered.length} lô`;
@@ -2792,6 +2869,355 @@ userData.forEach(u=>{
       </div></td>
     </tr>`;
 });
+
+/* ═══════════════════════════════════════════════════════════════════════════════════ */
+/* ══════════════════════════ MULTI-LANGUAGE SYSTEM ══════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════════════════════ */
+
+const languages = {
+  'vi': { name: 'Tiếng Việt', flag: '🇻🇳' },
+  'km': { name: 'ខ្មែរ', flag: '🇰🇭' },
+};
+
+const translations = {
+  'vi': {
+    'dashboard': 'Dashboard',
+    'lo-cay': 'Quản lý lô cây',
+    'them-du-lieu': 'Thêm dữ liệu',
+    'thong-ke': 'Thống kê',
+    'nguoi-dung': 'Quản lý người dùng',
+    'search': 'Tìm lô theo mã, đội, giống cây...',
+    'tong-cty': 'Tổng Công ty',
+    'online': 'Trực tuyến',
+    'farms': 'Lô vườn',
+    'area': 'Diện tích',
+    'add-new': 'Thêm lô mới',
+    'all-farms': 'Tất cả NT',
+    'all-species': 'Tất cả giống',
+    'all-years': 'Tất cả năm',
+    'all-session': 'Tất cả phiên cạo',
+    'all-rhythm': 'Tất cả nhịp độ',
+    'farm-name': 'Tên lô',
+    'farm-code': 'Mã lô (cty)',
+    'farm-owner': 'Nông trường',
+    'group': 'Tổ',
+    'plant-year': 'Năm trồng',
+    'species': 'Giống cây',
+    'area-label': 'Diện tích',
+    'region': 'Khu vực',
+    'session': 'Phiên cạo',
+    'rhythm': 'Nhịp độ cạo',
+    'action': 'Hành động',
+    'view': 'Xem',
+    'edit': 'Sửa',
+    'lock': 'Khóa',
+    'reset': 'Reset',
+    'notification': 'Thông báo',
+    'admin': 'Quản trị viên',
+    'showing': 'Hiển thị',
+    'page': 'Trang',
+    'language': 'Ngôn ngữ',
+    'search-lang': 'Tìm ngôn ngữ...',
+    'logout': 'Đăng xuất',
+    'export': 'Xuất báo cáo',
+    'overview': 'Tổng quan',
+    'total-farms': 'Tổng lô cao su',
+    'total-area': 'Tổng diện tích',
+    'total-species': 'Số giống cao su',
+    'total-teams': 'Số lượng Đội',
+    'map-title': 'Bản đồ vườn cây cao su',
+    'color-by': 'Tô màu theo',
+    'all-area': 'Toàn vùng',
+    'export-map': 'Xuất',
+    'basic-info': 'Thông tin cơ bản',
+    'farm-code-label': 'Mã lô',
+    'team': 'Đội trực thuộc',
+    'plant-year-label': 'Năm trồng',
+    'species-label': 'Giống cây',
+    'area-input': 'Diện tích (ha)',
+    'status': 'Hiện trạng',
+    'select': '— Chọn —',
+    'submit': 'Lưu',
+    'cancel': 'Hủy',
+    'required': 'Bắt buộc',
+    'statistics': 'Thống kê',
+    'export-excel': 'Xuất Excel',
+    'by-farm': 'Theo nông trường',
+    'area-by-year': 'Diện tích theo năm',
+    'species-structure': 'Cơ cấu giống',
+    'total-area': 'Tổng diện tích',
+    'avg-per-farm': 'Bình quân / lô',
+    'largest-farm': 'Nông trường lớn nhất',
+    'main-species': 'Giống chủ lực',
+    'area-and-farms': 'Diện tích & số lô theo nông trường',
+    'species-by-farm': 'Cơ cấu giống theo nông trường',
+    'top-groups': 'Diện tích các tổ (Top 10 tổ lớn nhất)',
+    'user-management': 'Quản lý người dùng',
+    'total-users': 'Tổng người dùng',
+    'active-users': 'Người dùng hoạt động',
+    'pending-approval': 'Chờ duyệt',
+    'locked': 'Đã khóa',
+    'edit': 'Sửa',
+    'delete': 'Xóa',
+    'approve': 'Duyệt',
+    'search-user': 'Tìm người dùng...',
+    'all-status': 'Tất cả trạng thái',
+    'active': 'Hoạt động',
+    'select-all': 'Chọn tất cả',
+    'all-teams': 'Tất cả đội'
+  },
+  'km': {
+    'dashboard': 'แดชบอร์ด',
+    'lo-cay': 'จัดการฟาร์ม',
+    'them-du-lieu': 'เพิ่มข้อมูล',
+    'thong-ke': 'สถิติ',
+    'nguoi-dung': 'จัดการผู้ใช้',
+    'search': 'ค้นหาตามรหัส ทีม ชนิด...',
+    'tong-cty': 'สำนักงานใหญ่',
+    'online': 'ออนไลน์',
+    'farms': 'ฟาร์ม',
+    'area': 'พื้นที่',
+    'add-new': 'เพิ่มฟาร์มใหม่',
+    'all-farms': 'ฟาร์มทั้งหมด',
+    'all-species': 'สปีชีส์ทั้งหมด',
+    'all-years': 'ปีทั้งหมด',
+    'all-session': 'เซสชั่นทั้งหมด',
+    'all-rhythm': 'จังหวะทั้งหมด',
+    'farm-name': 'ชื่อฟาร์ม',
+    'farm-code': 'รหัสฟาร์ม',
+    'farm-owner': 'เจ้าของฟาร์ม',
+    'group': 'กลุ่ม',
+    'plant-year': 'ปีการปลูก',
+    'species': 'ชนิด',
+    'area-label': 'พื้นที่',
+    'region': 'ภูมิภาค',
+    'session': 'เซสชั่น',
+    'rhythm': 'จังหวะ',
+    'action': 'การดำเนิน',
+    'view': 'ดู',
+    'edit': 'แก้ไข',
+    'lock': 'ล็อก',
+    'reset': 'รีเซ็ต',
+    'notification': 'การแจ้งเตือน',
+    'admin': 'ผู้ดูแลระบบ',
+    'showing': 'แสดง',
+    'page': 'หน้า',
+    'language': 'ภาษา',
+    'search-lang': 'ค้นหาภาษา...',
+    'logout': 'ออกจากระบบ',
+    'export': 'ส่งออกรายงาน',
+    'overview': 'ภาพรวม',
+    'total-farms': 'จำนวนฟาร์มยางทั้งหมด',
+    'total-area': 'พื้นที่ทั้งหมด',
+    'total-species': 'จำนวนชนิดยาง',
+    'total-teams': 'จำนวนทีม',
+    'map-title': 'แผนที่ฟาร์มยาง',
+    'color-by': 'ระบายสีตาม',
+    'all-area': 'พื้นที่ทั้งหมด',
+    'export-map': 'ส่งออก',
+    'basic-info': 'ข้อมูลพื้นฐาน',
+    'farm-code-label': 'รหัสฟาร์ม',
+    'team': 'ทีม',
+    'plant-year-label': 'ปีการปลูก',
+    'species-label': 'ชนิด',
+    'area-input': 'พื้นที่ (เฮกแตร์)',
+    'status': 'สถานะ',
+    'select': '— เลือก —',
+    'submit': 'บันทึก',
+    'cancel': 'ยกเลิก',
+    'required': 'จำเป็น',
+    'statistics': 'สถิติ',
+    'export-excel': 'ส่งออก Excel',
+    'by-farm': 'โดยฟาร์ม',
+    'area-by-year': 'พื้นที่ตามปี',
+    'species-structure': 'โครงสร้างสปีชีส์',
+    'total-area': 'พื้นที่ทั้งหมด',
+    'avg-per-farm': 'เฉลี่ยต่อฟาร์ม',
+    'largest-farm': 'ฟาร์มที่ใหญ่ที่สุด',
+    'main-species': 'สปีชีส์หลัก',
+    'area-and-farms': 'พื้นที่และฟาร์มตามฟาร์ม',
+    'species-by-farm': 'สปีชีส์ตามฟาร์ม',
+    'top-groups': 'กลุ่มยอดนิยม 10 อันดับ',
+    'user-management': 'การจัดการผู้ใช้',
+    'total-users': 'ผู้ใช้ทั้งหมด',
+    'active-users': 'ผู้ใช้ที่ใช้งาน',
+    'pending-approval': 'รอการอนุมัติ',
+    'locked': 'ล็อก',
+    'edit': 'แก้ไข',
+    'delete': 'ลบ',
+    'approve': 'อนุมัติ',
+    'search-user': 'ค้นหาผู้ใช้...',
+    'all-status': 'สถานะทั้งหมด',
+    'active': 'ใช้งาน',
+    'select-all': 'เลือกทั้งหมด',
+    'all-teams': 'ทีมทั้งหมด'
+  }
+};
+
+let currentLang = localStorage.getItem('appLang') || 'vi';
+
+function initLanguageMenu() {
+  const langList = document.getElementById('langList');
+  langList.innerHTML = Object.entries(languages).map(([code, data]) => `
+    <div class="lang-item ${code === currentLang ? 'active' : ''}" onclick="changeLang('${code}')">
+      <span class="lang-flag">${data.flag}</span>
+      <div class="lang-name">
+        <div class="lang-name-main">${data.name}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleLanguageMenu() {
+  const menu = document.getElementById('langMenu');
+  menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+}
+
+function filterLanguages() {
+  const search = document.getElementById('langSearch').value.toLowerCase();
+  const items = document.querySelectorAll('.lang-item');
+  items.forEach(item => {
+    const name = item.querySelector('.lang-name-main').textContent.toLowerCase();
+    item.style.display = name.includes(search) ? 'flex' : 'none';
+  });
+}
+
+function changeLang(langCode) {
+  currentLang = langCode;
+  localStorage.setItem('appLang', langCode);
+  
+  console.log('Changing language to:', langCode);
+  
+  // Update active language in menu - bỏ active khỏi tất cả
+  const langItems = document.querySelectorAll('.lang-item');
+  langItems.forEach(item => item.classList.remove('active'));
+  
+  // Thêm active cho item được chọn
+  langItems.forEach(item => {
+    if (item.getAttribute('onclick') && item.getAttribute('onclick').includes(`'${langCode}'`)) {
+      item.classList.add('active');
+    }
+  });
+  
+  // Apply translations - ĐÂY LÀ CÁI QUAN TRỌNG!
+  console.log('Applying translations...');
+  applyTranslations();
+  console.log('Translations applied');
+  
+  // Đóng menu
+  const langMenu = document.getElementById('langMenu');
+  if (langMenu) {
+    langMenu.style.display = 'none';
+  }
+  
+  // Show toast message
+  if (languages[langCode]) {
+    showToast(`🌍 Đã chuyển sang ${languages[langCode].name}`, '✅');
+  }
+}
+
+function t(key) {
+  if (translations[currentLang] && translations[currentLang][key]) {
+    return translations[currentLang][key];
+  }
+  if (translations['en'] && translations['en'][key]) {
+    return translations['en'][key];
+  }
+  return key;
+}
+
+function applyTranslations() {
+  // Update navigation items
+  document.querySelectorAll('[data-lang]').forEach(el => {
+    const key = el.getAttribute('data-lang');
+    el.textContent = t(key);
+  });
+  
+  // Update placeholders
+  document.querySelectorAll('[data-lang-placeholder]').forEach(el => {
+    const key = el.getAttribute('data-lang-placeholder');
+    el.placeholder = t(key);
+  });
+  
+  // Update titles and values
+  document.querySelectorAll('[data-lang-title]').forEach(el => {
+    const key = el.getAttribute('data-lang-title');
+    el.title = t(key);
+  });
+  
+  // Update option elements
+  document.querySelectorAll('option[data-lang]').forEach(el => {
+    const key = el.getAttribute('data-lang');
+    el.textContent = t(key);
+  });
+  
+  // Update language menu button text based on current language
+  const langBtn = document.getElementById('langBtn');
+  if (langBtn) {
+    langBtn.title = t('language');
+  }
+}
+
+// Additional translations for common hardcoded texts
+const commonTexts = {
+  'Tất cả': 'all-farms',
+  'Chọn': 'select',
+  'NT': 'team',
+  'Sửa': 'edit',
+  'Xóa': 'delete'
+};
+
+// Helper function để dịch toast messages
+function tToast(msg) {
+  const translations = {
+    'vi': {
+      'Bạn có 3 thông báo mới': 'Bạn có 3 thông báo mới',
+      'Đã xuất bản đồ PNG': 'Đã xuất bản đồ PNG',
+      'Mở form thêm người dùng': 'Mở form thêm người dùng',
+      'Chi tiết lô': 'Chi tiết lô',
+      'Zoom đến lô': 'Zoom đến lô',
+      'Xem hồ sơ': 'Xem hồ sơ',
+      'Chỉnh sửa': 'Chỉnh sửa',
+      'Đã xử lý tài khoản': 'Đã xử lý tài khoản'
+    },
+    'km': {
+      'Bạn có 3 thông báo mới': 'អ្នកមានការជូនដំណឹងថ្មី 3',
+      'Đã xuất bản đồ PNG': 'បាននាំចេញផែនទីជា PNG',
+      'Mở form thêm người dùng': 'បើកទម្រង់បន្ថែមអ្នកប្រើ',
+      'Chi tiết lô': 'ព័ត៌មានលម្អិតអំពីដីកសិកម្ម',
+      'Zoom đến lô': 'ពង្រីកទៅកាន់ដីកសិកម្ម',
+      'Xem hồ sơ': 'មើលប្រវត្តិរូប',
+      'Chỉnh sửa': 'កែសម្រួល',
+      'Đã xử lý tài khoản': 'គណនីត្រូវបានដំណើរការ'
+    }
+  };
+  
+  if (translations[currentLang] && translations[currentLang][msg]) {
+    return translations[currentLang][msg];
+  }
+  return msg;
+}
+
+// Initialize language menu on page load
+function initializeLanguageSystem() {
+  console.log('Initializing language system...');
+  try {
+    initLanguageMenu();
+    applyTranslations();
+    console.log('Language system initialized! Current language:', currentLang);
+  } catch(error) {
+    console.error('Error initializing language system:', error);
+  }
+}
+
+// Run initialization
+if (document.readyState === 'loading') {
+  // DOM is still loading
+  window.addEventListener('DOMContentLoaded', initializeLanguageSystem);
+} else {
+  // DOM is already loaded
+  setTimeout(initializeLanguageSystem, 100);
+}
 </script>
 </body>
 </html>
