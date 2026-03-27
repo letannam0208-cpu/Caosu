@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WebGIS · Quản Lý Lô Cây Cao Su</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root {
+  --bg:       #0a0e1a;
+  --s1:       #111827;
+  --s2:       #1a2332;
+  --s3:       #242e42;
+  --border:   rgba(255,255,255,0.08);
+  --border2:  rgba(255,255,255,0.14);
+  --text:     #f0f4f9;
+  --muted:    #6b7c9d;
+  --muted2:   #8fa3bd;
+  --accent:   #10b981;
+  --accentB:  #06b6d4;
+  --warn:     #f59e0b;
+  --danger:   #ef4444;
+  --purple:   #a78bfa;
+  --font-d:   'Syne', sans-serif;
+  --font-b:   'Be Vietnam Pro', sans-serif;
+  --nav-w:    200px;
+  --top-h:    64px;
+  --r:        8px;
+  --r-lg:     12px;
+  --shadow:   0 10px 40px rgba(0,0,0,0.3);
+  --shadow-sm: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--font-b);
+  background:var(--bg);
+  color:var(--text);
+  height:100vh;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--s3);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--s2)}
+
+/* TOP BAR */
+#topbar{
+  height:var(--top-h);
+  flex-shrink:0;
+  background:linear-gradient(180deg,var(--s1),rgba(17,24,39,0.8));
+  border-bottom:1px solid var(--border);
+  display:flex;
+  align-items:center;
+  padding:0 20px;
+  gap:16px;
+  position:relative;
+  z-index:100;
+  backdrop-filter:blur(10px);
+}
+#topbar::after{
+  content:'';
+  position:absolute;
+  bottom:0;
+  left:0;
+  right:0;
+  height:1px;
+  background:linear-gradient(90deg,transparent,rgba(16,185,129,0.25),transparent);
+}
+.tb-logo{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  text-decoration:none;
+  flex-shrink:0;
+  transition:all 0.3s;
+}
+.tb-logo:hover{
+  transform:translateY(-2px);
+}
+.tb-icon{
+  width:40px;
+  height:40px;
+  border-radius:10px;
+  background:linear-gradient(135deg,#10b981,#059669);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:20px;
+  box-shadow:0 4px 16px rgba(16,185,129,0.25);
+  flex-shrink:0;
+}
+.tb-title{
+  font-family:var(--font-d);
+  font-size:14px;
+  letter-spacing:0.1em;
+  color:var(--text);
+  font-weight:700;
+}
+.tb-sub{
+  font-size:10px;
+  color:var(--muted);
+  letter-spacing:0.12em;
+  text-transform:uppercase;
+  margin-top:2px;
+}
+.tb-sep{
+  width:1px;
+  height:28px;
+  background:var(--border);
+  margin:0 4px;
+}
+.tb-pill{
+  background:transparent;
+  border:none;
+  padding:6px 12px;
+  font-size:12px;
+  color:var(--muted2);
+  display:flex;
+  align-items:center;
+  gap:8px;
+  text-transform:capitalize;
+  border-radius:6px;
+  transition:all 0.2s;
+}
+.tb-pill:hover{
+  background:rgba(255,255,255,0.05);
+}
+.tb-pill strong{
+  color:var(--accent);
+  font-weight:600;
+  font-size:13px;
+}
+.live-dot{
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  background:var(--accent);
+  box-shadow:0 0 8px var(--accent);
+  animation:blink 2s infinite;
+}
+@keyframes blink{
+  0%,100%{opacity:1}
+  50%{opacity:0.4}
+}
+.tb-right{
+  margin-left:auto;
+  display:flex;
+  align-items:center;
+  gap:16px;
+}
+.icon-btn{
+  width:36px;
+  height:36px;
+  border-radius:var(--r);
+  background:rgba(255,255,255,0.05);
+  border:1px solid var(--border);
+  color:var(--muted2);
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:15px;
+  transition:all 0.2s;
+}
+.icon-btn:hover{
+  color:var(--accentB);
+  background:rgba(6,182,212,0.1);
+  border-color:rgba(6,182,212,0.2);
+}
+.tb-avatar{
+  width:38px;
+  height:38px;
+  border-radius:50%;
+  background:linear-gradient(135deg,#10b981,#06b6d4);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:12px;
+  font-weight:700;
+  color:#fff;
+  cursor:pointer;
+  border:2px solid var(--border2);
+  transition:all 0.2s;
+}
+.tb-avatar:hover{
+  transform:scale(1.05);
+  border-color:var(--accent);
+}
+.tb-user-info{
+  text-align:right;
+  font-size:12px;
+}
+.tb-user-name{
+  font-weight:600;
+  color:var(--text);
+}
+.tb-user-role{
+  font-size:11px;
+  color:var(--muted);
+  margin-top:2px;
+}
+
+/* BODY & NAV */
+#body{
+  display:flex;
+  flex:1;
+  overflow:hidden;
+}
+#nav{
+  width:var(--nav-w);
+  flex-shrink:0;
+  background:linear-gradient(180deg,var(--s1),var(--bg));
+  border-right:1px solid var(--border);
+  display:flex;
+  flex-direction:column;
+  overflow-y:auto;
+  padding:16px 10px;
+  gap:4px;
+}
+.nav-section-label{
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:0.15em;
+  text-transform:uppercase;
+  color:var(--muted);
+  padding:8px 12px 6px;
+  margin-top:8px;
+  margin-bottom:2px;
+}
+.nav-item{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px 12px;
+  border-radius:var(--r);
+  cursor:pointer;
+  transition:all 0.2s;
+  color:var(--muted2);
+  font-size:13px;
+  font-weight:500;
+  border:1px solid transparent;
+  position:relative;
+  text-decoration:none;
+  white-space:nowrap;
+}
+.nav-item:hover{
+  background:rgba(255,255,255,0.05);
+  color:var(--text);
+  border-color:var(--border2);
+}
+.nav-item.active{
+  background:rgba(16,185,129,0.15);
+  border-color:var(--accent);
+  color:var(--accent);
+  font-weight:600;
+  box-shadow:inset 0 0 8px rgba(16,185,129,0.1);
+}
+.nav-item.active::before{
+  content:'';
+  position:absolute;
+  left:0;
+  top:20%;
+  bottom:20%;
+  width:3px;
+  border-radius:0 2px 2px 0;
+  background:var(--accent);
+}
+.nav-icon{
+  width:16px;
+  height:16px;
+  flex-shrink:0;
+  text-align:center;
+  font-size:13px;
+}
+.nav-badge{
+  margin-left:auto;
+  background:rgba(239,68,68,0.2);
+  color:#fca5a5;
+  font-size:10px;
+  font-weight:700;
+  padding:2px 6px;
+  border-radius:8px;
+  flex-shrink:0;
+}
+
+/* Logout button */
+.nav-logout{
+  margin-top:auto;
+  border-top:1px solid var(--border);
+  padding-top:12px;
+}
+.nav-logout .nav-item{
+  color:#fca5a5;
+  border:1px solid rgba(239,68,68,0.2);
+  background:rgba(239,68,68,0.08);
+}
+.nav-logout .nav-item:hover{
+  background:rgba(239,68,68,0.15);
+  border-color:rgba(239,68,68,0.4);
+  color:#ff9999;
+}
+.nav-logout .nav-item.active{
+  background:rgba(239,68,68,0.2);
+  border-color:rgba(239,68,68,0.5);
+  color:#fca5a5;
+}
+
+/* CONTENT */
+#content{
+  flex:1;
+  overflow-y:auto;
+  padding:20px 24px;
+  background:linear-gradient(135deg,rgba(10,14,26,0),rgba(16,185,129,0.03));
+}
+.page-header{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  margin-bottom:24px;
+  gap:16px;
+}
+.page-title-group{
+  flex:1;
+}
+.page-title{
+  font-family:var(--font-d);
+  font-size:28px;
+  font-weight:800;
+  color:var(--text);
+  letter-spacing:-0.02em;
+  margin-bottom:4px;
+}
+.page-subtitle{
+  font-size:12px;
+  color:var(--muted);
+}
+.btn-add{
+  background:linear-gradient(135deg,var(--accent),#059669);
+  color:#fff;
+  border:none;
+  padding:10px 20px;
+  border-radius:var(--r);
+  font-family:var(--font-b);
+  font-size:13px;
+  font-weight:600;
+  cursor:pointer;
+  transition:all 0.2s;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  flex-shrink:0;
+  box-shadow:0 4px 12px rgba(16,185,129,0.2);
+}
+.btn-add:hover{
+  transform:translateY(-2px);
+  box-shadow:0 6px 20px rgba(16,185,129,0.3);
+}
+.btn-add:active{
+  transform:scale(0.98);
+}
+
+/* TOOLBAR & FILTER */
+.toolbar{
+  margin-bottom:16px;
+}
+.filter-bar{
+  display:grid;
+  grid-template-columns:1.8fr 1fr 1fr 1fr 1fr 1fr;
+  gap:12px;
+  margin-bottom:12px;
+  background:var(--s1);
+  padding:14px;
+  border-radius:var(--r-lg);
+  border:1px solid var(--border);
+  box-shadow:var(--shadow-sm);
+}
+.search-box,
+.select-filter{
+  padding:10px 14px;
+  border-radius:var(--r);
+  background:var(--s2);
+  border:1px solid var(--border);
+  color:var(--text);
+  font-family:var(--font-b);
+  font-size:12px;
+  transition:all 0.2s;
+}
+.search-box::placeholder,
+.select-filter::placeholder{
+  color:var(--muted);
+}
+.search-box:focus,
+.select-filter:focus{
+  outline:none;
+  border-color:var(--accent);
+  background:var(--s3);
+  box-shadow:0 0 12px rgba(16,185,129,0.15);
+}
+.select-filter{
+  cursor:pointer;
+}
+.select-filter:hover:not(:focus){
+  border-color:var(--border2);
+  background:rgba(26,35,50,0.8);
+}
+.select-filter option{
+  background:var(--s1);
+  color:var(--text);
+}
+.filter-active{
+  border-color:var(--accent)!important;
+  box-shadow:0 0 10px rgba(16,185,129,0.3)!important;
+  background:rgba(16,185,129,0.08);
+}
+.show-info{
+  font-size:12px;
+  color:var(--muted);
+  margin-bottom:12px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  padding:0 2px;
+}
+
+/* TABLE */
+.table-container{
+  background:var(--s1);
+  border:1px solid var(--border);
+  border-radius:var(--r-lg);
+  overflow:hidden;
+  box-shadow:var(--shadow-sm);
+}
+table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:12px;
+}
+thead{
+  background:linear-gradient(180deg,var(--s2),var(--s1));
+  position:sticky;
+  top:0;
+  z-index:10;
+}
+th{
+  padding:12px 14px;
+  text-align:left;
+  border-bottom:1px solid var(--border2);
+  font-size:11px;
+  font-weight:700;
+  color:var(--muted2);
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  white-space:nowrap;
+}
+td{
+  padding:12px 14px;
+  border-bottom:1px solid var(--border);
+}
+tbody tr{
+  transition:all 0.15s;
+}
+tbody tr:hover{
+  background:rgba(16,185,129,0.04);
+}
+tbody tr:last-child td{
+  border-bottom:none;
+}
+
+/* Cell styles */
+.cell-name{
+  font-weight:600;
+  color:var(--text);
+}
+.cell-code{
+  font-family:monospace;
+  font-size:11px;
+  color:var(--muted2);
+  letter-spacing:0.02em;
+}
+.cell-farm-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:4px 10px;
+  border-radius:6px;
+  background:rgba(16,185,129,0.15);
+  color:var(--accent);
+  font-weight:500;
+  font-size:11px;
+  border:1px solid rgba(16,185,129,0.2);
+}
+.farm-dot{
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  display:inline-block;
+}
+.farm-dot.nt1,
+.farm-dot.nt2,
+.farm-dot.nt3{
+  background:#fbbf24;
+  box-shadow:0 0 4px rgba(251,191,36,0.5);
+}
+
+/* Species badges */
+.species-badge{
+  display:inline-block;
+  padding:4px 10px;
+  border-radius:6px;
+  font-weight:600;
+  font-size:11px;
+  border:1px solid;
+  white-space:nowrap;
+  transition:all 0.2s;
+}
+.badge-pb255{
+  background:rgba(168,107,250,0.15);
+  color:#d8b4fe;
+  border-color:rgba(168,107,250,0.3);
+}
+.badge-pb260{
+  background:rgba(6,182,212,0.15);
+  color:#7dd3fc;
+  border-color:rgba(6,182,212,0.3);
+}
+.badge-rriv3{
+  background:rgba(168,107,250,0.15);
+  color:#d8b4fe;
+  border-color:rgba(168,107,250,0.3);
+}
+.badge-rriv107{
+  background:rgba(245,158,11,0.15);
+  color:#fcd34d;
+  border-color:rgba(245,158,11,0.3);
+}
+.badge-rrivi{
+  background:rgba(34,197,94,0.15);
+  color:#86efac;
+  border-color:rgba(34,197,94,0.3);
+}
+.badge-rric121{
+  background:rgba(34,197,94,0.15);
+  color:#86efac;
+  border-color:rgba(34,197,94,0.3);
+}
+
+/* Buttons */
+.btn-dash{
+  background:rgba(16,185,129,0.2);
+  border:1px solid rgba(16,185,129,0.4);
+  color:var(--accent);
+  padding:5px 10px;
+  border-radius:var(--r);
+  font-size:11px;
+  cursor:pointer;
+  transition:all 0.18s;
+  font-weight:600;
+}
+.btn-dash:hover{
+  background:rgba(16,185,129,0.3);
+  box-shadow:0 2px 8px rgba(16,185,129,0.15);
+  transform:translateY(-1px);
+}
+.btn-dash.blue{
+  background:rgba(6,182,212,0.2);
+  border-color:rgba(6,182,212,0.4);
+  color:var(--accentB);
+}
+.btn-dash.blue:hover{
+  background:rgba(6,182,212,0.3);
+  box-shadow:0 2px 8px rgba(6,182,212,0.15);
+}
+.btn-view{
+  background:rgba(239,68,68,0.2);
+  border:1px solid rgba(239,68,68,0.4);
+  color:#fca5a5;
+  padding:6px 14px;
+  border-radius:var(--r);
+  font-size:11px;
+  cursor:pointer;
+  transition:all 0.18s;
+  font-weight:600;
+}
+.btn-view:hover{
+  background:rgba(239,68,68,0.3);
+  box-shadow:0 2px 8px rgba(239,68,68,0.15);
+  transform:translateY(-1px);
+}
+
+@media(max-width:1400px){
+  .filter-bar{grid-template-columns:1.5fr 1fr 1fr 1fr 1fr}
+  th:nth-child(10),td:nth-child(10){display:none}
+}
+@media(max-width:1200px){
+  .filter-bar{grid-template-columns:1.5fr 1fr 1fr 1fr}
+  th:nth-child(9),td:nth-child(9){display:none}
+  th:nth-child(10),td:nth-child(10){display:none}
+}
+@media(max-width:992px){
+  --nav-w: 180px;
+  .filter-bar{grid-template-columns:1.5fr 1fr 1fr}
+  th:nth-child(7),td:nth-child(7){display:none}
+  th:nth-child(8),td:nth-child(8){display:none}
+}
+@media(max-width:768px){
+  --nav-w: 160px;
+  #nav{padding:12px 8px;width:160px}
+  #topbar{padding:0 16px}
+  #content{padding:16px 12px}
+  .page-header{flex-direction:column}
+  .page-title{font-size:22px}
+  .filter-bar{
+    grid-template-columns:1fr;
+    padding:10px;
+    gap:10px;
+  }
+  .search-box{grid-column:1/-1}
+  table{font-size:11px}
+  th,td{padding:10px 8px}
+  .tb-pill{display:none}
+}
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <a class="tb-logo" href="#">
+    <div class="tb-icon">🌿</div>
+    <div>
+      <div class="tb-title">WEBGIS CAO SU</div>
+      <div class="tb-sub">Vườn cây</div>
+    </div>
+  </a>
+  <div class="tb-sep"></div>
+  <div class="tb-pill"><span class="live-dot"></span><span>Trực tuyến</span></div>
+  <div class="tb-pill"><strong>Lô vườn</strong> 425</div>
+  <div class="tb-pill"><strong>Diện tích</strong> 7.244 ha</div>
+  <div class="tb-right">
+    <button class="icon-btn" title="Thông báo"><i class="fas fa-bell"></i></button>
+    <button class="icon-btn" title="Bản đồ"><i class="fas fa-globe"></i></button>
+    <button class="icon-btn" title="Cài đặt"><i class="fas fa-cog"></i></button>
+    <div style="display:flex;align-items:center;gap:10px;border-left:1px solid var(--border);padding-left:16px">
+      <div class="tb-user-info">
+        <div class="tb-user-name">Nguyễn Văn An</div>
+        <div class="tb-user-role">Quản trị viên</div>
+      </div>
+      <div class="tb-avatar" title="Thông tin cá nhân">NA</div>
+    </div>
+  </div>
+</div>
+
+<div id="body">
+  <nav id="nav">
+      <div class="nav-section-label">Tổng quan</div>
+      <a href="/" class="nav-item <%= (path === '/' || path === '/dashboard') ? 'active' : '' %>">
+        <i class="fas fa-home nav-icon"></i> Dashboard
+      </a>
+
+      <div class="nav-section-label">Quản lý dữ liệu</div>
+      <a href="/quan-ly-lo-cay" class="nav-item <%= path === '/quan-ly-lo-cay' ? 'active' : '' %>">
+        <i class="fas fa-tree nav-icon"></i> Quản lý lô cây
+      </a>
+      <a href="/them-du-lieu-lo-cay" class="nav-item <%= path === '/them-du-lieu-lo-cay' ? 'active' : '' %>">
+        <i class="fas fa-plus-circle nav-icon"></i> Thêm dữ liệu lô
+      </a>
+
+      <div class="nav-section-label">Người dùng & Phân quyền</div>
+      <a href="/quan-ly-nguoi-dung" class="nav-item <%= path === '/quan-ly-nguoi-dung' ? 'active' : '' %>">
+        <i class="fas fa-users nav-icon"></i> Quản lý người dùng
+      </a>
+
+      <div class="nav-section-label">Phân tích</div>
+      <a href="/thong-ke" class="nav-item <%= path === '/thong-ke' ? 'active' : '' %>">
+        <i class="fas fa-chart-bar nav-icon"></i> Thống kê
+      </a>
+
+      <div class="nav-logout" style="margin-top: auto; border-top: 1px solid var(--border); padding-top: 12px;">
+        <a href="/logout" class="nav-item">
+          <i class="fas fa-sign-out-alt nav-icon"></i> Đăng xuất
+        </a>
+      </div>
+    </nav>
+
+  <div id="content">
+    <div class="page-header">
+      <div class="page-title-group">
+        <h1 class="page-title">Quản Lý Lô Cây</h1>
+        <p class="page-subtitle">Quản lý và theo dõi toàn bộ lô cây cao su trong trang trại</p>
+      </div>
+      <button class="btn-add"><i class="fas fa-plus"></i>Thêm lô cây</button>
+    </div>
+
+    <div class="toolbar">
+      <div class="filter-bar">
+        <input type="text" id="searchInput" class="search-box" placeholder="🔍 Tìm kiếm lô cây, mã định danh, vị trí...">
+        <select id="ntFilter" class="select-filter">
+          <option value="">Tất cả NT</option>
+          <option value="NT1">NT 1</option>
+          <option value="NT2">NT 2</option>
+          <option value="NT3">NT 3</option>
+        </select>
+        <select id="giongFilter" class="select-filter">
+          <option value="">Tất cả giống</option>
+          <option value="pb255">PB 255</option>
+          <option value="pb260">PB 260</option>
+          <option value="rriv3">RRIV 3</option>
+          <option value="rriv107">RRIV 107</option>
+          <option value="rrivi">RRIV I</option>
+          <option value="rric121">RRIC 121</option>
+        </select>
+        <select id="namFilter" class="select-filter">
+          <option value="">Tất cả năm</option>
+          <option value="2010">2010</option>
+          <option value="2011">2011</option>
+          <option value="2012">2012</option>
+        </select>
+        <select id="phienFilter" class="select-filter">
+          <option value="">Phiên cạo</option>
+          <option value="1">A</option>
+          <option value="2">B</option>
+          <option value="3">C</option>
+          <option value="4">D</option>
+        </select>
+        <select id="phienFilter" class="select-filter">
+          <option value="">Nhịp độ cạo</option>
+          <option value="1">d3</option>
+          <option value="2">d4</option>
+        </select>
+        <select id="phienFilter" class="select-filter">
+          <option value="">Quy hoạch tái canh</option>
+          <option value="1">Năm 2026</option>
+          <option value="2">Năm 2027</option>
+          <option value="3">Năm 2028</option>
+          <option value="4">Năm 2029</option>
+          <option value="5">Năm 2030</option>
+        </select>
+        <select id="nhipdoFilter" class="select-filter">
+          <option value="">Tất cả</option>
+          <option value="active">Hoạt động</option>
+          <option value="inactive">Bảo trì</option>
+        </select>
+      </div>
+      <div class="show-info">
+        <i class="fas fa-info-circle"></i>
+        <span>Hiển thị <strong id="resultCount">0</strong> lô cây</span>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <table border="1">
+  <thead>
+    <tr>
+      <th>Mã lô</th>
+      <th>Tên lô</th>
+      <th>Diện tích</th>
+      <th>Năm trồng</th>
+      <th>Giống</th>
+      <th>Tổ</th>
+      <th>Đội</th>
+      <th>Xã</th>
+      <th>Phiên cạo</th>
+      <th>Nhịp độ cạo</th>
+      <th>Quy hoạch tái canh</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% data.forEach(row => { %>
+      <tr>
+        <td><%= row.malo_cty %></td>
+        <td><%= row.ten_lo %></td>
+        <td><%= row.dien_tich %></td>
+        <td><%= row.nam_trong %></td>
+        <td><%= row.giong %></td>
+        <td><%= row.to_sx %></td>
+        <td><%= row.doi %></td>
+        <td><%= row.xa %></td>
+        <td><%= row.phien_cao %></td>
+        <td><%= row.nhiet_do_cao %></td>
+        <td><%= row.quy_hoach_tai_canh %></td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>
+    </div>
+  </div>
+</div>
+
+<script>
+// FILTER FUNCTION
+const searchInput = document.getElementById('searchInput');
+const filters = {
+  nt: document.getElementById('ntFilter'),
+  giong: document.getElementById('giongFilter'),
+  nam: document.getElementById('namFilter'),
+  phien: document.getElementById('phienFilter'),
+  nhipdo: document.getElementById('nhipdoFilter')
+};
+const rows = document.querySelectorAll('#tableBody tr');
+const resultCountEl = document.getElementById('resultCount');
+
+function applyFilters() {
+  let visible = 0;
+
+  rows.forEach(row => {
+    const text = row.textContent.toLowerCase();
+    const search = searchInput.value.toLowerCase();
+
+    const matchSearch = !search || text.includes(search);
+
+    const matchNT     = !filters.nt.value     || (row.dataset.nt     === filters.nt.value);
+    const matchGiong  = !filters.giong.value  || (row.dataset.giong  === filters.giong.value);
+    const matchNam    = !filters.nam.value    || (row.dataset.nam    === filters.nam.value);
+    const matchPhien  = !filters.phien.value  || (row.dataset.phien  === filters.phien.value);
+    const matchNhipdo = !filters.nhipdo.value || (row.dataset.nhipdo === filters.nhipdo.value);
+
+    const show = matchSearch && matchNT && matchGiong && matchNam && matchPhien && matchNhipdo;
+
+    row.style.display = show ? '' : 'none';
+    if (show) visible++;
+  });
+
+  resultCountEl.textContent = visible;
+}
+
+// Event listeners
+searchInput.addEventListener('input', applyFilters);
+Object.values(filters).forEach(select => {
+  select.addEventListener('change', applyFilters);
+});
+
+// Highlight active filters
+function updateFilterStyle() {
+  Object.values(filters).forEach(s => {
+    s.classList.toggle('filter-active', !!s.value);
+  });
+}
+Object.values(filters).forEach(s => s.addEventListener('change', updateFilterStyle));
+updateFilterStyle();
+
+// Run once on load
+applyFilters();
+
+// Chuyển tab nội dung
+function switchTab(tabId, button) {
+  document.querySelectorAll('.tab-content').forEach(tab => tab.style.display = 'none');
+  document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+
+  document.getElementById(tabId).style.display = 'block';
+  button.classList.add('active');
+}
+
+// Highlight menu sidebar khi click
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', function(e) {
+    // Nếu là logout thì không xử lý thêm
+    if (this.getAttribute('href') === '/logout') return;
+
+    // Xóa active cũ, thêm active mới
+    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+    this.classList.add('active');
+    // Không preventDefault → cho phép chuyển trang thật
+  });
+});
+
+// Tự động highlight menu dựa trên URL hiện tại khi load trang
+window.addEventListener('load', () => {
+  const currentPath = window.location.pathname;
+  document.querySelectorAll('.nav-item').forEach(item => {
+    const href = item.getAttribute('href');
+    if (href && (currentPath === href || (currentPath === '/dashboard' && href === '/'))) {
+      item.classList.add('active');
+    }
+  });
+});
+
+// Logout (nếu cần confirm trước khi redirect)
+function logout() {
+  if (confirm('Bạn có chắc muốn đăng xuất?')) {
+    window.location.href = '/logout';
+  }
+}
+
+// View detail alert
+document.querySelectorAll('.btn-view').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const row = this.closest('tr');
+    const name = row.querySelector('.cell-name').textContent.trim();
+    alert('Chi tiết lô: ' + name);
+  });
+});
+
+// Add button action
+document.querySelector('.btn-add').addEventListener('click', function() {
+  alert('Thêm lô cây mới');
+});
+</script>
+
+</body>
+</html>

@@ -96,28 +96,57 @@ body{font-family:var(--font-b);background:var(--bg);color:var(--text);height:100
 
 /* ── LANGUAGE MENU ── */
 .lang-menu{
-  position:absolute;top:56px;right:40px;width:320px;max-height:500px;
-  background:var(--s1);border:1px solid var(--border);border-radius:var(--r-lg);
-  box-shadow:0 10px 40px rgba(0,0,0,0.4);z-index:1000;overflow:hidden;
-  display:flex;flex-direction:column;
+  position:fixed;
+  top:56px;
+  right:60px;
+  width:280px;
+  background:var(--s1);
+  border:1px solid var(--border);
+  border-radius:var(--r-lg);
+  box-shadow:0 10px 40px rgba(0,0,0,0.4);
+  z-index:10000;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
 }
 .lang-search{
-  padding:12px;border-bottom:1px solid var(--border);
+  padding:12px;
+  border-bottom:1px solid var(--border);
 }
 .lang-search input{
-  width:100%;padding:8px 12px;border:1px solid var(--border);
-  border-radius:var(--r);background:var(--s2);color:var(--text);
-  font-size:12px;font-family:var(--font-b);
+  width:100%;
+  padding:8px 12px;
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  background:var(--s2);
+  color:var(--text);
+  font-size:12px;
+  font-family:var(--font-b);
 }
-.lang-search input::placeholder{color:var(--muted)}
+.lang-search input::placeholder{
+  color:var(--muted);
+}
 .lang-list{
-  overflow-y:auto;max-height:430px;
+  overflow-y:auto;
+  max-height:300px;
 }
 .lang-item{
-  padding:12px 16px;cursor:pointer;display:flex;align-items:center;
-  gap:10px;border-bottom:1px solid rgba(255,255,255,0.03);transition:.2s;
+  padding:12px 16px;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  border-bottom:1px solid rgba(255,255,255,0.03);
+  transition:0.2s;
+  color:var(--muted2);
 }
-.lang-item:hover{background:var(--s2)}
+.lang-item:last-child{
+  border-bottom:none;
+}
+.lang-item:hover{
+  background:var(--s2);
+  color:var(--text);
+}
 .lang-item.active{background:rgba(0,214,143,0.1);border-left:3px solid var(--accent)}
 .lang-flag{font-size:18px;width:24px;flex-shrink:0}
 .lang-name{flex:1}
@@ -699,7 +728,20 @@ td.mono{font-family:monospace;font-size:11px;color:var(--muted)}
       <div class="lang-search">
         <input type="text" placeholder="Tìm ngôn ngữ..." id="langSearch" oninput="filterLanguages()">
       </div>
-      <div class="lang-list" id="langList"></div>
+      <div class="lang-list" id="langList">
+        <div class="lang-item" onclick="changeLang('vi')">
+          <span class="lang-flag">🇻🇳</span>
+          <div class="lang-name">
+            <div class="lang-name-main">Tiếng Việt</div>
+          </div>
+        </div>
+        <div class="lang-item" onclick="changeLang('km')">
+          <span class="lang-flag">🇰🇭</span>
+          <div class="lang-name">
+            <div class="lang-name-main">ខ្មែរ</div>
+          </div>
+        </div>
+      </div>
     </div>
     <button class="icon-btn" title="Cài đặt">
       <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -713,36 +755,34 @@ td.mono{font-family:monospace;font-size:11px;color:var(--muted)}
 </div>
 
 <div id="body">
-  <nav id="nav">
-      <div class="nav-section-label">Tổng quan</div>
-      <a href="/" class="nav-item <%= (path === '/' || path === '/dashboard') ? 'active' : '' %>">
-        <i class="fas fa-home nav-icon"></i> Dashboard
-      </a>
+  <div id="nav">
+    <div class="nav-section-label">CHÍNH</div>
+    <a href="/dashboard" class="nav-item">
+      <i class="fas fa-th nav-icon"></i><span>Dashboard</span>
+    </a>
+    <a href="/quan-ly-lo-cay" class="nav-item active">
+      <i class="fas fa-leaf nav-icon"></i><span>Quản lý lô cây</span>
+    </a>
+    <a href="/them-du-lieu" class="nav-item">
+      <i class="fas fa-circle-notch nav-icon"></i><span>Thêm dữ liệu</span>
+    </a>
 
-      <div class="nav-section-label">Quản lý dữ liệu</div>
-      <a href="/quan-ly-lo-cay" class="nav-item <%= path === '/quan-ly-lo-cay' ? 'active' : '' %>">
-        <i class="fas fa-tree nav-icon"></i> Quản lý lô cây
-      </a>
-      <a href="/them-du-lieu-lo-cay" class="nav-item <%= path === '/them-du-lieu-lo-cay' ? 'active' : '' %>">
-        <i class="fas fa-plus-circle nav-icon"></i> Thêm dữ liệu lô
-      </a>
+    <div class="nav-section-label">PHÂN TÍCH</div>
+    <a href="/thong-ke" class="nav-item">
+      <i class="fas fa-bars nav-icon"></i><span>Thống kê</span>
+    </a>
 
-      <div class="nav-section-label">Người dùng & Phân quyền</div>
-      <a href="/quan-ly-nguoi-dung" class="nav-item <%= path === '/quan-ly-nguoi-dung' ? 'active' : '' %>">
-        <i class="fas fa-users nav-icon"></i> Quản lý người dùng
-      </a>
+    <div class="nav-section-label">HỆ THỐNG</div>
+    <a href="/users" class="nav-item">
+      <i class="fas fa-users nav-icon"></i><span>Quản lý người dùng</span><span class="nav-badge">2</span>
+    </a>
 
-      <div class="nav-section-label">Phân tích</div>
-      <a href="/thong-ke" class="nav-item <%= path === '/thong-ke' ? 'active' : '' %>">
-        <i class="fas fa-chart-bar nav-icon"></i> Thống kê
+    <div class="nav-logout">
+      <a href="/logout" class="nav-item">
+        <i class="fas fa-sign-out-alt nav-icon"></i><span>Đăng xuất</span>
       </a>
-
-      <div class="nav-logout" style="margin-top: auto; border-top: 1px solid var(--border); padding-top: 12px;">
-        <a href="/logout" class="nav-item">
-          <i class="fas fa-sign-out-alt nav-icon"></i> Đăng xuất
-        </a>
-      </div>
-    </nav>
+    </div>
+  </div>
 
 <!-- CONTENT -->
 <div id="content">
@@ -806,7 +846,7 @@ td.mono{font-family:monospace;font-size:11px;color:var(--muted)}
       <span class="map-label" data-lang="color-by">Tô màu theo:</span>
       <button class="map-chip"    id="mview-giong" onclick="switchMapView('giong',this)">Giống cây</button>
       <button class="map-chip"    id="mview-nam"   onclick="switchMapView('nam',this)" data-lang="plant-year">Năm trồng</button>
-      <button class="map-chip on" id="mview-nt"    onclick="switchMapView('nt',this)" data-lang="farm-owner">Đội</button>
+      <button class="map-chip on" id="mview-nt"    onclick="switchMapView('nt',this)" data-lang="farm-owner">Nông trường</button>
       <div style="margin-left:auto;display:flex;gap:6px;align-items:center">
         <span id="selCountTop" style="font-size:11px;color:var(--muted)">425 lô hiển thị</span>
         <button class="map-chip" onclick="goHome()">⌂ <span data-lang="all-area">Toàn vùng</span></button>
@@ -815,7 +855,7 @@ td.mono{font-family:monospace;font-size:11px;color:var(--muted)}
     </div>
     <!-- Row 2: filters with dropdowns -->
     <div class="map-topbar" style="background:rgba(15,23,41,0.6);padding:7px 14px;gap:12px;display:flex;align-items:center">
-      <span class="map-label" style="flex-shrink:0" data-lang="farm-owner">Đội:</span>
+      <span class="map-label" style="flex-shrink:0" data-lang="farm-owner">Nông trường:</span>
       <select id="filter-nt" style="
         background:var(--s2);border:1px solid var(--border);border-radius:var(--r);
         color:var(--muted2);padding:6px 10px;font-size:11px;font-family:var(--font-b);
@@ -2485,11 +2525,11 @@ const translations = {
     'all-teams': 'Tất cả đội'
   },
   'km': {
-    'dashboard': 'แดชบอร์ด',
-    'lo-cay': 'จัดการฟาร์ม',
-    'them-du-lieu': 'เพิ่มข้อมูล',
-    'thong-ke': 'สถิติ',
-    'nguoi-dung': 'จัดการผู้ใช้',
+    'dashboard': '[KM] ផ្ទាំងគ្រាប់បង្ហាញ',
+    'lo-cay': '[KM] ផ្ទាំងគ្រាប់បង្ហាញ',
+    'them-du-lieu': '[KM] ផ្ទាំងគ្រាប់បង្ហាញ',
+    'thong-ke': '[KM] ផ្ទាំងគ្រាប់បង្ហាញ',
+    'nguoi-dung': '[KM] ផ្ទាំងគ្រាប់បង្ហាញ',
     'search': 'ค้นหาตามรหัส ทีม ชนิด...',
     'tong-cty': 'สำนักงานใหญ่',
     'online': 'ออนไลน์',
@@ -2575,7 +2615,15 @@ const translations = {
 let currentLang = localStorage.getItem('appLang') || 'vi';
 
 function initLanguageMenu() {
+  console.log('initLanguageMenu called');
   const langList = document.getElementById('langList');
+  console.log('langList:', langList);
+  
+  if (!langList) {
+    console.error('langList not found!');
+    return;
+  }
+  
   langList.innerHTML = Object.entries(languages).map(([code, data]) => `
     <div class="lang-item ${code === currentLang ? 'active' : ''}" onclick="changeLang('${code}')">
       <span class="lang-flag">${data.flag}</span>
@@ -2584,11 +2632,15 @@ function initLanguageMenu() {
       </div>
     </div>
   `).join('');
+  
+  console.log('Language menu built');
 }
 
 function toggleLanguageMenu() {
   const menu = document.getElementById('langMenu');
-  menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+  const isHidden = menu.style.display === 'none';
+  menu.style.display = isHidden ? 'block' : 'none';
+  console.log('Menu toggled, display:', menu.style.display);
 }
 
 function filterLanguages() {
@@ -2606,7 +2658,7 @@ function changeLang(langCode) {
   
   console.log('Changing language to:', langCode);
   
-  // Update active language in menu - bỏ active khỏi tất cả
+  // Update active language in menu
   const langItems = document.querySelectorAll('.lang-item');
   langItems.forEach(item => item.classList.remove('active'));
   
@@ -2617,21 +2669,13 @@ function changeLang(langCode) {
     }
   });
   
-  // Apply translations - ĐÂY LÀ CÁI QUAN TRỌNG!
+  // Apply translations
   console.log('Applying translations...');
   applyTranslations();
-  console.log('Translations applied');
   
-  // Đóng menu
-  const langMenu = document.getElementById('langMenu');
-  if (langMenu) {
-    langMenu.style.display = 'none';
-  }
-  
-  // Show toast message
-  if (languages[langCode]) {
-    showToast(`🌍 Đã chuyển sang ${languages[langCode].name}`, '✅');
-  }
+  // Đóng menu sau khi chọn
+  const menu = document.getElementById('langMenu');
+  menu.style.display = 'none';
 }
 
 function t(key) {
@@ -2645,10 +2689,14 @@ function t(key) {
 }
 
 function applyTranslations() {
+  console.log('applyTranslations called, currentLang:', currentLang);
+  
   // Update navigation items
   document.querySelectorAll('[data-lang]').forEach(el => {
     const key = el.getAttribute('data-lang');
-    el.textContent = t(key);
+    const translated = t(key);
+    console.log(`Translating ${key} to ${translated}`);
+    el.textContent = translated;
   });
   
   // Update placeholders
@@ -2674,6 +2722,8 @@ function applyTranslations() {
   if (langBtn) {
     langBtn.title = t('language');
   }
+  
+  console.log('applyTranslations completed');
 }
 
 // Additional translations for common hardcoded texts
@@ -2727,45 +2777,7 @@ function initializeLanguageSystem() {
     console.error('Error initializing language system:', error);
   }
 }
-// Chuyển tab nội dung
-function switchTab(tabId, button) {
-  document.querySelectorAll('.tab-content').forEach(tab => tab.style.display = 'none');
-  document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
 
-  document.getElementById(tabId).style.display = 'block';
-  button.classList.add('active');
-}
-
-// Highlight menu sidebar khi click
-document.querySelectorAll('.nav-item').forEach(item => {
-  item.addEventListener('click', function(e) {
-    // Nếu là logout thì không xử lý thêm
-    if (this.getAttribute('href') === '/logout') return;
-
-    // Xóa active cũ, thêm active mới
-    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-    this.classList.add('active');
-    // Không preventDefault → cho phép chuyển trang thật
-  });
-});
-
-// Tự động highlight menu dựa trên URL hiện tại khi load trang
-window.addEventListener('load', () => {
-  const currentPath = window.location.pathname;
-  document.querySelectorAll('.nav-item').forEach(item => {
-    const href = item.getAttribute('href');
-    if (href && (currentPath === href || (currentPath === '/dashboard' && href === '/'))) {
-      item.classList.add('active');
-    }
-  });
-});
-
-// Logout (nếu cần confirm trước khi redirect)
-function logout() {
-  if (confirm('Bạn có chắc muốn đăng xuất?')) {
-    window.location.href = '/logout';
-  }
-}
 // Run initialization
 if (document.readyState === 'loading') {
   // DOM is still loading

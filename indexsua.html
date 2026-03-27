@@ -806,7 +806,10 @@ td.mono{font-family:monospace;font-size:11px;color:var(--muted)}
       <span class="map-label" data-lang="color-by">Tô màu theo:</span>
       <button class="map-chip"    id="mview-giong" onclick="switchMapView('giong',this)">Giống cây</button>
       <button class="map-chip"    id="mview-nam"   onclick="switchMapView('nam',this)" data-lang="plant-year">Năm trồng</button>
-      <button class="map-chip on" id="mview-nt"    onclick="switchMapView('nt',this)" data-lang="farm-owner">Đội</button>
+      <button class="map-chip on" id="mview-nt"    onclick="switchMapView('nt',this)" data-lang="farm-owner">Nông trường</button>
+      <button class="map-chip" id="mview-phien_cao" onclick="switchMapView('phien_cao', this)">Phiên cạo</button>
+      <button class="map-chip" id="mview-nhiet_do_cao" onclick="switchMapView('nhiet_do_cao', this)">Nhịp độ cạo</button>
+      <button class="map-chip" id="mview-quy_hoach_tai_canh" onclick="switchMapView('quy_hoach_tai_canh', this)">QH tái canh</button>
       <div style="margin-left:auto;display:flex;gap:6px;align-items:center">
         <span id="selCountTop" style="font-size:11px;color:var(--muted)">425 lô hiển thị</span>
         <button class="map-chip" onclick="goHome()">⌂ <span data-lang="all-area">Toàn vùng</span></button>
@@ -815,7 +818,7 @@ td.mono{font-family:monospace;font-size:11px;color:var(--muted)}
     </div>
     <!-- Row 2: filters with dropdowns -->
     <div class="map-topbar" style="background:rgba(15,23,41,0.6);padding:7px 14px;gap:12px;display:flex;align-items:center">
-      <span class="map-label" style="flex-shrink:0" data-lang="farm-owner">Đội:</span>
+      <span class="map-label" style="flex-shrink:0" data-lang="farm-owner">Nông trường:</span>
       <select id="filter-nt" style="
         background:var(--s2);border:1px solid var(--border);border-radius:var(--r);
         color:var(--muted2);padding:6px 10px;font-size:11px;font-family:var(--font-b);
@@ -841,6 +844,38 @@ td.mono{font-family:monospace;font-size:11px;color:var(--muted)}
       " onchange="updateMapFilters('giong', this)">
         <option value="all" data-lang="all-species">Tất cả</option>
       </select>
+    <div class="map-sep"></div>
+
+        <span class="map-label" style="flex-shrink:0">Phiên cạo:</span>
+        <select id="filter-phien_cao"
+        style="background:var(--s2);border:1px solid var(--border);border-radius:var(--r);
+        color:var(--muted2);padding:6px 10px;font-size:11px;font-family:var(--font-b);
+        cursor:pointer;transition:.2s;max-width:120px;"
+        onchange="updateMapFilters('phien_cao', this)">
+        <option value="all">Tất cả</option>
+        </select>
+
+        <div class="map-sep"></div>
+
+        <span class="map-label" style="flex-shrink:0">Nhịp độ cạo:</span>
+        <select id="filter-Nhip_do_cao"
+        style="background:var(--s2);border:1px solid var(--border);border-radius:var(--r);
+        color:var(--muted2);padding:6px 10px;font-size:11px;font-family:var(--font-b);
+        cursor:pointer;transition:.2s;max-width:120px;"
+        onchange="updateMapFilters('nhip_do_cao', this)">
+        <option value="all">Tất cả</option>
+        </select>
+
+        <div class="map-sep"></div>
+
+        <span class="map-label" style="flex-shrink:0">Quy hoạch tái canh:</span>
+        <select id="filter-quy_hoach_tai_canh"
+        style="background:var(--s2);border:1px solid var(--border);border-radius:var(--r);
+        color:var(--muted2);padding:6px 10px;font-size:11px;font-family:var(--font-b);
+        cursor:pointer;transition:.2s;max-width:120px;"
+        onchange="updateMapFilters('quy_hoach_tai_canh', this)">
+        <option value="all">Tất cả</option>
+        </select>
     </div>
 
     <!-- Map canvas + overlays -->
