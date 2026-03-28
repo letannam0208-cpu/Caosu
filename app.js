@@ -126,7 +126,7 @@ app.get('/api/lo-cao-su', async (req, res) => {
   try {
     const { doi, nam_trong, giong } = req.query;
 
-    let whereClause = 'WHERE l.geometry IS NOT NULL';
+    let whereClause = 'WHERE l.geometry_old IS NOT NULL';
     const params = [];
     let paramIndex = 1;
 
@@ -150,7 +150,7 @@ app.get('/api/lo-cao-su', async (req, res) => {
         dt.dien_tich_map,
         kh.che_do_cao, kh.nam_mc, kh.tinh_trang_mc,
         htc.cay_cao,
-        ST_AsGeoJSON(l.geometry::geometry) as geometry
+        ST_AsGeoJSON(ST_Transform(l.geometry_old::geometry, 4326)) as geometry
       FROM lo l
       LEFT JOIN don_vi dv ON l.id_don_vi = dv.id_don_vi
       LEFT JOIN dien_tich dt ON l.id_lo = dt.id_lo
@@ -159,20 +159,26 @@ app.get('/api/lo-cao-su', async (req, res) => {
       ${whereClause}
     `, params);
 
-    const features = result.rows.map(row => ({
-      type: "Feature",
-      geometry: row.geometry ? JSON.parse(row.geometry) : null,
-      properties: {
-        id_lo: row.id_lo,
-        ten_lo: row.ten_lo,
-        giong: row.giong,
-        nam_trong: row.nam_trong,
-        doi: row.doi,
-        dien_tich_map: row.dien_tich_map,
-        che_do_cao: row.che_do_cao,
-        cay_cao: row.cay_cao
-      }
-    }));
+    console.log(`✅ /api/lo-cao-su thành công - Trả về ${result.rows.length} rows`);
+
+    const features = result.rows
+      .filter(row => row.geometry)   // chỉ lấy những row có geometry
+      .map(row => ({
+        type: "Feature",
+        geometry: JSON.parse(row.geometry),
+        properties: {
+          id_lo: row.id_lo,
+          ten_lo: row.ten_lo,
+          giong: row.giong,
+          nam_trong: row.nam_trong,
+          doi: row.doi,
+          dien_tich_map: row.dien_tich_map,
+          che_do_cao: row.che_do_cao,
+          cay_cao: row.cay_cao
+        }
+      }));
+
+    console.log(`✅ Đã tạo ${features.length} features GeoJSON`);
 
     res.json({
       type: "FeatureCollection",
@@ -180,8 +186,13 @@ app.get('/api/lo-cao-su', async (req, res) => {
     });
 
   } catch (err) {
-    console.error('Lỗi /api/lo-cao-su:', err.message);
-    res.status(500).json({ success: false, error: 'Lỗi lấy dữ liệu bản đồ' });
+    console.error('❌ Lỗi /api/lo-cao-su:', err.message);
+    console.error('Stack:', err.stack);   // thêm stack để xem chi tiết
+    res.status(500).json({ 
+      success: false, 
+      error: 'Lỗi lấy dữ liệu bản đồ', 
+      details: err.message 
+    });
   }
 });
 // ====================== API RANH GIỚI (BOUNDARY) ======================
@@ -189,7 +200,7 @@ app.get('/api/boundary', async (req, res) => {
   try {
     const { doi } = req.query;
 
-    let whereClause = 'WHERE l.geometry IS NOT NULL';
+    let whereClause = 'WHERE l.geometry_old IS NOT NULL';
     const params = [];
     let paramIndex = 1;
 
@@ -203,7 +214,7 @@ app.get('/api/boundary', async (req, res) => {
         dv.doi,
         dv.du_an,
         dv.khu_vuc,
-        ST_AsGeoJSON(ST_Union(l.geometry)) as geometry
+        ST_AsGeoJSON(ST_Union(l.geometry_old::geometry)) as geometry
       FROM lo l
       LEFT JOIN don_vi dv ON l.id_don_vi = dv.id_don_vi
       ${whereClause}
