@@ -126,7 +126,7 @@ app.get('/api/lo-cao-su', async (req, res) => {
   try {
     const { doi, nam_trong, giong } = req.query;
 
-    let whereClause = 'WHERE l.geometry_old IS NOT NULL';
+    let whereClause = 'WHERE l.geometry IS NOT NULL';
     const params = [];
     let paramIndex = 1;
 
@@ -150,7 +150,7 @@ app.get('/api/lo-cao-su', async (req, res) => {
         dt.dien_tich_map,
         kh.che_do_cao, kh.nam_mc, kh.tinh_trang_mc,
         htc.cay_cao,
-        ST_AsGeoJSON(ST_Transform(l.geometry_old::geometry, 4326)) as geometry
+        ST_AsGeoJSON(ST_Transform(l.geometry::geometry, 4326)) as geometry
       FROM lo l
       LEFT JOIN don_vi dv ON l.id_don_vi = dv.id_don_vi
       LEFT JOIN dien_tich dt ON l.id_lo = dt.id_lo
@@ -200,7 +200,7 @@ app.get('/api/boundary', async (req, res) => {
   try {
     const { doi } = req.query;
 
-    let whereClause = 'WHERE l.geometry_old IS NOT NULL';
+    let whereClause = 'WHERE l.geometry IS NOT NULL';
     const params = [];
     let paramIndex = 1;
 
@@ -214,7 +214,7 @@ app.get('/api/boundary', async (req, res) => {
         dv.doi,
         dv.du_an,
         dv.khu_vuc,
-        ST_AsGeoJSON(ST_Union(l.geometry_old::geometry)) as geometry
+        ST_AsGeoJSON(ST_Union(l.geometry::geometry)) as geometry
       FROM lo l
       LEFT JOIN don_vi dv ON l.id_don_vi = dv.id_don_vi
       ${whereClause}
