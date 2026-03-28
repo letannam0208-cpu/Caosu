@@ -150,7 +150,7 @@ app.get('/api/lo-cao-su', async (req, res) => {
         dt.dien_tich_map,
         kh.che_do_cao, kh.nam_mc, kh.tinh_trang_mc,
         htc.cay_cao,
-        ST_AsGeoJSON(l.geometry) as geometry
+        ST_AsGeoJSON(ST_Transform(l.geometry, 4326)) as geometry
       FROM lo l
       LEFT JOIN don_vi dv ON l.id_don_vi = dv.id_don_vi
       LEFT JOIN dien_tich dt ON l.id_lo = dt.id_lo
