@@ -184,7 +184,56 @@ app.get('/api/lo-cao-su', async (req, res) => {
     res.status(500).json({ success: false, error: 'Lỗi lấy dữ liệu bản đồ' });
   }
 });
+// ====================== API RANH GIỚI (BOUNDARY) ======================
+app.get('/api/boundary', async (req, res) => {
+  try {
+    const { doi } = req.query;
 
+    let whereClause = 'WHERE l.geometry IS NOT NULL';
+    const params = [];
+    let paramIndex = 1;
+
+    if (doi) {
+      params.push(doi);
+      whereClause += ` AND dv.doi = $${paramIndex++}`;
+    }
+
+    const result = await pool.query(`
+      SELECT 
+        dv.doi,
+        dv.du_an,
+        dv.khu_vuc,
+        ST_AsGeoJSON(ST_Union(l.geometry)) as geometry
+      FROM lo l
+      LEFT JOIN don_vi dv ON l.id_don_vi = dv.id_don_vi
+      ${whereClause}
+      GROUP BY dv.doi, dv.du_an, dv.khu_vuc
+      ORDER BY dv.doi
+    `, params);
+
+    const features = result.rows
+      .filter(row => row.geometry)
+      .map(row => ({
+        type: "Feature",
+        geometry: JSON.parse(row.geometry),
+        properties: {
+          doi: row.doi || 'Toàn vùng',
+          du_an: row.du_an,
+          khu_vuc: row.khu_vuc,
+          type: 'boundary'
+        }
+      }));
+
+    res.json({
+      type: "FeatureCollection",
+      features: features
+    });
+
+  } catch (err) {
+    console.error('Lỗi /api/boundary:', err.message);
+    res.status(500).json({ success: false, error: 'Lỗi lấy ranh giới bản đồ' });
+  }
+});
 // ====================== ROUTES ======================
 app.get('/', (req, res) => {
   res.locals.path = '/';

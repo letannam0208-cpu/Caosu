@@ -1180,22 +1180,24 @@ td.mono{font-family:monospace;font-size:11px;color:var(--muted)}
 </div>
 
 <script>
-// Biến toàn cục
-let dashMap, CAOSU_GEOJSON = null;
-let mapViewMode = 'doi';           // mặc định tô màu theo Đội
+// ==================== BIẾN TOÀN CỤC ====================
+let dashMap;
+let CAOSU_GEOJSON = null;
+let mapViewMode = 'doi';           // mặc định tô màu theo đội
 let selectedIdx = new Set();
 let lotLayers = [], backgroundLotLayers = [], labelLayers = [];
-let lotsVis = true, labelsVis = true, boundaryVis = true;
+let boundaryLayer = null;
+let boundaryVis = true;
 
-// Palette tô màu theo Đội (bạn có thể chỉnh)
+// Palette tô màu theo đội (có thể mở rộng)
 const doiPalette = {
   'NT 1': '#00d68f',
   'NT 2': '#00b4ff',
   'NT 3': '#f59e0b',
-  // thêm các đội khác nếu có
+  'default': '#5a6a8a'
 };
 
-// ==================== LOAD DATA TỪ API ====================
+// ==================== LOAD DỮ LIỆU BẢN ĐỒ ====================
 async function loadMapData(filters = {}) {
   try {
     const params = new URLSearchParams(filters);
@@ -1205,25 +1207,53 @@ async function loadMapData(filters = {}) {
     renderRealLots();
   } catch (e) {
     console.error("Lỗi load GeoJSON:", e);
-    showToast("Không thể tải dữ liệu bản đồ", "⚠️");
+    showToast("Không thể tải dữ liệu lô cây", "⚠️");
   }
 }
 
-async function loadDashboardStats() {
+// ==================== LOAD & HIỂN THỊ RANH GIỚI ====================
+async function loadAndShowBoundary(selectedDoi = null) {
   try {
-    const res = await fetch('/api/dashboard-stats');
-    const { success, data } = await res.json();
-    if (success) {
-      // Cập nhật KPI
-      document.querySelectorAll('.kpi-value')[0].innerHTML = `${data.tong_lo_cay} <span>lô</span>`;
-      document.querySelectorAll('.kpi-value')[1].innerHTML = `${parseFloat(data.tong_dien_tich).toFixed(3)} <span>ha</span>`;
-      document.querySelectorAll('.kpi-value')[2].innerHTML = `${data.tong_giong} <span>giống</span>`;
-      document.querySelectorAll('.kpi-value')[3].innerHTML = `${data.tong_doi} <span>Đội</span>`;
+    if (boundaryLayer) {
+      dashMap.removeLayer(boundaryLayer);
+      boundaryLayer = null;
     }
-  } catch (e) { console.error(e); }
+
+    const url = selectedDoi 
+      ? `/api/boundary?doi=${encodeURIComponent(selectedDoi)}` 
+      : '/api/boundary';
+
+    const res = await fetch(url);
+    const data = await res.json();
+
+    if (!data.features || data.features.length === 0) return;
+
+    boundaryLayer = L.geoJSON(data, {
+      style: {
+        color: "#ffffff",      // viền trắng nổi bật
+        weight: 4,
+        opacity: 0.95,
+        fillColor: "#ffffff",
+        fillOpacity: 0.06,
+        dashArray: "6, 3"
+      },
+      onEachFeature: function(feature, layer) {
+        const name = feature.properties.doi || 'Toàn vùng';
+        layer.bindTooltip(`<strong>Ranh giới ${name}</strong>`, {
+          permanent: false,
+          direction: 'center',
+          className: 'boundary-tooltip'
+        });
+      }
+    }).addTo(dashMap);
+
+    boundaryLayer.bringToBack();   // đưa ranh giới xuống dưới lớp lô
+  } catch (e) {
+    console.error("Lỗi tải ranh giới:", e);
+  }
 }
 
-// ==================== RENDER BẢN ĐỒ (đã sửa) ====================
+// ==================== RENDER LÔ CÂY ====================
 function renderRealLots() {
   if (!CAOSU_GEOJSON || !dashMap) return;
 
@@ -1231,23 +1261,33 @@ function renderRealLots() {
   lotLayers.forEach(o => dashMap.removeLayer(o.layer));
   backgroundLotLayers.forEach(o => dashMap.removeLayer(o.layer));
   labelLayers.forEach(l => dashMap.removeLayer(l));
-  lotLayers = []; backgroundLotLayers = []; labelLayers = [];
+
+  lotLayers = []; 
+  backgroundLotLayers = []; 
+  labelLayers = [];
 
   let count = 0;
 
-  CAOSU_GEOJSON.features.forEach((feat, idx) => {
+  CAOSU_GEOJSON.features.forEach((feat) => {
     const p = feat.properties || {};
-    const col = getLotColorReal(p, mapViewMode);
+    const col = doiPalette[p.doi] || doiPalette.default;
 
-    // Background layer
-    const bgLayer = L.geoJSON(feat, { style: { color: '#d4dce833', weight: 0.5, fillColor: '#d4dce8', fillOpacity: 0.25 }, interactive: false });
-    bgLayer.addTo(dashMap);
+    // Background nhẹ
+    const bgLayer = L.geoJSON(feat, {
+      style: { color: '#d4dce833', weight: 0.5, fillOpacity: 0.15 },
+      interactive: false
+    }).addTo(dashMap);
     backgroundLotLayers.push({layer: bgLayer});
 
-    // Main lot layer
+    // Layer chính
     if (lotsVis) {
       const layer = L.geoJSON(feat, {
-        style: { color: col, weight: 1, fillColor: col, fillOpacity: 0.52 }
+        style: { 
+          color: col, 
+          weight: 1.5, 
+          fillColor: col, 
+          fillOpacity: 0.55 
+        }
       });
 
       layer.bindPopup(`
@@ -1265,9 +1305,8 @@ function renderRealLots() {
       `);
 
       layer.addTo(dashMap);
-      lotLayers.push({layer, p, idx});
+      lotLayers.push({layer, p});
     }
-
     count++;
   });
 
@@ -1275,18 +1314,50 @@ function renderRealLots() {
   renderMapLegend();
 }
 
-function getLotColorReal(p, mode) {
-  if (mode === 'doi') return doiPalette[p.doi] || '#5a6a8a';
-  if (mode === 'giong') return giongPalette[p.giong] || '#5a6a8a'; // bạn tự định nghĩa giongPalette
-  if (mode === 'nam') return namPalette[p.nam_trong] || '#5a6a8a';
-  return '#00d68f';
+// ==================== TOGGLE RANH GIỚI ====================
+function toggleBoundary(btn) {
+  boundaryVis = !boundaryVis;
+
+  if (boundaryVis) {
+    btn.classList.add('active');
+    loadAndShowBoundary(); 
+  } else {
+    btn.classList.remove('active');
+    if (boundaryLayer) {
+      dashMap.removeLayer(boundaryLayer);
+      boundaryLayer = null;
+    }
+  }
 }
 
-// ==================== KHỞI TẠO ====================
-async function initDashMap() {
-  dashMap = L.map('dashMap', { zoomControl: false }).setView([12.524, 105.452], 12);
+// ==================== CẬP NHẬT FILTER ====================
+function updateMapFilters(type, selectElement) {
+  // Code filter cũ của bạn (nếu có) giữ nguyên...
+  // Ví dụ:
+  const filters = {};
+  if (document.getElementById('filter-nt').value !== 'all') 
+    filters.doi = document.getElementById('filter-nt').value;
 
-  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19 }).addTo(dashMap);
+  loadMapData(filters);
+
+  // Tự động cập nhật ranh giới khi đổi đội
+  if (boundaryVis && type === 'NT') {
+    const selectedDoi = selectElement.value === 'all' ? null : selectElement.value;
+    loadAndShowBoundary(selectedDoi);
+  }
+}
+
+// ==================== KHỞI TẠO BẢN ĐỒ ====================
+async function initDashMap() {
+  dashMap = L.map('dashMap', { 
+    zoomControl: false,
+    attributionControl: false 
+  }).setView([12.524, 105.452], 12);   // Kampong Thom
+
+  // Tile layer ảnh vệ tinh
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+    maxZoom: 19
+  }).addTo(dashMap);
 
   // Load dữ liệu
   await Promise.all([
@@ -1294,13 +1365,26 @@ async function initDashMap() {
     loadDashboardStats()
   ]);
 
-  // Build filter dropdowns
-  buildFilterUI();
+  buildFilterUI();   // hàm build dropdown của bạn (nếu có)
+
+  // Hiển thị ranh giới ngay khi load
+  setTimeout(() => {
+    loadAndShowBoundary();
+  }, 600);
 }
 
-// Gọi khi load trang
+// ==================== CÁC HÀM HỖ TRỢ KHÁC (giữ nguyên hoặc bổ sung) ====================
+function showToast(msg, icon = '✅') {
+  const toast = document.getElementById('toast');
+  document.getElementById('toastIcon').innerHTML = icon;
+  document.getElementById('toastMsg').innerHTML = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+// Gọi khi trang load
 window.addEventListener('load', () => {
-  initializeLanguageSystem();
+  initializeLanguageSystem();   // nếu bạn có hàm này
   setTimeout(initDashMap, 300);
 });
 </script>
