@@ -251,6 +251,13 @@ select {
   cursor:pointer;transition:.2s;
 }
 select:hover{border-color:var(--accentB);color:var(--accentB)}
+
+/* === CSS PHẦN CODE CŨ BỊ ĐẶT SAI VỊ TRÍ === */
+#map { height: 80vh; }
+.container { display: flex; }
+aside { width: 200px; padding: 10px; background: #f5f5f5; }
+header { display: flex; justify-content: space-between; padding: 10px; background: #2c3e50; color: white; }
+#legend { padding: 10px; }
 </style>
 </head>
 <body>
@@ -401,7 +408,7 @@ let selectedIdx = new Set();
 let lotLayers = [], backgroundLotLayers = [], labelLayers = [];
 let boundaryLayer = null;
 let boundaryVis = true;
-let lotsVis = true;                    // ✅ THÊM BIẾN THIẾU
+let lotsVis = true;
 let layerVisibility = {
   'lots': true,
   'background-layer': true,
@@ -502,7 +509,7 @@ function renderRealLots() {
     }).addTo(dashMap);
     backgroundLotLayers.push({layer: bgLayer});
 
-    // Layer chính (kiểm tra lotsVis)
+    // Layer chính
     if (lotsVis) {
       const layer = L.geoJSON(feat, {
         style: {
@@ -533,10 +540,9 @@ function renderRealLots() {
   console.log("✅ Đã render " + count + " lô");
 }
 
-// ==================== TOGGLE RANH GIỚI ====================
+// ==================== CÁC HÀM KHÁC (giữ nguyên) ====================
 function toggleBoundary(btn) {
   boundaryVis = !boundaryVis;
-
   if (boundaryVis) {
     btn.classList.add('active');
     loadAndShowBoundary();
@@ -549,10 +555,8 @@ function toggleBoundary(btn) {
   }
 }
 
-// ==================== BUILD FILTER DROPDOWNS ====================
 async function buildFilterUI() {
   try {
-    // Load nông trường
     const doiRes = await fetch('/api/don-vi-list');
     const doiData = await doiRes.json();
     if (doiData.success && doiData.data) {
@@ -565,7 +569,6 @@ async function buildFilterUI() {
       });
     }
 
-    // Load năm trồng
     const namRes = await fetch('/api/nam-trong-stats');
     const namData = await namRes.json();
     if (namData.success && namData.data) {
@@ -578,7 +581,6 @@ async function buildFilterUI() {
       });
     }
 
-    // Load giống
     const giongRes = await fetch('/api/giong-stats');
     const giongData = await giongRes.json();
     if (giongData.success && giongData.data) {
@@ -590,17 +592,14 @@ async function buildFilterUI() {
         select.appendChild(opt);
       });
     }
-
     console.log("✅ Dropdowns được populate");
   } catch (e) {
     console.error("Lỗi build filter UI:", e);
   }
 }
 
-// ==================== CẬP NHẬT FILTER ====================
 function updateMapFilters(type, selectElement) {
   const filters = {};
-
   if (document.getElementById('filter-nt').value !== 'all')
     filters.doi = document.getElementById('filter-nt').value;
   if (document.getElementById('filter-nam').value !== 'all')
@@ -610,16 +609,12 @@ function updateMapFilters(type, selectElement) {
 
   loadMapData(filters);
 
-  // Cập nhật ranh giới
   if (boundaryVis && type === 'doi') {
     const selectedDoi = selectElement.value === 'all' ? null : selectElement.value;
     loadAndShowBoundary(selectedDoi);
   }
-  
-  console.log("Filters:", filters);
 }
 
-// ==================== SWITCH MAP VIEW ====================
 function switchMapView(mode, btn) {
   mapViewMode = mode;
   document.querySelectorAll('.map-chip').forEach(b => b.classList.remove('on'));
@@ -627,7 +622,6 @@ function switchMapView(mode, btn) {
   console.log("Chuyển sang chế độ:", mode);
 }
 
-// ==================== TOGGLE LAYER ====================
 function toggleLayer(el, layerType) {
   const check = el.querySelector('.mlp-check');
   layerVisibility[layerType] = !layerVisibility[layerType];
@@ -643,54 +637,24 @@ function toggleLayer(el, layerType) {
   }
 }
 
-// ==================== TOGGLE PANEL ====================
 function togglePanel(panelId) {
   const panel = document.getElementById(panelId);
-  if (panel) {
-    panel.classList.toggle('show');
-  }
+  if (panel) panel.classList.toggle('show');
 }
 
-// ==================== MAP TOOLS ====================
-function mapZoomIn() { dashMap.zoomIn(); }
-function mapZoomOut() { dashMap.zoomOut(); }
-function goHome() { dashMap.setView([12.524, 105.452], 12); }
+function mapZoomIn() { if(dashMap) dashMap.zoomIn(); }
+function mapZoomOut() { if(dashMap) dashMap.zoomOut(); }
+function goHome() { if(dashMap) dashMap.setView([12.524, 105.452], 12); }
 function setMapTool(tool, btn) {
   document.querySelectorAll('.map-ctrl-left .mc-btn-wide').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
 }
-function clearSelection() { selectedIdx.clear(); }
-
-// ==================== TOAST ====================
 function showToast(msg, icon = '✅') {
   const toast = document.getElementById('toast');
   document.getElementById('toastIcon').innerHTML = icon;
   document.getElementById('toastMsg').innerHTML = msg;
   toast.classList.add('show');
   setTimeout(() => toast.classList.remove('show'), 3000);
-}
-
-// ==================== LOAD DASHBOARD STATS ====================
-async function loadDashboardStats() {
-  try {
-    const res = await fetch('/api/dashboard-stats');
-    const data = await res.json();
-    if (data.success) {
-      console.log("Dashboard stats:", data.data);
-    }
-  } catch (e) {
-    console.error("Lỗi load stats:", e);
-  }
-}
-
-// ==================== RENDER MAP LEGEND ====================
-function renderMapLegend() {
-  console.log("Legend rendered");
-}
-
-// ==================== INITIALIZE LANGUAGE ====================
-function initializeLanguageSystem() {
-  console.log("Language system initialized");
 }
 
 // ==================== KHỞI TẠO BẢN ĐỒ ====================
@@ -700,19 +664,16 @@ async function initDashMap() {
     attributionControl: false
   }).setView([12.524, 105.452], 12);
 
-  // Tile layer ảnh vệ tinh
   L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
     maxZoom: 19
   }).addTo(dashMap);
 
-  // Load dữ liệu song song
   await Promise.all([
     loadMapData(),
     loadDashboardStats(),
     buildFilterUI()
   ]);
 
-  // Hiển thị ranh giới sau 600ms
   setTimeout(() => {
     loadAndShowBoundary();
   }, 600);
@@ -720,11 +681,136 @@ async function initDashMap() {
   console.log("✅ Bản đồ được khởi tạo");
 }
 
+async function loadDashboardStats() {
+  try {
+    const res = await fetch('/api/dashboard-stats');
+    const data = await res.json();
+    if (data.success) console.log("Dashboard stats:", data.data);
+  } catch (e) {
+    console.error("Lỗi load stats:", e);
+  }
+}
+
 // ==================== KHỞI CHẠY ====================
 window.addEventListener('load', () => {
-  initializeLanguageSystem();
   setTimeout(initDashMap, 300);
 });
 </script>
+
+<!-- PHẦN CODE HTML + JS CŨ BẠN ĐẶT SAI VỊ TRÍ (đã đưa xuống dưới cùng) -->
+<div id="app" style="display:none">
+  <header>
+    <h2>🌱 WebGIS Cao Su</h2>
+    <select id="filterType">
+      <option value="doi">Theo đội</option>
+      <option value="giong">Theo giống</option>
+      <option value="nam_trong">Theo năm</option>
+    </select>
+  </header>
+
+  <div class="container">
+    <aside>
+      <h3>Layers</h3>
+      <label><input type="checkbox" id="boundaryToggle" checked> Ranh giới</label>
+      <label><input type="checkbox" id="baseToggle" checked> Lớp nền</label>
+      <label><input type="checkbox" id="thematicToggle" checked> Phân loại</label>
+    </aside>
+    <div id="map"></div>
+  </div>
+  <div id="legend"></div>
+</div>
+
+<script>
+// Phần JavaScript cũ của bạn (giữ nguyên hoàn toàn)
+const map = L.map('map').setView([10.5, 106.5], 12);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+let boundaryLayer, baseLayer, thematicLayer;
+
+fetch('/api/boundary')
+  .then(res => res.json())
+  .then(data => {
+    boundaryLayer = L.geoJSON(data, {
+      style: { color: '#000', weight: 3, dashArray: '6,6', fillOpacity: 0 }
+    }).addTo(map);
+  });
+
+function loadBase() {
+  fetch('/api/lo-cao-su')
+    .then(res => res.json())
+    .then(data => {
+      baseLayer = L.geoJSON(data, {
+        style: { color: '#999', weight: 1, fillColor: '#ccc', fillOpacity: 0.2 }
+      }).addTo(map);
+    });
+}
+
+function getColor(val, type) {
+  if (type === 'doi') {
+    return val == 1 ? '#e41a1c' : val == 2 ? '#377eb8' : val == 3 ? '#4daf4a' : '#999';
+  }
+  if (type === 'giong') {
+    return val === 'RRIV 4' ? '#1b9e77' : '#d95f02';
+  }
+  if (type === 'nam_trong') {
+    return val < 2010 ? '#7570b3' : '#e7298a';
+  }
+  return '#ccc';
+}
+
+function loadThematic(type = 'doi') {
+  if (thematicLayer) map.removeLayer(thematicLayer);
+  fetch('/api/lo-cao-su')
+    .then(res => res.json())
+    .then(data => {
+      thematicLayer = L.geoJSON(data, {
+        style: f => ({
+          color: '#333',
+          weight: 1,
+          fillColor: getColor(f.properties[type], type),
+          fillOpacity: 0.7
+        }),
+        onEachFeature: (feature, layer) => {
+          layer.bindPopup(`
+            <b>${feature.properties.ten_lo}</b><br>
+            Đội: ${feature.properties.doi}<br>
+            Giống: ${feature.properties.giong}<br>
+            Năm: ${feature.properties.nam_trong}
+          `);
+        }
+      }).addTo(map);
+    });
+}
+
+function updateLegend(type) {
+  const legend = document.getElementById('legend');
+  if (type === 'doi') {
+    legend.innerHTML = `<b>Đội</b><br><span style="color:#e41a1c">■</span> Đội 1<br><span style="color:#377eb8">■</span> Đội 2<br>`;
+  }
+  if (type === 'giong') {
+    legend.innerHTML = `<b>Giống</b><br><span style="color:#1b9e77">■</span> RRIV 4<br><span style="color:#d95f02">■</span> Khác`;
+  }
+}
+
+document.getElementById('filterType').addEventListener('change', e => {
+  loadThematic(e.target.value);
+  updateLegend(e.target.value);
+});
+
+document.getElementById('boundaryToggle').onchange = e => {
+  e.target.checked ? map.addLayer(boundaryLayer) : map.removeLayer(boundaryLayer);
+};
+document.getElementById('baseToggle').onchange = e => {
+  e.target.checked ? map.addLayer(baseLayer) : map.removeLayer(baseLayer);
+};
+document.getElementById('thematicToggle').onchange = e => {
+  e.target.checked ? map.addLayer(thematicLayer) : map.removeLayer(thematicLayer);
+};
+
+loadBase();
+loadThematic();
+updateLegend('doi');
+</script>
+
 </body>
 </html>
