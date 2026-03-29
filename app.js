@@ -145,12 +145,12 @@ app.get('/api/lo-cao-su', async (req, res) => {
 
     const result = await pool.query(`
       SELECT
-        l.id_lo, l.ten_lo, l.giong, l.nam_trong, l.cao_trinh_tb,
+        l.id_lo, l.ten_lo, l.giong, l.nam_trong,
         dv.doi, dv.du_an, dv.khu_vuc,
         dt.dien_tich_map,
-        kh.che_do_cao, kh.nam_mc, kh.tinh_trang_mc,
+        kh.che_do_cao,
         htc.cay_cao,
-        ST_AsGeoJSON(ST_Transform(l.geometry::geometry, 4326)) as geometry
+        ST_AsGeoJSON(l.geometry) AS geometry   -- Dùng trực tiếp, không cast
       FROM lo l
       LEFT JOIN don_vi dv ON l.id_don_vi = dv.id_don_vi
       LEFT JOIN dien_tich dt ON l.id_lo = dt.id_lo
@@ -159,10 +159,10 @@ app.get('/api/lo-cao-su', async (req, res) => {
       ${whereClause}
     `, params);
 
-    console.log(`✅ /api/lo-cao-su thành công - Trả về ${result.rows.length} rows`);
+    console.log(`✅ /api/lo-cao-su thành công → ${result.rows.length} rows`);
 
     const features = result.rows
-      .filter(row => row.geometry)   // chỉ lấy những row có geometry
+      .filter(row => row.geometry)
       .map(row => ({
         type: "Feature",
         geometry: JSON.parse(row.geometry),
@@ -178,8 +178,6 @@ app.get('/api/lo-cao-su', async (req, res) => {
         }
       }));
 
-    console.log(`✅ Đã tạo ${features.length} features GeoJSON`);
-
     res.json({
       type: "FeatureCollection",
       features: features
@@ -187,7 +185,7 @@ app.get('/api/lo-cao-su', async (req, res) => {
 
   } catch (err) {
     console.error('❌ Lỗi /api/lo-cao-su:', err.message);
-    console.error('Stack:', err.stack);   // thêm stack để xem chi tiết
+    console.error('Full error:', err);
     res.status(500).json({ 
       success: false, 
       error: 'Lỗi lấy dữ liệu bản đồ', 
@@ -214,7 +212,7 @@ app.get('/api/boundary', async (req, res) => {
         dv.doi,
         dv.du_an,
         dv.khu_vuc,
-        ST_AsGeoJSON(ST_Union(l.geometry::geometry)) as geometry
+        ST_AsGeoJSON(ST_Union(l.geometry)) as geometry
       FROM lo l
       LEFT JOIN don_vi dv ON l.id_don_vi = dv.id_don_vi
       ${whereClause}
