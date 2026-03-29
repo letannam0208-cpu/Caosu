@@ -150,7 +150,7 @@ app.get('/api/lo-cao-su', async (req, res) => {
         dt.dien_tich_map,
         kh.che_do_cao,
         htc.cay_cao,
-        ST_AsGeoJSON(l.geometry) AS geometry   -- Dùng trực tiếp, không cast
+        ST_AsGeoJSON(ST_Transform(l.geometry, 4326)) AS geometry   -- Dùng trực tiếp, không cast
       FROM lo l
       LEFT JOIN don_vi dv ON l.id_don_vi = dv.id_don_vi
       LEFT JOIN dien_tich dt ON l.id_lo = dt.id_lo
@@ -212,7 +212,7 @@ app.get('/api/boundary', async (req, res) => {
         dv.doi,
         dv.du_an,
         dv.khu_vuc,
-        ST_AsGeoJSON(ST_Union(l.geometry)) as geometry
+        ST_AsGeoJSON(ST_Transform(ST_Union(l.geometry), 4326)) as geometry
       FROM lo l
       LEFT JOIN don_vi dv ON l.id_don_vi = dv.id_don_vi
       ${whereClause}
