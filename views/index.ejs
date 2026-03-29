@@ -1755,7 +1755,7 @@
   // ==================== LOAD DỮ LIỆU ====================
   async function loadMapData(filters = {}) {
     try {
-      const res = await fetch('/api/get-geojson');
+      const res = await fetch('/api/lo-cao-su');
       CAOSU_GEOJSON = await res.json();
       
       // Build search data
