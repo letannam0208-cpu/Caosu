@@ -1628,221 +1628,324 @@
 </div>
 
 <script>
-// ==================== BIẾN TOÀN CỤC ====================
-let dashMap;
-let CAOSU_GEOJSON = null;
-let mapViewMode = 'doi';
-let currentBasemap = 'satellite';
+  // ==================== BIẾN TOÀN CỤC ====================
+  let dashMap;
+  let CAOSU_GEOJSON = null;
+  let mapViewMode = 'doi';
+  let currentBasemap = 'satellite';
+  let basemapLayers = {};
 
-// Layers
-let boundaryOuterLayer = null;
-let backgroundLayer = null;
-let thematicLayer = null;
+  let boundaryOuterLayer = null;
+  let backgroundLayer = null;
+  let thematicLayer = null;
 
-// Palettes
-const doiPalette = { 
-  'NT 1': '#10b981', 'NT 2': '#0ea5e9', 'NT 3': '#f59e0b', 'default': '#64748b' 
-};
+  // Layer visibility states
+  let layerVisibility = {
+    boundary: true,
+    loCay: true
+  };
 
-const phienPalette = { 
-  'Main': '#10b981', 'Replant': '#f59e0b', 'Immature': '#0ea5e9', 
-  'Mature': '#8b5cf6', 'default': '#64748b' 
-};
+  // Search data
+  let searchData = [];
 
-const nhipPalette = { 
-  'Thấp': '#0ea5e9', 'Trung bình': '#f59e0b', 'Cao': '#ef4444', 
-  'Rất cao': '#8b5cf6', 'default': '#64748b' 
-};
+  // Palettes với màu sắc mới
+  const doiPalette = { 
+    'NT 1': '#10b981', 
+    'NT 2': '#0ea5e9', 
+    'NT 3': '#f59e0b', 
+    'default': '#6b7280' 
+  };
 
-const taiCanhPalette = { 
-  '2025': '#5ee7b1', '2024': '#10b981', '2023': '#0ea5e9', 
-  '2022': '#f59e0b', '2021': '#fb923c', '2020': '#ef4444', 
-  'default': '#64748b' 
-};
+  const phienPalette = { 
+    'Main': '#10b981', 
+    'Replant': '#f59e0b', 
+    'Immature': '#0ea5e9', 
+    'Mature': '#8b5cf6', 
+    'default': '#6b7280' 
+  };
 
-// ==================== KHỞI TẠO MAP ====================
-async function initDashMap() {
-  dashMap = L.map('dashMap', { zoomControl: false }).setView([12.524, 105.452], 12);
+  const nhipPalette = { 
+    'Thấp': '#0ea5e9', 
+    'Trung bình': '#f59e0b', 
+    'Cao': '#ef4444', 
+    'Rất cao': '#8b5cf6',
+    'default': '#6b7280' 
+  };
 
-  // Basemap mặc định (vệ tinh)
-  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-    maxZoom: 19,
-    attribution: '© Esri'
-  }).addTo(dashMap);
+  const taiCanhPalette = { 
+    '2025': '#5ee7b1', 
+    '2024': '#10b981', 
+    '2023': '#0ea5e9', 
+    '2022': '#f59e0b', 
+    '2021': '#fb923c', 
+    '2020': '#ef4444', 
+    'Trước 2020': '#8b5cf6',
+    'default': '#6b7280' 
+  };
 
-  // Tọa độ chuột
-  dashMap.on('mousemove', function(e) {
-    document.getElementById('lat').textContent = e.latlng.lat.toFixed(4);
-    document.getElementById('lng').textContent = e.latlng.lng.toFixed(4);
-  });
+  // ==================== KHỞI TẠO MAP ====================
+  async function initDashMap() {
+    dashMap = L.map('dashMap', {
+      zoomControl: false
+    }).setView([12.524, 105.452], 12);
 
-  // Load dữ liệu
-  await Promise.all([
-    loadMapData(),
-    buildFilterUI()
-  ]);
+    // Khởi tạo các basemap layers
+    basemapLayers.osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      minZoom: 0,
+      attribution: '© OpenStreetMap contributors'
+    });
 
-  setTimeout(loadBoundaries, 800);
+    basemapLayers.satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      maxZoom: 18,
+      minZoom: 0,
+      attribution: 'Tiles © Esri'
+    });
 
-  console.log("✅ Bản đồ đã khởi tạo và đồng bộ với backend");
-}
+    basemapLayers.terrain = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+      maxZoom: 17,
+      minZoom: 0,
+      attribution: 'Map data: © OpenStreetMap contributors, SRTM | Map style: © OpenTopoMap'
+    });
 
-// ==================== LOAD DỮ LIỆU TỪ BACKEND ====================
-async function loadMapData(filters = {}) {
-  try {
-    const params = new URLSearchParams(filters);
-    const response = await fetch(`/api/lo-cao-su?${params}`);
-    
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-    
-    CAOSU_GEOJSON = await response.json();
-    renderThematicLayer();
-    
-    console.log(`✅ Tải thành công ${CAOSU_GEOJSON.features ? CAOSU_GEOJSON.features.length : 0} features`);
-  } catch (error) {
-    console.error("❌ Lỗi loadMapData:", error);
-    showToast("Không thể tải dữ liệu bản đồ từ server", "⚠️");
-  }
-}
+    basemapLayers.dark = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      maxZoom: 19,
+      minZoom: 0,
+      attribution: '© CARTO'
+    });
 
-function renderThematicLayer() {
-  if (!CAOSU_GEOJSON || !dashMap) return;
-  if (thematicLayer) dashMap.removeLayer(thematicLayer);
+    basemapLayers.streets = L.tileLayer('https://{s}.basemaps.cartocdn.com/positron/{z}/{x}/{y}{r}.png', {
+      maxZoom: 19,
+      minZoom: 0,
+      attribution: '© CARTO'
+    });
 
-  thematicLayer = L.featureGroup().addTo(dashMap);
+    // Thêm basemap mặc định
+    basemapLayers.satellite.addTo(dashMap);
 
-  CAOSU_GEOJSON.features.forEach(feat => {
-    const p = feat.properties || {};
-    let color = '#64748b';
+    thematicLayer = L.featureGroup().addTo(dashMap);
+    await loadBoundaries();
+    await buildFilterUI();
+    await loadMapData();
 
-    switch(mapViewMode) {
-      case 'doi':
-        color = doiPalette[p.doi] || doiPalette.default;
-        break;
-      case 'phien':
-        color = phienPalette[p.che_do_cao] || phienPalette.default;
-        break;
-      case 'nhip':
-        color = nhipPalette[p.nhip_do_cao] || nhipPalette.default;
-        break;
-      case 'tai':
-        color = taiCanhPalette[p.tai_canh_nam] || taiCanhPalette.default;
-        break;
-      case 'giong':
-        color = (p.giong === 'RRIV 4') ? '#10b981' : '#ef4444';
-        break;
-      case 'nam':
-        color = (p.nam_trong && parseInt(p.nam_trong) < 2015) ? '#8b5cf6' : '#f472b6';
-        break;
-    }
+    dashMap.on('mousemove', (e) => {
+      document.getElementById('lat').textContent = e.latlng.lat.toFixed(4);
+      document.getElementById('lng').textContent = e.latlng.lng.toFixed(4);
+    });
 
-    L.geoJSON(feat, {
-      style: {
-        color: color,
-        weight: 1.5,
-        fillColor: color,
-        fillOpacity: 0.68
+    // Đóng panels khi click ra ngoài
+    document.addEventListener('click', (e) => {
+      const gallery = document.getElementById('basemapGallery');
+      const basemapToggle = document.querySelector('.basemap-toggle');
+      const layerList = document.getElementById('layerList');
+      const layerToggle = document.querySelector('.layer-toggle');
+      
+      if (!gallery.contains(e.target) && !basemapToggle.contains(e.target)) {
+        gallery.classList.remove('show');
       }
-    }).bindPopup(`
-      <strong style="color:${color}">${p.giong || '—'}</strong><br>
-      Lô: ${p.id_lo}<br>
-      Đội: ${p.doi || '—'}<br>
-      Phiên cạo: ${p.che_do_cao || '—'}<br>
-      Nhịp độ cao: ${p.nhip_do_cao || '—'}<br>
-      Tài canh năm: ${p.tai_canh_nam || '—'}<br>
-      Năm trồng: ${p.nam_trong || '—'}
-    `).addTo(thematicLayer);
-  });
-}
+      if (!layerList.contains(e.target) && !layerToggle.contains(e.target)) {
+        layerList.classList.remove('show');
+      }
+    });
 
-// ==================== LOAD RANH GIỚI ====================
-async function loadBoundaries() {
-  try {
-    const res = await fetch('/api/boundary');
-    const data = await res.json();
-
-    if (boundaryOuterLayer) dashMap.removeLayer(boundaryOuterLayer);
-    boundaryOuterLayer = L.geoJSON(data, {
-      style: { color: "#e2e8f0", weight: 3.5, opacity: 0.9, fillOpacity: 0, dashArray: "8, 4" }
-    }).addTo(dashMap);
-
-    if (backgroundLayer) dashMap.removeLayer(backgroundLayer);
-    backgroundLayer = L.geoJSON(data, {
-      style: { color: "#cbd5e1", weight: 0.8, fillColor: "#1e2937", fillOpacity: 0.06 }
-    }).addTo(dashMap);
-    backgroundLayer.bringToBack();
-
-  } catch (e) {
-    console.error("Lỗi loadBoundaries:", e);
+    // Sync zoom slider
+    initZoomSync();
   }
-}
 
-// ==================== BUILD FILTER ====================
-async function buildFilterUI() {
-  try {
-    // Đội (Nông trường)
-    const doiRes = await fetch('/api/don-vi-list');
-    const doiData = await doiRes.json();
-    populateSelect('filter-nt', doiData.data || [], 'doi');
+  // ==================== LOAD DỮ LIỆU ====================
+  async function loadMapData(filters = {}) {
+    try {
+      const res = await fetch('/api/get-geojson');
+      CAOSU_GEOJSON = await res.json();
+      
+      // Build search data
+      searchData = CAOSU_GEOJSON.features.map(feat => ({
+        id: feat.properties.id_lo,
+        name: `Lô ${feat.properties.id_lo}`,
+        doi: feat.properties.doi,
+        giong: feat.properties.giong,
+        nam_trong: feat.properties.nam_trong,
+        type: 'lô cây',
+        geometry: feat.geometry,
+        properties: feat.properties
+      }));
 
-    // Năm trồng
-    const namRes = await fetch('/api/nam-trong-stats');
-    const namData = await namRes.json();
-    populateSelect('filter-nam', namData.data || [], 'nam_trong');
-
-    // Giống cây
-    const giongRes = await fetch('/api/giong-stats');
-    const giongData = await giongRes.json();
-    populateSelect('filter-giong', giongData.data || [], 'giong');
-
-    console.log("✅ Bộ lọc đã đồng bộ với backend");
-  } catch (e) {
-    console.error("Lỗi buildFilterUI:", e);
-    showToast("Không tải được dữ liệu bộ lọc", "⚠️");
-  }
-}
-
-function populateSelect(selectId, items, field) {
-  const select = document.getElementById(selectId);
-  if (!select) return;
-  select.innerHTML = '<option value="all">Tất cả</option>';
-
-  items.forEach(item => {
-    const value = item[field] || item.doi || item.nam_trong || item.giong;
-    if (value) {
-      const option = document.createElement('option');
-      option.value = value;
-      option.textContent = value;
-      select.appendChild(option);
+      renderThematicLayer();
+    } catch (e) {
+      console.error(e);
+      showToast('Lỗi tải dữ liệu bản đồ', '❌');
     }
-  });
-}
+  }
 
-function updateMapFilters() {
-  const filters = {};
-  
-  const nt = document.getElementById('filter-nt').value;
-  const nam = document.getElementById('filter-nam').value;
-  const giong = document.getElementById('filter-giong').value;
+  function renderThematicLayer() {
+    if (thematicLayer) dashMap.removeLayer(thematicLayer);
+    thematicLayer = L.featureGroup().addTo(dashMap);
 
-  if (nt !== 'all') filters.doi = nt;
-  if (nam !== 'all') filters.nam_trong = nam;
-  if (giong !== 'all') filters.giong = giong;
+    CAOSU_GEOJSON.features.forEach((feat) => {
+      const p = feat.properties;
+      let col = '#6b7280';
 
-  loadMapData(filters);
-}
+      if (mapViewMode === 'doi') col = doiPalette[p.doi] || doiPalette.default;
+      else if (mapViewMode === 'phien') col = phienPalette[p.che_do_cao] || phienPalette.default;
+      else if (mapViewMode === 'nhip') col = nhipPalette[p.nhip_do_cao] || nhipPalette.default;
+      else if (mapViewMode === 'tai') col = taiCanhPalette[p.tai_canh_nam] || taiCanhPalette.default;
+      else if (mapViewMode === 'giong') col = p.giong === 'RRIV 4' ? '#10b981' : '#ef4444';
+      else if (mapViewMode === 'nam') col = (p.nam_trong && p.nam_trong < 2015) ? '#8b5cf6' : '#f472b6';
 
-// ==================== CHUYỂN CHẾ ĐỘ TÔ MÀU ====================
-function switchMapView(mode, btn) {
-  mapViewMode = mode;
-  document.querySelectorAll('.chip').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  updateLegend(mode);
-  renderThematicLayer();
-}
+      const popupContent = createPopupContent(p, col);
 
-function updateLegend(mode) {
-  const legend = document.getElementById('legend');
+      L.geoJSON(feat, {
+        style: { 
+          color: col, 
+          weight: 1.5, 
+          fillColor: col, 
+          fillOpacity: 0.7 
+        }
+      }).bindPopup(popupContent, {
+        maxWidth: 420,
+        maxHeight: 500,
+        className: 'custom-popup'
+      }).addTo(thematicLayer);
+    });
+  }
+
+  function createPopupContent(p, color) {
+    return `
+      <div style="color: ${color};">
+        <div class="popup-header">
+          <div class="popup-title">📍 Lô ${p.id_lo}</div>
+          <div class="popup-subtitle">${p.giong || 'Chưa xác định'}</div>
+        </div>
+        <div class="popup-body">
+          <div class="popup-section">
+            <div class="popup-section-title">Thông tin cơ bản</div>
+            <div class="popup-field">
+              <span class="popup-label">Mã lô:</span>
+              <span class="popup-value highlight">${p.id_lo}</span>
+            </div>
+            <div class="popup-field">
+              <span class="popup-label">Giống cây:</span>
+              <span class="popup-value">${p.giong || '—'}</span>
+            </div>
+            <div class="popup-field">
+              <span class="popup-label">Đội quản lý:</span>
+              <span class="popup-value">${p.doi || '—'}</span>
+            </div>
+          </div>
+          
+          <div class="popup-section">
+            <div class="popup-section-title">Thông tin trồng trọt</div>
+            <div class="popup-field">
+              <span class="popup-label">Năm trồng:</span>
+              <span class="popup-value">${p.nam_trong || '—'}</span>
+            </div>
+            <div class="popup-field">
+              <span class="popup-label">Phiên cạo:</span>
+              <span class="popup-value">${p.che_do_cao || '—'}</span>
+            </div>
+            <div class="popup-field">
+              <span class="popup-label">Nhịp độ cao:</span>
+              <span class="popup-value">${p.nhip_do_cao || '—'}</span>
+            </div>
+            <div class="popup-field">
+              <span class="popup-label">Tài canh:</span>
+              <span class="popup-value">${p.tai_canh_nam || '—'}</span>
+            </div>
+          </div>
+
+          <div class="popup-actions">
+            <button class="popup-btn" onclick="showDetailPage(${p.id_lo})">📄 Chi tiết</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function showDetailPage(loId) {
+    showToast(`Trang chi tiết lô ${loId} (đang phát triển)`, "📄");
+  }
+
+  // ==================== RANH GIỚI ====================
+  async function loadBoundaries() {
+    try {
+      const res = await fetch('/api/boundary');
+      const data = await res.json();
+
+      if (boundaryOuterLayer) dashMap.removeLayer(boundaryOuterLayer);
+      boundaryOuterLayer = L.geoJSON(data, {
+        style: { 
+          color: "#ffffff", 
+          weight: 3, 
+          opacity: 0.8, 
+          fillOpacity: 0, 
+          dashArray: "8, 4" 
+        }
+      }).addTo(dashMap);
+
+      if (backgroundLayer) dashMap.removeLayer(backgroundLayer);
+      backgroundLayer = L.geoJSON(data, {
+        style: { 
+          color: "#94a3b8", 
+          weight: 0.5, 
+          fillColor: "#1e293b", 
+          fillOpacity: 0.03 
+        }
+      }).addTo(dashMap);
+      backgroundLayer.bringToBack();
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  // ==================== FILTER ====================
+  async function buildFilterUI() {
+    try {
+      const doiRes = await fetch('/api/don-vi-list');
+      const doiData = await doiRes.json();
+      populateSelect('filter-nt', doiData.data || [], 'doi');
+
+      const namRes = await fetch('/api/nam-trong-stats');
+      const namData = await namRes.json();
+      populateSelect('filter-nam', namData.data || [], 'nam_trong');
+
+      const giongRes = await fetch('/api/giong-stats');
+      const giongData = await giongRes.json();
+      populateSelect('filter-giong', giongData.data || [], 'giong');
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  function populateSelect(id, items, key) {
+    const sel = document.getElementById(id);
+    items.forEach(item => {
+      const val = item[key] || item.doi || item.nam_trong || item.giong;
+      if (val) sel.add(new Option(val, val));
+    });
+  }
+
+  function updateMapFilters() {
+    const filters = {};
+    if (document.getElementById('filter-nt').value !== 'all') 
+      filters.doi = document.getElementById('filter-nt').value;
+    if (document.getElementById('filter-nam').value !== 'all') 
+      filters.nam_trong = document.getElementById('filter-nam').value;
+    if (document.getElementById('filter-giong').value !== 'all') 
+      filters.giong = document.getElementById('filter-giong').value;
+    loadMapData(filters);
+  }
+
+  // ==================== CHỈ ĐỊNH CHUYỂN CHẾ ĐỘ TÔ MÀU ====================
+  function switchMapView(mode, btn) {
+    mapViewMode = mode;
+    document.querySelectorAll('.chip').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    updateLegend(mode);
+    renderThematicLayer();
+  }
+
+  function updateLegend(mode) {
+    const legend = document.getElementById('legend');
     
     if (mode === 'doi') {
       legend.innerHTML = `
