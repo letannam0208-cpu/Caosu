@@ -12,33 +12,14 @@
 
 <style>
 :root {
-  --bg: #0a0f1c;
-  --s1: #121a2e;
-  --s2: #1a2338;
-  --accent: #00d68f;
-  --accentB: #00b4ff;
-  --text: #e8eeff;
-  --muted: #5a6a8a;
-  --border: rgba(255,255,255,0.08);
-  --r: 8px;
+  --bg: #0a0f1c; --s1: #121a2e; --s2: #1a2338;
+  --accent: #00d68f; --accentB: #00b4ff; --text: #e8eeff;
+  --muted: #5a6a8a; --border: rgba(255,255,255,0.08); --r: 8px;
 }
-
 * { box-sizing: border-box; margin:0; padding:0; }
-body {
-  font-family: 'Be Vietnam Pro', sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  height: 100vh;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
+body { font-family: 'Be Vietnam Pro', sans-serif; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
 
-/* Header */
-header {
-  height: 64px; background: var(--s1); border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; padding: 0 20px; gap: 20px; z-index: 1000;
-}
+header { height: 64px; background: var(--s1); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 20px; gap: 20px; z-index: 1000; }
 .logo { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 18px; color: var(--accent); }
 .status { background: rgba(0,214,143,0.15); color: var(--accent); padding: 5px 14px; border-radius: 20px; font-size: 13px; display: flex; align-items: center; gap: 6px; }
 .stats-bar { display: flex; gap: 40px; margin-left: 30px; font-size: 14px; }
@@ -46,40 +27,18 @@ header {
 .user-info { margin-left: auto; display: flex; align-items: center; gap: 12px; font-size: 14px; }
 .avatar { width: 38px; height: 38px; background: linear-gradient(135deg, var(--accent), var(--accentB)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #000; }
 
-/* Sidebar */
-.sidebar {
-  width: 240px; background: var(--s1); border-right: 1px solid var(--border);
-  padding-top: 20px; overflow-y: auto; flex-shrink: 0;
-}
-.sidebar a {
-  display: flex; align-items: center; gap: 14px; padding: 14px 24px;
-  color: var(--muted); text-decoration: none; transition: all 0.2s;
-}
+.sidebar { width: 240px; background: var(--s1); border-right: 1px solid var(--border); padding-top: 20px; overflow-y: auto; flex-shrink: 0; }
+.sidebar a { display: flex; align-items: center; gap: 14px; padding: 14px 24px; color: var(--muted); text-decoration: none; transition: all 0.2s; }
 .sidebar a:hover, .sidebar a.active { background: var(--s2); color: var(--text); }
 .sidebar a i { width: 20px; text-align: center; }
 .sidebar hr { margin: 15px 24px; border-color: var(--border); }
 
-/* Main */
 .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 
-/* Map Top Bar */
-.map-topbar {
-  background: var(--s2); padding: 12px 20px; display: flex; align-items: center;
-  gap: 15px; border-bottom: 1px solid var(--border); flex-wrap: wrap;
+.map-topbar, .filter-bar {
+  background: var(--s2); padding: 12px 20px; display: flex; align-items: center; gap: 15px; border-bottom: 1px solid var(--border);
 }
-.map-title { font-weight: 600; font-size: 15px; display: flex; align-items: center; gap: 8px; }
-.chips { display: flex; gap: 6px; }
-.map-chip {
-  background: var(--s1); border: 1px solid var(--border); padding: 6px 14px;
-  border-radius: var(--r); font-size: 13px; cursor: pointer;
-}
-.map-chip.on { background: rgba(0,214,143,0.2); border-color: var(--accent); color: var(--accent); }
-
-/* Filter Bar */
-.filter-bar {
-  background: #1a2338; padding: 10px 20px; display: flex; gap: 20px; flex-wrap: wrap;
-  border-bottom: 1px solid var(--border);
-}
+.filter-bar { padding: 10px 20px; gap: 20px; flex-wrap: wrap; }
 .filter-group { display: flex; align-items: center; gap: 8px; font-size: 13px; }
 .filter-group label { color: var(--muted); white-space: nowrap; }
 .filter-group select {
@@ -87,56 +46,40 @@ header {
   padding: 6px 12px; border-radius: var(--r); font-size: 13px;
 }
 
-/* Map Area */
 .map-area { flex: 1; position: relative; overflow: hidden; }
 #dashMap { width: 100%; height: 100%; }
 
-/* Controls */
 .map-ctrl-left {
   position: absolute; top: 20px; left: 20px; z-index: 500;
   background: rgba(26,35,56,0.95); border: 1px solid var(--border);
-  border-radius: var(--r); padding: 10px; backdrop-filter: blur(10px);
-  display: flex; flex-direction: column; gap: 6px; min-width: 170px;
+  border-radius: var(--r); padding: 10px; display: flex; flex-direction: column; gap: 6px;
 }
 .mc-btn {
   padding: 10px 14px; background: transparent; border: 1px solid var(--border);
   color: var(--muted); border-radius: var(--r); cursor: pointer; font-size: 13px;
-  transition: 0.2s; display: flex; align-items: center; gap: 8px;
+  display: flex; align-items: center; gap: 8px;
 }
 .mc-btn:hover { border-color: var(--accentB); color: var(--accentB); }
-.mc-btn.active { background: rgba(0,214,143,0.15); border-color: var(--accent); color: var(--accent); }
 
-/* Coordinate Bar */
 .map-coord-bar {
   position: absolute; bottom: 15px; right: 15px; z-index: 600;
   background: rgba(26,35,56,0.95); border: 1px solid var(--border);
   padding: 8px 14px; border-radius: var(--r); font-size: 12px; color: var(--muted);
 }
 
-/* Legend */
 .legend {
   position: absolute; bottom: 15px; left: 20px; z-index: 600;
   background: rgba(26,35,56,0.95); border: 1px solid var(--border);
   border-radius: var(--r); padding: 12px 16px; width: 220px;
-  backdrop-filter: blur(10px);
 }
-.legend h4 { margin-bottom: 10px; font-size: 13px; color: var(--accent); }
-.legend-item { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 12.5px; }
+.legend h4 { margin-bottom: 10px; color: var(--accent); font-size: 13px; }
+.legend-item { display: flex; align-items: center; gap: 8px; margin: 4px 0; font-size: 12.5px; }
 
-/* Measure Panel */
-.measure-panel {
-  position: absolute; bottom: 20px; left: 260px; width: 280px;
-  background: rgba(26,35,56,0.97); border: 1px solid var(--border);
-  border-radius: 12px; padding: 15px; z-index: 700; display: none;
-}
-.measure-panel.show { display: block; }
-
-/* Toast */
 .toast {
   position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
   background: var(--s1); border: 1px solid var(--border); padding: 14px 20px;
   border-radius: 12px; color: var(--text); z-index: 2000; display: none;
-  align-items: center; gap: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  align-items: center; gap: 10px;
 }
 .toast.show { display: flex; }
 </style>
@@ -157,7 +100,6 @@ header {
 </header>
 
 <div style="display:flex; flex:1; overflow:hidden;">
-  <!-- Sidebar -->
   <nav class="sidebar">
     <a href="/" class="active"><i class="fas fa-home"></i> <span>Dashboard</span></a>
     <a href="/quan-ly-lo-cay"><i class="fas fa-tree"></i> <span>Quản lý lô cây</span></a>
@@ -168,103 +110,54 @@ header {
   </nav>
 
   <div class="main">
-    <!-- Map Top Bar -->
     <div class="map-topbar">
-      <div class="map-title">
-        <i class="fas fa-map-marked-alt"></i> Bản đồ vườn cây cao su — Kampong Thom, Cambodia
-      </div>
+      <div class="map-title"><i class="fas fa-map-marked-alt"></i> Bản đồ vườn cây cao su — Kampong Thom, Cambodia</div>
       <div class="chips">
         <button class="map-chip" onclick="switchMapView('giong',this)">Giống cây</button>
         <button class="map-chip" onclick="switchMapView('nam',this)">Năm trồng</button>
-        <button class="map-chip on" id="btn-doi" onclick="switchMapView('doi',this)">Nông trường</button>
+        <button class="map-chip on" onclick="switchMapView('doi',this)">Nông trường</button>
       </div>
-      <div style="margin-left:auto">
-        <button onclick="toggleMeasurePanel()" class="map-chip">
-          <i class="fas fa-ruler"></i> Đo lường
-        </button>
-      </div>
+      <button onclick="toggleMeasurePanel()" class="map-chip" style="margin-left:auto"><i class="fas fa-ruler"></i> Đo lường</button>
     </div>
 
-    <!-- Filter Bar -->
     <div class="filter-bar">
-      <div class="filter-group">
-        <label>Nông trường:</label>
-        <select id="filter-nt" onchange="updateMapFilters()"><option value="all">Tất cả</option></select>
-      </div>
-      <div class="filter-group">
-        <label>Năm trồng:</label>
-        <select id="filter-nam" onchange="updateMapFilters()"><option value="all">Tất cả</option></select>
-      </div>
-      <div class="filter-group">
-        <label>Giống cây:</label>
-        <select id="filter-giong" onchange="updateMapFilters()"><option value="all">Tất cả</option></select>
-      </div>
-      <div class="filter-group">
-        <label>Phiên cao:</label>
-        <select onchange="updateMapFilters()"><option value="all">Tất cả</option></select>
-      </div>
-      <div class="filter-group">
-        <label>Nhịp độ cao:</label>
-        <select onchange="updateMapFilters()"><option value="all">Tất cả</option></select>
-      </div>
-      <div class="filter-group">
-        <label>Quy hoạch tái canh:</label>
-        <select onchange="updateMapFilters()"><option value="all">Tất cả</option></select>
-      </div>
+      <div class="filter-group"><label>Nông trường:</label><select id="filter-nt" onchange="updateMapFilters()"><option value="all">Tất cả</option></select></div>
+      <div class="filter-group"><label>Năm trồng:</label><select id="filter-nam" onchange="updateMapFilters()"><option value="all">Tất cả</option></select></div>
+      <div class="filter-group"><label>Giống cây:</label><select id="filter-giong" onchange="updateMapFilters()"><option value="all">Tất cả</option></select></div>
     </div>
 
-    <!-- Map -->
     <div class="map-area">
       <div id="dashMap"></div>
 
-      <!-- Left Controls -->
       <div class="map-ctrl-left">
         <button class="mc-btn" onclick="mapZoomIn()"><i class="fas fa-plus"></i> Phóng to</button>
         <button class="mc-btn" onclick="mapZoomOut()"><i class="fas fa-minus"></i> Thu nhỏ</button>
         <button class="mc-btn active" onclick="goHome()"><i class="fas fa-home"></i> Toàn vùng</button>
-        <button class="mc-btn" onclick="toggleMeasurePanel()"><i class="fas fa-ruler-combined"></i> Đo khoảng cách / Diện tích</button>
       </div>
 
-      <!-- Coordinate -->
       <div class="map-coord-bar" id="coordBar">
         Lat: <span id="lat">12.5240</span>° | Lng: <span id="lng">105.4520</span>°
       </div>
 
-      <!-- Legend -->
       <div class="legend" id="legend">
         <h4>🔹 Nông trường</h4>
         <div class="legend-item"><span style="display:inline-block;width:18px;height:18px;background:#00d68f;border-radius:3px"></span> NT 1</div>
         <div class="legend-item"><span style="display:inline-block;width:18px;height:18px;background:#00b4ff;border-radius:3px"></span> NT 2</div>
         <div class="legend-item"><span style="display:inline-block;width:18px;height:18px;background:#f59e0b;border-radius:3px"></span> NT 3</div>
       </div>
-
-      <!-- Measure Panel -->
-      <div class="measure-panel" id="measurePanel">
-        <div style="font-weight:600;margin-bottom:12px">Công cụ đo lường</div>
-        <button onclick="startMeasure('distance')" class="mc-btn" style="width:100%;margin-bottom:8px">📏 Đo khoảng cách</button>
-        <button onclick="startMeasure('area')" class="mc-btn" style="width:100%">📐 Đo diện tích</button>
-        <div id="measureResult" style="margin-top:15px;font-size:14px;display:none;">
-          Kết quả: <strong id="resultValue">0</strong> <span id="resultUnit">m</span>
-        </div>
-      </div>
     </div>
   </div>
 </div>
 
-<!-- Toast -->
-<div class="toast" id="toast">
-  <span id="toastIcon"></span>
-  <span id="toastMsg"></span>
-</div>
+<div class="toast" id="toast"><span id="toastIcon"></span><span id="toastMsg"></span></div>
 
 <script>
 // ==================== BIẾN TOÀN CỤC ====================
 let dashMap;
 let CAOSU_GEOJSON = null;
 let mapViewMode = 'doi';
-let boundaryLayer = null;
 
-// Palette
+// Palette tô màu
 const doiPalette = {
   'NT 1': '#00d68f',
   'NT 2': '#00b4ff',
@@ -272,7 +165,7 @@ const doiPalette = {
   'default': '#5a6a8a'
 };
 
-// ==================== KHỞI TẠO BẢN ĐỒ ====================
+// ==================== KHỞI TẠO ====================
 async function initDashMap() {
   dashMap = L.map('dashMap', { zoomControl: false }).setView([12.524, 105.452], 12);
 
@@ -280,110 +173,104 @@ async function initDashMap() {
     maxZoom: 19
   }).addTo(dashMap);
 
-  // Hiển thị tọa độ
+  // Tọa độ chuột
   dashMap.on('mousemove', e => {
     document.getElementById('lat').textContent = e.latlng.lat.toFixed(4);
     document.getElementById('lng').textContent = e.latlng.lng.toFixed(4);
   });
 
-  await Promise.all([loadMapData(), buildFilterUI()]);
-  setTimeout(() => loadAndShowBoundary(), 600);
+  // Load dữ liệu song song
+  await Promise.all([
+    loadMapData(),
+    buildFilterUI()
+  ]);
 
-  console.log("✅ WebGIS Cao Su đã khởi tạo hoàn chỉnh");
+  setTimeout(loadAndShowBoundary, 800);
+  console.log("✅ Bản đồ đã khởi tạo");
 }
 
-// ==================== CÁC HÀM CHÍNH ====================
+// ==================== LOAD BẢN ĐỒ ====================
 async function loadMapData(filters = {}) {
   try {
     const params = new URLSearchParams(filters);
     const res = await fetch(`/api/lo-cao-su?${params}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
     CAOSU_GEOJSON = await res.json();
     renderRealLots();
-  } catch (e) { console.error(e); }
+  } catch (e) {
+    console.error("❌ loadMapData:", e);
+    showToast("Không tải được dữ liệu bản đồ", "⚠️");
+  }
 }
 
 function renderRealLots() {
   if (!CAOSU_GEOJSON || !dashMap) return;
-  // Xóa layer cũ (bạn có thể bổ sung code xóa layer nếu cần)
+  // Xóa layer cũ nếu có (có thể cải tiến sau)
   let count = 0;
   CAOSU_GEOJSON.features.forEach(feat => {
     const p = feat.properties || {};
     const col = doiPalette[p.doi] || doiPalette.default;
 
-    const layer = L.geoJSON(feat, {
+    L.geoJSON(feat, {
       style: { color: col, weight: 1.5, fillColor: col, fillOpacity: 0.55 }
-    }).bindPopup(`<strong>${p.giong||'—'}</strong><br>Lô: ${p.id_lo}<br>Đội: ${p.doi}<br>Năm: ${p.nam_trong}`).addTo(dashMap);
+    }).bindPopup(`
+      <strong style="color:${col}">${p.giong || '—'}</strong><br>
+      Lô: ${p.id_lo}<br>
+      Đội: ${p.doi || '—'}<br>
+      Năm: ${p.nam_trong || '—'}
+    `).addTo(dashMap);
     count++;
   });
-  console.log(`✅ Đã render ${count} lô`);
+  console.log(`✅ Render ${count} lô thành công`);
 }
 
+// ==================== BUILD FILTER (ĐÃ SỬA ĐẦY ĐỦ) ====================
 async function buildFilterUI() {
-  // Code populate dropdown (giữ nguyên từ trước)
-  console.log("✅ Filter UI đã tải");
-}
+  try {
+    console.log("🔄 Đang tải dữ liệu cho bộ lọc...");
 
-function updateMapFilters() {
-  const filters = {};
-  if (document.getElementById('filter-nt').value !== 'all') filters.doi = document.getElementById('filter-nt').value;
-  if (document.getElementById('filter-nam').value !== 'all') filters.nam_trong = document.getElementById('filter-nam').value;
-  if (document.getElementById('filter-giong').value !== 'all') filters.giong = document.getElementById('filter-giong').value;
-  loadMapData(filters);
-}
+    // Nông trường
+    const doiRes = await fetch('/api/don-vi-list');
+    const doiData = await doiRes.json();
+    populateSelect('filter-nt', doiData.data || [], 'doi');
 
-function switchMapView(mode, btn) {
-  mapViewMode = mode;
-  document.querySelectorAll('.map-chip').forEach(b => b.classList.remove('on'));
-  btn.classList.add('on');
-  updateLegend(mode);
-}
+    // Năm trồng
+    const namRes = await fetch('/api/nam-trong-stats');
+    const namData = await namRes.json();
+    populateSelect('filter-nam', namData.data || [], 'nam_trong');
 
-function updateLegend(mode) {
-  const legend = document.getElementById('legend');
-  if (mode === 'doi') {
-    legend.innerHTML = `
-      <h4>🔹 Nông trường</h4>
-      <div class="legend-item"><span style="display:inline-block;width:18px;height:18px;background:#00d68f;border-radius:3px"></span> NT 1</div>
-      <div class="legend-item"><span style="display:inline-block;width:18px;height:18px;background:#00b4ff;border-radius:3px"></span> NT 2</div>
-      <div class="legend-item"><span style="display:inline-block;width:18px;height:18px;background:#f59e0b;border-radius:3px"></span> NT 3</div>
-    `;
-  } else if (mode === 'giong') {
-    legend.innerHTML = `<h4>🔹 Giống cây</h4><div class="legend-item">RRIV 4 &amp; các giống khác</div>`;
-  } else {
-    legend.innerHTML = `<h4>🔹 Năm trồng</h4><div class="legend-item">Trước 2010 | Sau 2010</div>`;
+    // Giống cây
+    const giongRes = await fetch('/api/giong-stats');
+    const giongData = await giongRes.json();
+    populateSelect('filter-giong', giongData.data || [], 'giong');
+
+    console.log("✅ Bộ lọc đã được tải thành công");
+  } catch (err) {
+    console.error("❌ Lỗi buildFilterUI:", err);
+    showToast("Không tải được bộ lọc. Kiểm tra server!", "⚠️");
   }
 }
 
-// Measure & Controls
-function toggleMeasurePanel() {
-  document.getElementById('measurePanel').classList.toggle('show');
-}
-function startMeasure(type) {
-  showToast(`Bắt đầu đo ${type === 'distance' ? 'khoảng cách' : 'diện tích'}`, '📏');
-}
-function mapZoomIn() { if(dashMap) dashMap.zoomIn(); }
-function mapZoomOut() { if(dashMap) dashMap.zoomOut(); }
-function goHome() { if(dashMap) dashMap.setView([12.524, 105.452], 12); }
+function populateSelect(selectId, items, key) {
+  const select = document.getElementById(selectId);
+  if (!select || !Array.isArray(items)) return;
 
-function showToast(msg, icon = '✅') {
-  const toast = document.getElementById('toast');
-  document.getElementById('toastIcon').innerHTML = icon;
-  document.getElementById('toastMsg').innerHTML = msg;
-  toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 4000);
+  items.forEach(item => {
+    const value = item[key] || item.doi || item.nam_trong || item.giong;
+    if (value) {
+      const opt = new Option(value, value);
+      select.add(opt);
+    }
+  });
 }
 
-// Load boundary (giữ nguyên từ code cũ)
-async function buildFilterUI() {
-  // Giữ nguyên code buildFilterUI cũ của bạn
-}
-
+// ==================== CẬP NHẬT FILTER ====================
 function updateMapFilters() {
   const filters = {};
   if (document.getElementById('filter-nt').value !== 'all') filters.doi = document.getElementById('filter-nt').value;
   if (document.getElementById('filter-nam').value !== 'all') filters.nam_trong = document.getElementById('filter-nam').value;
   if (document.getElementById('filter-giong').value !== 'all') filters.giong = document.getElementById('filter-giong').value;
-  
+
   loadMapData(filters);
 }
 
@@ -393,28 +280,7 @@ function switchMapView(mode, btn) {
   btn.classList.add('on');
 }
 
-// Measure Tool
-function toggleMeasurePanel() {
-  const panel = document.getElementById('measurePanel');
-  panel.classList.toggle('show');
-}
-
-function startMeasure(type) {
-  if (measureLayer) dashMap.removeLayer(measureLayer);
-  measurePoints = [];
-  measureLayer = L.featureGroup().addTo(dashMap);
-
-  showToast(`Đang đo ${type === 'distance' ? 'khoảng cách' : 'diện tích'}...`, '📏');
-
-  dashMap.getContainer().style.cursor = 'crosshair';
-
-  dashMap.once('click', function(e) {
-    // Logic đo đơn giản (có thể mở rộng sau)
-    showToast(`Công cụ đo ${type} đang được phát triển`, '⚙️');
-    dashMap.getContainer().style.cursor = '';
-  });
-}
-
+// ==================== CÁC HÀM KHÁC ====================
 function mapZoomIn() { if(dashMap) dashMap.zoomIn(); }
 function mapZoomOut() { if(dashMap) dashMap.zoomOut(); }
 function goHome() { if(dashMap) dashMap.setView([12.524, 105.452], 12); }
@@ -425,6 +291,12 @@ function showToast(msg, icon = '✅') {
   document.getElementById('toastMsg').innerHTML = msg;
   toast.classList.add('show');
   setTimeout(() => toast.classList.remove('show'), 4000);
+}
+
+// Placeholder cho boundary (bạn có thể copy hàm cũ vào đây)
+async function loadAndShowBoundary() {
+  console.log("📍 Đang tải ranh giới...");
+  // Thêm code load boundary nếu cần
 }
 
 // ==================== KHỞI CHẠY ====================
