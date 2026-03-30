@@ -905,17 +905,28 @@
 
     // Lấy GeoJSON lô cây từ API (quan trọng nhất)
     async function fetchLoCaoSu(filters = {}) {
+      console.log('📡 fetchLoCaoSu với filters:', filters);
       try {
         const params = new URLSearchParams();
         if (filters.doi) params.append('doi', filters.doi);
         if (filters.nam_trong) params.append('nam_trong', filters.nam_trong);
         if (filters.giong) params.append('giong', filters.giong);
 
-        const response = await fetch(`${API_BASE}/api/lo-cao-su?${params.toString()}`);
-        const geoData = await response.json();
+        const url = `${API_BASE}/api/lo-cao-su?${params.toString()}`;
+        console.log('🌐 Gọi URL:', url);
         
-        // Cập nhật searchData từ features
+        const response = await fetch(url);
+        console.log('📦 Response status:', response.status);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const geoData = await response.json();
+        console.log('✅ GeoJSON received:', geoData.features?.length, 'features');
+        
         if (geoData.features) {
+          console.log('📌 Sample feature:', geoData.features[0]);
           searchData = geoData.features.map(f => ({
             id: f.properties.id_lo,
             name: f.properties.ten_lo,
@@ -927,7 +938,6 @@
           }));
         }
 
-        console.log('✅ GeoJSON lô cây:', geoData.features?.length, 'features');
         return geoData;
       } catch (error) {
         console.error('❌ Lỗi fetchLoCaoSu:', error);
@@ -937,14 +947,24 @@
 
     // Lấy boundary (ranh giới)
     async function fetchBoundary(doi = null) {
+      console.log('📡 fetchBoundary với doi:', doi);
       try {
         const params = new URLSearchParams();
         if (doi) params.append('doi', doi);
 
-        const response = await fetch(`${API_BASE}/api/boundary?${params.toString()}`);
-        const geoData = await response.json();
+        const url = `${API_BASE}/api/boundary?${params.toString()}`;
+        console.log('🌐 Gọi URL:', url);
         
-        console.log('✅ Boundary:', geoData.features?.length, 'features');
+        const response = await fetch(url);
+        console.log('📦 Response status:', response.status);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const geoData = await response.json();
+        console.log('✅ Boundary received:', geoData.features?.length, 'features');
+        
         return geoData;
       } catch (error) {
         console.error('❌ Lỗi fetchBoundary:', error);
@@ -954,126 +974,163 @@
 
     // Tải tất cả dữ liệu bản đồ
     async function fetchMapData() {
+      console.log('🔄 fetchMapData: bắt đầu lấy dữ liệu...');
       try {
+        console.log('📡 Gọi fetchLoCaoSu và fetchBoundary...');
         const [loData, boundaryData] = await Promise.all([
           fetchLoCaoSu(),
           fetchBoundary()
         ]);
 
-        return {
+        console.log('📊 loData:', loData);
+        console.log('📊 boundaryData:', boundaryData);
+
+        const result = {
           plots: loData.features || [],
           boundaries: boundaryData.features || [],
           stats: {
             total: loData.features?.length || 0
           }
         };
+
+        console.log('✅ fetchMapData result:', result);
+        return result;
       } catch (error) {
-        console.error('Lỗi khi tải dữ liệu:', error);
-        showToast('Lỗi khi tải dữ liệu bản đồ', '❌');
+        console.error('❌ Lỗi fetchMapData:', error);
+        showToast('Lỗi khi tải dữ liệu bản đồ: ' + error.message, '❌');
         return null;
       }
     }
 
     // ==================== KHỞI TẠO BẢN ĐỒ ====================
     async function initDashMap() {
-      // Khởi tạo bản đồ
-      dashMap = L.map('dashMap').setView([12.524, 105.452], 12);
-
-      // Basemap layers
-      basemapLayers.osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors',
-        maxZoom: 19
-      }).addTo(dashMap);
-
-      basemapLayers.satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-        attribution: 'Tiles &copy; Esri',
-        maxZoom: 19
-      });
-
-      // Lấy dữ liệu từ API
-      const mapData = await fetchMapData();
-      if (!mapData) return;
-
-      // Tạo boundary layer (ranh giới)
-      if (mapData.boundaries && mapData.boundaries.length > 0) {
-        boundaryOuterLayer = L.geoJSON({
-          type: 'FeatureCollection',
-          features: mapData.boundaries
-        }, {
-          style: {
-            color: '#e5e7eb',
-            weight: 2,
-            opacity: 0.5,
-            fillOpacity: 0.1,
-            dashArray: '5, 5'
-          }
-        }).addTo(dashMap);
-      }
-
-      // Tạo thematic layer (lô cây)
-      if (mapData.plots && mapData.plots.length > 0) {
-        thematicLayer = L.geoJSON({
-          type: 'FeatureCollection',
-          features: mapData.plots
-        }, {
-          style: (feature) => {
-            let color = '#10b981'; // Mặc định xanh
-            
-            // Tô màu theo năm trồng hoặc trạng thái
-            if (feature.properties.nam_trong) {
-              const year = feature.properties.nam_trong;
-              const yearMap = {
-                2025: '#5ee7b1',
-                2024: '#10b981',
-                2023: '#0ea5e9',
-                2022: '#f59e0b',
-                2021: '#fb923c',
-                2020: '#ef4444'
-              };
-              color = yearMap[year] || '#8b5cf6';
-            }
-            
-            return {
-              color: color,
-              weight: 2,
-              opacity: 0.8,
-              fillOpacity: 0.4
-            };
-          },
-          onEachFeature: (feature, layer) => {
-            const props = feature.properties;
-            const popupContent = `
-              <div style="font-family: Arial, sans-serif; font-size: 12px; width: 250px;">
-                <strong style="color: #10b981; font-size: 14px;">${props.ten_lo || 'Lô ' + props.id_lo}</strong><br/>
-                <hr style="margin: 5px 0; border: none; border-top: 1px solid #e5e7eb;">
-                <div style="line-height: 1.6;">
-                  <strong>ID:</strong> ${props.id_lo}<br/>
-                  <strong>Đội:</strong> ${props.doi || 'N/A'}<br/>
-                  <strong>Giống:</strong> ${props.giong || 'N/A'}<br/>
-                  <strong>Năm trồng:</strong> ${props.nam_trong || 'N/A'}<br/>
-                  <strong>Diện tích:</strong> ${props.dien_tich_map ? props.dien_tich_map + ' ha' : 'N/A'}<br/>
-                  <strong>Chế độ cao:</strong> ${props.che_do_cao || 'N/A'}<br/>
-                  <strong>Cây cao:</strong> ${props.cay_cao || 'N/A'}
-                </div>
-              </div>
-            `;
-            layer.bindPopup(popupContent);
-          }
-        }).addTo(dashMap);
-      }
-
-      // Khởi tạo zoom sync
-      initZoomSync();
-
-      // Tải dropdown filters
-      await Promise.all([
-        fetchDashboardStats(),
-        fetchDonViList(),
-        fetchGiongStats(),
-        fetchNamTrongStats()
-      ]);
+      console.log('🚀 Bắt đầu initDashMap...');
       
-      showToast('Bản đồ đã tải thành công', '✅');
+      try {
+        // Khởi tạo bản đồ
+        console.log('📍 Khởi tạo Leaflet map...');
+        dashMap = L.map('dashMap').setView([12.524, 105.452], 12);
+        console.log('✅ Map created:', dashMap);
+
+        // Basemap layers
+        console.log('🗺️ Thêm OSM basemap...');
+        basemapLayers.osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '© OpenStreetMap contributors',
+          maxZoom: 19
+        }).addTo(dashMap);
+        console.log('✅ OSM basemap added');
+
+        basemapLayers.satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+          attribution: 'Tiles &copy; Esri',
+          maxZoom: 19
+        });
+
+        // Lấy dữ liệu từ API
+        console.log('🔄 Lấy dữ liệu từ API...');
+        const mapData = await fetchMapData();
+        console.log('📊 Map data received:', mapData);
+        
+        if (!mapData) {
+          console.error('❌ mapData là null!');
+          return;
+        }
+
+        // Tạo boundary layer (ranh giới)
+        if (mapData.boundaries && mapData.boundaries.length > 0) {
+          console.log('🏗️ Tạo boundary layer với', mapData.boundaries.length, 'features');
+          boundaryOuterLayer = L.geoJSON({
+            type: 'FeatureCollection',
+            features: mapData.boundaries
+          }, {
+            style: {
+              color: '#e5e7eb',
+              weight: 2,
+              opacity: 0.5,
+              fillOpacity: 0.1,
+              dashArray: '5, 5'
+            }
+          }).addTo(dashMap);
+          console.log('✅ Boundary layer added');
+        } else {
+          console.warn('⚠️ Không có boundary data');
+        }
+
+        // Tạo thematic layer (lô cây)
+        if (mapData.plots && mapData.plots.length > 0) {
+          console.log('🎨 Tạo thematic layer với', mapData.plots.length, 'features');
+          console.log('📌 Sample feature:', mapData.plots[0]);
+          
+          thematicLayer = L.geoJSON({
+            type: 'FeatureCollection',
+            features: mapData.plots
+          }, {
+            style: (feature) => {
+              let color = '#10b981';
+              
+              if (feature.properties.nam_trong) {
+                const year = feature.properties.nam_trong;
+                const yearMap = {
+                  2025: '#5ee7b1',
+                  2024: '#10b981',
+                  2023: '#0ea5e9',
+                  2022: '#f59e0b',
+                  2021: '#fb923c',
+                  2020: '#ef4444'
+                };
+                color = yearMap[year] || '#8b5cf6';
+              }
+              
+              return {
+                color: color,
+                weight: 2,
+                opacity: 0.8,
+                fillOpacity: 0.4
+              };
+            },
+            onEachFeature: (feature, layer) => {
+              const props = feature.properties;
+              const popupContent = `
+                <div style="font-family: Arial, sans-serif; font-size: 12px; width: 250px;">
+                  <strong style="color: #10b981; font-size: 14px;">${props.ten_lo || 'Lô ' + props.id_lo}</strong><br/>
+                  <hr style="margin: 5px 0; border: none; border-top: 1px solid #e5e7eb;">
+                  <div style="line-height: 1.6;">
+                    <strong>ID:</strong> ${props.id_lo}<br/>
+                    <strong>Đội:</strong> ${props.doi || 'N/A'}<br/>
+                    <strong>Giống:</strong> ${props.giong || 'N/A'}<br/>
+                    <strong>Năm trồng:</strong> ${props.nam_trong || 'N/A'}<br/>
+                    <strong>Diện tích:</strong> ${props.dien_tich_map ? props.dien_tich_map + ' ha' : 'N/A'}<br/>
+                    <strong>Chế độ cao:</strong> ${props.che_do_cao || 'N/A'}<br/>
+                    <strong>Cây cao:</strong> ${props.cay_cao || 'N/A'}
+                  </div>
+                </div>
+              `;
+              layer.bindPopup(popupContent);
+            }
+          }).addTo(dashMap);
+          console.log('✅ Thematic layer added');
+        } else {
+          console.warn('⚠️ Không có plots data');
+        }
+
+        // Khởi tạo zoom sync
+        initZoomSync();
+
+        // Tải dropdown filters
+        console.log('📋 Tải filters...');
+        await Promise.all([
+          fetchDashboardStats(),
+          fetchDonViList(),
+          fetchGiongStats(),
+          fetchNamTrongStats()
+        ]);
+        console.log('✅ Filters loaded');
+        
+        showToast('Bản đồ đã tải thành công', '✅');
+        console.log('🎉 initDashMap hoàn tất!');
+      } catch (error) {
+        console.error('❌ Lỗi trong initDashMap:', error);
+        showToast('Lỗi khởi tạo bản đồ: ' + error.message, '❌');
+      }
     }
 
     // ==================== ĐIỀU KHIỂN ====================
