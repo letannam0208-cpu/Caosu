@@ -254,23 +254,6 @@ app.get('/dashboard', (req, res) => {
   renderPage(res, 'index', 'Dashboard - WebGIS Cao Su');
 });
 
-// Placeholder routes
-const placeholderRoutes = [
-  '/quan-ly-lo-cay', '/motadulieu', '/cndl', '/qldl', '/hsnd', 
-  '/lichsu', '/thong-ke', '/quan-ly-nguoi-dung', '/them-du-lieu-lo-cay'
-];
-
-placeholderRoutes.forEach(route => {
-  app.get(route, (req, res) => {
-    res.locals.path = route;
-    res.render('placeholder', {
-      title: route.replace('/', '').replace(/-/g, ' ').toUpperCase(),
-      user: getMockUser(),
-      path: route,
-      message: `Trang ${route} đang được phát triển...`
-    });
-  });
-});
 // ====================== QUẢN LÝ LÔ CÂY ======================
 // Render trang quản lý
 app.get('/quan-ly-lo-cay', (req, res) => {
