@@ -636,89 +636,76 @@
     </div>
   </header>
 
-  <!-- ========== CONTAINER ========== -->
+  <!-- MAIN CONTAINER -->
   <div class="container">
     <!-- SIDEBAR -->
-    <div class="sidebar">
-      <div class="sidebar-header">
-        <h3>📊 TỔNG QUAN</h3>
+    <aside class="sidebar">
+      <div class="sidebar-icon-group">
+        <a href="#" class="active" title="Trang chủ">
+          <i class="fas fa-home"></i>
+        </a>
+        <a href="#" title="Tìm kiếm">
+          <i class="fas fa-search"></i>
+        </a>
+        <a href="#" title="Bản đồ">
+          <i class="fas fa-map"></i>
+        </a>
       </div>
-      <nav>
-        <a href="#" class="active">
-          <i class="fas fa-chart-line"></i>
-          <span>Dashboard</span>
-        </a>
-        <a href="#">
-          <i class="fas fa-plus"></i>
-          <span>Thêm dữ liệu lô</span>
-        </a>
-      </nav>
 
-      <div class="sidebar-header" style="margin-top: 20px;">
-        <h3>⚙️ QUẢN LÝ DỮ LIỆU</h3>
-      </div>
-      <nav>
-        <a href="#">
-          <i class="fas fa-layer-group"></i>
-          <span>Quản lý lô cây</span>
-        </a>
-        <a href="#">
-          <i class="fas fa-file-alt"></i>
-          <span>Thêm dữ liệu lô</span>
-        </a>
-      </nav>
+      <div class="sidebar-divider"></div>
 
-      <div class="sidebar-header" style="margin-top: 20px;">
-        <h3>👥 NGƯỜI DÙNG & PHÂN QUYỀN</h3>
-      </div>
-      <nav>
-        <a href="#">
-          <i class="fas fa-users"></i>
-          <span>Quản lý người dùng</span>
+      <div class="sidebar-icon-group">
+        <a href="#" title="Phân tích">
+          <i class="fas fa-chart-bar"></i>
         </a>
-      </nav>
-
-      <div class="sidebar-header" style="margin-top: 20px;">
-        <h3>📈 PHÂN TÍCH</h3>
-      </div>
-      <nav>
-        <a href="#">
-          <i class="fas fa-bar-chart"></i>
-          <span>Thống kê</span>
+        <a href="#" title="Cài đặt">
+          <i class="fas fa-cog"></i>
         </a>
-      </nav>
+        <a href="#" title="Công cụ">
+          <i class="fas fa-tools"></i>
+        </a>
+      </div>
 
       <div class="sidebar-footer">
-        <a href="#" class="logout">
+        <a href="#" class="logout" title="Đăng xuất">
           <i class="fas fa-sign-out-alt"></i>
-          <span>Đăng xuất</span>
         </a>
       </div>
-    </div>
+    </aside>
 
     <!-- MAIN CONTENT -->
     <div class="main">
       <!-- TOP BAR -->
       <div class="top-bar">
         <div class="top-bar-title">
-          <h2>Dashboard</h2>
-          <p>Tổng quan hoạt động vườn cây – cập nhật lúc 07:42, 16/03/2026</p>
+          <h2>Xã Kraya, Huyện Santuk, Kampong Thom</h2>
+          <p>Hệ thống quản lý và giám sát vườn cây cao su</p>
         </div>
         <div class="top-bar-controls">
-          <button class="export-btn">
-            <i class="fas fa-download"></i>
-            <span>Xuất báo cáo</span>
-          </button>
+          <div class="export-dropdown">
+            <button class="export-btn" onclick="toggleExportMenu()" title="Xuất bản đồ">
+              <i class="fas fa-download"></i>
+              Xuất bản đồ
+              <i class="fas fa-chevron-down" style="font-size: 10px; margin-left: 4px;"></i>
+            </button>
+            <div class="export-menu" id="exportMenu">
+              <button class="export-menu-item" onclick="exportMapAsImage()">
+                <i class="fas fa-image"></i> Xuất thành ảnh (PNG)
+              </button>
+              <button class="export-menu-item" onclick="exportMapAsPDF()">
+                <i class="fas fa-file-pdf"></i> Xuất thành PDF
+              </button>
+            </div>
+          </div>
           <button class="add-btn">
             <i class="fas fa-plus"></i>
-            <span>Thêm dữ liệu</span>
+            Thêm lô
           </button>
         </div>
       </div>
 
       <!-- FILTER BAR -->
       <div class="filter-bar">
-        <span style="font-weight: 600; color: var(--text-secondary); font-size: 12px;">🔹 Bản đồ vườn cây cao su – Kampong Thom, Cambodia</span>
         <div style="display: flex; gap: 12px; align-items: center; margin-left: auto; flex-wrap: wrap;">
           <span style="font-size: 12px; color: var(--text-muted);">Đội:</span>
           <select class="filter-select" name="doi">
@@ -1290,17 +1277,194 @@
 
       showToast(`Hiển thị ${loData.features.length} lô cây`, '✅');
     }
+     // ==================== EXPORT MAP FUNCTIONS ====================
+    function toggleExportMenu() {
+      const menu = document.getElementById('exportMenu');
+      menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+      
+      // Đóng menu khi click bên ngoài
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.export-btn') && !e.target.closest('.export-menu')) {
+          menu.style.display = 'none';
+        }
+      }, { once: true });
+    }
+
+    function exportMapAsImage() {
+      const menu = document.getElementById('exportMenu');
+      menu.style.display = 'none';
+      
+      showToast('Đang xuất bản đồ...', '⏳');
+      
+      const mapContainer = document.querySelector('.map-wrapper');
+      
+      html2canvas(mapContainer, {
+        backgroundColor: '#0f172a',
+        scale: 2,
+        useCORS: true,
+        allowTaint: true
+      }).then(canvas => {
+        const link = document.createElement('a');
+        link.href = canvas.toDataURL('image/png');
+        link.download = `ban-do-cao-su-${new Date().toISOString().split('T')[0]}.png`;
+        link.click();
+        showToast('Xuất hình ảnh thành công!', '✅');
+      }).catch(err => {
+        console.error('Export image error:', err);
+        showToast('Lỗi xuất hình ảnh', '❌');
+      });
+    }
+
+    function exportMapAsPDF() {
+      const menu = document.getElementById('exportMenu');
+      menu.style.display = 'none';
+      
+      showToast('Đang xuất PDF...', '⏳');
+      
+      const mapContainer = document.querySelector('.map-wrapper');
+      
+      html2canvas(mapContainer, {
+        backgroundColor: '#0f172a',
+        scale: 2,
+        useCORS: true,
+        allowTaint: true
+      }).then(canvas => {
+        const imgData = canvas.toDataURL('image/png');
+        const { jsPDF } = window.jspdf;
+        
+        // Tính toán kích thước để giữ tỷ lệ
+        const width = canvas.width;
+        const height = canvas.height;
+        const aspectRatio = width / height;
+        
+        let pdfWidth = 210; // A4 width in mm
+        let pdfHeight = pdfWidth / aspectRatio;
+        
+        // Nếu quá dài, điều chỉnh
+        if (pdfHeight > 297) { // A4 max height
+          pdfHeight = 297;
+          pdfWidth = pdfHeight * aspectRatio;
+        }
+        
+        const pdf = new jsPDF({
+          orientation: pdfHeight > pdfWidth ? 'portrait' : 'landscape',
+          unit: 'mm',
+          format: [pdfWidth, pdfHeight]
+        });
+        
+        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+        pdf.save(`ban-do-cao-su-${new Date().toISOString().split('T')[0]}.pdf`);
+        showToast('Xuất PDF thành công!', '✅');
+      }).catch(err => {
+        console.error('Export PDF error:', err);
+        showToast('Lỗi xuất PDF', '❌');
+      });
+    }
 
     // ==================== KHỞI CHẠY ====================
     window.addEventListener('load', initDashMap);
     
-    // Gắn event listener cho filter dropdowns
     document.addEventListener('DOMContentLoaded', () => {
       const filterSelects = document.querySelectorAll('select[name="doi"], select[name="nam_trong"], select[name="giong"]');
       filterSelects.forEach(select => {
         select.addEventListener('change', applyMapFilters);
       });
     });
+
+    // ==================== EXPORT MAP FUNCTIONS ====================
+    function toggleExportMenu() {
+      const menu = document.getElementById('exportMenu');
+      menu.classList.toggle('show');
+    }
+
+    // Close menu when clicking outside
+    document.addEventListener('click', (e) => {
+      const exportDropdown = document.querySelector('.export-dropdown');
+      if (!exportDropdown.contains(e.target)) {
+        document.getElementById('exportMenu').classList.remove('show');
+      }
+    });
+
+    function exportMapAsImage() {
+      const mapElement = document.getElementById('dashMap');
+      showToast('Đang xuất bản đồ thành hình ảnh...', '⏳');
+      
+      html2canvas(mapElement, {
+        backgroundColor: '#0f172a',
+        scale: 2,
+        logging: false,
+        useCORS: true,
+        allowTaint: true
+      }).then(canvas => {
+        const link = document.createElement('a');
+        link.href = canvas.toDataURL('image/png');
+        link.download = `ban-do-cao-su-${new Date().toISOString().split('T')[0]}.png`;
+        link.click();
+        showToast('Xuất bản đồ thành công!', '✅');
+        document.getElementById('exportMenu').classList.remove('show');
+      }).catch(error => {
+        console.error('Export error:', error);
+        showToast('Lỗi khi xuất bản đồ', '❌');
+      });
+    }
+
+    function exportMapAsPDF() {
+      const mapElement = document.getElementById('dashMap');
+      showToast('Đang xuất bản đồ thành PDF...', '⏳');
+      
+      html2canvas(mapElement, {
+        backgroundColor: '#0f172a',
+        scale: 2,
+        logging: false,
+        useCORS: true,
+        allowTaint: true
+      }).then(canvas => {
+        const mapWidth = mapElement.offsetWidth;
+        const mapHeight = mapElement.offsetHeight;
+        const imgData = canvas.toDataURL('image/png');
+        
+        // Calculate dimensions for PDF (landscape orientation)
+        const pdfWidth = 297; // A4 landscape width in mm
+        const pdfHeight = 210; // A4 landscape height in mm
+        const ratio = mapWidth / mapHeight;
+        
+        let finalWidth = pdfWidth;
+        let finalHeight = pdfWidth / ratio;
+        
+        if (finalHeight > pdfHeight) {
+          finalHeight = pdfHeight;
+          finalWidth = pdfHeight * ratio;
+        }
+        
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({
+          orientation: 'landscape',
+          unit: 'mm',
+          format: 'a4'
+        });
+        
+        const xOffset = (pdfWidth - finalWidth) / 2;
+        const yOffset = (pdfHeight - finalHeight) / 2;
+        
+        pdf.addImage(imgData, 'PNG', xOffset, yOffset, finalWidth, finalHeight);
+        
+        // Add title and metadata
+        pdf.setFontSize(16);
+        pdf.text('Bản Đồ Vườn Cây Cao Su', pdfWidth / 2, 15, { align: 'center' });
+        
+        pdf.setFontSize(10);
+        pdf.setTextColor(150);
+        pdf.text(`Xuất ngày: ${new Date().toLocaleDateString('vi-VN')}`, pdfWidth / 2, 20, { align: 'center' });
+        pdf.text('Xã Kraya, Huyện Santuk, Kampong Thom', pdfWidth / 2, 25, { align: 'center' });
+        
+        pdf.save(`ban-do-cao-su-${new Date().toISOString().split('T')[0]}.pdf`);
+        showToast('Xuất PDF thành công!', '✅');
+        document.getElementById('exportMenu').classList.remove('show');
+      }).catch(error => {
+        console.error('Export error:', error);
+        showToast('Lỗi khi xuất PDF', '❌');
+      });
+    }
   </script>
 
 </body>
