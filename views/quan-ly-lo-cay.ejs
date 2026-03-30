@@ -671,83 +671,140 @@ tbody tr:last-child td{border-bottom:none;}
     </div>
 
     <!-- Tab Đơn vị -->
-    <div id="tab-donvi" class="tab-content">
-      <div class="table-container">
-        <button class="btn-add" id="btnAddDonVi" style="margin-bottom:16px;"><i class="fas fa-plus"></i>Thêm đơn vị</button>
-        <table>
-          <thead><tr><th>ID</th><th>Dự án</th><th>Đội</th><th>Khu vực</th><th>Hành động</th></tr></thead>
-          <tbody id="donvi-table-body"></tbody>
-        </table>
-      </div>
+<div id="tab-donvi" class="tab-content">
+  <div class="toolbar">
+    <div class="filter-bar" style="grid-template-columns: 1fr 1fr 1fr;">
+      <input type="text" id="dvSearchInput" class="search-box" placeholder="🔍 Tìm kiếm ID, dự án, đội...">
+      <select id="dvDuAnFilter" class="select-filter"><option value="">Tất cả dự án</option></select>
+      <select id="dvKhuVucFilter" class="select-filter"><option value="">Tất cả khu vực</option></select>
     </div>
-
-    <!-- Tab Diện tích -->
-    <div id="tab-dientich" class="tab-content">
-      <div class="table-container">
-        <button class="btn-add" id="btnAddDienTich" style="margin-bottom:16px;"><i class="fas fa-plus"></i>Thêm diện tích</button>
-        <table>
-          <thead><tr><th>ID DT</th><th>ID Lô</th><th>Tên lô</th><th>DT Map</th><th>DT 01/01/25</th><th>DT 01/01/26</th><th>Hành động</th></tr></thead>
-          <tbody id="dientich-table-body"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- Tab Hành chính -->
-    <div id="tab-hanhchinh" class="tab-content">
-      <div class="table-container">
-        <button class="btn-add" id="btnAddHanhChinh" style="margin-bottom:16px;"><i class="fas fa-plus"></i>Thêm hành chính</button>
-        <table>
-          <thead><tr><th>ID HC</th><th>Xã</th><th>Huyện</th><th>Tỉnh</th><th>Hành động</th></tr></thead>
-          <tbody id="hanhchinh-table-body"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- Tab Hiện trạng cây -->
-    <div id="tab-hientrang" class="tab-content">
-      <div class="table-container">
-        <button class="btn-add" id="btnAddHienTrang" style="margin-bottom:16px;"><i class="fas fa-plus"></i>Thêm hiện trạng cây</button>
-        <table>
-          <thead><tr><th>ID HT</th><th>ID Lô</th><th>Tên lô</th><th>Tổng hộ KK</th><th>Cây cao</th><th>Cây chưa cao</th><th>Cây khô mủ</th><th>Cây không PT</th><th>Hố trống</th><th>Mật độ</th><th>Hành động</th></tr></thead>
-          <tbody id="hientrang-table-body"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- Tab Khai thác -->
-    <div id="tab-khaitac" class="tab-content">
-      <div class="table-container">
-        <button class="btn-add" id="btnAddKhaiThac" style="margin-bottom:16px;"><i class="fas fa-plus"></i>Thêm khai thác</button>
-        <table>
-          <thead><tr><th>ID KT</th><th>ID Lô</th><th>Tên lô</th><th>Chế độ cạo</th><th>Phiên cạo</th><th>Nhịp độ</th><th>Năm MC</th><th>Tuổi cạo</th><th>Năm cạo up</th><th>Tình trạng mủ</th><th>Hành động</th></tr></thead>
-          <tbody id="khaitac-table-body"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- Tab Sản lượng -->
-    <div id="tab-sanluong" class="tab-content">
-      <div class="table-container">
-        <button class="btn-add" id="btnAddSanLuong" style="margin-bottom:16px;"><i class="fas fa-plus"></i>Thêm sản lượng</button>
-        <table>
-          <thead><tr><th>ID SL</th><th>ID Lô</th><th>Tên lô</th><th>NS25 kg/ha</th><th>NS25 kg/cây</th><th>NS26 kg/ha</th><th>NS26 kg/cây</th><th>Tổng lát cạo</th><th>Sản lượng</th><th>Phân loại</th><th>Đối tượng</th><th>Tái canh năm</th><th>Hành động</th></tr></thead>
-          <tbody id="sanluong-table-body"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- Tab Thông tin trồng -->
-    <div id="tab-thongtintrong" class="tab-content">
-      <div class="table-container">
-        <button class="btn-add" id="btnAddThongTinTrong" style="margin-bottom:16px;"><i class="fas fa-plus"></i>Thêm thông tin trồng</button>
-        <table>
-          <thead><tr><th>ID TTT</th><th>ID Lô</th><th>Tên lô</th><th>Hạng đất</th><th>Phương pháp trồng</th><th>Khoảng cách</th><th>Mật độ TK</th><th>Hành động</th></tr></thead>
-          <tbody id="thongtintrong-table-body"></tbody>
-        </table>
-      </div>
-    </div>
-
+    <div class="show-info"><i class="fas fa-info-circle"></i> <span>Hiển thị <strong id="dvResultCount">0</strong> đơn vị</span></div>
   </div>
+  <div class="table-container">
+    <table>
+      <thead><tr><th>ID</th><th>Dự án</th><th>Đội</th><th>Khu vực</th><th>Hành động</th></tr></thead>
+      <tbody id="donvi-table-body"></tbody>
+    </table>
+  </div>
+  <button id="btnAddDonVi" class="btn-add" style="margin-top:16px;"><i class="fas fa-plus"></i>Thêm đơn vị</button>
+</div>
+
+<!-- Tab Diện tích -->
+<div id="tab-dientich" class="tab-content">
+  <div class="toolbar">
+    <div class="filter-bar" style="grid-template-columns: 1fr 1fr 1fr 1fr;">
+      <input type="text" id="dtSearchInput" class="search-box" placeholder="🔍 Tìm theo ID lô, tên lô...">
+      <input type="number" id="dtDienTichMin" class="search-box" placeholder="DT map từ (ha)">
+      <input type="number" id="dtDienTichMax" class="search-box" placeholder="DT map đến (ha)">
+      <select id="dtLoFilter" class="select-filter"><option value="">Tất cả lô cây</option></select>
+    </div>
+    <div class="show-info"><i class="fas fa-info-circle"></i> <span>Hiển thị <strong id="dtResultCount">0</strong> diện tích</span></div>
+  </div>
+  <div class="table-container">
+    <table>
+      <thead><tr><th>ID DT</th><th>ID Lô</th><th>Tên lô</th><th>DT Map</th><th>DT 01/01/25</th><th>DT 01/01/26</th><th>Hành động</th></tr></thead>
+      <tbody id="dientich-table-body"></tbody>
+    </table>
+  </div>
+  <button id="btnAddDienTich" class="btn-add" style="margin-top:16px;"><i class="fas fa-plus"></i>Thêm diện tích</button>
+</div>
+
+<!-- Tab Hành chính -->
+<div id="tab-hanhchinh" class="tab-content">
+  <div class="toolbar">
+    <div class="filter-bar" style="grid-template-columns: 1fr 1fr 1fr;">
+      <input type="text" id="hcSearchInput" class="search-box" placeholder="🔍 Tìm theo ID, xã, huyện...">
+      <select id="hcHuyenFilter" class="select-filter"><option value="">Tất cả huyện</option></select>
+      <select id="hcTinhFilter" class="select-filter"><option value="">Tất cả tỉnh</option></select>
+    </div>
+    <div class="show-info"><i class="fas fa-info-circle"></i> <span>Hiển thị <strong id="hcResultCount">0</strong> hành chính</span></div>
+  </div>
+  <div class="table-container">
+    <table>
+      <thead><tr><th>ID HC</th><th>Xã</th><th>Huyện</th><th>Tỉnh</th><th>Hành động</th></tr></thead>
+      <tbody id="hanhchinh-table-body"></tbody>
+    </table>
+  </div>
+  <button id="btnAddHanhChinh" class="btn-add" style="margin-top:16px;"><i class="fas fa-plus"></i>Thêm hành chính</button>
+</div>
+
+<!-- Tab Hiện trạng cây -->
+<div id="tab-hientrang" class="tab-content">
+  <div class="toolbar">
+    <div class="filter-bar" style="grid-template-columns: 1fr 1fr 1fr 1fr;">
+      <input type="text" id="htSearchInput" class="search-box" placeholder="🔍 Tìm theo lô cây...">
+      <select id="htLoFilter" class="select-filter"><option value="">Tất cả lô</option></select>
+      <input type="number" id="htCayCaoMin" class="search-box" placeholder="Cây cao ≥">
+      <input type="number" id="htCayCaoMax" class="search-box" placeholder="Cây cao ≤">
+    </div>
+    <div class="show-info"><i class="fas fa-info-circle"></i> <span>Hiển thị <strong id="htResultCount">0</strong> hiện trạng</span></div>
+  </div>
+  <div class="table-container">
+    <table>
+      <thead><tr><th>ID HT</th><th>ID Lô</th><th>Tên lô</th><th>Tổng hộ KK</th><th>Cây cao</th><th>Cây chưa cao</th><th>Cây khô mủ</th><th>Cây không PT</th><th>Hố trống</th><th>Mật độ</th><th>Hành động</th></tr></thead>
+      <tbody id="hientrang-table-body"></tbody>
+    </table>
+  </div>
+  <button id="btnAddHienTrang" class="btn-add" style="margin-top:16px;"><i class="fas fa-plus"></i>Thêm hiện trạng cây</button>
+</div>
+
+<!-- Tab Khai thác -->
+<div id="tab-khaitac" class="tab-content">
+  <div class="toolbar">
+    <div class="filter-bar" style="grid-template-columns: 1fr 1fr 1fr 1fr;">
+      <input type="text" id="ktSearchInput" class="search-box" placeholder="🔍 Tìm theo lô, chế độ...">
+      <select id="ktCheDoFilter" class="select-filter"><option value="">Chế độ cạo</option></select>
+      <select id="ktPhienFilter" class="select-filter"><option value="">Phiên cạo</option></select>
+      <select id="ktNhipDoFilter" class="select-filter"><option value="">Nhịp độ</option></select>
+    </div>
+    <div class="show-info"><i class="fas fa-info-circle"></i> <span>Hiển thị <strong id="ktResultCount">0</strong> khai thác</span></div>
+  </div>
+  <div class="table-container">
+    <table>
+      <thead><tr><th>ID KT</th><th>ID Lô</th><th>Tên lô</th><th>Chế độ cạo</th><th>Phiên cạo</th><th>Nhịp độ</th><th>Năm MC</th><th>Tuổi cạo</th><th>Năm cạo up</th><th>Tình trạng mủ</th><th>Hành động</th></tr></thead>
+      <tbody id="khaitac-table-body"></tbody>
+    </table>
+  </div>
+  <button id="btnAddKhaiThac" class="btn-add" style="margin-top:16px;"><i class="fas fa-plus"></i>Thêm khai thác</button>
+</div>
+
+<!-- Tab Sản lượng -->
+<div id="tab-sanluong" class="tab-content">
+  <div class="toolbar">
+    <div class="filter-bar" style="grid-template-columns: 1fr 1fr 1fr 1fr;">
+      <input type="text" id="slSearchInput" class="search-box" placeholder="🔍 Tìm theo lô, phân loại...">
+      <select id="slPhanLoaiFilter" class="select-filter"><option value="">Phân loại</option></select>
+      <input type="number" id="slSanLuongMin" class="search-box" placeholder="Sản lượng ≥">
+      <input type="number" id="slSanLuongMax" class="search-box" placeholder="Sản lượng ≤">
+    </div>
+    <div class="show-info"><i class="fas fa-info-circle"></i> <span>Hiển thị <strong id="slResultCount">0</strong> sản lượng</span></div>
+  </div>
+  <div class="table-container">
+    <table>
+      <thead><tr><th>ID SL</th><th>ID Lô</th><th>Tên lô</th><th>NS25 kg/ha</th><th>NS25 kg/cây</th><th>NS26 kg/ha</th><th>NS26 kg/cây</th><th>Tổng lát cạo</th><th>Sản lượng</th><th>Phân loại</th><th>Đối tượng</th><th>Tái canh năm</th><th>Hành động</th></tr></thead>
+      <tbody id="sanluong-table-body"></tbody>
+    </table>
+  </div>
+  <button id="btnAddSanLuong" class="btn-add" style="margin-top:16px;"><i class="fas fa-plus"></i>Thêm sản lượng</button>
+</div>
+
+<!-- Tab Thông tin trồng -->
+<div id="tab-thongtintrong" class="tab-content">
+  <div class="toolbar">
+    <div class="filter-bar" style="grid-template-columns: 1fr 1fr 1fr;">
+      <input type="text" id="ttSearchInput" class="search-box" placeholder="🔍 Tìm theo lô, hạng đất...">
+      <select id="ttHangDatFilter" class="select-filter"><option value="">Hạng đất</option></select>
+      <select id="ttPhuongPhapFilter" class="select-filter"><option value="">Phương pháp trồng</option></select>
+    </div>
+    <div class="show-info"><i class="fas fa-info-circle"></i> <span>Hiển thị <strong id="ttResultCount">0</strong> thông tin trồng</span></div>
+  </div>
+  <div class="table-container">
+    <table>
+      <thead><tr><th>ID TTT</th><th>ID Lô</th><th>Tên lô</th><th>Hạng đất</th><th>Phương pháp trồng</th><th>Khoảng cách</th><th>Mật độ TK</th><th>Hành động</th></tr></thead>
+      <tbody id="thongtintrong-table-body"></tbody>
+    </table>
+  </div>
+  <button id="btnAddThongTinTrong" class="btn-add" style="margin-top:16px;"><i class="fas fa-plus"></i>Thêm thông tin trồng</button>
 </div>
 
 <!-- Modal chung cho các bảng (sử dụng cùng một modal nhưng thay đổi form) -->
@@ -958,25 +1015,412 @@ tbody tr:last-child td{border-bottom:none;}
 
   // ==================== CÁC BẢNG KHÁC ====================
   // Đơn vị
-  async function loadDonVi() {
-    const res = await fetch('/api/don-vi');
-    const data = await res.json();
-    if(data.success) {
-      const tbody = document.getElementById('donvi-table-body');
-      tbody.innerHTML = '';
-      data.data.forEach(dv => {
-        const row = tbody.insertRow();
-        row.insertCell(0).innerText = dv.id_don_vi;
-        row.insertCell(1).innerText = dv.du_an;
-        row.insertCell(2).innerText = dv.doi;
-        row.insertCell(3).innerText = dv.khu_vuc;
-        const actionCell = row.insertCell(4);
-        actionCell.innerHTML = `<button class="btn-dash edit-donvi" data-id="${dv.id_don_vi}">Sửa</button><button class="btn-view delete-donvi" data-id="${dv.id_don_vi}" style="margin-left:8px;">Xóa</button>`;
-      });
-      document.querySelectorAll('.edit-donvi').forEach(btn => btn.addEventListener('click', () => editDonVi(btn.dataset.id)));
-      document.querySelectorAll('.delete-donvi').forEach(btn => btn.addEventListener('click', () => deleteDonVi(btn.dataset.id)));
-    }
+  let donViData = [];
+
+async function loadDonVi() {
+  const res = await fetch('/api/don-vi');
+  const data = await res.json();
+  if (data.success) {
+    donViData = data.data;
+    renderDonViTable(donViData);
+    updateDonViFilters(donViData);
   }
+}
+function renderDonViTable(data) {
+  const tbody = document.getElementById('donvi-table-body');
+  tbody.innerHTML = '';
+  data.forEach(dv => {
+    const row = tbody.insertRow();
+    row.insertCell(0).innerText = dv.id_don_vi;
+    row.insertCell(1).innerText = dv.du_an || '';
+    row.insertCell(2).innerText = dv.doi || '';
+    row.insertCell(3).innerText = dv.khu_vuc || '';
+    const actionCell = row.insertCell(4);
+    actionCell.innerHTML = `
+      <button class="btn-dash" onclick="editDonVi('${dv.id_don_vi}')">Sửa</button>
+      <button class="btn-view" onclick="deleteDonVi('${dv.id_don_vi}')">Xóa</button>
+    `;
+  });
+  document.getElementById('dvResultCount').innerText = data.length;
+}
+function updateDonViFilters(data) {
+  const duAnSet = new Set(data.map(d => d.du_an).filter(v => v));
+  const duAnFilter = document.getElementById('dvDuAnFilter');
+  duAnFilter.innerHTML = '<option value="">Tất cả dự án</option>';
+  duAnSet.forEach(da => { const opt = document.createElement('option'); opt.value = da; opt.textContent = da; duAnFilter.appendChild(opt); });
+
+  const khuVucSet = new Set(data.map(d => d.khu_vuc).filter(v => v));
+  const khuVucFilter = document.getElementById('dvKhuVucFilter');
+  khuVucFilter.innerHTML = '<option value="">Tất cả khu vực</option>';
+  khuVucSet.forEach(kv => { const opt = document.createElement('option'); opt.value = kv; opt.textContent = kv; khuVucFilter.appendChild(opt); });
+}
+function filterDonVi() {
+  const search = document.getElementById('dvSearchInput').value.toLowerCase();
+  const duAn = document.getElementById('dvDuAnFilter').value;
+  const khuVuc = document.getElementById('dvKhuVucFilter').value;
+  const filtered = donViData.filter(dv => {
+    const text = `${dv.id_don_vi} ${dv.du_an} ${dv.doi} ${dv.khu_vuc}`.toLowerCase();
+    const matchSearch = !search || text.includes(search);
+    const matchDuAn = !duAn || dv.du_an === duAn;
+    const matchKhuVuc = !khuVuc || dv.khu_vuc === khuVuc;
+    return matchSearch && matchDuAn && matchKhuVuc;
+  });
+  renderDonViTable(filtered);
+}
+document.getElementById('dvSearchInput')?.addEventListener('input', filterDonVi);
+document.getElementById('dvDuAnFilter')?.addEventListener('change', filterDonVi);
+document.getElementById('dvKhuVucFilter')?.addEventListener('change', filterDonVi);
+//Diện tích
+let dienTichData = [];
+
+async function loadDienTich() {
+  const res = await fetch('/api/dien-tich');
+  const data = await res.json();
+  if (data.success) {
+    dienTichData = data.data;
+    renderDienTichTable(dienTichData);
+    updateDienTichFilters(dienTichData);
+  }
+}
+function renderDienTichTable(data) {
+  const tbody = document.getElementById('dientich-table-body');
+  tbody.innerHTML = '';
+  data.forEach(dt => {
+    const row = tbody.insertRow();
+    row.insertCell(0).innerText = dt.id_dien_tich;
+    row.insertCell(1).innerText = dt.ten_lo || '';
+    row.insertCell(2).innerText = dt.dien_tich_map || '';
+    row.insertCell(3).innerText = dt.dien_tich_010125 || '';
+    row.insertCell(4).innerText = dt.dien_tich_010126 || '';
+    const actionCell = row.insertCell(5);
+    actionCell.innerHTML = `
+      <button class="btn-dash" onclick="editDienTich('${dt.id_dien_tich}')">Sửa</button>
+      <button class="btn-view" onclick="deleteDienTich('${dt.id_dien_tich}')">Xóa</button>
+    `;
+  });
+  document.getElementById('dtResultCount').innerText = data.length;
+}
+function updateDienTichFilters(data) {
+  const loSet = new Set(data.map(d => d.ten_lo).filter(v => v));
+  const loFilter = document.getElementById('dtLoFilter');
+  loFilter.innerHTML = '<option value="">Tất cả lô cây</option>';
+  loSet.forEach(lo => { const opt = document.createElement('option'); opt.value = lo; opt.textContent = lo; loFilter.appendChild(opt); });
+}
+function filterDienTich() {
+  const search = document.getElementById('dtSearchInput').value.toLowerCase();
+  const dtMin = parseFloat(document.getElementById('dtDienTichMin').value);
+  const dtMax = parseFloat(document.getElementById('dtDienTichMax').value);
+  const lo = document.getElementById('dtLoFilter').value;
+  const filtered = dienTichData.filter(dt => {
+    const text = `${dt.id_dien_tich} ${dt.ten_lo}`.toLowerCase();
+    const matchSearch = !search || text.includes(search);
+    const matchLo = !lo || dt.ten_lo === lo;
+    const matchDt = (!dtMin || dt.dien_tich_map >= dtMin) && (!dtMax || dt.dien_tich_map <= dtMax);
+    return matchSearch && matchLo && matchDt;
+  });
+  renderDienTichTable(filtered);
+}
+document.getElementById('dtSearchInput')?.addEventListener('input', filterDienTich);
+document.getElementById('dtDienTichMin')?.addEventListener('input', filterDienTich);
+document.getElementById('dtDienTichMax')?.addEventListener('input', filterDienTich);
+document.getElementById('dtLoFilter')?.addEventListener('change', filterDienTich);
+//Hành chính
+let hanhChinhData = [];
+
+async function loadHanhChinh() {
+  const res = await fetch('/api/hanh-chinh');
+  const data = await res.json();
+  if (data.success) {
+    hanhChinhData = data.data;
+    renderHanhChinhTable(hanhChinhData);
+    updateHanhChinhFilters(hanhChinhData);
+  }
+}
+function renderHanhChinhTable(data) {
+  const tbody = document.getElementById('hanhchinh-table-body');
+  tbody.innerHTML = '';
+  data.forEach(hc => {
+    const row = tbody.insertRow();
+    row.insertCell(0).innerText = hc.id_hc;
+    row.insertCell(1).innerText = hc.xa || '';
+    row.insertCell(2).innerText = hc.huyen || '';
+    row.insertCell(3).innerText = hc.tinh || '';
+    const actionCell = row.insertCell(4);
+    actionCell.innerHTML = `
+      <button class="btn-dash" onclick="editHanhChinh('${hc.id_hc}')">Sửa</button>
+      <button class="btn-view" onclick="deleteHanhChinh('${hc.id_hc}')">Xóa</button>
+    `;
+  });
+  document.getElementById('hcResultCount').innerText = data.length;
+}
+function updateHanhChinhFilters(data) {
+  const huyenSet = new Set(data.map(d => d.huyen).filter(v => v));
+  const huyenFilter = document.getElementById('hcHuyenFilter');
+  huyenFilter.innerHTML = '<option value="">Tất cả huyện</option>';
+  huyenSet.forEach(h => { const opt = document.createElement('option'); opt.value = h; opt.textContent = h; huyenFilter.appendChild(opt); });
+  const tinhSet = new Set(data.map(d => d.tinh).filter(v => v));
+  const tinhFilter = document.getElementById('hcTinhFilter');
+  tinhFilter.innerHTML = '<option value="">Tất cả tỉnh</option>';
+  tinhSet.forEach(t => { const opt = document.createElement('option'); opt.value = t; opt.textContent = t; tinhFilter.appendChild(opt); });
+}
+function filterHanhChinh() {
+  const search = document.getElementById('hcSearchInput').value.toLowerCase();
+  const huyen = document.getElementById('hcHuyenFilter').value;
+  const tinh = document.getElementById('hcTinhFilter').value;
+  const filtered = hanhChinhData.filter(hc => {
+    const text = `${hc.id_hc} ${hc.xa} ${hc.huyen} ${hc.tinh}`.toLowerCase();
+    const matchSearch = !search || text.includes(search);
+    const matchHuyen = !huyen || hc.huyen === huyen;
+    const matchTinh = !tinh || hc.tinh === tinh;
+    return matchSearch && matchHuyen && matchTinh;
+  });
+  renderHanhChinhTable(filtered);
+}
+document.getElementById('hcSearchInput')?.addEventListener('input', filterHanhChinh);
+document.getElementById('hcHuyenFilter')?.addEventListener('change', filterHanhChinh);
+document.getElementById('hcTinhFilter')?.addEventListener('change', filterHanhChinh);
+//Hiện trạng cây
+let hienTrangData = [];
+
+async function loadHienTrangCay() {
+  const res = await fetch('/api/hien-trang-cay');
+  const data = await res.json();
+  if (data.success) {
+    hienTrangData = data.data;
+    renderHienTrangTable(hienTrangData);
+    updateHienTrangFilters(hienTrangData);
+  }
+}
+function renderHienTrangTable(data) {
+  const tbody = document.getElementById('hientrang-table-body');
+  tbody.innerHTML = '';
+  data.forEach(ht => {
+    const row = tbody.insertRow();
+    row.insertCell(0).innerText = ht.id_htc;
+    row.insertCell(1).innerText = ht.ten_lo || '';
+    row.insertCell(2).innerText = ht.tong_ho_kk || '';
+    row.insertCell(3).innerText = ht.cay_cao || '';
+    row.insertCell(4).innerText = ht.cay_chua_cao || '';
+    row.insertCell(5).innerText = ht.cay_kho_mu || '';
+    row.insertCell(6).innerText = ht.cay_khong_pt || '';
+    row.insertCell(7).innerText = ht.ho_trong || '';
+    row.insertCell(8).innerText = ht.mat_do_cc || '';
+    const actionCell = row.insertCell(9);
+    actionCell.innerHTML = `
+      <button class="btn-dash" onclick="editHienTrang('${ht.id_htc}')">Sửa</button>
+      <button class="btn-view" onclick="deleteHienTrang('${ht.id_htc}')">Xóa</button>
+    `;
+  });
+  document.getElementById('htResultCount').innerText = data.length;
+}
+function updateHienTrangFilters(data) {
+  const loSet = new Set(data.map(d => d.ten_lo).filter(v => v));
+  const loFilter = document.getElementById('htLoFilter');
+  loFilter.innerHTML = '<option value="">Tất cả lô</option>';
+  loSet.forEach(lo => { const opt = document.createElement('option'); opt.value = lo; opt.textContent = lo; loFilter.appendChild(opt); });
+}
+function filterHienTrang() {
+  const search = document.getElementById('htSearchInput').value.toLowerCase();
+  const lo = document.getElementById('htLoFilter').value;
+  const cayCaoMin = parseInt(document.getElementById('htCayCaoMin').value);
+  const cayCaoMax = parseInt(document.getElementById('htCayCaoMax').value);
+  const filtered = hienTrangData.filter(ht => {
+    const text = `${ht.id_htc} ${ht.ten_lo}`.toLowerCase();
+    const matchSearch = !search || text.includes(search);
+    const matchLo = !lo || ht.ten_lo === lo;
+    const matchCayCao = (!cayCaoMin || ht.cay_cao >= cayCaoMin) && (!cayCaoMax || ht.cay_cao <= cayCaoMax);
+    return matchSearch && matchLo && matchCayCao;
+  });
+  renderHienTrangTable(filtered);
+}
+document.getElementById('htSearchInput')?.addEventListener('input', filterHienTrang);
+document.getElementById('htLoFilter')?.addEventListener('change', filterHienTrang);
+document.getElementById('htCayCaoMin')?.addEventListener('input', filterHienTrang);
+document.getElementById('htCayCaoMax')?.addEventListener('input', filterHienTrang);
+//Khai thác
+let khaiThacData = [];
+
+async function loadKhaiThac() {
+  const res = await fetch('/api/khai-thac');
+  const data = await res.json();
+  if (data.success) {
+    khaiThacData = data.data;
+    renderKhaiThacTable(khaiThacData);
+    updateKhaiThacFilters(khaiThacData);
+  }
+}
+function renderKhaiThacTable(data) {
+  const tbody = document.getElementById('khaitac-table-body');
+  tbody.innerHTML = '';
+  data.forEach(kt => {
+    const row = tbody.insertRow();
+    row.insertCell(0).innerText = kt.id_kt;
+    row.insertCell(1).innerText = kt.ten_lo || '';
+    row.insertCell(2).innerText = kt.che_do_cao || '';
+    row.insertCell(3).innerText = kt.phien_cao || '';
+    row.insertCell(4).innerText = kt.nhip_do_cao || '';
+    row.insertCell(5).innerText = kt.nam_mc || '';
+    row.insertCell(6).innerText = kt.tuoi_cao || '';
+    row.insertCell(7).innerText = kt.nam_cao_up || '';
+    row.insertCell(8).innerText = kt.tinh_trang_mc || '';
+    const actionCell = row.insertCell(9);
+    actionCell.innerHTML = `
+      <button class="btn-dash" onclick="editKhaiThac('${kt.id_kt}')">Sửa</button>
+      <button class="btn-view" onclick="deleteKhaiThac('${kt.id_kt}')">Xóa</button>
+    `;
+  });
+  document.getElementById('ktResultCount').innerText = data.length;
+}
+function updateKhaiThacFilters(data) {
+  const cheDoSet = new Set(data.map(d => d.che_do_cao).filter(v => v));
+  const cheDoFilter = document.getElementById('ktCheDoFilter');
+  cheDoFilter.innerHTML = '<option value="">Chế độ cạo</option>';
+  cheDoSet.forEach(cd => { const opt = document.createElement('option'); opt.value = cd; opt.textContent = cd; cheDoFilter.appendChild(opt); });
+  const phienSet = new Set(data.map(d => d.phien_cao).filter(v => v));
+  const phienFilter = document.getElementById('ktPhienFilter');
+  phienFilter.innerHTML = '<option value="">Phiên cạo</option>';
+  phienSet.forEach(p => { const opt = document.createElement('option'); opt.value = p; opt.textContent = p; phienFilter.appendChild(opt); });
+  const nhipDoSet = new Set(data.map(d => d.nhip_do_cao).filter(v => v));
+  const nhipDoFilter = document.getElementById('ktNhipDoFilter');
+  nhipDoFilter.innerHTML = '<option value="">Nhịp độ</option>';
+  nhipDoSet.forEach(nd => { const opt = document.createElement('option'); opt.value = nd; opt.textContent = nd; nhipDoFilter.appendChild(opt); });
+}
+function filterKhaiThac() {
+  const search = document.getElementById('ktSearchInput').value.toLowerCase();
+  const cheDo = document.getElementById('ktCheDoFilter').value;
+  const phien = document.getElementById('ktPhienFilter').value;
+  const nhipDo = document.getElementById('ktNhipDoFilter').value;
+  const filtered = khaiThacData.filter(kt => {
+    const text = `${kt.id_kt} ${kt.ten_lo} ${kt.che_do_cao} ${kt.phien_cao} ${kt.nhip_do_cao}`.toLowerCase();
+    const matchSearch = !search || text.includes(search);
+    const matchCheDo = !cheDo || kt.che_do_cao === cheDo;
+    const matchPhien = !phien || kt.phien_cao === phien;
+    const matchNhipDo = !nhipDo || kt.nhip_do_cao === nhipDo;
+    return matchSearch && matchCheDo && matchPhien && matchNhipDo;
+  });
+  renderKhaiThacTable(filtered);
+}
+document.getElementById('ktSearchInput')?.addEventListener('input', filterKhaiThac);
+document.getElementById('ktCheDoFilter')?.addEventListener('change', filterKhaiThac);
+document.getElementById('ktPhienFilter')?.addEventListener('change', filterKhaiThac);
+document.getElementById('ktNhipDoFilter')?.addEventListener('change', filterKhaiThac);
+//Sản lượng
+let sanLuongData = [];
+
+async function loadSanLuong() {
+  const res = await fetch('/api/san-luong');
+  const data = await res.json();
+  if (data.success) {
+    sanLuongData = data.data;
+    renderSanLuongTable(sanLuongData);
+    updateSanLuongFilters(sanLuongData);
+  }
+}
+function renderSanLuongTable(data) {
+  const tbody = document.getElementById('sanluong-table-body');
+  tbody.innerHTML = '';
+  data.forEach(sl => {
+    const row = tbody.insertRow();
+    row.insertCell(0).innerText = sl.id_sl;
+    row.insertCell(1).innerText = sl.ten_lo || '';
+    row.insertCell(2).innerText = sl.ns25_kg_ha || '';
+    row.insertCell(3).innerText = sl.ns25_kg_cay || '';
+    row.insertCell(4).innerText = sl.ns26_kg_ha || '';
+    row.insertCell(5).innerText = sl.ns26_kg_cay || '';
+    row.insertCell(6).innerText = sl.tong_lat_cao || '';
+    row.insertCell(7).innerText = sl.san_luong || '';
+    row.insertCell(8).innerText = sl.phan_loai || '';
+    row.insertCell(9).innerText = sl.doi_tuong || '';
+    row.insertCell(10).innerText = sl.tai_canh_nam || '';
+    const actionCell = row.insertCell(11);
+    actionCell.innerHTML = `
+      <button class="btn-dash" onclick="editSanLuong('${sl.id_sl}')">Sửa</button>
+      <button class="btn-view" onclick="deleteSanLuong('${sl.id_sl}')">Xóa</button>
+    `;
+  });
+  document.getElementById('slResultCount').innerText = data.length;
+}
+function updateSanLuongFilters(data) {
+  const phanLoaiSet = new Set(data.map(d => d.phan_loai).filter(v => v));
+  const phanLoaiFilter = document.getElementById('slPhanLoaiFilter');
+  phanLoaiFilter.innerHTML = '<option value="">Phân loại</option>';
+  phanLoaiSet.forEach(pl => { const opt = document.createElement('option'); opt.value = pl; opt.textContent = pl; phanLoaiFilter.appendChild(opt); });
+}
+function filterSanLuong() {
+  const search = document.getElementById('slSearchInput').value.toLowerCase();
+  const phanLoai = document.getElementById('slPhanLoaiFilter').value;
+  const slMin = parseFloat(document.getElementById('slSanLuongMin').value);
+  const slMax = parseFloat(document.getElementById('slSanLuongMax').value);
+  const filtered = sanLuongData.filter(sl => {
+    const text = `${sl.id_sl} ${sl.ten_lo} ${sl.phan_loai}`.toLowerCase();
+    const matchSearch = !search || text.includes(search);
+    const matchPhanLoai = !phanLoai || sl.phan_loai === phanLoai;
+    const matchSL = (!slMin || sl.san_luong >= slMin) && (!slMax || sl.san_luong <= slMax);
+    return matchSearch && matchPhanLoai && matchSL;
+  });
+  renderSanLuongTable(filtered);
+}
+document.getElementById('slSearchInput')?.addEventListener('input', filterSanLuong);
+document.getElementById('slPhanLoaiFilter')?.addEventListener('change', filterSanLuong);
+document.getElementById('slSanLuongMin')?.addEventListener('input', filterSanLuong);
+document.getElementById('slSanLuongMax')?.addEventListener('input', filterSanLuong);
+//Thông tin trồng
+let thongTinTrongData = [];
+
+async function loadThongTinTrong() {
+  const res = await fetch('/api/thong-tin-trong');
+  const data = await res.json();
+  if (data.success) {
+    thongTinTrongData = data.data;
+    renderThongTinTrongTable(thongTinTrongData);
+    updateThongTinTrongFilters(thongTinTrongData);
+  }
+}
+function renderThongTinTrongTable(data) {
+  const tbody = document.getElementById('thongtintrong-table-body');
+  tbody.innerHTML = '';
+  data.forEach(tt => {
+    const row = tbody.insertRow();
+    row.insertCell(0).innerText = tt.id_ttt;
+    row.insertCell(1).innerText = tt.ten_lo || '';
+    row.insertCell(2).innerText = tt.hang_dat || '';
+    row.insertCell(3).innerText = tt.phuong_phap_trong || '';
+    row.insertCell(4).innerText = tt.khoang_cach_trong || '';
+    row.insertCell(5).innerText = tt.mat_do_tk || '';
+    const actionCell = row.insertCell(6);
+    actionCell.innerHTML = `
+      <button class="btn-dash" onclick="editThongTinTrong('${tt.id_ttt}')">Sửa</button>
+      <button class="btn-view" onclick="deleteThongTinTrong('${tt.id_ttt}')">Xóa</button>
+    `;
+  });
+  document.getElementById('ttResultCount').innerText = data.length;
+}
+function updateThongTinTrongFilters(data) {
+  const hangDatSet = new Set(data.map(d => d.hang_dat).filter(v => v));
+  const hangDatFilter = document.getElementById('ttHangDatFilter');
+  hangDatFilter.innerHTML = '<option value="">Hạng đất</option>';
+  hangDatSet.forEach(hd => { const opt = document.createElement('option'); opt.value = hd; opt.textContent = hd; hangDatFilter.appendChild(opt); });
+  const phuongPhapSet = new Set(data.map(d => d.phuong_phap_trong).filter(v => v));
+  const phuongPhapFilter = document.getElementById('ttPhuongPhapFilter');
+  phuongPhapFilter.innerHTML = '<option value="">Phương pháp trồng</option>';
+  phuongPhapSet.forEach(pp => { const opt = document.createElement('option'); opt.value = pp; opt.textContent = pp; phuongPhapFilter.appendChild(opt); });
+}
+function filterThongTinTrong() {
+  const search = document.getElementById('ttSearchInput').value.toLowerCase();
+  const hangDat = document.getElementById('ttHangDatFilter').value;
+  const phuongPhap = document.getElementById('ttPhuongPhapFilter').value;
+  const filtered = thongTinTrongData.filter(tt => {
+    const text = `${tt.id_ttt} ${tt.ten_lo} ${tt.hang_dat} ${tt.phuong_phap_trong}`.toLowerCase();
+    const matchSearch = !search || text.includes(search);
+    const matchHangDat = !hangDat || tt.hang_dat === hangDat;
+    const matchPhuongPhap = !phuongPhap || tt.phuong_phap_trong === phuongPhap;
+    return matchSearch && matchHangDat && matchPhuongPhap;
+  });
+  renderThongTinTrongTable(filtered);
+}
+document.getElementById('ttSearchInput')?.addEventListener('input', filterThongTinTrong);
+document.getElementById('ttHangDatFilter')?.addEventListener('change', filterThongTinTrong);
+document.getElementById('ttPhuongPhapFilter')?.addEventListener('change', filterThongTinTrong);
   function editDonVi(id) {
     // Lấy chi tiết và hiển thị modal
     fetch(`/api/don-vi/${id}`).then(res => res.json()).then(data => {
