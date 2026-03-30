@@ -576,6 +576,180 @@
       background: rgba(30, 41, 59, 0.9);
     }
 
+    /* ============= LAYER PANEL ============= */
+    .map-layer-panel {
+      position: absolute;
+      top: 32px;
+      right: 32px;
+      background: var(--surface);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      width: 280px;
+      max-height: 60vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow-lg);
+      z-index: 400;
+      display: none;
+    }
+
+    .map-layer-panel.show {
+      display: block;
+      animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .mlp-header {
+      padding: 16px;
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--text-primary);
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .mlp-item {
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: var(--transition);
+      font-size: 12px;
+      color: var(--text-secondary);
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .mlp-item:last-child {
+      border-bottom: none;
+    }
+
+    .mlp-item:hover {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--primary);
+    }
+
+    .mlp-check {
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--border);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: bold;
+      color: white;
+      transition: var(--transition);
+    }
+
+    .mlp-check.on {
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+
+    .mlp-check.off {
+      background: transparent;
+      border-color: var(--border);
+    }
+
+    .mlp-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* ============= SEARCH PANEL ============= */
+    .map-search-panel {
+      position: absolute;
+      top: 32px;
+      left: 32px;
+      background: var(--surface);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      width: 320px;
+      max-height: 60vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow-lg);
+      z-index: 400;
+      display: none;
+    }
+
+    .map-search-panel.show {
+      display: block;
+      animation: slideIn 0.3s ease;
+    }
+
+    .msp-input {
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .msp-input svg {
+      flex-shrink: 0;
+    }
+
+    .msp-input input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text-primary);
+      font-size: 12px;
+      outline: none;
+    }
+
+    .msp-input input::placeholder {
+      color: var(--text-muted);
+    }
+
+    #mapSearchResults {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 8px;
+    }
+
+    .msp-result {
+      padding: 10px 12px;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      font-size: 11px;
+      transition: var(--transition);
+      border-left: 3px solid transparent;
+    }
+
+    .msp-result:hover {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--primary);
+      border-left-color: var(--primary);
+    }
+
+    .msp-result strong {
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .msp-result-desc {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
     /* ============= SCROLLBAR ============= */
     ::-webkit-scrollbar {
       width: 6px;
@@ -780,6 +954,12 @@
           <button class="map-control-btn" onclick="toggleLayerList()" title="Danh sách lớp">
             <i class="fas fa-bars"></i>
           </button>
+          <button class="map-control-btn" onclick="togglePanel('map-search-panel')" title="Tìm kiếm lô">
+            <i class="fas fa-search"></i>
+          </button>
+          <button class="map-control-btn" onclick="togglePanel('map-layer-panel')" title="Lớp bản đồ">
+            <i class="fas fa-layer-group"></i>
+          </button>
         </div>
 
         <!-- LEGEND PANEL -->
@@ -798,6 +978,50 @@
               <span class="legend-color" style="background:#f59e0b;"></span>
               <span>Trưởng thành</span>
             </div>
+          </div>
+        </div>
+
+        <!-- LAYER PANEL -->
+        <div class="map-layer-panel" id="map-layer-panel">
+          <div class="mlp-header">
+            Lớp bản đồ
+            <span style="cursor:pointer;color:var(--text-muted)" onclick="togglePanel('map-layer-panel')">✕</span>
+          </div>
+          <div class="mlp-item" onclick="toggleLayer(this,'lots')">
+            <div class="mlp-check on" id="lc-lots">✓</div>
+            <div class="mlp-dot" style="background:#00d68f"></div>
+            Lô vườn cây cao su (509 lô)
+          </div>
+          <div class="mlp-item" onclick="toggleLayer(this,'background-layer')">
+            <div class="mlp-check on" id="lc-background-layer">✓</div>
+            <div class="mlp-dot" style="background:#d4dce8"></div>
+            Lớp nền (509 lô)
+          </div>
+          <div class="mlp-item" onclick="toggleLayer(this,'boundary')">
+            <div class="mlp-check on" id="lc-boundary">✓</div>
+            <div class="mlp-dot" style="background:#ffffff55"></div>
+            Ranh giới xã Kraya
+          </div>
+          <div class="mlp-item" onclick="toggleLayer(this,'label')">
+            <div class="mlp-check on" id="lc-label">✓</div>
+            <div class="mlp-dot" style="background:#00b4ff"></div>
+            Nhãn tên lô (zoom ≥ 12)
+          </div>
+          <div class="mlp-item" onclick="toggleLayer(this,'satellite')">
+            <div class="mlp-check on" id="lc-satellite">✓</div>
+            <div class="mlp-dot" style="background:#888"></div>
+            Ảnh vệ tinh Esri
+          </div>
+        </div>
+
+        <!-- SEARCH PANEL -->
+        <div class="map-search-panel" id="map-search-panel">
+          <div class="msp-input">
+            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="#5a6a8a" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <input type="text" placeholder="Tên lô, mã, giống, năm trồng..." id="mapSearchInput" oninput="mapSearch(this.value)">
+          </div>
+          <div id="mapSearchResults">
+            <div class="msp-result" style="color:var(--text-muted);font-style:italic">Nhập từ khóa để tìm kiếm lô...</div>
           </div>
         </div>
       </div>
@@ -1290,6 +1514,134 @@
 
       showToast(`Hiển thị ${loData.features.length} lô cây`, '✅');
     }
+
+    // ==================== LAYER PANEL & SEARCH ====================
+    function togglePanel(panelId) {
+      const panel = document.getElementById(panelId);
+      if (panel) {
+        panel.classList.toggle('show');
+        console.log(`Toggled panel: ${panelId}`);
+      }
+    }
+
+    function toggleLayer(element, layerId) {
+      const checkbox = element.querySelector('.mlp-check');
+      if (checkbox) {
+        checkbox.classList.toggle('on');
+        checkbox.classList.toggle('off');
+        
+        const isChecked = checkbox.classList.contains('on');
+        console.log(`Layer ${layerId}: ${isChecked ? 'ON' : 'OFF'}`);
+
+        // Xử lý từng layer
+        if (layerId === 'lots' && thematicLayer) {
+          if (isChecked) {
+            dashMap.addLayer(thematicLayer);
+          } else {
+            dashMap.removeLayer(thematicLayer);
+          }
+          showToast(isChecked ? 'Hiển thị lô cây' : 'Ẩn lô cây', '👁️');
+        } else if (layerId === 'boundary' && boundaryOuterLayer) {
+          if (isChecked) {
+            dashMap.addLayer(boundaryOuterLayer);
+          } else {
+            dashMap.removeLayer(boundaryOuterLayer);
+          }
+          showToast(isChecked ? 'Hiển thị ranh giới' : 'Ẩn ranh giới', '👁️');
+        } else if (layerId === 'background-layer') {
+          showToast(isChecked ? 'Hiển thị lớp nền' : 'Ẩn lớp nền', '👁️');
+        } else if (layerId === 'label') {
+          showToast(isChecked ? 'Hiển thị nhãn tên' : 'Ẩn nhãn tên', '🏷️');
+        } else if (layerId === 'satellite') {
+          // Chuyển basemap
+          if (isChecked) {
+            if (basemapLayers[currentBasemap]) dashMap.removeLayer(basemapLayers[currentBasemap]);
+            currentBasemap = 'satellite';
+            basemapLayers.satellite.addTo(dashMap);
+            basemapLayers.satellite.bringToBack();
+          } else {
+            if (basemapLayers.satellite) dashMap.removeLayer(basemapLayers.satellite);
+            currentBasemap = 'osm';
+            basemapLayers.osm.addTo(dashMap);
+            basemapLayers.osm.bringToBack();
+          }
+          showToast(isChecked ? 'Chuyển sang vệ tinh' : 'Chuyển sang bản đồ', '🗺️');
+        }
+      }
+    }
+
+    function mapSearch(query) {
+      const resultsDiv = document.getElementById('mapSearchResults');
+      
+      if (!query.trim()) {
+        resultsDiv.innerHTML = '<div class="msp-result" style="color:var(--text-muted);font-style:italic">Nhập từ khóa để tìm kiếm lô...</div>';
+        return;
+      }
+
+      const queryLower = query.toLowerCase();
+      const results = searchData.filter(item => {
+        return (
+          (item.name && item.name.toLowerCase().includes(queryLower)) ||
+          (item.id && item.id.toString().includes(query)) ||
+          (item.giong && item.giong.toLowerCase().includes(queryLower)) ||
+          (item.nam_trong && item.nam_trong.toString().includes(query)) ||
+          (item.doi && item.doi.toLowerCase().includes(queryLower))
+        );
+      }).slice(0, 8);
+
+      if (results.length === 0) {
+        resultsDiv.innerHTML = '<div class="msp-result" style="color:var(--text-muted)">Không tìm thấy kết quả</div>';
+      } else {
+        resultsDiv.innerHTML = results.map((item, idx) => `
+          <div class="msp-result" onclick="selectSearchResult(${idx}, ${JSON.stringify(item).replace(/"/g, '&quot;')})">
+            <strong>📍 Lô ${item.id}: ${item.name || 'N/A'}</strong>
+            <div class="msp-result-desc">
+              ${item.doi ? `Đội: ${item.doi} | ` : ''}
+              ${item.giong ? `Giống: ${item.giong}` : ''}
+            </div>
+          </div>
+        `).join('');
+      }
+    }
+
+    function selectSearchResult(idx, item) {
+      console.log('Selected result:', item);
+      
+      if (item.geometry) {
+        const geoJSON = L.geoJSON({
+          type: 'Feature',
+          geometry: item.geometry
+        });
+        const bounds = geoJSON.getBounds();
+        dashMap.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 });
+      }
+
+      showToast(`Đã chọn lô ${item.id}: ${item.name}`, '✅');
+      
+      // Đóng search panel sau khi chọn
+      document.getElementById('mapSearchInput').value = '';
+      document.getElementById('mapSearchResults').innerHTML = '<div class="msp-result" style="color:var(--text-muted);font-style:italic">Nhập từ khóa để tìm kiếm lô...</div>';
+    }
+
+    // Hiện/ẩn search panel khi click vào map
+    document.addEventListener('DOMContentLoaded', () => {
+      const mapWrapper = document.querySelector('.map-wrapper');
+      const searchPanel = document.getElementById('map-search-panel');
+      
+      if (mapWrapper && searchPanel) {
+        mapWrapper.addEventListener('click', (e) => {
+          // Chỉ hiện search panel nếu click vào map, không phải vào UI elements
+          if (e.target === mapWrapper || e.target.id === 'dashMap') {
+            searchPanel.classList.add('show');
+          }
+        });
+
+        // Ẩn khi click vào input hoặc results
+        searchPanel.addEventListener('click', (e) => {
+          e.stopPropagation();
+        });
+      }
+    });
 
     // ==================== KHỞI CHẠY ====================
     window.addEventListener('load', initDashMap);

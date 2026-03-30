@@ -184,10 +184,10 @@
 
     /* ============= SIDEBAR ============= */
     .sidebar {
-      width: 260px;
+      width: 220px;
       background: var(--surface);
       border-right: 1px solid var(--border-light);
-      padding: 24px 0;
+      padding: 20px 0;
       overflow-y: auto;
       flex-shrink: 0;
       display: flex;
@@ -195,12 +195,12 @@
     }
 
     .sidebar-header {
-      padding: 0 24px;
-      margin-bottom: 24px;
+      padding: 0 16px;
+      margin-bottom: 20px;
     }
 
     .sidebar-header h3 {
-      font-size: 12px;
+      font-size: 11px;
       color: var(--text-muted);
       font-weight: 700;
       text-transform: uppercase;
@@ -210,7 +210,7 @@
     .sidebar nav {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 4px;
       padding: 0 12px;
       flex: 1;
     }
@@ -219,12 +219,12 @@
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 12px 16px;
+      padding: 10px 14px;
       color: var(--text-secondary);
       text-decoration: none;
       border-radius: var(--radius-md);
       transition: var(--transition);
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 500;
       position: relative;
     }
@@ -257,13 +257,13 @@
     }
 
     .sidebar a i {
-      font-size: 18px;
-      width: 20px;
+      font-size: 16px;
+      width: 18px;
       text-align: center;
     }
 
     .sidebar-footer {
-      padding: 16px 12px;
+      padding: 12px 12px;
       border-top: 1px solid var(--border-light);
       margin-top: auto;
     }
@@ -284,145 +284,140 @@
       overflow: hidden;
     }
 
-    /* ============= MAP TOPBAR ============= */
-    .map-topbar {
-      background: var(--surface);
+    .top-bar {
+      height: 64px;
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.6), rgba(15, 23, 42, 0.8));
       border-bottom: 1px solid var(--border-light);
-      padding: 16px 32px;
+      padding: 0 32px;
       display: flex;
       align-items: center;
-      gap: 20px;
-      box-shadow: var(--shadow-sm);
+      justify-content: space-between;
+      gap: 24px;
     }
 
-    .map-title {
+    .top-bar-title {
       display: flex;
-      align-items: center;
-      gap: 10px;
-      font-weight: 600;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .top-bar-title h2 {
+      font-size: 28px;
+      font-weight: 700;
       color: var(--text-primary);
-      font-size: 15px;
+      font-family: 'Poppins', sans-serif;
     }
 
-    .map-title i {
-      color: var(--primary);
-      font-size: 18px;
+    .top-bar-title p {
+      font-size: 12px;
+      color: var(--text-muted);
     }
 
-    .view-chips {
+    .top-bar-controls {
       display: flex;
-      gap: 8px;
-      flex: 1;
-      margin-left: 20px;
-    }
-
-    .chip {
-      padding: 8px 16px;
-      background: var(--surface-light);
-      color: var(--text-secondary);
-      border: 1px solid var(--border-light);
-      border-radius: 20px;
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: 600;
-      transition: var(--transition);
-      white-space: nowrap;
-    }
-
-    .chip:hover {
-      border-color: var(--primary);
-      color: var(--primary);
-      background: rgba(16, 185, 129, 0.1);
-    }
-
-    .chip.active {
-      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-      border-color: var(--primary);
-      color: white;
-      box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
-    }
-
-    .map-actions {
-      display: flex;
-      gap: 8px;
+      align-items: center;
+      gap: 16px;
       margin-left: auto;
     }
 
-    .btn-action {
+    .export-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
       padding: 8px 16px;
-      background: rgba(15, 23, 42, 0.8);
-      border: 1px solid var(--border-light);
+      background: rgba(15, 23, 42, 0.6);
       color: var(--text-secondary);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      font-size: 13px;
+      transition: var(--transition);
+    }
+
+    .export-btn:hover {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--primary);
+      border-color: var(--primary);
+    }
+
+    .add-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: var(--primary);
+      color: white;
+      border: none;
       border-radius: var(--radius-md);
       cursor: pointer;
       font-size: 13px;
       font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 6px;
       transition: var(--transition);
     }
 
-    .btn-action:hover {
-      border-color: var(--secondary);
-      color: var(--secondary);
-      background: rgba(14, 165, 233, 0.1);
+    .add-btn:hover {
+      background: var(--primary-dark);
     }
 
     /* ============= FILTER BAR ============= */
     .filter-bar {
-      background: rgba(51, 65, 85, 0.5);
+      height: auto;
+      background: rgba(30, 41, 59, 0.5);
       border-bottom: 1px solid var(--border-light);
-      padding: 14px 32px;
+      padding: 16px 32px;
       display: flex;
       align-items: center;
-      gap: 24px;
-      flex-wrap: wrap;
-      backdrop-filter: blur(10px);
+      gap: 16px;
+      overflow-x: auto;
     }
 
-    .filter-group {
+    .filter-badge {
       display: flex;
       align-items: center;
-      gap: 10px;
-      font-size: 13px;
-    }
-
-    .filter-group label {
-      color: var(--text-muted);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      white-space: nowrap;
-    }
-
-    .filter-group select {
-      background: var(--surface);
-      border: 1px solid var(--border-light);
-      color: var(--text-primary);
+      gap: 8px;
       padding: 8px 12px;
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--primary);
       border-radius: var(--radius-md);
-      font-size: 13px;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      font-size: 12px;
+      font-weight: 500;
+      white-space: nowrap;
       cursor: pointer;
       transition: var(--transition);
-      min-width: 150px;
     }
 
-    .filter-group select:hover {
+    .filter-badge:hover {
+      background: rgba(16, 185, 129, 0.25);
+    }
+
+    .filter-badge.active {
+      background: var(--primary);
+      color: white;
+    }
+
+    .filter-select {
+      padding: 6px 12px;
+      background: rgba(30, 41, 59, 0.6);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .filter-select:hover {
       border-color: var(--primary);
+      color: var(--text-primary);
     }
 
-    .filter-group select:focus {
-      outline: none;
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-    }
-
-    /* ============= MAP AREA ============= */
-    .map-area {
+    /* ============= MAP CONTAINER ============= */
+    .map-wrapper {
       flex: 1;
       position: relative;
       overflow: hidden;
+      background: var(--bg-dark);
     }
 
     #dashMap {
@@ -430,857 +425,161 @@
       height: 100%;
     }
 
-    /* ============= MAP CONTROLS ============= */
-    .map-controls {
+    .map-control-panel {
       position: absolute;
-      top: 20px;
-      left: 20px;
-      z-index: 500;
-      background: rgba(30, 41, 59, 0.95);
-      border: 1px solid var(--border-light);
-      border-radius: var(--radius-lg);
-      padding: 12px;
+      bottom: 32px;
+      right: 32px;
       display: flex;
       flex-direction: column;
-      gap: 8px;
-      backdrop-filter: blur(10px);
-      box-shadow: var(--shadow-lg);
+      gap: 12px;
+      z-index: 400;
     }
 
-    .map-btn {
-      width: 40px;
-      height: 40px;
+    .map-control-btn {
+      width: 44px;
+      height: 44px;
       background: var(--surface);
       border: 1px solid var(--border-light);
-      color: var(--text-secondary);
       border-radius: var(--radius-md);
+      color: var(--text-secondary);
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: var(--transition);
       font-size: 16px;
+      transition: var(--transition);
+      box-shadow: var(--shadow-md);
     }
 
-    .map-btn:hover {
+    .map-control-btn:hover {
       background: var(--primary);
-      border-color: var(--primary);
       color: white;
-      box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
-      transform: translateY(-2px);
+      border-color: var(--primary);
     }
 
-    .map-btn.active {
-      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-      border-color: var(--primary);
-      color: white;
-      box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
-    }
-
-    /* ============= MAP INFO ============= */
-    .map-info {
-      position: absolute;
-      bottom: 20px;
-      right: 20px;
-      z-index: 600;
-      background: rgba(30, 41, 59, 0.95);
-      border: 1px solid var(--border-light);
-      padding: 12px 16px;
+    .zoom-slider-container {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: center;
+      background: var(--surface);
+      padding: 12px 8px;
       border-radius: var(--radius-md);
+      border: 1px solid var(--border-light);
+      box-shadow: var(--shadow-md);
+    }
+
+    .zoom-slider {
+      width: 30px;
+      height: 120px;
+      writing-mode: bt-lr;
+      -webkit-appearance: slider-vertical;
+      -moz-appearance: slider-vertical;
+      appearance: slider-vertical;
+    }
+
+    .zoom-label {
       font-size: 12px;
-      color: var(--text-secondary);
-      backdrop-filter: blur(10px);
-      box-shadow: var(--shadow-lg);
-      font-family: 'Monaco', 'Courier New', monospace;
-      min-width: 280px;
-    }
-
-    .coord-row {
-      display: flex;
-      gap: 16px;
-      margin: 4px 0;
-    }
-
-    .coord-item {
-      display: flex;
-      gap: 6px;
-    }
-
-    .coord-label {
-      color: var(--primary);
       font-weight: 600;
-    }
-
-    .coord-value {
-      color: var(--text-primary);
-      font-weight: 500;
+      color: var(--primary);
+      text-align: center;
+      min-width: 24px;
     }
 
     /* ============= LEGEND ============= */
-    .legend {
+    .legend-panel {
       position: absolute;
-      bottom: 20px;
-      left: 20px;
-      z-index: 600;
-      background: rgba(30, 41, 59, 0.95);
+      bottom: 32px;
+      left: 32px;
+      background: var(--surface);
       border: 1px solid var(--border-light);
       border-radius: var(--radius-lg);
       padding: 16px;
-      width: 300px;
-      backdrop-filter: blur(10px);
       box-shadow: var(--shadow-lg);
-      animation: slideUp 0.4s ease-out;
+      max-width: 280px;
+      z-index: 400;
+      max-height: 50vh;
+      overflow-y: auto;
     }
 
-    @keyframes slideUp {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .legend h4 {
-      margin-bottom: 14px;
-      color: var(--primary);
+    .legend-panel h4 {
       font-size: 14px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+      font-weight: 600;
     }
 
     .legend-items {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 10px;
     }
 
     .legend-item {
       display: flex;
       align-items: center;
       gap: 10px;
-      font-size: 13px;
+      font-size: 12px;
       color: var(--text-secondary);
-      transition: var(--transition);
-      padding: 8px 10px;
-      border-radius: var(--radius-sm);
-    }
-
-    .legend-item:hover {
-      background: rgba(16, 185, 129, 0.1);
-      color: var(--text-primary);
     }
 
     .legend-color {
-      width: 18px;
-      height: 18px;
-      border-radius: 4px;
+      width: 16px;
+      height: 16px;
+      border-radius: var(--radius-sm);
       flex-shrink: 0;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     }
 
     /* ============= TOAST ============= */
-    .toast {
+    #toast {
       position: fixed;
-      bottom: 30px;
+      bottom: 32px;
       left: 50%;
       transform: translateX(-50%) translateY(200px);
       background: var(--surface);
-      border: 1px solid var(--border-light);
-      padding: 16px 24px;
-      border-radius: var(--radius-lg);
       color: var(--text-primary);
-      z-index: 2000;
+      padding: 12px 24px;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-light);
+      box-shadow: var(--shadow-lg);
+      z-index: 9999;
+      transition: transform 0.3s ease;
+      font-size: 13px;
       display: flex;
       align-items: center;
       gap: 12px;
-      box-shadow: var(--shadow-xl);
-      transition: var(--transition);
-      pointer-events: none;
     }
 
-    .toast.show {
+    #toast.show {
       transform: translateX(-50%) translateY(0);
-      pointer-events: auto;
     }
 
-    .toast-icon {
-      font-size: 18px;
+    #toastIcon {
+      font-size: 16px;
     }
 
-    .toast-message {
-      font-size: 14px;
-      font-weight: 500;
-    }
-
-    /* ============= BASEMAP GALLERY ============= */
-    .basemap-toggle {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      z-index: 500;
-      width: 44px;
-      height: 44px;
-      background: rgba(30, 41, 59, 0.95);
-      border: 1px solid var(--border-light);
-      border-radius: var(--radius-md);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--text-secondary);
-      transition: var(--transition);
-      backdrop-filter: blur(10px);
-      box-shadow: var(--shadow-lg);
-    }
-
-    .basemap-toggle:hover {
-      border-color: var(--primary);
-      color: var(--primary);
-      background: rgba(16, 185, 129, 0.1);
-    }
-
-    .basemap-gallery {
-      position: absolute;
-      top: 70px;
-      right: 20px;
-      z-index: 501;
-      background: rgba(30, 41, 59, 0.98);
-      border: 1px solid var(--border-light);
-      border-radius: var(--radius-lg);
-      padding: 16px;
-      width: 280px;
-      backdrop-filter: blur(10px);
-      box-shadow: var(--shadow-xl);
-      display: none;
-      flex-direction: column;
-      gap: 12px;
-      animation: slideDown 0.3s ease-out;
-    }
-
-    .basemap-gallery.show {
-      display: flex;
-    }
-
-    @keyframes slideDown {
-      from {
-        opacity: 0;
-        transform: translateY(-10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .basemap-gallery h4 {
-      color: var(--primary);
-      font-size: 13px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 4px;
-    }
-
-    .basemap-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 10px 12px;
-      background: var(--surface-light);
-      border: 1.5px solid var(--border-light);
-      border-radius: var(--radius-md);
-      cursor: pointer;
-      transition: var(--transition);
-    }
-
-    .basemap-item:hover {
-      border-color: var(--primary);
-      background: rgba(16, 185, 129, 0.1);
-    }
-
-    .basemap-item.active {
-      border-color: var(--primary);
-      background: rgba(16, 185, 129, 0.2);
-    }
-
-    .basemap-thumbnail {
-      width: 50px;
-      height: 50px;
-      border-radius: var(--radius-sm);
-      background-size: cover;
-      background-position: center;
-      flex-shrink: 0;
-      border: 1px solid var(--border-light);
-    }
-
-    .basemap-info {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    .basemap-name {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text-primary);
-    }
-
-    .basemap-desc {
-      font-size: 11px;
-      color: var(--text-muted);
-    }
-
-    .basemap-check {
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      border: 2px solid var(--border-light);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      transition: var(--transition);
-    }
-
-    .basemap-item.active .basemap-check {
-      background: var(--primary);
-      border-color: var(--primary);
-      color: white;
-    }
-
-    /* ============= LAYER LIST ============= */
-    .layer-toggle {
-      position: absolute;
-      top: 20px;
-      right: 75px;
-      z-index: 500;
-      width: 44px;
-      height: 44px;
-      background: rgba(30, 41, 59, 0.95);
-      border: 1px solid var(--border-light);
-      border-radius: var(--radius-md);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--text-secondary);
-      transition: var(--transition);
-      backdrop-filter: blur(10px);
-      box-shadow: var(--shadow-lg);
-    }
-
-    .layer-toggle:hover {
-      border-color: var(--secondary);
-      color: var(--secondary);
-      background: rgba(14, 165, 233, 0.1);
-    }
-
-    .layer-list {
-      position: absolute;
-      top: 70px;
-      right: 75px;
-      z-index: 501;
-      background: rgba(30, 41, 59, 0.98);
-      border: 1px solid var(--border-light);
-      border-radius: var(--radius-lg);
-      padding: 16px;
-      width: 300px;
-      max-height: 450px;
-      overflow-y: auto;
-      backdrop-filter: blur(10px);
-      box-shadow: var(--shadow-xl);
-      display: none;
-      flex-direction: column;
-      gap: 12px;
-      animation: slideDown 0.3s ease-out;
-    }
-
-    .layer-list.show {
-      display: flex;
-    }
-
-    .layer-list h4 {
-      color: var(--secondary);
-      font-size: 13px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 4px;
-    }
-
-    .layer-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 12px;
-      background: var(--surface-light);
-      border: 1px solid var(--border-light);
-      border-radius: var(--radius-md);
-      transition: var(--transition);
-    }
-
-    .layer-item:hover {
-      background: rgba(14, 165, 233, 0.1);
-      border-color: var(--secondary);
-    }
-
-    .layer-checkbox {
-      width: 18px;
-      height: 18px;
-      border: 2px solid var(--border-light);
-      border-radius: 4px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: var(--transition);
-      flex-shrink: 0;
-      background: var(--surface);
-    }
-
-    .layer-checkbox:hover {
-      border-color: var(--secondary);
-    }
-
-    .layer-checkbox.checked {
-      background: var(--secondary);
-      border-color: var(--secondary);
-      color: white;
-    }
-
-    .layer-info {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    .layer-name {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text-primary);
-    }
-
-    .layer-desc {
-      font-size: 11px;
-      color: var(--text-muted);
-    }
-
-    .layer-opacity {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-top: 8px;
-      padding-top: 8px;
-      border-top: 1px solid var(--border-light);
-    }
-
-    .layer-opacity label {
-      font-size: 11px;
-      color: var(--text-muted);
-      min-width: 50px;
-    }
-
-    .layer-opacity input[type="range"] {
-      flex: 1;
-      height: 4px;
-      border-radius: 2px;
-      background: var(--border-light);
-      outline: none;
-      -webkit-appearance: none;
-      appearance: none;
-    }
-
-    .layer-opacity input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 14px;
-      height: 14px;
-      border-radius: 50%;
-      background: var(--secondary);
-      cursor: pointer;
-      transition: var(--transition);
-    }
-
-    .layer-opacity input[type="range"]::-webkit-slider-thumb:hover {
-      box-shadow: 0 0 10px rgba(14, 165, 233, 0.5);
-      transform: scale(1.2);
-    }
-
-    .layer-opacity input[type="range"]::-moz-range-thumb {
-      width: 14px;
-      height: 14px;
-      border-radius: 50%;
-      background: var(--secondary);
-      cursor: pointer;
-      border: none;
-      transition: var(--transition);
-    }
-
-    .layer-opacity input[type="range"]::-moz-range-thumb:hover {
-      box-shadow: 0 0 10px rgba(14, 165, 233, 0.5);
-      transform: scale(1.2);
-    }
-
-    /* ============= SEARCH BAR ============= */
-    .search-container {
-      position: absolute;
-      top: 20px;
-      left: 70px;
-      z-index: 500;
-      width: 350px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .search-box {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      background: rgba(30, 41, 59, 0.98);
-      border: 1.5px solid var(--border-light);
-      border-radius: var(--radius-lg);
-      padding: 12px 16px;
-      backdrop-filter: blur(10px);
-      box-shadow: var(--shadow-lg);
-      transition: var(--transition);
-    }
-
-    .search-box:focus-within {
-      border-color: var(--secondary);
-      box-shadow: 0 0 20px rgba(14, 165, 233, 0.3);
-    }
-
+    /* ============= SEARCH ============= */
     .search-input {
-      flex: 1;
-      background: transparent;
-      border: none;
-      color: var(--text-primary);
-      font-size: 13px;
-      outline: none;
-      font-family: 'Inter', sans-serif;
-    }
-
-    .search-input::placeholder {
-      color: var(--text-muted);
-    }
-
-    .search-icon {
-      color: var(--text-muted);
-      font-size: 16px;
-      transition: var(--transition);
-    }
-
-    .search-box:focus-within .search-icon {
-      color: var(--secondary);
-    }
-
-    .search-clear {
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      cursor: pointer;
-      font-size: 16px;
-      transition: var(--transition);
-      display: none;
-    }
-
-    .search-input:not(:placeholder-shown) ~ .search-clear {
-      display: block;
-    }
-
-    .search-clear:hover {
-      color: var(--secondary);
-    }
-
-    .search-results {
-      background: rgba(30, 41, 59, 0.98);
+      padding: 8px 16px;
+      background: rgba(30, 41, 59, 0.6);
       border: 1px solid var(--border-light);
       border-radius: var(--radius-md);
-      max-height: 350px;
-      overflow-y: auto;
-      backdrop-filter: blur(10px);
-      box-shadow: var(--shadow-lg);
-      display: none;
-      flex-direction: column;
-      animation: slideDown 0.3s ease-out;
-    }
-
-    .search-results.show {
-      display: flex;
-    }
-
-    .search-result-item {
-      padding: 12px 16px;
-      border-bottom: 1px solid var(--border-light);
-      cursor: pointer;
-      transition: var(--transition);
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .search-result-item:last-child {
-      border-bottom: none;
-    }
-
-    .search-result-item:hover {
-      background: rgba(14, 165, 233, 0.1);
-    }
-
-    .search-result-title {
+      color: var(--text-primary);
       font-size: 13px;
-      font-weight: 600;
-      color: var(--text-primary);
-    }
-
-    .search-result-desc {
-      font-size: 11px;
-      color: var(--text-muted);
-    }
-
-    .search-no-result {
-      padding: 16px;
-      text-align: center;
-      color: var(--text-muted);
-      font-size: 12px;
-    }
-
-    /* ============= POPUP DETAIL ============= */
-    .leaflet-popup-content-wrapper {
-      background: rgba(30, 41, 59, 0.98) !important;
-      border: 1px solid var(--border-light) !important;
-      border-radius: var(--radius-lg) !important;
-      box-shadow: var(--shadow-xl) !important;
-      padding: 0 !important;
-      backdrop-filter: blur(10px);
-    }
-
-    .leaflet-popup-content {
-      margin: 0 !important;
-      width: 100% !important;
-      max-width: 400px !important;
-      font-family: 'Inter', sans-serif !important;
-    }
-
-    .popup-header {
-      padding: 16px;
-      border-bottom: 1px solid var(--border-light);
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .popup-title {
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--text-primary);
-    }
-
-    .popup-subtitle {
-      font-size: 12px;
-      color: var(--text-muted);
-    }
-
-    .popup-body {
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .popup-section {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .popup-section-title {
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--secondary);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      padding-bottom: 6px;
-      border-bottom: 1px solid var(--border-light);
-    }
-
-    .popup-field {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      font-size: 12px;
-    }
-
-    .popup-label {
-      color: var(--text-muted);
-      font-weight: 600;
-      min-width: 100px;
-    }
-
-    .popup-value {
-      color: var(--text-primary);
-      font-weight: 500;
-      text-align: right;
-      flex: 1;
-    }
-
-    .popup-value.highlight {
-      color: var(--primary);
-      font-weight: 600;
-    }
-
-    .popup-actions {
-      display: flex;
-      gap: 8px;
-      padding-top: 8px;
-      border-top: 1px solid var(--border-light);
-    }
-
-    .popup-btn {
-      flex: 1;
-      padding: 10px 12px;
-      background: linear-gradient(135deg, rgba(14, 165, 233, 0.2), rgba(14, 165, 233, 0.1));
-      border: 1px solid var(--secondary);
-      color: var(--secondary);
-      border-radius: var(--radius-md);
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
+      width: 200px;
       transition: var(--transition);
     }
 
-    .popup-btn:hover {
-      background: linear-gradient(135deg, rgba(14, 165, 233, 0.3), rgba(14, 165, 233, 0.2));
-      box-shadow: 0 0 15px rgba(14, 165, 233, 0.3);
-    }
-
-    .leaflet-popup-tip {
-      background: rgba(30, 41, 59, 0.98) !important;
-    }
-
-    /* ============= CUSTOM ZOOM CONTROL ============= */
-    .custom-zoom-control {
-      position: absolute;
-      bottom: 30px;
-      right: 20px;
-      z-index: 500;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      background: rgba(30, 41, 59, 0.95);
-      border: 1px solid var(--border-light);
-      border-radius: var(--radius-lg);
-      padding: 16px;
-      backdrop-filter: blur(10px);
-      box-shadow: var(--shadow-lg);
-    }
-
-    .zoom-slider {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .zoom-slider input[type="range"] {
-      width: 8px;
-      height: 120px;
-      border-radius: 4px;
-      background: var(--border-light);
+    .search-input:focus {
       outline: none;
-      -webkit-appearance: slider-vertical;
-      appearance: slider-vertical;
-      writing-mode: bt-lr;
-    }
-
-    .zoom-slider input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-      cursor: pointer;
-      transition: var(--transition);
-      border: 2px solid var(--primary);
-      box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
-    }
-
-    .zoom-slider input[type="range"]::-webkit-slider-thumb:hover {
-      transform: scale(1.3);
-      box-shadow: 0 0 25px rgba(16, 185, 129, 0.5);
-    }
-
-    .zoom-slider input[type="range"]::-moz-range-thumb {
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-      cursor: pointer;
-      border: 2px solid var(--primary);
-      transition: var(--transition);
-      box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
-    }
-
-    .zoom-slider input[type="range"]::-moz-range-thumb:hover {
-      transform: scale(1.3);
-      box-shadow: 0 0 25px rgba(16, 185, 129, 0.5);
-    }
-
-    .zoom-label {
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--primary);
-      min-width: 30px;
-      text-align: center;
-    }
-
-    .zoom-buttons {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .zoom-btn {
-      width: 36px;
-      height: 36px;
-      background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.1));
-      border: 1.5px solid var(--primary);
-      color: var(--primary);
-      border-radius: var(--radius-md);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 16px;
-      transition: var(--transition);
-      font-weight: 700;
-    }
-
-    .zoom-btn:hover {
-      background: linear-gradient(135deg, rgba(16, 185, 129, 0.3), rgba(16, 185, 129, 0.2));
-      box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
-      transform: translateY(-2px);
-    }
-
-    .zoom-btn:active {
-      transform: translateY(0);
+      border-color: var(--primary);
+      background: rgba(30, 41, 59, 0.9);
     }
 
     /* ============= SCROLLBAR ============= */
     ::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
+      width: 6px;
+      height: 6px;
     }
 
     ::-webkit-scrollbar-track {
@@ -1288,998 +587,721 @@
     }
 
     ::-webkit-scrollbar-thumb {
-      background: rgba(148, 163, 184, 0.3);
-      border-radius: 4px;
+      background: var(--border);
+      border-radius: 3px;
     }
 
     ::-webkit-scrollbar-thumb:hover {
-      background: rgba(148, 163, 184, 0.5);
-    }
-
-    /* ============= RESPONSIVE ============= */
-    @media (max-width: 1200px) {
-      .stats-bar {
-        gap: 16px;
-      }
-      
-      .stat-item strong {
-        font-size: 16px;
-      }
-    }
-
-    @media (max-width: 768px) {
-      header {
-        padding: 0 16px;
-        height: 64px;
-      }
-
-      .sidebar {
-        display: none;
-      }
-
-      .logo {
-        font-size: 16px;
-      }
-
-      .stats-bar {
-        display: none;
-      }
-
-      .view-chips {
-        display: none;
-      }
-
-      .map-topbar {
-        padding: 12px 16px;
-        flex-wrap: wrap;
-      }
-
-      .filter-bar {
-        padding: 12px 16px;
-      }
-
-      .filter-group select {
-        min-width: 120px;
-      }
-
-      .legend {
-        width: 280px;
-        padding: 12px;
-      }
-
-      .map-info {
-        font-size: 11px;
-        padding: 10px 12px;
-        min-width: 250px;
-      }
+      background: var(--primary);
     }
   </style>
 </head>
+
 <body>
+  <!-- ========== HEADER ========== -->
+  <header>
+    <div class="logo">
+      <i class="fas fa-leaf"></i>
+      <span style="display: flex; flex-direction: column; gap: 0; line-height: 1;">
+        <span style="font-size: 18px;">WEBGIS CAO SU</span>
+        <span style="font-size: 11px; color: var(--text-muted); font-weight: 400;">TỔNG CÔNG TY</span>
+      </span>
+    </div>
+    <div class="status">
+      <span>🟢 Trực tuyến</span>
+    </div>
+    <div class="stats-bar">
+      <div class="stat-item">
+        <label>Lô vườn</label>
+        <strong id="statsTotal">425</strong>
+      </div>
+      <div class="stat-item">
+        <label>Diện tích</label>
+        <strong id="statsArea">7.244 ha</strong>
+      </div>
+    </div>
+    <div class="user-info">
+      <div style="display: flex; align-items: center; gap: 12px; cursor: pointer;">
+        <i class="fas fa-bell" style="font-size: 18px; color: var(--text-secondary);"></i>
+        <i class="fas fa-globe" style="font-size: 18px; color: var(--text-secondary);"></i>
+        <i class="fas fa-cog" style="font-size: 18px; color: var(--text-secondary);"></i>
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px; padding-left: 16px; border-left: 1px solid var(--border-light);">
+        <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 2px;">
+          <span style="font-size: 13px; color: var(--text-primary);">Nguyễn Văn An</span>
+          <span style="font-size: 11px; color: var(--text-muted);">Quản lý vườn</span>
+        </div>
+        <div class="avatar" id="userAvatar">NA</div>
+      </div>
+    </div>
+  </header>
 
-<!-- HEADER -->
-<header>
-  <div class="logo">
-    <i class="fas fa-leaf"></i>
-    <span>WebGIS Cao Su</span>
-  </div>
-  <div class="status">
-    <span>Trực tuyến</span>
-  </div>
-  <div class="stats-bar">
-    <div class="stat-item">
-      <label>Lô vườn</label>
-      <strong>425</strong>
-    </div>
-    <div class="stat-item">
-      <label>Diện tích</label>
-      <strong>7.244 ha</strong>
-    </div>
-  </div>
-  <div class="user-info">
-    <span>Nguyễn Văn An</span>
-    <div class="avatar">NA</div>
-  </div>
-</header>
+  <!-- ========== CONTAINER ========== -->
+  <div class="container">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <h3>📊 TỔNG QUAN</h3>
+      </div>
+      <nav>
+        <a href="#" class="active">
+          <i class="fas fa-chart-line"></i>
+          <span>Dashboard</span>
+        </a>
+        <a href="#">
+          <i class="fas fa-plus"></i>
+          <span>Thêm dữ liệu lô</span>
+        </a>
+      </nav>
 
-<!-- MAIN CONTAINER -->
-<div class="container">
-  <!-- SIDEBAR -->
-  <nav class="sidebar">
-    <div class="sidebar-header">
-      <h3>📍 Quản lý</h3>
-    </div>
-    <nav>
-      <a href="/" class="active">
-        <i class="fas fa-home"></i>
-        <span>Dashboard</span>
-      </a>
-      <a href="/quan-ly-lo-cay">
-        <i class="fas fa-tree"></i>
-        <span>Quản lý lô cây</span>
-      </a>
-      <a href="/them-du-lieu-lo-cay">
-        <i class="fas fa-plus-circle"></i>
-        <span>Thêm dữ liệu</span>
-      </a>
-    </nav>
-    <div class="sidebar-footer">
-      <a href="#" class="logout">
-        <i class="fas fa-sign-out-alt"></i>
-        <span>Đăng xuất</span>
-      </a>
-    </div>
-  </nav>
+      <div class="sidebar-header" style="margin-top: 20px;">
+        <h3>⚙️ QUẢN LÝ DỮ LIỆU</h3>
+      </div>
+      <nav>
+        <a href="#">
+          <i class="fas fa-layer-group"></i>
+          <span>Quản lý lô cây</span>
+        </a>
+        <a href="#">
+          <i class="fas fa-file-alt"></i>
+          <span>Thêm dữ liệu lô</span>
+        </a>
+      </nav>
 
-  <!-- MAIN CONTENT -->
-  <div class="main">
-    <!-- MAP TOPBAR -->
-    <div class="map-topbar">
-      <div class="map-title">
-        <i class="fas fa-map-marked-alt"></i>
-        Bản đồ vườn cây cao su — Kampong Thom, Cambodia
+      <div class="sidebar-header" style="margin-top: 20px;">
+        <h3>👥 NGƯỜI DÙNG & PHÂN QUYỀN</h3>
       </div>
-      <div class="view-chips">
-        <button class="chip active" onclick="switchMapView('doi',this)">Đội</button>
-        <button class="chip" onclick="switchMapView('giong',this)">Giống cây</button>
-        <button class="chip" onclick="switchMapView('nam',this)">Năm trồng</button>
-        <button class="chip" onclick="switchMapView('phien',this)">Phiên cạo</button>
-        <button class="chip" onclick="switchMapView('nhip',this)">Nhịp độ cao</button>
-        <button class="chip" onclick="switchMapView('tai',this)">Tài canh năm</button>
-      </div>
-      <div class="map-actions">
-        <button class="btn-action" onclick="toggleMeasurePanel()">
-          <i class="fas fa-ruler"></i>
-          <span>Đo lường</span>
-        </button>
-      </div>
-    </div>
+      <nav>
+        <a href="#">
+          <i class="fas fa-users"></i>
+          <span>Quản lý người dùng</span>
+        </a>
+      </nav>
 
-    <!-- FILTER BAR -->
-    <div class="filter-bar">
-      <div class="filter-group">
-        <label>Đội:</label>
-        <select id="filter-nt" onchange="updateMapFilters()">
-          <option value="all">Tất cả</option>
-        </select>
+      <div class="sidebar-header" style="margin-top: 20px;">
+        <h3>📈 PHÂN TÍCH</h3>
       </div>
-      <div class="filter-group">
-        <label>Năm trồng:</label>
-        <select id="filter-nam" onchange="updateMapFilters()">
-          <option value="all">Tất cả</option>
-        </select>
-      </div>
-      <div class="filter-group">
-        <label>Giống cây:</label>
-        <select id="filter-giong" onchange="updateMapFilters()">
-          <option value="all">Tất cả</option>
-        </select>
+      <nav>
+        <a href="#">
+          <i class="fas fa-bar-chart"></i>
+          <span>Thống kê</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <a href="#" class="logout">
+          <i class="fas fa-sign-out-alt"></i>
+          <span>Đăng xuất</span>
+        </a>
       </div>
     </div>
 
-    <!-- MAP AREA -->
-    <div class="map-area">
-      <div id="dashMap"></div>
-
-      <!-- SEARCH BAR -->
-      <div class="search-container">
-        <div class="search-box">
-          <i class="fas fa-search search-icon"></i>
-          <input 
-            type="text" 
-            class="search-input" 
-            id="searchInput" 
-            placeholder="Tìm kiếm lô cây, đội, năm trồng..."
-            onkeyup="performSearch(this.value)"
-            onchange="clearSearch()"
-          >
-          <button class="search-clear" onclick="clearSearchInput()">
-            <i class="fas fa-times"></i>
+    <!-- MAIN CONTENT -->
+    <div class="main">
+      <!-- TOP BAR -->
+      <div class="top-bar">
+        <div class="top-bar-title">
+          <h2>Dashboard</h2>
+          <p>Tổng quan hoạt động vườn cây – cập nhật lúc 07:42, 16/03/2026</p>
+        </div>
+        <div class="top-bar-controls">
+          <button class="export-btn">
+            <i class="fas fa-download"></i>
+            <span>Xuất báo cáo</span>
+          </button>
+          <button class="add-btn">
+            <i class="fas fa-plus"></i>
+            <span>Thêm dữ liệu</span>
           </button>
         </div>
-        <div class="search-results" id="searchResults"></div>
       </div>
 
-      <!-- MAP CONTROLS - REMOVED -->
+      <!-- FILTER BAR -->
+      <div class="filter-bar">
+        <span style="font-weight: 600; color: var(--text-secondary); font-size: 12px;">🔹 Bản đồ vườn cây cao su – Kampong Thom, Cambodia</span>
+        <div style="display: flex; gap: 12px; align-items: center; margin-left: auto; flex-wrap: wrap;">
+          <span style="font-size: 12px; color: var(--text-muted);">Đội:</span>
+          <select class="filter-select" name="doi">
+            <option value="">Tất cả</option>
+          </select>
+          
+          <span style="font-size: 12px; color: var(--text-muted);">Năm trồng:</span>
+          <select class="filter-select" name="nam_trong">
+            <option value="">Tất cả</option>
+          </select>
 
-      <!-- CUSTOM ZOOM CONTROL -->
-      <div class="custom-zoom-control">
-        <div class="zoom-buttons">
-          <button class="zoom-btn" onclick="zoomMapIn()" title="Phóng to">
+          <span style="font-size: 12px; color: var(--text-muted);">Giống cây:</span>
+          <select class="filter-select" name="giong">
+            <option value="">Tất cả</option>
+          </select>
+
+          <span style="font-size: 12px; color: var(--text-muted);">Phân loại:</span>
+          <select class="filter-select">
+            <option>Tất cả</option>
+          </select>
+
+          <span style="font-size: 12px; color: var(--text-muted);">Nhịp độ cao:</span>
+          <select class="filter-select">
+            <option>Tất cả</option>
+          </select>
+
+          <span style="font-size: 12px; color: var(--text-muted);">Quay hoạch tài canh:</span>
+          <select class="filter-select">
+            <option>Tất cả</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- MAP WRAPPER -->
+      <div class="map-wrapper">
+        <div id="dashMap"></div>
+
+        <!-- MAP CONTROL PANEL -->
+        <div class="map-control-panel">
+          <button class="map-control-btn" onclick="zoomMapIn()" title="Phóng to">
             <i class="fas fa-plus"></i>
           </button>
-          <button class="zoom-btn" onclick="zoomMapOut()" title="Thu nhỏ">
+          <div class="zoom-slider-container">
+            <input type="range" id="zoomRange" class="zoom-slider" min="3" max="20" value="12" onchange="setZoomLevel(this.value)">
+            <span class="zoom-label" id="zoomLabel">12</span>
+          </div>
+          <button class="map-control-btn" onclick="zoomMapOut()" title="Thu nhỏ">
             <i class="fas fa-minus"></i>
           </button>
-          <button class="zoom-btn" onclick="zoomHome()" title="Về vị trí ban đầu" style="background: linear-gradient(135deg, rgba(14, 165, 233, 0.2), rgba(14, 165, 233, 0.1)); border-color: var(--secondary); color: var(--secondary);">
+          <button class="map-control-btn" onclick="zoomHome()" title="Về vị trí gốc">
             <i class="fas fa-home"></i>
           </button>
+          <button class="map-control-btn" onclick="toggleMeasurePanel()" title="Công cụ đo">
+            <i class="fas fa-ruler"></i>
+          </button>
+          <button class="map-control-btn" onclick="toggleBasemapGallery()" title="Thay đổi bản đồ nền">
+            <i class="fas fa-layer-group"></i>
+          </button>
+          <button class="map-control-btn" onclick="toggleLayerList()" title="Danh sách lớp">
+            <i class="fas fa-bars"></i>
+          </button>
         </div>
-        <div class="zoom-slider">
-          <label class="zoom-label" id="zoomLabel">12</label>
-          <input 
-            type="range" 
-            id="zoomRange" 
-            min="1" 
-            max="19" 
-            value="12" 
-            onchange="setZoomLevel(this.value)"
-            oninput="updateZoomLabel(this.value)"
-          >
-        </div>
-      </div>
 
-      <!-- BASEMAP TOGGLE -->
-      <button class="basemap-toggle" onclick="toggleBasemapGallery()" title="Thay đổi bản đồ nền">
-        <i class="fas fa-layer-group"></i>
-      </button>
-
-      <!-- LAYER TOGGLE -->
-      <button class="layer-toggle" onclick="toggleLayerList()" title="Quản lý lớp dữ liệu">
-        <i class="fas fa-list"></i>
-      </button>
-
-      <!-- BASEMAP GALLERY -->
-      <div class="basemap-gallery" id="basemapGallery">
-        <h4>Bản đồ nền</h4>
-        <div class="basemap-item active" onclick="changeBasemap('satellite', this)">
-          <div class="basemap-thumbnail" style="background: linear-gradient(135deg, #90caf9 0%, #64b5f6 100%);"></div>
-          <div class="basemap-info">
-            <div class="basemap-name">Vệ tinh</div>
-            <div class="basemap-desc">Ảnh vệ tinh từ trên cao</div>
-          </div>
-          <div class="basemap-check">
-            <i class="fas fa-check" style="font-size: 12px;"></i>
-          </div>
-        </div>
-        <div class="basemap-item" onclick="changeBasemap('terrain', this)">
-          <div class="basemap-thumbnail" style="background: linear-gradient(135deg, #ffcc80 0%, #ffb74d 100%);"></div>
-          <div class="basemap-info">
-            <div class="basemap-name">Địa hình</div>
-            <div class="basemap-desc">Bản đồ địa hình</div>
-          </div>
-          <div class="basemap-check"></div>
-        </div>
-        <div class="basemap-item" onclick="changeBasemap('dark', this)">
-          <div class="basemap-thumbnail" style="background: linear-gradient(135deg, #616161 0%, #424242 100%);"></div>
-          <div class="basemap-info">
-            <div class="basemap-name">Tối</div>
-            <div class="basemap-desc">Bản đồ tối</div>
-          </div>
-          <div class="basemap-check"></div>
-        </div>
-        <div class="basemap-item" onclick="changeBasemap('streets', this)">
-          <div class="basemap-thumbnail" style="background: linear-gradient(135deg, #e1f5fe 0%, #b3e5fc 100%);"></div>
-          <div class="basemap-info">
-            <div class="basemap-name">Giao thông</div>
-            <div class="basemap-desc">Bản đồ giao thông</div>
-          </div>
-          <div class="basemap-check"></div>
-        </div>
-      </div>
-
-      <!-- LAYER LIST -->
-      <div class="layer-list" id="layerList">
-        <h4>Lớp dữ liệu</h4>
-        <div class="layer-item" id="layer-boundary">
-          <div class="layer-checkbox checked" onclick="toggleLayer('boundary', this)">
-            <i class="fas fa-check" style="font-size: 11px;"></i>
-          </div>
-          <div class="layer-info">
-            <div class="layer-name">Ranh giới</div>
-            <div class="layer-desc">Ranh giới vườn cao su</div>
-          </div>
-        </div>
-        <div class="layer-item" id="layer-loCay">
-          <div class="layer-checkbox checked" onclick="toggleLayer('loCay', this)">
-            <i class="fas fa-check" style="font-size: 11px;"></i>
-          </div>
-          <div class="layer-info">
-            <div class="layer-name">Lô cây</div>
-            <div class="layer-desc">Các lô trồng cao su</div>
-          </div>
-          <div class="layer-opacity">
-            <label>Độ mờ:</label>
-            <input type="range" min="0" max="100" value="70" onchange="updateLayerOpacity('loCay', this.value)">
-          </div>
-        </div>
-      </div>
-
-      <!-- MAP INFO -->
-      <div class="map-info" id="coordBar">
-        <div class="coord-row">
-          <div class="coord-item">
-            <span class="coord-label">Lat:</span>
-            <span class="coord-value"><span id="lat">12.5240</span>°</span>
-          </div>
-          <div class="coord-item">
-            <span class="coord-label">Lng:</span>
-            <span class="coord-value"><span id="lng">105.4520</span>°</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- LEGEND -->
-      <div class="legend" id="legend">
-        <h4>🔹 Đội</h4>
-        <div class="legend-items">
-          <div class="legend-item">
-            <span class="legend-color" style="background:#10b981;"></span>
-            <span>Đội 1</span>
-          </div>
-          <div class="legend-item">
-            <span class="legend-color" style="background:#0ea5e9;"></span>
-            <span>Đội 2</span>
-          </div>
-          <div class="legend-item">
-            <span class="legend-color" style="background:#f59e0b;"></span>
-            <span>Đội 3</span>
+        <!-- LEGEND PANEL -->
+        <div class="legend-panel" id="legendPanel">
+          <h4>🔹 Giai đoạn cây</h4>
+          <div class="legend-items">
+            <div class="legend-item">
+              <span class="legend-color" style="background:#5ee7b1;"></span>
+              <span>Mới trồng</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-color" style="background:#0ea5e9;"></span>
+              <span>Non</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-color" style="background:#f59e0b;"></span>
+              <span>Trưởng thành</span>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
-</div>
 
-<!-- TOAST NOTIFICATION -->
-<div class="toast" id="toast">
-  <span class="toast-icon" id="toastIcon">✅</span>
-  <span class="toast-message" id="toastMsg"></span>
-</div>
+  <!-- TOAST NOTIFICATION -->
+  <div id="toast">
+    <span id="toastIcon">✅</span>
+    <span id="toastMsg">Đã cập nhật thành công</span>
+  </div>
 
-<script>
-  // ==================== BIẾN TOÀN CỤC ====================
-  let dashMap;
-  let CAOSU_GEOJSON = null;
-  let mapViewMode = 'doi';
-  let currentBasemap = 'satellite';
-  let basemapLayers = {};
-
-  let boundaryOuterLayer = null;
-  let backgroundLayer = null;
-  let thematicLayer = null;
-
-  // Layer visibility states
-  let layerVisibility = {
-    boundary: true,
-    loCay: true
-  };
-
-  // Search data
-  let searchData = [];
-
-  // Palettes với màu sắc mới
-  const doiPalette = { 
-    'NT 1': '#10b981', 
-    'NT 2': '#0ea5e9', 
-    'NT 3': '#f59e0b', 
-    'default': '#6b7280' 
-  };
-
-  const phienPalette = { 
-    'Main': '#10b981', 
-    'Replant': '#f59e0b', 
-    'Immature': '#0ea5e9', 
-    'Mature': '#8b5cf6', 
-    'default': '#6b7280' 
-  };
-
-  const nhipPalette = { 
-    'Thấp': '#0ea5e9', 
-    'Trung bình': '#f59e0b', 
-    'Cao': '#ef4444', 
-    'Rất cao': '#8b5cf6',
-    'default': '#6b7280' 
-  };
-
-  const taiCanhPalette = { 
-    '2025': '#5ee7b1', 
-    '2024': '#10b981', 
-    '2023': '#0ea5e9', 
-    '2022': '#f59e0b', 
-    '2021': '#fb923c', 
-    '2020': '#ef4444', 
-    'Trước 2020': '#8b5cf6',
-    'default': '#6b7280' 
-  };
-
-  // ==================== KHỞI TẠO MAP ====================
-  async function initDashMap() {
-    dashMap = L.map('dashMap', {
-      zoomControl: false
-    }).setView([12.524, 105.452], 12);
-
-    // Khởi tạo các basemap layers
-    basemapLayers.osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      minZoom: 0,
-      attribution: '© OpenStreetMap contributors'
-    });
-
-    basemapLayers.satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-      maxZoom: 18,
-      minZoom: 0,
-      attribution: 'Tiles © Esri'
-    });
-
-    basemapLayers.terrain = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
-      maxZoom: 17,
-      minZoom: 0,
-      attribution: 'Map data: © OpenStreetMap contributors, SRTM | Map style: © OpenTopoMap'
-    });
-
-    basemapLayers.dark = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-      maxZoom: 19,
-      minZoom: 0,
-      attribution: '© CARTO'
-    });
-
-    basemapLayers.streets = L.tileLayer('https://{s}.basemaps.cartocdn.com/positron/{z}/{x}/{y}{r}.png', {
-      maxZoom: 19,
-      minZoom: 0,
-      attribution: '© CARTO'
-    });
-
-    // Thêm basemap mặc định
-    basemapLayers.satellite.addTo(dashMap);
-
-    thematicLayer = L.featureGroup().addTo(dashMap);
-    await loadBoundaries();
-    await buildFilterUI();
-    await loadMapData();
-
-    dashMap.on('mousemove', (e) => {
-      document.getElementById('lat').textContent = e.latlng.lat.toFixed(4);
-      document.getElementById('lng').textContent = e.latlng.lng.toFixed(4);
-    });
-
-    // Đóng panels khi click ra ngoài
-    document.addEventListener('click', (e) => {
-      const gallery = document.getElementById('basemapGallery');
-      const basemapToggle = document.querySelector('.basemap-toggle');
-      const layerList = document.getElementById('layerList');
-      const layerToggle = document.querySelector('.layer-toggle');
-      
-      if (!gallery.contains(e.target) && !basemapToggle.contains(e.target)) {
-        gallery.classList.remove('show');
-      }
-      if (!layerList.contains(e.target) && !layerToggle.contains(e.target)) {
-        layerList.classList.remove('show');
-      }
-    });
-
-    // Sync zoom slider
-    initZoomSync();
-  }
-
-  // ==================== LOAD DỮ LIỆU ====================
-  async function loadMapData(filters = {}) {
-    try {
-      const res = await fetch('/api/lo-cao-su');
-      CAOSU_GEOJSON = await res.json();
-      
-      // Build search data
-      searchData = CAOSU_GEOJSON.features.map(feat => ({
-        id: feat.properties.id_lo,
-        name: `Lô ${feat.properties.id_lo}`,
-        doi: feat.properties.doi,
-        giong: feat.properties.giong,
-        nam_trong: feat.properties.nam_trong,
-        type: 'lô cây',
-        geometry: feat.geometry,
-        properties: feat.properties
-      }));
-
-      renderThematicLayer();
-    } catch (e) {
-      console.error(e);
-      showToast('Lỗi tải dữ liệu bản đồ', '❌');
-    }
-  }
-
-  function renderThematicLayer() {
-    if (thematicLayer) dashMap.removeLayer(thematicLayer);
-    thematicLayer = L.featureGroup().addTo(dashMap);
-
-    CAOSU_GEOJSON.features.forEach((feat) => {
-      const p = feat.properties;
-      let col = '#6b7280';
-
-      if (mapViewMode === 'doi') col = doiPalette[p.doi] || doiPalette.default;
-      else if (mapViewMode === 'phien') col = phienPalette[p.che_do_cao] || phienPalette.default;
-      else if (mapViewMode === 'nhip') col = nhipPalette[p.nhip_do_cao] || nhipPalette.default;
-      else if (mapViewMode === 'tai') col = taiCanhPalette[p.tai_canh_nam] || taiCanhPalette.default;
-      else if (mapViewMode === 'giong') col = p.giong === 'RRIV 4' ? '#10b981' : '#ef4444';
-      else if (mapViewMode === 'nam') col = (p.nam_trong && p.nam_trong < 2015) ? '#8b5cf6' : '#f472b6';
-
-      const popupContent = createPopupContent(p, col);
-
-      L.geoJSON(feat, {
-        style: { 
-          color: col, 
-          weight: 1.5, 
-          fillColor: col, 
-          fillOpacity: 0.7 
-        }
-      }).bindPopup(popupContent, {
-        maxWidth: 420,
-        maxHeight: 500,
-        className: 'custom-popup'
-      }).addTo(thematicLayer);
-    });
-  }
-
-  function createPopupContent(p, color) {
-    return `
-      <div style="color: ${color};">
-        <div class="popup-header">
-          <div class="popup-title">📍 Lô ${p.id_lo}</div>
-          <div class="popup-subtitle">${p.giong || 'Chưa xác định'}</div>
-        </div>
-        <div class="popup-body">
-          <div class="popup-section">
-            <div class="popup-section-title">Thông tin cơ bản</div>
-            <div class="popup-field">
-              <span class="popup-label">Mã lô:</span>
-              <span class="popup-value highlight">${p.id_lo}</span>
-            </div>
-            <div class="popup-field">
-              <span class="popup-label">Giống cây:</span>
-              <span class="popup-value">${p.giong || '—'}</span>
-            </div>
-            <div class="popup-field">
-              <span class="popup-label">Đội quản lý:</span>
-              <span class="popup-value">${p.doi || '—'}</span>
-            </div>
-          </div>
-          
-          <div class="popup-section">
-            <div class="popup-section-title">Thông tin trồng trọt</div>
-            <div class="popup-field">
-              <span class="popup-label">Năm trồng:</span>
-              <span class="popup-value">${p.nam_trong || '—'}</span>
-            </div>
-            <div class="popup-field">
-              <span class="popup-label">Phiên cạo:</span>
-              <span class="popup-value">${p.che_do_cao || '—'}</span>
-            </div>
-            <div class="popup-field">
-              <span class="popup-label">Nhịp độ cao:</span>
-              <span class="popup-value">${p.nhip_do_cao || '—'}</span>
-            </div>
-            <div class="popup-field">
-              <span class="popup-label">Tài canh:</span>
-              <span class="popup-value">${p.tai_canh_nam || '—'}</span>
-            </div>
-          </div>
-
-          <div class="popup-actions">
-            <button class="popup-btn" onclick="showDetailPage(${p.id_lo})">📄 Chi tiết</button>
-          </div>
-        </div>
-      </div>
-    `;
-  }
-
-  function showDetailPage(loId) {
-    showToast(`Trang chi tiết lô ${loId} (đang phát triển)`, "📄");
-  }
-
-  // ==================== RANH GIỚI ====================
-  async function loadBoundaries() {
-    try {
-      const res = await fetch('/api/boundary');
-      const data = await res.json();
-
-      if (boundaryOuterLayer) dashMap.removeLayer(boundaryOuterLayer);
-      boundaryOuterLayer = L.geoJSON(data, {
-        style: { 
-          color: "#ffffff", 
-          weight: 3, 
-          opacity: 0.8, 
-          fillOpacity: 0, 
-          dashArray: "8, 4" 
-        }
-      }).addTo(dashMap);
-
-      if (backgroundLayer) dashMap.removeLayer(backgroundLayer);
-      backgroundLayer = L.geoJSON(data, {
-        style: { 
-          color: "#94a3b8", 
-          weight: 0.5, 
-          fillColor: "#1e293b", 
-          fillOpacity: 0.03 
-        }
-      }).addTo(dashMap);
-      backgroundLayer.bringToBack();
-    } catch (e) {
-      console.error(e);
-    }
-  }
-
-  // ==================== FILTER ====================
-  async function buildFilterUI() {
-    try {
-      const doiRes = await fetch('/api/don-vi-list');
-      const doiData = await doiRes.json();
-      populateSelect('filter-nt', doiData.data || [], 'doi');
-
-      const namRes = await fetch('/api/nam-trong-stats');
-      const namData = await namRes.json();
-      populateSelect('filter-nam', namData.data || [], 'nam_trong');
-
-      const giongRes = await fetch('/api/giong-stats');
-      const giongData = await giongRes.json();
-      populateSelect('filter-giong', giongData.data || [], 'giong');
-    } catch (e) {
-      console.error(e);
-    }
-  }
-
-  function populateSelect(id, items, key) {
-    const sel = document.getElementById(id);
-    items.forEach(item => {
-      const val = item[key] || item.doi || item.nam_trong || item.giong;
-      if (val) sel.add(new Option(val, val));
-    });
-  }
-
-  function updateMapFilters() {
-    const filters = {};
-    if (document.getElementById('filter-nt').value !== 'all') 
-      filters.doi = document.getElementById('filter-nt').value;
-    if (document.getElementById('filter-nam').value !== 'all') 
-      filters.nam_trong = document.getElementById('filter-nam').value;
-    if (document.getElementById('filter-giong').value !== 'all') 
-      filters.giong = document.getElementById('filter-giong').value;
-    loadMapData(filters);
-  }
-
-  // ==================== CHỈ ĐỊNH CHUYỂN CHẾ ĐỘ TÔ MÀU ====================
-  function switchMapView(mode, btn) {
-    mapViewMode = mode;
-    document.querySelectorAll('.chip').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    updateLegend(mode);
-    renderThematicLayer();
-  }
-
-  function updateLegend(mode) {
-    const legend = document.getElementById('legend');
+  <!-- SCRIPTS -->
+  <script>
+    // ==================== KHỞI TẠO CẤU HÌNH ====================
+    let dashMap = null;
+    let thematicLayer = null;
+    let backgroundLayer = null;
+    let boundaryOuterLayer = null;
+    let currentBasemap = 'osm';
     
-    if (mode === 'doi') {
-      legend.innerHTML = `
-        <h4>🔹 Đội</h4>
-        <div class="legend-items">
-          <div class="legend-item">
-            <span class="legend-color" style="background:#10b981;"></span>
-            <span>Đội 1</span>
-          </div>
-          <div class="legend-item">
-            <span class="legend-color" style="background:#0ea5e9;"></span>
-            <span>Đội 2</span>
-          </div>
-          <div class="legend-item">
-            <span class="legend-color" style="background:#f59e0b;"></span>
-            <span>Đội 3</span>
-          </div>
-        </div>
-      `;
-    } else if (mode === 'giong') {
-      legend.innerHTML = `
-        <h4>🔹 Giống cây</h4>
-        <div class="legend-items">
-          <div class="legend-item">
-            <span class="legend-color" style="background:#10b981;"></span>
-            <span>RRIV 4</span>
-          </div>
-          <div class="legend-item">
-            <span class="legend-color" style="background:#ef4444;"></span>
-            <span>Khác</span>
-          </div>
-        </div>
-      `;
-    } else if (mode === 'nam') {
-      legend.innerHTML = `
-        <h4>🔹 Năm trồng</h4>
-        <div class="legend-items">
-          <div class="legend-item">
-            <span class="legend-color" style="background:#8b5cf6;"></span>
-            <span>Trước 2015</span>
-          </div>
-          <div class="legend-item">
-            <span class="legend-color" style="background:#f472b6;"></span>
-            <span>2015 trở lại</span>
-          </div>
-        </div>
-      `;
-    } else if (mode === 'phien') {
-      legend.innerHTML = `
-        <h4>🔹 Phiên cạo</h4>
-        <div class="legend-items">
-          <div class="legend-item">
-            <span class="legend-color" style="background:#10b981;"></span>
-            <span>Main</span>
-          </div>
-          <div class="legend-item">
-            <span class="legend-color" style="background:#f59e0b;"></span>
-            <span>Replant</span>
-          </div>
-          <div class="legend-item">
-            <span class="legend-color" style="background:#0ea5e9;"></span>
-            <span>Immature</span>
-          </div>
-          <div class="legend-item">
-            <span class="legend-color" style="background:#8b5cf6;"></span>
-            <span>Mature</span>
-          </div>
-        </div>
-      `;
-    } else if (mode === 'nhip') {
-      legend.innerHTML = `
-        <h4>🔹 Nhịp độ cao</h4>
-        <div class="legend-items">
-          <div class="legend-item">
-            <span class="legend-color" style="background:#0ea5e9;"></span>
-            <span>Thấp</span>
-          </div>
-          <div class="legend-item">
-            <span class="legend-color" style="background:#f59e0b;"></span>
-            <span>Trung bình</span>
-          </div>
-          <div class="legend-item">
-            <span class="legend-color" style="background:#ef4444;"></span>
-            <span>Cao</span>
-          </div>
-          <div class="legend-item">
-            <span class="legend-color" style="background:#8b5cf6;"></span>
-            <span>Rất cao</span>
-          </div>
-        </div>
-      `;
-    } else if (mode === 'tai') {
-      legend.innerHTML = `
-        <h4>🔹 Tài canh năm</h4>
-        <div class="legend-items">
-          <div class="legend-item">
-            <span class="legend-color" style="background:#5ee7b1;"></span>
-            <span>2025</span>
-          </div>
-          <div class="legend-item">
-            <span class="legend-color" style="background:#10b981;"></span>
-            <span>2024</span>
-          </div>
-          <div class="legend-item">
-            <span class="legend-color" style="background:#0ea5e9;"></span>
-            <span>2023</span>
-          </div>
-          <div class="legend-item">
-            <span class="legend-color" style="background:#f59e0b;"></span>
-            <span>2022</span>
-          </div>
-          <div class="legend-item">
-            <span class="legend-color" style="background:#fb923c;"></span>
-            <span>2021</span>
-          </div>
-          <div class="legend-item">
-            <span class="legend-color" style="background:#ef4444;"></span>
-            <span>2020</span>
-          </div>
-          <div class="legend-item">
-            <span class="legend-color" style="background:#8b5cf6;"></span>
-            <span>Trước 2020</span>
-          </div>
-        </div>
-      `;
-    }
-  }
+    const basemapLayers = {};
+    const layerVisibility = {
+      boundary: true,
+      loCay: true
+    };
+    
+    let searchData = [];
 
-  // ==================== ĐIỀU KHIỂN ====================
-  function goHome() { 
-    if(dashMap) dashMap.setView([12.524, 105.452], 12); 
-  }
+    // ==================== API CALL ====================
+    // Detect API base URL tự động
+    const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+      ? 'http://localhost:3000'
+      : 'https://caosu-sncx.vercel.app'; // Domain production
 
-  function showToast(msg, icon = '✅') {
-    const t = document.getElementById('toast');
-    document.getElementById('toastIcon').innerHTML = icon;
-    document.getElementById('toastMsg').innerHTML = msg;
-    t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 4000);
-  }
-
-  // ==================== CUSTOM ZOOM ====================
-  function zoomMapIn() {
-    if (dashMap) {
-      const currentZoom = dashMap.getZoom();
-      dashMap.setZoom(currentZoom + 1);
-      document.getElementById('zoomRange').value = currentZoom + 1;
-      updateZoomLabel(currentZoom + 1);
-    }
-  }
-
-  function zoomMapOut() {
-    if (dashMap) {
-      const currentZoom = dashMap.getZoom();
-      dashMap.setZoom(currentZoom - 1);
-      document.getElementById('zoomRange').value = currentZoom - 1;
-      updateZoomLabel(currentZoom - 1);
-    }
-  }
-
-  function setZoomLevel(level) {
-    if (dashMap) {
-      dashMap.setZoom(parseInt(level));
-      updateZoomLabel(level);
-    }
-  }
-
-  function updateZoomLabel(level) {
-    document.getElementById('zoomLabel').textContent = level;
-  }
-
-  function zoomHome() {
-    if (dashMap) {
-      dashMap.setView([12.524, 105.452], 12);
-      document.getElementById('zoomRange').value = 12;
-      updateZoomLabel(12);
-      showToast("Quay về vị trí ban đầu", "🏠");
-    }
-  }
-
-  // Cập nhật zoom slider khi bản đồ zoom
-  function initZoomSync() {
-    if (dashMap) {
-      dashMap.on('zoomend', () => {
-        const zoom = dashMap.getZoom();
-        document.getElementById('zoomRange').value = zoom;
-        updateZoomLabel(zoom);
-      });
-    }
-  }
-
-  function toggleMeasurePanel() {
-    showToast("Công cụ đo lường đang được phát triển", "📏");
-  }
-
-  // ==================== BASEMAP GALLERY ====================
-  function toggleBasemapGallery() {
-    const gallery = document.getElementById('basemapGallery');
-    gallery.classList.toggle('show');
-  }
-
-  function changeBasemap(type, element) {
-    // Xóa basemap hiện tại khỏi map
-    if (basemapLayers[currentBasemap] && dashMap.hasLayer(basemapLayers[currentBasemap])) {
-      dashMap.removeLayer(basemapLayers[currentBasemap]);
-    }
-
-    // Thêm basemap mới
-    if (basemapLayers[type]) {
-      basemapLayers[type].addTo(dashMap);
-      basemapLayers[type].bringToBack();
-      currentBasemap = type;
-
-      // Cập nhật UI
-      document.querySelectorAll('.basemap-item').forEach(item => {
-        item.classList.remove('active');
-      });
-      element.classList.add('active');
-
-      // Đảm bảo layers dữ liệu nằm trên basemap
-      if (backgroundLayer && dashMap.hasLayer(backgroundLayer)) {
-        backgroundLayer.bringToBack();
+    // Lấy thống kê dashboard
+    async function fetchDashboardStats() {
+      try {
+        const response = await fetch(`${API_BASE}/api/dashboard-stats`);
+        const result = await response.json();
+        
+        if (result.success && result.data) {
+          document.getElementById('statsTotal').textContent = result.data.tong_lo_cay || 0;
+          document.getElementById('statsArea').textContent = (result.data.tong_dien_tich || 0) + ' ha';
+          console.log('✅ Thống kê dashboard:', result.data);
+        }
+      } catch (error) {
+        console.error('❌ Lỗi fetchDashboardStats:', error);
       }
-      if (thematicLayer && dashMap.hasLayer(thematicLayer)) {
-        thematicLayer.bringToFront();
-      }
-
-      showToast(`Đã chuyển sang bản đồ ${element.querySelector('.basemap-name').textContent}`, "🗺️");
     }
-  }
 
-  // ==================== LAYER LIST ====================
-  function toggleLayerList() {
-    const layerList = document.getElementById('layerList');
-    layerList.classList.toggle('show');
-  }
-
-  function toggleLayer(layerName, element) {
-    layerVisibility[layerName] = !layerVisibility[layerName];
-    element.classList.toggle('checked');
-
-    if (layerName === 'boundary') {
-      if (layerVisibility[layerName]) {
-        if (boundaryOuterLayer) dashMap.addLayer(boundaryOuterLayer);
-        if (backgroundLayer) dashMap.addLayer(backgroundLayer);
-      } else {
-        if (boundaryOuterLayer) dashMap.removeLayer(boundaryOuterLayer);
-        if (backgroundLayer) dashMap.removeLayer(backgroundLayer);
+    // Lấy danh sách đơn vị (fill dropdown)
+    async function fetchDonViList() {
+      try {
+        const response = await fetch(`${API_BASE}/api/don-vi-list`);
+        const result = await response.json();
+        
+        if (result.success) {
+          const donViSelect = document.querySelector('select[name="doi"]');
+          if (donViSelect) {
+            const options = result.data.map(item => `<option value="${item.doi}">${item.doi}</option>`).join('');
+            donViSelect.innerHTML = '<option value="">Tất cả</option>' + options;
+          }
+          console.log('✅ Danh sách đơn vị:', result.data);
+        }
+      } catch (error) {
+        console.error('❌ Lỗi fetchDonViList:', error);
       }
-      showToast(layerVisibility[layerName] ? "Hiển thị ranh giới" : "Ẩn ranh giới", "👁️");
-    } else if (layerName === 'loCay') {
-      if (layerVisibility[layerName]) {
+    }
+
+    // Lấy thống kê giống cây
+    async function fetchGiongStats() {
+      try {
+        const response = await fetch(`${API_BASE}/api/giong-stats`);
+        const result = await response.json();
+        
+        if (result.success) {
+          const giongSelect = document.querySelector('select[name="giong"]');
+          if (giongSelect) {
+            const options = result.data.map(item => `<option value="${item.giong}">${item.giong} (${item.so_lo})</option>`).join('');
+            giongSelect.innerHTML = '<option value="">Tất cả</option>' + options;
+          }
+          console.log('✅ Giống cây stats:', result.data);
+        }
+      } catch (error) {
+        console.error('❌ Lỗi fetchGiongStats:', error);
+      }
+    }
+
+    // Lấy thống kê năm trồng
+    async function fetchNamTrongStats() {
+      try {
+        const response = await fetch(`${API_BASE}/api/nam-trong-stats`);
+        const result = await response.json();
+        
+        if (result.success) {
+          const namTrongSelect = document.querySelector('select[name="nam_trong"]');
+          if (namTrongSelect) {
+            const options = result.data.map(item => `<option value="${item.nam_trong}">${item.nam_trong} (${item.so_lo})</option>`).join('');
+            namTrongSelect.innerHTML = '<option value="">Tất cả</option>' + options;
+          }
+          console.log('✅ Năm trồng stats:', result.data);
+        }
+      } catch (error) {
+        console.error('❌ Lỗi fetchNamTrongStats:', error);
+      }
+    }
+
+    // Lấy GeoJSON lô cây từ API (quan trọng nhất)
+    async function fetchLoCaoSu(filters = {}) {
+      console.log('📡 fetchLoCaoSu với filters:', filters);
+      try {
+        const params = new URLSearchParams();
+        if (filters.doi) params.append('doi', filters.doi);
+        if (filters.nam_trong) params.append('nam_trong', filters.nam_trong);
+        if (filters.giong) params.append('giong', filters.giong);
+
+        const url = `${API_BASE}/api/lo-cao-su?${params.toString()}`;
+        console.log('🌐 Gọi URL:', url);
+        
+        const response = await fetch(url);
+        console.log('📦 Response status:', response.status);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const geoData = await response.json();
+        console.log('✅ GeoJSON received:', geoData.features?.length, 'features');
+        
+        if (geoData.features) {
+          console.log('📌 Sample feature:', geoData.features[0]);
+          searchData = geoData.features.map(f => ({
+            id: f.properties.id_lo,
+            name: f.properties.ten_lo,
+            doi: f.properties.doi,
+            giong: f.properties.giong,
+            nam_trong: f.properties.nam_trong,
+            dien_tich_map: f.properties.dien_tich_map,
+            geometry: f.geometry
+          }));
+        }
+
+        return geoData;
+      } catch (error) {
+        console.error('❌ Lỗi fetchLoCaoSu:', error);
+        return { type: 'FeatureCollection', features: [] };
+      }
+    }
+
+    // Lấy boundary (ranh giới)
+    async function fetchBoundary(doi = null) {
+      console.log('📡 fetchBoundary với doi:', doi);
+      try {
+        const params = new URLSearchParams();
+        if (doi) params.append('doi', doi);
+
+        const url = `${API_BASE}/api/boundary?${params.toString()}`;
+        console.log('🌐 Gọi URL:', url);
+        
+        const response = await fetch(url);
+        console.log('📦 Response status:', response.status);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const geoData = await response.json();
+        console.log('✅ Boundary received:', geoData.features?.length, 'features');
+        
+        return geoData;
+      } catch (error) {
+        console.error('❌ Lỗi fetchBoundary:', error);
+        return { type: 'FeatureCollection', features: [] };
+      }
+    }
+
+    // Tải tất cả dữ liệu bản đồ
+    async function fetchMapData() {
+      console.log('🔄 fetchMapData: bắt đầu lấy dữ liệu...');
+      try {
+        console.log('📡 Gọi fetchLoCaoSu và fetchBoundary...');
+        const [loData, boundaryData] = await Promise.all([
+          fetchLoCaoSu(),
+          fetchBoundary()
+        ]);
+
+        console.log('📊 loData:', loData);
+        console.log('📊 boundaryData:', boundaryData);
+
+        const result = {
+          plots: loData.features || [],
+          boundaries: boundaryData.features || [],
+          stats: {
+            total: loData.features?.length || 0
+          }
+        };
+
+        console.log('✅ fetchMapData result:', result);
+        return result;
+      } catch (error) {
+        console.error('❌ Lỗi fetchMapData:', error);
+        showToast('Lỗi khi tải dữ liệu bản đồ: ' + error.message, '❌');
+        return null;
+      }
+    }
+
+    // ==================== KHỞI TẠO BẢN ĐỒ ====================
+    async function initDashMap() {
+      console.log('🚀 Bắt đầu initDashMap...');
+      
+      try {
+        // Khởi tạo bản đồ
+        console.log('📍 Khởi tạo Leaflet map...');
+        dashMap = L.map('dashMap').setView([12.524, 105.452], 12);
+        console.log('✅ Map created:', dashMap);
+
+        // Basemap layers
+        console.log('🗺️ Thêm OSM basemap...');
+        basemapLayers.osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '© OpenStreetMap contributors',
+          maxZoom: 19
+        }).addTo(dashMap);
+        console.log('✅ OSM basemap added');
+
+        basemapLayers.satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+          attribution: 'Tiles &copy; Esri',
+          maxZoom: 19
+        });
+
+        // Lấy dữ liệu từ API
+        console.log('🔄 Lấy dữ liệu từ API...');
+        const mapData = await fetchMapData();
+        console.log('📊 Map data received:', mapData);
+        
+        if (!mapData) {
+          console.error('❌ mapData là null!');
+          return;
+        }
+
+        // Tạo boundary layer (ranh giới)
+        if (mapData.boundaries && mapData.boundaries.length > 0) {
+          console.log('🏗️ Tạo boundary layer với', mapData.boundaries.length, 'features');
+          boundaryOuterLayer = L.geoJSON({
+            type: 'FeatureCollection',
+            features: mapData.boundaries
+          }, {
+            style: {
+              color: '#e5e7eb',
+              weight: 2,
+              opacity: 0.5,
+              fillOpacity: 0.1,
+              dashArray: '5, 5'
+            }
+          }).addTo(dashMap);
+          console.log('✅ Boundary layer added');
+        } else {
+          console.warn('⚠️ Không có boundary data');
+        }
+
+        // Tạo thematic layer (lô cây)
+        if (mapData.plots && mapData.plots.length > 0) {
+          console.log('🎨 Tạo thematic layer với', mapData.plots.length, 'features');
+          console.log('📌 Sample feature:', mapData.plots[0]);
+          
+          thematicLayer = L.geoJSON({
+            type: 'FeatureCollection',
+            features: mapData.plots
+          }, {
+            style: (feature) => {
+              let color = '#10b981';
+              
+              if (feature.properties.nam_trong) {
+                const year = feature.properties.nam_trong;
+                const yearMap = {
+                  2025: '#5ee7b1',
+                  2024: '#10b981',
+                  2023: '#0ea5e9',
+                  2022: '#f59e0b',
+                  2021: '#fb923c',
+                  2020: '#ef4444'
+                };
+                color = yearMap[year] || '#8b5cf6';
+              }
+              
+              return {
+                color: color,
+                weight: 2,
+                opacity: 0.8,
+                fillOpacity: 0.4
+              };
+            },
+            onEachFeature: (feature, layer) => {
+              const props = feature.properties;
+              const popupContent = `
+                <div style="font-family: Arial, sans-serif; font-size: 12px; width: 250px;">
+                  <strong style="color: #10b981; font-size: 14px;">${props.ten_lo || 'Lô ' + props.id_lo}</strong><br/>
+                  <hr style="margin: 5px 0; border: none; border-top: 1px solid #e5e7eb;">
+                  <div style="line-height: 1.6;">
+                    <strong>ID:</strong> ${props.id_lo}<br/>
+                    <strong>Đội:</strong> ${props.doi || 'N/A'}<br/>
+                    <strong>Giống:</strong> ${props.giong || 'N/A'}<br/>
+                    <strong>Năm trồng:</strong> ${props.nam_trong || 'N/A'}<br/>
+                    <strong>Diện tích:</strong> ${props.dien_tich_map ? props.dien_tich_map + ' ha' : 'N/A'}<br/>
+                    <strong>Chế độ cao:</strong> ${props.che_do_cao || 'N/A'}<br/>
+                    <strong>Cây cao:</strong> ${props.cay_cao || 'N/A'}
+                  </div>
+                </div>
+              `;
+              layer.bindPopup(popupContent);
+            }
+          }).addTo(dashMap);
+          console.log('✅ Thematic layer added');
+        } else {
+          console.warn('⚠️ Không có plots data');
+        }
+
+        // Khởi tạo zoom sync
+        initZoomSync();
+
+        // Tải dropdown filters
+        console.log('📋 Tải filters...');
+        await Promise.all([
+          fetchDashboardStats(),
+          fetchDonViList(),
+          fetchGiongStats(),
+          fetchNamTrongStats()
+        ]);
+        console.log('✅ Filters loaded');
+        
+        showToast('Bản đồ đã tải thành công', '✅');
+        console.log('🎉 initDashMap hoàn tất!');
+      } catch (error) {
+        console.error('❌ Lỗi trong initDashMap:', error);
+        showToast('Lỗi khởi tạo bản đồ: ' + error.message, '❌');
+      }
+    }
+
+    // ==================== ĐIỀU KHIỂN ====================
+    function showToast(msg, icon = '✅') {
+      const t = document.getElementById('toast');
+      document.getElementById('toastIcon').innerHTML = icon;
+      document.getElementById('toastMsg').innerHTML = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 4000);
+    }
+
+    function zoomMapIn() {
+      if (dashMap) {
+        const currentZoom = dashMap.getZoom();
+        dashMap.setZoom(currentZoom + 1);
+        document.getElementById('zoomRange').value = currentZoom + 1;
+        updateZoomLabel(currentZoom + 1);
+      }
+    }
+
+    function zoomMapOut() {
+      if (dashMap) {
+        const currentZoom = dashMap.getZoom();
+        dashMap.setZoom(currentZoom - 1);
+        document.getElementById('zoomRange').value = currentZoom - 1;
+        updateZoomLabel(currentZoom - 1);
+      }
+    }
+
+    function setZoomLevel(level) {
+      if (dashMap) {
+        dashMap.setZoom(parseInt(level));
+        updateZoomLabel(level);
+      }
+    }
+
+    function updateZoomLabel(level) {
+      document.getElementById('zoomLabel').textContent = level;
+    }
+
+    function zoomHome() {
+      if (dashMap) {
+        dashMap.setView([12.524, 105.452], 12);
+        document.getElementById('zoomRange').value = 12;
+        updateZoomLabel(12);
+        showToast("Quay về vị trí ban đầu", "🏠");
+      }
+    }
+
+    function initZoomSync() {
+      if (dashMap) {
+        dashMap.on('zoomend', () => {
+          const zoom = dashMap.getZoom();
+          document.getElementById('zoomRange').value = zoom;
+          updateZoomLabel(zoom);
+        });
+      }
+    }
+
+    function toggleMeasurePanel() {
+      showToast("Công cụ đo lường đang được phát triển", "📏");
+    }
+
+    function toggleBasemapGallery() {
+      showToast("Đã chuyển sang bản đồ vệ tinh", "🗺️");
+      if (basemapLayers[currentBasemap] && dashMap.hasLayer(basemapLayers[currentBasemap])) {
+        dashMap.removeLayer(basemapLayers[currentBasemap]);
+      }
+      currentBasemap = currentBasemap === 'osm' ? 'satellite' : 'osm';
+      basemapLayers[currentBasemap].addTo(dashMap);
+      basemapLayers[currentBasemap].bringToBack();
+    }
+
+    function toggleLayerList() {
+      showToast(layerVisibility.loCay ? "Ẩn lô cây" : "Hiển thị lô cây", "👁️");
+      layerVisibility.loCay = !layerVisibility.loCay;
+      if (layerVisibility.loCay) {
         if (thematicLayer) dashMap.addLayer(thematicLayer);
       } else {
         if (thematicLayer) dashMap.removeLayer(thematicLayer);
       }
-      showToast(layerVisibility[layerName] ? "Hiển thị lô cây" : "Ẩn lô cây", "👁️");
-    }
-  }
-
-  function updateLayerOpacity(layerName, value) {
-    const opacity = value / 100;
-    if (layerName === 'loCay' && thematicLayer) {
-      thematicLayer.eachLayer(layer => {
-        if (layer.setStyle) {
-          layer.setStyle({ fillOpacity: opacity * 0.7 });
-        }
-      });
-    }
-  }
-
-  // ==================== SEARCH ====================
-  function performSearch(query) {
-    if (!query.trim()) {
-      document.getElementById('searchResults').classList.remove('show');
-      return;
     }
 
-    const queryLower = query.toLowerCase();
-    const results = searchData.filter(item => 
-      item.name.toLowerCase().includes(queryLower) ||
-      item.doi?.toLowerCase().includes(queryLower) ||
-      item.giong?.toLowerCase().includes(queryLower) ||
-      item.nam_trong?.toString().includes(query) ||
-      item.id.toString().includes(query)
-    ).slice(0, 8);
+    // ==================== FILTER & SEARCH ====================
+    async function applyMapFilters() {
+      const filters = {
+        doi: document.querySelector('select[name="doi"]')?.value || '',
+        nam_trong: document.querySelector('select[name="nam_trong"]')?.value || '',
+        giong: document.querySelector('select[name="giong"]')?.value || ''
+      };
 
-    const resultsDiv = document.getElementById('searchResults');
-    if (results.length === 0) {
-      resultsDiv.innerHTML = '<div class="search-no-result">Không tìm thấy kết quả</div>';
-    } else {
-      resultsDiv.innerHTML = results.map((item, idx) => `
-        <div class="search-result-item" onclick="selectSearchResult(${idx}, ${JSON.stringify(item).replace(/"/g, '&quot;')})">
-          <div class="search-result-title">📍 ${item.name}</div>
-          <div class="search-result-desc">
-            ${item.doi ? `Đội: ${item.doi}` : ''} 
-            ${item.giong ? `| Giống: ${item.giong}` : ''} 
-            ${item.nam_trong ? `| Năm: ${item.nam_trong}` : ''}
-          </div>
-        </div>
-      `).join('');
+      // Loại bỏ filter rỗng
+      Object.keys(filters).forEach(key => filters[key] === '' && delete filters[key]);
+
+      console.log('📍 Áp dụng filter:', filters);
+      showToast('Đang cập nhật bản đồ...', '⏳');
+
+      // Lấy dữ liệu lọc từ API
+      const loData = await fetchLoCaoSu(filters);
+      
+      if (!loData.features) {
+        showToast('Không có dữ liệu phù hợp', '⚠️');
+        return;
+      }
+
+      // Xóa layer cũ
+      if (thematicLayer) dashMap.removeLayer(thematicLayer);
+
+      // Tạo layer mới từ dữ liệu lọc
+      if (loData.features.length > 0) {
+        thematicLayer = L.geoJSON(loData, {
+          style: (feature) => {
+            let color = '#10b981';
+            if (feature.properties.nam_trong) {
+              const year = feature.properties.nam_trong;
+              const yearMap = {
+                2025: '#5ee7b1',
+                2024: '#10b981',
+                2023: '#0ea5e9',
+                2022: '#f59e0b',
+                2021: '#fb923c',
+                2020: '#ef4444'
+              };
+              color = yearMap[year] || '#8b5cf6';
+            }
+            return {
+              color: color,
+              weight: 2,
+              opacity: 0.8,
+              fillOpacity: 0.4
+            };
+          },
+          onEachFeature: (feature, layer) => {
+            const props = feature.properties;
+            const popupContent = `
+              <div style="font-family: Arial, sans-serif; font-size: 12px; width: 250px;">
+                <strong style="color: #10b981; font-size: 14px;">${props.ten_lo || 'Lô ' + props.id_lo}</strong><br/>
+                <hr style="margin: 5px 0; border: none; border-top: 1px solid #e5e7eb;">
+                <div style="line-height: 1.6;">
+                  <strong>ID:</strong> ${props.id_lo}<br/>
+                  <strong>Đội:</strong> ${props.doi || 'N/A'}<br/>
+                  <strong>Giống:</strong> ${props.giong || 'N/A'}<br/>
+                  <strong>Năm trồng:</strong> ${props.nam_trong || 'N/A'}<br/>
+                  <strong>Diện tích:</strong> ${props.dien_tich_map ? props.dien_tich_map + ' ha' : 'N/A'}<br/>
+                  <strong>Chế độ cao:</strong> ${props.che_do_cao || 'N/A'}<br/>
+                  <strong>Cây cao:</strong> ${props.cay_cao || 'N/A'}
+                </div>
+              </div>
+            `;
+            layer.bindPopup(popupContent);
+          }
+        }).addTo(dashMap);
+      }
+
+      showToast(`Hiển thị ${loData.features.length} lô cây`, '✅');
     }
-    resultsDiv.classList.add('show');
-  }
 
-  function selectSearchResult(idx, item) {
-    const itemObj = JSON.parse(JSON.stringify(item));
-    clearSearchInput();
+    // ==================== KHỞI CHẠY ====================
+    window.addEventListener('load', initDashMap);
     
-    // Zoom to feature
-    if (itemObj.geometry) {
-      const geoJSON = L.geoJSON({
-        type: 'Feature',
-        geometry: itemObj.geometry
+    // Gắn event listener cho filter dropdowns
+    document.addEventListener('DOMContentLoaded', () => {
+      const filterSelects = document.querySelectorAll('select[name="doi"], select[name="nam_trong"], select[name="giong"]');
+      filterSelects.forEach(select => {
+        select.addEventListener('change', applyMapFilters);
       });
-      const bounds = geoJSON.getBounds();
-      dashMap.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 });
-    }
-
-    showToast(`Đã chọn lô ${itemObj.id}`, "✅");
-  }
-
-  function clearSearchInput() {
-    document.getElementById('searchInput').value = '';
-    document.getElementById('searchResults').classList.remove('show');
-  }
-
-  function clearSearch() {
-    document.getElementById('searchResults').classList.remove('show');
-  }
-
-  // ==================== KHỞI CHẠY ====================
-  window.addEventListener('load', initDashMap);
-</script>
+    });
+  </script>
 
 </body>
 </html>
