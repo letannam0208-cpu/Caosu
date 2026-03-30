@@ -828,7 +828,10 @@
     let searchData = [];
 
     // ==================== API CALL ====================
-    const API_BASE = 'http://localhost:3000'; // Thay đổi theo domain của bạn
+    // Detect API base URL tự động
+    const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+      ? 'http://localhost:3000'
+      : 'https://caosu-sncx.vercel.app'; // Domain production
 
     // Lấy thống kê dashboard
     async function fetchDashboardStats() {
