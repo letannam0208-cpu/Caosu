@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WebGIS · Quản Lý Lô Cây Cao Su</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root {
+  --bg:       #0a0e1a;
+  --s1:       #111827;
+  --s2:       #1a2332;
+  --s3:       #242e42;
+  --border:   rgba(255,255,255,0.08);
+  --border2:  rgba(255,255,255,0.14);
+  --text:     #f0f4f9;
+  --muted:    #6b7c9d;
+  --muted2:   #8fa3bd;
+  --accent:   #10b981;
+  --accentB:  #06b6d4;
+  --warn:     #f59e0b;
+  --danger:   #ef4444;
+  --purple:   #a78bfa;
+  --font-d:   'Syne', sans-serif;
+  --font-b:   'Be Vietnam Pro', sans-serif;
+  --nav-w:    200px;
+  --top-h:    64px;
+  --r:        8px;
+  --r-lg:     12px;
+  --shadow:   0 10px 40px rgba(0,0,0,0.3);
+  --shadow-sm: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--font-b);
+  background:var(--bg);
+  color:var(--text);
+  height:100vh;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--s3);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--s2)}
+
+/* TOP BAR */
+#topbar{
+  height:var(--top-h);
+  flex-shrink:0;
+  background:linear-gradient(180deg,var(--s1),rgba(17,24,39,0.8));
+  border-bottom:1px solid var(--border);
+  display:flex;
+  align-items:center;
+  padding:0 20px;
+  gap:16px;
+  position:relative;
+  z-index:100;
+  backdrop-filter:blur(10px);
+}
+#topbar::after{
+  content:'';
+  position:absolute;
+  bottom:0;
+  left:0;
+  right:0;
+  height:1px;
+  background:linear-gradient(90deg,transparent,rgba(16,185,129,0.25),transparent);
+}
+.tb-logo{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  text-decoration:none;
+  flex-shrink:0;
+  transition:all 0.3s;
+}
+.tb-logo:hover{
+  transform:translateY(-2px);
+}
+.tb-icon{
+  width:40px;
+  height:40px;
+  border-radius:10px;
+  background:linear-gradient(135deg,#10b981,#059669);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:20px;
+  box-shadow:0 4px 16px rgba(16,185,129,0.25);
+  flex-shrink:0;
+}
+.tb-title{
+  font-family:var(--font-d);
+  font-size:14px;
+  letter-spacing:0.1em;
+  color:var(--text);
+  font-weight:700;
+}
+.tb-sub{
+  font-size:10px;
+  color:var(--muted);
+  letter-spacing:0.12em;
+  text-transform:uppercase;
+  margin-top:2px;
+}
+.tb-sep{
+  width:1px;
+  height:28px;
+  background:var(--border);
+  margin:0 4px;
+}
+.tb-pill{
+  background:transparent;
+  border:none;
+  padding:6px 12px;
+  font-size:12px;
+  color:var(--muted2);
+  display:flex;
+  align-items:center;
+  gap:8px;
+  text-transform:capitalize;
+  border-radius:6px;
+  transition:all 0.2s;
+}
+.tb-pill:hover{
+  background:rgba(255,255,255,0.05);
+}
+.tb-pill strong{
+  color:var(--accent);
+  font-weight:600;
+  font-size:13px;
+}
+.live-dot{
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  background:var(--accent);
+  box-shadow:0 0 8px var(--accent);
+  animation:blink 2s infinite;
+}
+@keyframes blink{
+  0%,100%{opacity:1}
+  50%{opacity:0.4}
+}
+.tb-right{
+  margin-left:auto;
+  display:flex;
+  align-items:center;
+  gap:16px;
+}
+.icon-btn{
+  width:36px;
+  height:36px;
+  border-radius:var(--r);
+  background:rgba(255,255,255,0.05);
+  border:1px solid var(--border);
+  color:var(--muted2);
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:15px;
+  transition:all 0.2s;
+}
+.icon-btn:hover{
+  color:var(--accentB);
+  background:rgba(6,182,212,0.1);
+  border-color:rgba(6,182,212,0.2);
+}
+.tb-avatar{
+  width:38px;
+  height:38px;
+  border-radius:50%;
+  background:linear-gradient(135deg,#10b981,#06b6d4);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:12px;
+  font-weight:700;
+  color:#fff;
+  cursor:pointer;
+  border:2px solid var(--border2);
+  transition:all 0.2s;
+}
+.tb-avatar:hover{
+  transform:scale(1.05);
+  border-color:var(--accent);
+}
+.tb-user-info{
+  text-align:right;
+  font-size:12px;
+}
+.tb-user-name{
+  font-weight:600;
+  color:var(--text);
+}
+.tb-user-role{
+  font-size:11px;
+  color:var(--muted);
+  margin-top:2px;
+}
+
+/* BODY & NAV */
+#body{
+  display:flex;
+  flex:1;
+  overflow:hidden;
+}
+#nav{
+  width:var(--nav-w);
+  flex-shrink:0;
+  background:linear-gradient(180deg,var(--s1),var(--bg));
+  border-right:1px solid var(--border);
+  display:flex;
+  flex-direction:column;
+  overflow-y:auto;
+  padding:16px 10px;
+  gap:4px;
+}
+.nav-section-label{
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:0.15em;
+  text-transform:uppercase;
+  color:var(--muted);
+  padding:8px 12px 6px;
+  margin-top:8px;
+  margin-bottom:2px;
+}
+.nav-item{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px 12px;
+  border-radius:var(--r);
+  cursor:pointer;
+  transition:all 0.2s;
+  color:var(--muted2);
+  font-size:13px;
+  font-weight:500;
+  border:1px solid transparent;
+  position:relative;
+  text-decoration:none;
+  white-space:nowrap;
+}
+.nav-item:hover{
+  background:rgba(255,255,255,0.05);
+  color:var(--text);
+  border-color:var(--border2);
+}
+.nav-item.active{
+  background:rgba(16,185,129,0.15);
+  border-color:var(--accent);
+  color:var(--accent);
+  font-weight:600;
+  box-shadow:inset 0 0 8px rgba(16,185,129,0.1);
+}
+.nav-item.active::before{
+  content:'';
+  position:absolute;
+  left:0;
+  top:20%;
+  bottom:20%;
+  width:3px;
+  border-radius:0 2px 2px 0;
+  background:var(--accent);
+}
+.nav-icon{
+  width:16px;
+  height:16px;
+  flex-shrink:0;
+  text-align:center;
+  font-size:13px;
+}
+.nav-badge{
+  margin-left:auto;
+  background:rgba(239,68,68,0.2);
+  color:#fca5a5;
+  font-size:10px;
+  font-weight:700;
+  padding:2px 6px;
+  border-radius:8px;
+  flex-shrink:0;
+}
+
+/* Logout button */
+.nav-logout{
+  margin-top:auto;
+  border-top:1px solid var(--border);
+  padding-top:12px;
+}
+.nav-logout .nav-item{
+  color:#fca5a5;
+  border:1px solid rgba(239,68,68,0.2);
+  background:rgba(239,68,68,0.08);
+}
+.nav-logout .nav-item:hover{
+  background:rgba(239,68,68,0.15);
+  border-color:rgba(239,68,68,0.4);
+  color:#ff9999;
+}
+.nav-logout .nav-item.active{
+  background:rgba(239,68,68,0.2);
+  border-color:rgba(239,68,68,0.5);
+  color:#fca5a5;
+}
+
+/* CONTENT */
+#content{
+  flex:1;
+  overflow-y:auto;
+  padding:20px 24px;
+  background:linear-gradient(135deg,rgba(10,14,26,0),rgba(16,185,129,0.03));
+}
+.page-header{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  margin-bottom:24px;
+  gap:16px;
+}
+.page-title-group{
+  flex:1;
+}
+.page-title{
+  font-family:var(--font-d);
+  font-size:28px;
+  font-weight:800;
+  color:var(--text);
+  letter-spacing:-0.02em;
+  margin-bottom:4px;
+}
+.page-subtitle{
+  font-size:12px;
+  color:var(--muted);
+}
+.btn-add{
+  background:linear-gradient(135deg,var(--accent),#059669);
+  color:#fff;
+  border:none;
+  padding:10px 20px;
+  border-radius:var(--r);
+  font-family:var(--font-b);
+  font-size:13px;
+  font-weight:600;
+  cursor:pointer;
+  transition:all 0.2s;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  flex-shrink:0;
+  box-shadow:0 4px 12px rgba(16,185,129,0.2);
+}
+.btn-add:hover{
+  transform:translateY(-2px);
+  box-shadow:0 6px 20px rgba(16,185,129,0.3);
+}
+.btn-add:active{
+  transform:scale(0.98);
+}
+
+/* TOOLBAR & FILTER */
+.toolbar{
+  margin-bottom:16px;
+}
+.filter-bar{
+  display:grid;
+  grid-template-columns:1.8fr 1fr 1fr 1fr 1fr 1fr;
+  gap:12px;
+  margin-bottom:12px;
+  background:var(--s1);
+  padding:14px;
+  border-radius:var(--r-lg);
+  border:1px solid var(--border);
+  box-shadow:var(--shadow-sm);
+}
+.search-box,
+.select-filter{
+  padding:10px 14px;
+  border-radius:var(--r);
+  background:var(--s2);
+  border:1px solid var(--border);
+  color:var(--text);
+  font-family:var(--font-b);
+  font-size:12px;
+  transition:all 0.2s;
+}
+.search-box::placeholder,
+.select-filter::placeholder{
+  color:var(--muted);
+}
+.search-box:focus,
+.select-filter:focus{
+  outline:none;
+  border-color:var(--accent);
+  background:var(--s3);
+  box-shadow:0 0 12px rgba(16,185,129,0.15);
+}
+.select-filter{
+  cursor:pointer;
+}
+.select-filter:hover:not(:focus){
+  border-color:var(--border2);
+  background:rgba(26,35,50,0.8);
+}
+.select-filter option{
+  background:var(--s1);
+  color:var(--text);
+}
+.filter-active{
+  border-color:var(--accent)!important;
+  box-shadow:0 0 10px rgba(16,185,129,0.3)!important;
+  background:rgba(16,185,129,0.08);
+}
+.show-info{
+  font-size:12px;
+  color:var(--muted);
+  margin-bottom:12px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  padding:0 2px;
+}
+
+/* TABLE */
+.table-container{
+  background:var(--s1);
+  border:1px solid var(--border);
+  border-radius:var(--r-lg);
+  overflow:hidden;
+  box-shadow:var(--shadow-sm);
+}
+table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:12px;
+}
+thead{
+  background:linear-gradient(180deg,var(--s2),var(--s1));
+  position:sticky;
+  top:0;
+  z-index:10;
+}
+th{
+  padding:12px 14px;
+  text-align:left;
+  border-bottom:1px solid var(--border2);
+  font-size:11px;
+  font-weight:700;
+  color:var(--muted2);
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  white-space:nowrap;
+}
+td{
+  padding:12px 14px;
+  border-bottom:1px solid var(--border);
+}
+tbody tr{
+  transition:all 0.15s;
+}
+tbody tr:hover{
+  background:rgba(16,185,129,0.04);
+}
+tbody tr:last-child td{
+  border-bottom:none;
+}
+
+/* Cell styles */
+.cell-name{
+  font-weight:600;
+  color:var(--text);
+}
+.cell-code{
+  font-family:monospace;
+  font-size:11px;
+  color:var(--muted2);
+  letter-spacing:0.02em;
+}
+.cell-farm-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:4px 10px;
+  border-radius:6px;
+  background:rgba(16,185,129,0.15);
+  color:var(--accent);
+  font-weight:500;
+  font-size:11px;
+  border:1px solid rgba(16,185,129,0.2);
+}
+.farm-dot{
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  display:inline-block;
+}
+.farm-dot.nt1,
+.farm-dot.nt2,
+.farm-dot.nt3{
+  background:#fbbf24;
+  box-shadow:0 0 4px rgba(251,191,36,0.5);
+}
+
+/* Species badges */
+.species-badge{
+  display:inline-block;
+  padding:4px 10px;
+  border-radius:6px;
+  font-weight:600;
+  font-size:11px;
+  border:1px solid;
+  white-space:nowrap;
+  transition:all 0.2s;
+}
+.badge-pb255{
+  background:rgba(168,107,250,0.15);
+  color:#d8b4fe;
+  border-color:rgba(168,107,250,0.3);
+}
+.badge-pb260{
+  background:rgba(6,182,212,0.15);
+  color:#7dd3fc;
+  border-color:rgba(6,182,212,0.3);
+}
+.badge-rriv3{
+  background:rgba(168,107,250,0.15);
+  color:#d8b4fe;
+  border-color:rgba(168,107,250,0.3);
+}
+.badge-rriv107{
+  background:rgba(245,158,11,0.15);
+  color:#fcd34d;
+  border-color:rgba(245,158,11,0.3);
+}
+.badge-rrivi{
+  background:rgba(34,197,94,0.15);
+  color:#86efac;
+  border-color:rgba(34,197,94,0.3);
+}
+.badge-rric121{
+  background:rgba(34,197,94,0.15);
+  color:#86efac;
+  border-color:rgba(34,197,94,0.3);
+}
+
+/* Buttons */
+.btn-dash{
+  background:rgba(16,185,129,0.2);
+  border:1px solid rgba(16,185,129,0.4);
+  color:var(--accent);
+  padding:5px 10px;
+  border-radius:var(--r);
+  font-size:11px;
+  cursor:pointer;
+  transition:all 0.18s;
+  font-weight:600;
+}
+.btn-dash:hover{
+  background:rgba(16,185,129,0.3);
+  box-shadow:0 2px 8px rgba(16,185,129,0.15);
+  transform:translateY(-1px);
+}
+.btn-dash.blue{
+  background:rgba(6,182,212,0.2);
+  border-color:rgba(6,182,212,0.4);
+  color:var(--accentB);
+}
+.btn-dash.blue:hover{
+  background:rgba(6,182,212,0.3);
+  box-shadow:0 2px 8px rgba(6,182,212,0.15);
+}
+.btn-view{
+  background:rgba(239,68,68,0.2);
+  border:1px solid rgba(239,68,68,0.4);
+  color:#fca5a5;
+  padding:6px 14px;
+  border-radius:var(--r);
+  font-size:11px;
+  cursor:pointer;
+  transition:all 0.18s;
+  font-weight:600;
+}
+.btn-view:hover{
+  background:rgba(239,68,68,0.3);
+  box-shadow:0 2px 8px rgba(239,68,68,0.15);
+  transform:translateY(-1px);
+}
+
+@media(max-width:1400px){
+  .filter-bar{grid-template-columns:1.5fr 1fr 1fr 1fr 1fr}
+  th:nth-child(10),td:nth-child(10){display:none}
+}
+@media(max-width:1200px){
+  .filter-bar{grid-template-columns:1.5fr 1fr 1fr 1fr}
+  th:nth-child(9),td:nth-child(9){display:none}
+  th:nth-child(10),td:nth-child(10){display:none}
+}
+@media(max-width:992px){
+  --nav-w: 180px;
+  .filter-bar{grid-template-columns:1.5fr 1fr 1fr}
+  th:nth-child(7),td:nth-child(7){display:none}
+  th:nth-child(8),td:nth-child(8){display:none}
+}
+@media(max-width:768px){
+  --nav-w: 160px;
+  #nav{padding:12px 8px;width:160px}
+  #topbar{padding:0 16px}
+  #content{padding:16px 12px}
+  .page-header{flex-direction:column}
+  .page-title{font-size:22px}
+  .filter-bar{
+    grid-template-columns:1fr;
+    padding:10px;
+    gap:10px;
+  }
+  .search-box{grid-column:1/-1}
+  table{font-size:11px}
+  th,td{padding:10px 8px}
+  .tb-pill{display:none}
+}
+</style>
+</head>
+<body>
+  <!-- Topbar và Nav giữ nguyên như cũ -->
+  <div id="topbar">...</div>
+  <div id="body">
+    <nav id="nav">...</nav>
+    <div id="content">
+      <div class="page-header">
+        <div class="page-title-group">
+          <h1 class="page-title">Quản Lý Lô Cây</h1>
+          <p class="page-subtitle">Quản lý và theo dõi toàn bộ lô cây cao su trong trang trại</p>
+        </div>
+        <button class="btn-add" id="btnAddLo"><i class="fas fa-plus"></i>Thêm lô cây</button>
+      </div>
+
+      <div class="toolbar">
+        <div class="filter-bar">
+          <input type="text" id="searchInput" class="search-box" placeholder="🔍 Tìm kiếm lô cây, mã định danh, vị trí...">
+          <select id="doiFilter" class="select-filter">
+            <option value="">Tất cả đơn vị</option>
+          </select>
+          <select id="giongFilter" class="select-filter">
+            <option value="">Tất cả giống</option>
+            <option value="pb255">PB 255</option>
+            <option value="pb260">PB 260</option>
+            <option value="rriv3">RRIV 3</option>
+            <option value="rriv107">RRIV 107</option>
+            <option value="rrivi">RRIV I</option>
+            <option value="rric121">RRIC 121</option>
+          </select>
+          <select id="namFilter" class="select-filter">
+            <option value="">Tất cả năm</option>
+          </select>
+          <select id="phienFilter" class="select-filter">
+            <option value="">Tất cả phiên</option>
+            <option value="1">Phiên 1</option>
+            <option value="2">Phiên 2</option>
+          </select>
+          <select id="nhipdoFilter" class="select-filter">
+            <option value="">Tất cả</option>
+            <option value="active">Hoạt động</option>
+            <option value="inactive">Bảo trì</option>
+          </select>
+        </div>
+        <div class="show-info">
+          <i class="fas fa-info-circle"></i>
+          <span>Hiển thị <strong id="resultCount">0</strong> lô cây</span>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Lô Cây</th>
+              <th>Mã định danh</th>
+              <th>Đơn vị</th>
+              <th>Giống</th>
+              <th>Năm trồng</th>
+              <th>Diện tích (ha)</th>
+              <th>Hành động</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <!-- Dữ liệu sẽ được load bằng JavaScript -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL THÊM/SỬA LÔ CÂY -->
+  <div id="loModal" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; align-items:center; justify-content:center;">
+    <div style="background:var(--s1); border-radius:16px; width:90%; max-width:800px; max-height:90%; overflow-y:auto; padding:24px;">
+      <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
+        <h3 id="modalTitle" style="color:var(--text);">Thêm lô cây</h3>
+        <button class="icon-btn" id="closeModal" style="background:none;"><i class="fas fa-times"></i></button>
+      </div>
+      <form id="loForm">
+        <input type="hidden" id="id_lo" name="id_lo">
+        <!-- Các nhóm thông tin -->
+        <div style="margin-bottom:16px;">
+          <label style="color:var(--muted);">Tên lô *</label>
+          <input type="text" id="ten_lo" name="ten_lo" class="search-box" style="width:100%;" required>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+          <div>
+            <label>Năm trồng</label>
+            <input type="number" id="nam_trong" name="nam_trong" class="search-box">
+          </div>
+          <div>
+            <label>Giống</label>
+            <input type="text" id="giong" name="giong" class="search-box">
+          </div>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+          <div>
+            <label>Cao trình TB (m)</label>
+            <input type="number" step="0.1" id="cao_trinh_tb" name="cao_trinh_tb" class="search-box">
+          </div>
+          <div>
+            <label>Đơn vị (ID)</label>
+            <select id="id_don_vi" name="id_don_vi" class="select-filter" style="width:100%;"></select>
+          </div>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+          <div>
+            <label>Hành chính (ID)</label>
+            <select id="id_hc" name="id_hc" class="select-filter" style="width:100%;"></select>
+          </div>
+        </div>
+        <hr style="border-color:var(--border); margin:16px 0;">
+        <h4 style="color:var(--accent);">Diện tích</h4>
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;">
+          <div><label>DT map</label><input type="number" step="0.001" id="dien_tich_map" name="dien_tich_map" class="search-box"></div>
+          <div><label>DT 01/01/25</label><input type="number" step="0.001" id="dien_tich_010125" name="dien_tich_010125" class="search-box"></div>
+          <div><label>DT 01/01/26</label><input type="number" step="0.001" id="dien_tich_010126" name="dien_tich_010126" class="search-box"></div>
+        </div>
+        <h4 style="color:var(--accent); margin-top:12px;">Hiện trạng cây</h4>
+        <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:12px;">
+          <div><label>Tổng hộ KK</label><input type="number" id="tong_ho_kk" name="tong_ho_kk" class="search-box"></div>
+          <div><label>Cây cao</label><input type="number" id="cay_cao" name="cay_cao" class="search-box"></div>
+          <div><label>Cây chưa cao</label><input type="number" id="cay_chua_cao" name="cay_chua_cao" class="search-box"></div>
+          <div><label>Cây khô mủ</label><input type="number" id="cay_kho_mu" name="cay_kho_mu" class="search-box"></div>
+          <div><label>Cây không PT</label><input type="number" id="cay_khong_pt" name="cay_khong_pt" class="search-box"></div>
+          <div><label>Hố trống</label><input type="number" id="ho_trong" name="ho_trong" class="search-box"></div>
+          <div><label>Mật độ (cây/ha)</label><input type="number" step="0.1" id="mat_do_cc" name="mat_do_cc" class="search-box"></div>
+        </div>
+        <h4 style="color:var(--accent); margin-top:12px;">Khai thác</h4>
+        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:12px;">
+          <div><label>Chế độ cạo</label><input type="text" id="che_do_cao" name="che_do_cao" class="search-box"></div>
+          <div><label>Phiên cạo</label><input type="text" id="phien_cao" name="phien_cao" class="search-box"></div>
+          <div><label>Nhịp độ cạo</label><input type="text" id="nhip_do_cao" name="nhip_do_cao" class="search-box"></div>
+          <div><label>Năm mở cạo</label><input type="number" id="nam_mc" name="nam_mc" class="search-box"></div>
+          <div><label>Tuổi cạo</label><input type="number" id="tuoi_cao" name="tuoi_cao" class="search-box"></div>
+          <div><label>Năm cạo up</label><input type="number" id="nam_cao_up" name="nam_cao_up" class="search-box"></div>
+          <div><label>Tình trạng mủ</label><input type="text" id="tinh_trang_mc" name="tinh_trang_mc" class="search-box"></div>
+        </div>
+        <h4 style="color:var(--accent); margin-top:12px;">Sản lượng</h4>
+        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:12px;">
+          <div><label>NS25 kg/ha</label><input type="number" step="0.01" id="ns25_kg_ha" name="ns25_kg_ha" class="search-box"></div>
+          <div><label>NS25 kg/cây</label><input type="number" step="0.01" id="ns25_kg_cay" name="ns25_kg_cay" class="search-box"></div>
+          <div><label>NS26 kg/ha</label><input type="number" step="0.01" id="ns26_kg_ha" name="ns26_kg_ha" class="search-box"></div>
+          <div><label>NS26 kg/cây</label><input type="number" step="0.01" id="ns26_kg_cay" name="ns26_kg_cay" class="search-box"></div>
+          <div><label>Tổng lát cạo</label><input type="number" step="0.01" id="tong_lat_cao" name="tong_lat_cao" class="search-box"></div>
+          <div><label>Sản lượng</label><input type="number" step="0.01" id="san_luong" name="san_luong" class="search-box"></div>
+          <div><label>Phân loại</label><input type="text" id="phan_loai" name="phan_loai" class="search-box"></div>
+          <div><label>Đối tượng</label><input type="text" id="doi_tuong" name="doi_tuong" class="search-box"></div>
+          <div><label>Tái canh năm</label><input type="number" id="tai_canh_nam" name="tai_canh_nam" class="search-box"></div>
+        </div>
+        <h4 style="color:var(--accent); margin-top:12px;">Thông tin trồng</h4>
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;">
+          <div><label>Hạng đất</label><input type="text" id="hang_dat" name="hang_dat" class="search-box"></div>
+          <div><label>Phương pháp trồng</label><input type="text" id="phuong_phap_trong" name="phuong_phap_trong" class="search-box"></div>
+          <div><label>Khoảng cách trồng</label><input type="text" id="khoang_cach_trong" name="khoang_cach_trong" class="search-box"></div>
+          <div><label>Mật độ TK</label><input type="number" id="mat_do_tk" name="mat_do_tk" class="search-box"></div>
+        </div>
+        <div style="margin-top:24px; text-align:right;">
+          <button type="button" id="cancelModal" class="btn-dash" style="margin-right:12px;">Hủy</button>
+          <button type="submit" class="btn-add">Lưu</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Load dữ liệu danh sách đơn vị và hành chính
+    async function loadDonVi() {
+      const res = await fetch('/api/don-vi-list');
+      const data = await res.json();
+      if(data.success) {
+        const select = document.getElementById('id_don_vi');
+        select.innerHTML = '<option value="">Chọn đơn vị</option>';
+        data.data.forEach(dv => {
+          const opt = document.createElement('option');
+          opt.value = dv.id_don_vi;
+          opt.textContent = dv.doi;
+          select.appendChild(opt);
+        });
+      }
+    }
+    async function loadHanhChinh() {
+      // Giả sử có API lấy danh sách hành chính
+      const res = await fetch('/api/hanh-chinh-list');
+      const data = await res.json();
+      if(data.success) {
+        const select = document.getElementById('id_hc');
+        select.innerHTML = '<option value="">Chọn xã/huyện</option>';
+        data.data.forEach(hc => {
+          const opt = document.createElement('option');
+          opt.value = hc.id_hc;
+          opt.textContent = `${hc.xa}, ${hc.huyen}`;
+          select.appendChild(opt);
+        });
+      }
+    }
+    // Hàm load danh sách lô cây lên bảng
+    async function loadLoCay() {
+      const res = await fetch('/api/lo-cay');
+      const data = await res.json();
+      if(data.success) {
+        renderTable(data.data);
+        updateFilters(data.data);
+      }
+    }
+    function renderTable(loCay) {
+      const tbody = document.getElementById('tableBody');
+      tbody.innerHTML = '';
+      loCay.forEach(l => {
+        const row = tbody.insertRow();
+        row.insertCell(0).innerHTML = `<span class="cell-name">${l.ten_lo || ''}</span>`;
+        row.insertCell(1).innerHTML = `<span class="cell-code">${l.id_lo}</span>`;
+        row.insertCell(2).innerHTML = `<span class="cell-farm-badge">${l.doi || ''}</span>`;
+        row.insertCell(3).innerHTML = `<span class="species-badge">${l.giong || ''}</span>`;
+        row.insertCell(4).innerHTML = l.nam_trong || '';
+        row.insertCell(5).innerHTML = l.dien_tich_map ? `${l.dien_tich_map} ha` : '';
+        const actionCell = row.insertCell(6);
+        actionCell.innerHTML = `
+          <button class="btn-dash edit-btn" data-id="${l.id_lo}"><i class="fas fa-edit"></i> Sửa</button>
+          <button class="btn-view delete-btn" data-id="${l.id_lo}" style="margin-left:8px;"><i class="fas fa-trash"></i> Xóa</button>
+        `;
+      });
+      // Gán sự kiện cho các nút sửa/xóa
+      document.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.addEventListener('click', () => editLo(btn.dataset.id));
+      });
+      document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', () => deleteLo(btn.dataset.id));
+      });
+      document.getElementById('resultCount').innerText = loCay.length;
+    }
+    // Hàm lọc
+    function filterRows() {
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      const doi = document.getElementById('doiFilter').value;
+      const giong = document.getElementById('giongFilter').value;
+      const nam = document.getElementById('namFilter').value;
+      const phien = document.getElementById('phienFilter').value;
+      const nhipdo = document.getElementById('nhipdoFilter').value;
+      const rows = document.querySelectorAll('#tableBody tr');
+      let visible = 0;
+      rows.forEach(row => {
+        const text = row.innerText.toLowerCase();
+        const matchSearch = !search || text.includes(search);
+        const matchDoi = !doi || (row.cells[2].innerText.includes(doi));
+        const matchGiong = !giong || (row.cells[3].innerText.toLowerCase().includes(giong));
+        const matchNam = !nam || (row.cells[4].innerText === nam);
+        // Phiên và nhịp độ chưa có dữ liệu mẫu, tạm bỏ qua
+        const show = matchSearch && matchDoi && matchGiong && matchNam;
+        row.style.display = show ? '' : 'none';
+        if(show) visible++;
+      });
+      document.getElementById('resultCount').innerText = visible;
+    }
+    function updateFilters(loCay) {
+      // Cập nhật các lựa chọn năm
+      const years = [...new Set(loCay.map(l => l.nam_trong).filter(y => y))].sort();
+      const namSelect = document.getElementById('namFilter');
+      namSelect.innerHTML = '<option value="">Tất cả năm</option>';
+      years.forEach(y => {
+        const opt = document.createElement('option');
+        opt.value = y;
+        opt.textContent = y;
+        namSelect.appendChild(opt);
+      });
+      // Cập nhật đơn vị filter
+      const doiSelect = document.getElementById('doiFilter');
+      const dois = [...new Set(loCay.map(l => l.doi).filter(d => d))];
+      dois.forEach(d => {
+        const opt = document.createElement('option');
+        opt.value = d;
+        opt.textContent = d;
+        doiSelect.appendChild(opt);
+      });
+    }
+    // Thêm/Sửa lô
+    let editId = null;
+    function editLo(id) {
+      editId = id;
+      fetch(`/api/lo-cay/${id}`)
+        .then(res => res.json())
+        .then(data => {
+          if(data.success) {
+            const l = data.data;
+            document.getElementById('id_lo').value = l.id_lo;
+            document.getElementById('ten_lo').value = l.ten_lo || '';
+            document.getElementById('nam_trong').value = l.nam_trong || '';
+            document.getElementById('giong').value = l.giong || '';
+            document.getElementById('cao_trinh_tb').value = l.cao_trinh_tb || '';
+            document.getElementById('id_don_vi').value = l.id_don_vi || '';
+            document.getElementById('id_hc').value = l.id_hc || '';
+            document.getElementById('dien_tich_map').value = l.dien_tich_map || '';
+            document.getElementById('dien_tich_010125').value = l.dien_tich_010125 || '';
+            document.getElementById('dien_tich_010126').value = l.dien_tich_010126 || '';
+            document.getElementById('tong_ho_kk').value = l.tong_ho_kk || '';
+            document.getElementById('cay_cao').value = l.cay_cao || '';
+            document.getElementById('cay_chua_cao').value = l.cay_chua_cao || '';
+            document.getElementById('cay_kho_mu').value = l.cay_kho_mu || '';
+            document.getElementById('cay_khong_pt').value = l.cay_khong_pt || '';
+            document.getElementById('ho_trong').value = l.ho_trong || '';
+            document.getElementById('mat_do_cc').value = l.mat_do_cc || '';
+            document.getElementById('che_do_cao').value = l.che_do_cao || '';
+            document.getElementById('phien_cao').value = l.phien_cao || '';
+            document.getElementById('nhip_do_cao').value = l.nhip_do_cao || '';
+            document.getElementById('nam_mc').value = l.nam_mc || '';
+            document.getElementById('tuoi_cao').value = l.tuoi_cao || '';
+            document.getElementById('nam_cao_up').value = l.nam_cao_up || '';
+            document.getElementById('tinh_trang_mc').value = l.tinh_trang_mc || '';
+            document.getElementById('ns25_kg_ha').value = l.ns25_kg_ha || '';
+            document.getElementById('ns25_kg_cay').value = l.ns25_kg_cay || '';
+            document.getElementById('ns26_kg_ha').value = l.ns26_kg_ha || '';
+            document.getElementById('ns26_kg_cay').value = l.ns26_kg_cay || '';
+            document.getElementById('tong_lat_cao').value = l.tong_lat_cao || '';
+            document.getElementById('san_luong').value = l.san_luong || '';
+            document.getElementById('phan_loai').value = l.phan_loai || '';
+            document.getElementById('doi_tuong').value = l.doi_tuong || '';
+            document.getElementById('tai_canh_nam').value = l.tai_canh_nam || '';
+            document.getElementById('hang_dat').value = l.hang_dat || '';
+            document.getElementById('phuong_phap_trong').value = l.phuong_phap_trong || '';
+            document.getElementById('khoang_cach_trong').value = l.khoang_cach_trong || '';
+            document.getElementById('mat_do_tk').value = l.mat_do_tk || '';
+            document.getElementById('modalTitle').innerText = 'Sửa lô cây';
+            document.getElementById('loModal').style.display = 'flex';
+          }
+        });
+    }
+    function deleteLo(id) {
+      if(confirm('Bạn có chắc chắn muốn xóa lô cây này?')) {
+        fetch(`/api/lo-cay/${id}`, { method: 'DELETE' })
+          .then(res => res.json())
+          .then(data => {
+            if(data.success) {
+              alert('Xóa thành công');
+              loadLoCay();
+            } else {
+              alert('Lỗi: ' + data.error);
+            }
+          });
+      }
+    }
+    // Xử lý submit form thêm/sửa
+    document.getElementById('loForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const data = Object.fromEntries(formData);
+      const id_lo = document.getElementById('id_lo').value;
+      const url = id_lo ? `/api/lo-cay/${id_lo}` : '/api/lo-cay';
+      const method = id_lo ? 'PUT' : 'POST';
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      const result = await res.json();
+      if(result.success) {
+        alert(id_lo ? 'Cập nhật thành công' : 'Thêm thành công');
+        document.getElementById('loModal').style.display = 'none';
+        loadLoCay();
+      } else {
+        alert('Lỗi: ' + result.error);
+      }
+    });
+    document.getElementById('btnAddLo').onclick = () => {
+      editId = null;
+      document.getElementById('loForm').reset();
+      document.getElementById('id_lo').value = '';
+      document.getElementById('modalTitle').innerText = 'Thêm lô cây';
+      document.getElementById('loModal').style.display = 'flex';
+    };
+    document.getElementById('closeModal').onclick = document.getElementById('cancelModal').onclick = () => {
+      document.getElementById('loModal').style.display = 'none';
+    };
+    // Gán sự kiện lọc
+    document.getElementById('searchInput').addEventListener('input', filterRows);
+    document.getElementById('doiFilter').addEventListener('change', filterRows);
+    document.getElementById('giongFilter').addEventListener('change', filterRows);
+    document.getElementById('namFilter').addEventListener('change', filterRows);
+    document.getElementById('phienFilter').addEventListener('change', filterRows);
+    document.getElementById('nhipdoFilter').addEventListener('change', filterRows);
+    // Khởi tạo
+    loadDonVi();
+    loadHanhChinh();
+    loadLoCay();
+  </script>
+</body>
+</html>
