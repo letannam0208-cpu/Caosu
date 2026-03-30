@@ -714,20 +714,12 @@
           addHoverEffect();
         }
 
-        // Tạo nhãn chính giữa mỗi lô (dùng centroid thực tế)
+        // Tạo nhãn chính giữa mỗi lô
         labelLayer = L.layerGroup();
         currentFeatures.forEach(feat => {
           if (feat.geometry) {
             try {
-              // Dùng Turf.js tính centroid chính xác của đa giác
-              let center;
-              if (feat.geometry.type === 'Polygon') {
-                center = turf.centroid(feat);
-              } else if (feat.geometry.type === 'MultiPolygon') {
-                center = turf.centroid(feat);
-              } else {
-                return;
-              }
+              let center = turf.centroid(feat);
               const coords = center.geometry.coordinates;
               const labelHtml = `
                 <div class="lot-label">
@@ -743,9 +735,7 @@
               });
               const marker = L.marker([coords[1], coords[0]], { icon, interactive: false });
               labelLayer.addLayer(marker);
-            } catch(e) {
-              console.warn('Không tạo nhãn cho lô', feat.properties.id_lo);
-            }
+            } catch(e) {}
           }
         });
         labelLayer.addTo(map);
@@ -768,7 +758,6 @@
       }
     }
 
-    // Cập nhật dropdown đội chỉ lấy 1,2,3
     function updateDoiFilterFromData() {
       const doiSelect = document.getElementById('filterDoi');
       let doiValues = [...new Set(currentFeatures.map(f => f.properties.doi).filter(d => d && d !== ''))];
@@ -833,7 +822,7 @@
       }
     }
 
-    // ========== BASEMAP GALLERY ==========
+    // ========== BASEMAP ==========
     const basemaps = {
       satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: '© Esri' }),
       streets: L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { attribution: '© CartoDB' }),
@@ -846,6 +835,11 @@
       map.addLayer(basemap);
       document.getElementById('chk-satellite').checked = (type === 'satellite');
       showToast('Đã chuyển nền bản đồ', '🗺️');
+    }
+    function toggleBasemapLayer() {
+      const chk = document.getElementById('chk-satellite');
+      if (chk.checked && !map.hasLayer(basemap)) basemap.addTo(map);
+      else if (!chk.checked && map.hasLayer(basemap)) map.removeLayer(basemap);
     }
 
     // ========== CÔNG CỤ ĐO ==========
@@ -879,17 +873,14 @@
     function zoomMapOut() { map.zoomOut(); }
     function setZoomLevel(level) { map.setZoom(parseInt(level)); }
     function zoomHome() { map.setView([12.524, 105.452], 12); document.getElementById('zoomRange').value = 12; document.getElementById('zoomLabel').innerText = 12; showToast('Về vị trí ban đầu', '🏠'); }
-
-    function toggleBasemapLayer() {
-      const chk = document.getElementById('chk-satellite');
-      if (chk.checked && !map.hasLayer(basemap)) basemap.addTo(map);
-      else if (!chk.checked && map.hasLayer(basemap)) map.removeLayer(basemap);
-    }
     function toggleLayer(layerName) {
-      const chk = document.getElementById(`chk-${layerName === 'mainLots' ? 'main-lots' : (layerName === 'labels' ? 'labels' : 'zones')}`);
+      const chkId = layerName === 'mainLots' ? 'chk-main-lots' : (layerName === 'labels' ? 'chk-labels' : 'chk-zones');
+      const chk = document.getElementById(chkId);
       const layer = layerName === 'mainLots' ? plotsLayer : (layerName === 'labels' ? labelLayer : zoneLayer);
-      if (chk.checked && layer && !map.hasLayer(layer)) layer.addTo(map);
-      else if (!chk.checked && layer && map.hasLayer(layer)) map.removeLayer(layer);
+      if (chk && layer) {
+        if (chk.checked && !map.hasLayer(layer)) layer.addTo(map);
+        else if (!chk.checked && map.hasLayer(layer)) map.removeLayer(layer);
+      }
     }
     function toggleLayerManager() {
       const panel = document.getElementById('layerManager');
@@ -932,23 +923,21 @@
         showToast('Xuất PDF thành công', '✅');
       }).catch(() => showToast('Lỗi xuất PDF', '❌'));
     }
-
     function showAddPlotForm() { showToast('Chức năng đang phát triển', '🚧'); }
 
     // ========== NGÔN NGỮ ==========
     function setLanguage(lang) {
       currentLanguage = lang;
-      // Cập nhật text tĩnh (có thể mở rộng)
       showToast(`Đã chuyển sang ${lang === 'vi' ? 'Tiếng Việt' : 'ភាសាខ្មែរ'}`, '🌐');
     }
 
-    // ========== KHỞI TẠO ==========
+    // ========== KHỞI TẠO BẢN ĐỒ ==========
     async function initMap() {
       map = L.map('dashMap').setView([12.524, 105.452], 12);
       basemap = basemaps.satellite;
       basemap.addTo(map);
 
-      // Populate filters
+      // Load các filter options
       const giongStats = await fetchGiongStats();
       const giongSelect = document.getElementById('filterGiong');
       giongStats.forEach(g => { const opt = document.createElement('option'); opt.value = g.giong; opt.textContent = g.giong; giongSelect.appendChild(opt); });
@@ -957,13 +946,13 @@
       const namSelect = document.getElementById('filterNam');
       namStats.forEach(n => { const opt = document.createElement('option'); opt.value = n.nam_trong; opt.textContent = n.nam_trong; namSelect.appendChild(opt); });
 
-      // Gắn sự kiện cho filter
+      // Gán sự kiện filter
       document.getElementById('filterDoi').addEventListener('change', refreshMap);
       document.getElementById('filterNam').addEventListener('change', refreshMap);
       document.getElementById('filterGiong').addEventListener('change', refreshMap);
       document.getElementById('colorBySelect').addEventListener('change', refreshMap);
 
-      // Thêm controls
+      // Các control cơ bản
       map.addControl(new L.Control.Fullscreen());
       L.control.locate({
         position: 'topleft',
@@ -973,7 +962,7 @@
         circleStyle: { color: '#10b981', weight: 2, fillColor: '#10b981', fillOpacity: 0.3 }
       }).addTo(map);
 
-      // La bàn
+      // Thêm nút la bàn
       const northBtn = document.createElement('button');
       northBtn.className = 'map-control-btn';
       northBtn.innerHTML = '<i class="fas fa-compass"></i>';
@@ -981,7 +970,7 @@
       northBtn.onclick = () => { if (map.setBearing) map.setBearing(0); showToast('Đã xoay về hướng Bắc', '🧭'); };
       document.querySelector('.map-control-panel').appendChild(northBtn);
 
-      // Công cụ đo
+      // Thêm nút đo
       const measureBtn = document.createElement('button');
       measureBtn.className = 'map-control-btn';
       measureBtn.innerHTML = '<i class="fas fa-ruler"></i>';
@@ -1069,6 +1058,7 @@
       });
       map.on('mouseout', () => { document.getElementById('mouse-coords').innerHTML = 'Lat: -- | Lng: --'; });
 
+      // Load dữ liệu lần đầu
       await refreshMap();
     }
 
