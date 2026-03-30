@@ -9,6 +9,8 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
   <style>
     :root {
@@ -184,58 +186,58 @@
 
     /* ============= SIDEBAR ============= */
     .sidebar {
-      width: 220px;
+      width: 80px;
       background: var(--surface);
       border-right: 1px solid var(--border-light);
-      padding: 20px 0;
+      padding: 24px 0;
       overflow-y: auto;
       flex-shrink: 0;
       display: flex;
       flex-direction: column;
+      align-items: center;
+      gap: 16px;
     }
 
-    .sidebar-header {
-      padding: 0 16px;
-      margin-bottom: 20px;
-    }
-
-    .sidebar-header h3 {
-      font-size: 11px;
-      color: var(--text-muted);
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    .sidebar nav {
+    .sidebar-icon-group {
       display: flex;
       flex-direction: column;
-      gap: 4px;
-      padding: 0 12px;
-      flex: 1;
+      gap: 8px;
+      align-items: center;
+      width: 100%;
+      padding: 0 8px;
+    }
+
+    .sidebar-divider {
+      width: 32px;
+      height: 1px;
+      background: var(--border-light);
+      margin: 8px 0;
     }
 
     .sidebar a {
       display: flex;
       align-items: center;
-      gap: 12px;
-      padding: 10px 14px;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
       color: var(--text-secondary);
       text-decoration: none;
       border-radius: var(--radius-md);
       transition: var(--transition);
-      font-size: 13px;
+      font-size: 18px;
       font-weight: 500;
       position: relative;
+      cursor: pointer;
     }
 
     .sidebar a::before {
       content: '';
       position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
+      left: -8px;
+      top: 50%;
+      transform: translateY(-50%);
       width: 3px;
+      height: 24px;
       background: var(--primary);
       border-radius: 0 3px 3px 0;
       opacity: 0;
@@ -256,16 +258,16 @@
       opacity: 1;
     }
 
-    .sidebar a i {
-      font-size: 16px;
-      width: 18px;
-      text-align: center;
-    }
-
     .sidebar-footer {
-      padding: 12px 12px;
-      border-top: 1px solid var(--border-light);
       margin-top: auto;
+      padding-top: 8px;
+      border-top: 1px solid var(--border-light);
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 8px;
     }
 
     .sidebar a.logout {
@@ -359,6 +361,56 @@
       background: var(--primary-dark);
     }
 
+    .export-dropdown {
+      position: relative;
+      display: inline-block;
+    }
+
+    .export-menu {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background: var(--surface);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-lg);
+      min-width: 220px;
+      z-index: 1000;
+      display: none;
+      margin-top: 8px;
+      overflow: hidden;
+    }
+
+    .export-menu.show {
+      display: block;
+    }
+
+    .export-menu-item {
+      width: 100%;
+      padding: 12px 16px;
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      text-align: left;
+      cursor: pointer;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: var(--transition);
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .export-menu-item:last-child {
+      border-bottom: none;
+    }
+
+    .export-menu-item:hover {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--primary);
+      padding-left: 20px;
+    }
+
     /* ============= FILTER BAR ============= */
     .filter-bar {
       height: auto;
@@ -418,11 +470,16 @@
       position: relative;
       overflow: hidden;
       background: var(--bg-dark);
+      border: 1px solid var(--border-light);
+      margin: 12px;
+      border-radius: var(--radius-lg);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
     }
 
     #dashMap {
       width: 100%;
       height: 100%;
+      border-radius: var(--radius-lg);
     }
 
     .map-control-panel {
@@ -436,8 +493,8 @@
     }
 
     .map-control-btn {
-      width: 44px;
-      height: 44px;
+      width: 48px;
+      height: 48px;
       background: var(--surface);
       border: 1px solid var(--border-light);
       border-radius: var(--radius-md);
@@ -455,6 +512,7 @@
       background: var(--primary);
       color: white;
       border-color: var(--primary);
+      transform: scale(1.05);
     }
 
     .zoom-slider-container {
@@ -486,7 +544,7 @@
       min-width: 24px;
     }
 
-    /* ============= LEGEND ============= */
+    /* ============= LEGEND - CẢI THIỆN ============= */
     .legend-panel {
       position: absolute;
       bottom: 32px;
@@ -494,40 +552,69 @@
       background: var(--surface);
       border: 1px solid var(--border-light);
       border-radius: var(--radius-lg);
-      padding: 16px;
+      padding: 20px;
       box-shadow: var(--shadow-lg);
-      max-width: 280px;
+      max-width: 320px;
       z-index: 400;
       max-height: 50vh;
       overflow-y: auto;
+      backdrop-filter: blur(10px);
+      background: rgba(30, 41, 59, 0.95);
     }
 
     .legend-panel h4 {
-      font-size: 14px;
+      font-size: 15px;
       color: var(--text-primary);
-      margin-bottom: 12px;
-      font-weight: 600;
+      margin-bottom: 16px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
     .legend-items {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 12px;
     }
 
     .legend-item {
       display: flex;
       align-items: center;
-      gap: 10px;
-      font-size: 12px;
+      gap: 12px;
+      font-size: 13px;
       color: var(--text-secondary);
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+    }
+
+    .legend-item:last-child {
+      border-bottom: none;
     }
 
     .legend-color {
-      width: 16px;
-      height: 16px;
+      width: 20px;
+      height: 20px;
       border-radius: var(--radius-sm);
       flex-shrink: 0;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .legend-label {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .legend-label strong {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    .legend-label small {
+      color: var(--text-muted);
+      font-size: 11px;
     }
 
     /* ============= TOAST ============= */
@@ -584,7 +671,7 @@
       background: var(--surface);
       border: 1px solid var(--border-light);
       border-radius: var(--radius-lg);
-      width: 280px;
+      width: 300px;
       max-height: 60vh;
       overflow-y: auto;
       box-shadow: var(--shadow-lg);
@@ -610,13 +697,13 @@
 
     .mlp-header {
       padding: 16px;
-      font-weight: 600;
-      font-size: 13px;
-      color: var(--text-primary);
       border-bottom: 1px solid var(--border-light);
+      font-weight: 600;
+      color: var(--text-primary);
       display: flex;
       justify-content: space-between;
       align-items: center;
+      font-size: 14px;
     }
 
     .mlp-item {
@@ -624,49 +711,41 @@
       display: flex;
       align-items: center;
       gap: 12px;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.1);
       cursor: pointer;
       transition: var(--transition);
-      font-size: 12px;
       color: var(--text-secondary);
-      border-bottom: 1px solid var(--border-light);
-    }
-
-    .mlp-item:last-child {
-      border-bottom: none;
+      font-size: 13px;
     }
 
     .mlp-item:hover {
-      background: rgba(16, 185, 129, 0.1);
-      color: var(--primary);
+      background: rgba(16, 185, 129, 0.05);
+      color: var(--text-primary);
     }
 
     .mlp-check {
-      width: 18px;
-      height: 18px;
-      border: 2px solid var(--border);
-      border-radius: 4px;
+      width: 20px;
+      height: 20px;
+      background: var(--primary);
+      border-radius: var(--radius-sm);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 12px;
-      font-weight: bold;
       color: white;
-      transition: var(--transition);
-    }
-
-    .mlp-check.on {
-      background: var(--primary);
-      border-color: var(--primary);
+      font-size: 12px;
+      font-weight: 700;
+      flex-shrink: 0;
     }
 
     .mlp-check.off {
       background: transparent;
-      border-color: var(--border);
+      border: 1px solid var(--border);
+      color: transparent;
     }
 
     .mlp-dot {
-      width: 12px;
-      height: 12px;
+      width: 14px;
+      height: 14px;
       border-radius: 50%;
       flex-shrink: 0;
     }
@@ -675,33 +754,42 @@
     .map-search-panel {
       position: absolute;
       top: 32px;
-      left: 32px;
+      left: 50%;
+      transform: translateX(-50%);
       background: var(--surface);
       border: 1px solid var(--border-light);
       border-radius: var(--radius-lg);
-      width: 320px;
-      max-height: 60vh;
-      overflow-y: auto;
+      width: 380px;
+      max-height: 500px;
       box-shadow: var(--shadow-lg);
       z-index: 400;
       display: none;
+      overflow: hidden;
+      flex-direction: column;
     }
 
     .map-search-panel.show {
-      display: block;
-      animation: slideIn 0.3s ease;
+      display: flex;
+      animation: slideDown 0.3s ease;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
     }
 
     .msp-input {
       padding: 12px 16px;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
       border-bottom: 1px solid var(--border-light);
-    }
-
-    .msp-input svg {
-      flex-shrink: 0;
     }
 
     .msp-input input {
@@ -709,7 +797,7 @@
       background: transparent;
       border: none;
       color: var(--text-primary);
-      font-size: 12px;
+      font-size: 13px;
       outline: none;
     }
 
@@ -718,36 +806,30 @@
     }
 
     #mapSearchResults {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      padding: 8px;
+      flex: 1;
+      overflow-y: auto;
     }
 
     .msp-result {
-      padding: 10px 12px;
-      border-radius: var(--radius-md);
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.1);
       cursor: pointer;
-      font-size: 11px;
       transition: var(--transition);
-      border-left: 3px solid transparent;
     }
 
     .msp-result:hover {
-      background: rgba(16, 185, 129, 0.1);
-      color: var(--primary);
-      border-left-color: var(--primary);
+      background: rgba(16, 185, 129, 0.05);
     }
 
     .msp-result strong {
-      color: var(--primary);
-      font-weight: 600;
+      color: var(--text-primary);
+      font-size: 13px;
     }
 
     .msp-result-desc {
-      font-size: 10px;
+      font-size: 11px;
       color: var(--text-muted);
-      margin-top: 2px;
+      margin-top: 4px;
     }
 
     /* ============= SCROLLBAR ============= */
@@ -766,164 +848,168 @@
     }
 
     ::-webkit-scrollbar-thumb:hover {
-      background: var(--primary);
+      background: var(--border-light);
+    }
+
+    /* ============= RESPONSIVE ============= */
+    @media (max-width: 768px) {
+      header {
+        padding: 0 16px;
+      }
+
+      .logo {
+        font-size: 16px;
+      }
+
+      .stats-bar {
+        gap: 16px;
+      }
+
+      .sidebar {
+        width: 64px;
+      }
+
+      .map-layer-panel {
+        width: 240px;
+      }
+
+      .legend-panel {
+        max-width: 240px;
+      }
+
+      .map-search-panel {
+        width: 320px;
+      }
     }
   </style>
 </head>
-
 <body>
-  <!-- ========== HEADER ========== -->
+
+  <!-- HEADER -->
   <header>
     <div class="logo">
-      <i class="fas fa-leaf"></i>
-      <span style="display: flex; flex-direction: column; gap: 0; line-height: 1;">
-        <span style="font-size: 18px;">WEBGIS CAO SU</span>
-        <span style="font-size: 11px; color: var(--text-muted); font-weight: 400;">TỔNG CÔNG TY</span>
-      </span>
+      <i class="fas fa-globe"></i>
+      WebGIS
     </div>
     <div class="status">
-      <span>🟢 Trực tuyến</span>
+      <i class="fas fa-circle"></i>
+      Kết nối
     </div>
     <div class="stats-bar">
       <div class="stat-item">
-        <label>Lô vườn</label>
-        <strong id="statsTotal">425</strong>
+        <label>Tổng lô</label>
+        <strong id="statsTotal">-</strong>
       </div>
       <div class="stat-item">
         <label>Diện tích</label>
-        <strong id="statsArea">7.244 ha</strong>
+        <strong id="statsArea">-</strong>
       </div>
     </div>
     <div class="user-info">
-      <div style="display: flex; align-items: center; gap: 12px; cursor: pointer;">
-        <i class="fas fa-bell" style="font-size: 18px; color: var(--text-secondary);"></i>
-        <i class="fas fa-globe" style="font-size: 18px; color: var(--text-secondary);"></i>
-        <i class="fas fa-cog" style="font-size: 18px; color: var(--text-secondary);"></i>
-      </div>
-      <div style="display: flex; align-items: center; gap: 8px; padding-left: 16px; border-left: 1px solid var(--border-light);">
-        <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 2px;">
-          <span style="font-size: 13px; color: var(--text-primary);">Nguyễn Văn An</span>
-          <span style="font-size: 11px; color: var(--text-muted);">Quản lý vườn</span>
-        </div>
-        <div class="avatar" id="userAvatar">NA</div>
-      </div>
+      <div class="avatar">AB</div>
+      <div>Admin</div>
     </div>
   </header>
 
-  <!-- ========== CONTAINER ========== -->
+  <!-- MAIN CONTAINER -->
   <div class="container">
     <!-- SIDEBAR -->
-    <div class="sidebar">
-      <div class="sidebar-header">
-        <h3>📊 TỔNG QUAN</h3>
+    <aside class="sidebar">
+      <div class="sidebar-icon-group">
+        <a href="#" class="active" title="Trang chủ">
+          <i class="fas fa-home"></i>
+        </a>
+        <a href="#" title="Tìm kiếm">
+          <i class="fas fa-search"></i>
+        </a>
+        <a href="#" title="Bản đồ">
+          <i class="fas fa-map"></i>
+        </a>
       </div>
-      <nav>
-        <a href="#" class="active">
-          <i class="fas fa-chart-line"></i>
-          <span>Dashboard</span>
-        </a>
-        <a href="#">
-          <i class="fas fa-plus"></i>
-          <span>Thêm dữ liệu lô</span>
-        </a>
-      </nav>
 
-      <div class="sidebar-header" style="margin-top: 20px;">
-        <h3>⚙️ QUẢN LÝ DỮ LIỆU</h3>
-      </div>
-      <nav>
-        <a href="#">
-          <i class="fas fa-layer-group"></i>
-          <span>Quản lý lô cây</span>
-        </a>
-        <a href="#">
-          <i class="fas fa-file-alt"></i>
-          <span>Thêm dữ liệu lô</span>
-        </a>
-      </nav>
+      <div class="sidebar-divider"></div>
 
-      <div class="sidebar-header" style="margin-top: 20px;">
-        <h3>👥 NGƯỜI DÙNG & PHÂN QUYỀN</h3>
-      </div>
-      <nav>
-        <a href="#">
-          <i class="fas fa-users"></i>
-          <span>Quản lý người dùng</span>
+      <div class="sidebar-icon-group">
+        <a href="#" title="Phân tích">
+          <i class="fas fa-chart-bar"></i>
         </a>
-      </nav>
-
-      <div class="sidebar-header" style="margin-top: 20px;">
-        <h3>📈 PHÂN TÍCH</h3>
-      </div>
-      <nav>
-        <a href="#">
-          <i class="fas fa-bar-chart"></i>
-          <span>Thống kê</span>
+        <a href="#" title="Cài đặt">
+          <i class="fas fa-cog"></i>
         </a>
-      </nav>
+        <a href="#" title="Công cụ">
+          <i class="fas fa-tools"></i>
+        </a>
+      </div>
 
       <div class="sidebar-footer">
-        <a href="#" class="logout">
+        <a href="#" class="logout" title="Đăng xuất">
           <i class="fas fa-sign-out-alt"></i>
-          <span>Đăng xuất</span>
         </a>
       </div>
-    </div>
+    </aside>
 
     <!-- MAIN CONTENT -->
     <div class="main">
       <!-- TOP BAR -->
       <div class="top-bar">
         <div class="top-bar-title">
-          <h2>Dashboard</h2>
-          <p>Tổng quan hoạt động vườn cây – cập nhật lúc 07:42, 16/03/2026</p>
+          <h2>Xã Kraya, Huyện Santuk, Kampong Thom</h2>
+          <p>Hệ thống quản lý và giám sát vườn cây cao su</p>
         </div>
         <div class="top-bar-controls">
-          <button class="export-btn">
-            <i class="fas fa-download"></i>
-            <span>Xuất báo cáo</span>
-          </button>
+          <div class="export-dropdown">
+            <button class="export-btn" onclick="toggleExportMenu()" title="Xuất bản đồ">
+              <i class="fas fa-download"></i>
+              Xuất bản đồ
+              <i class="fas fa-chevron-down" style="font-size: 10px; margin-left: 4px;"></i>
+            </button>
+            <div class="export-menu" id="exportMenu">
+              <button class="export-menu-item" onclick="exportMapAsImage()">
+                <i class="fas fa-image"></i> Xuất thành ảnh (PNG)
+              </button>
+              <button class="export-menu-item" onclick="exportMapAsPDF()">
+                <i class="fas fa-file-pdf"></i> Xuất thành PDF
+              </button>
+            </div>
+          </div>
           <button class="add-btn">
             <i class="fas fa-plus"></i>
-            <span>Thêm dữ liệu</span>
+            Thêm lô
           </button>
         </div>
       </div>
 
       <!-- FILTER BAR -->
       <div class="filter-bar">
-        <span style="font-weight: 600; color: var(--text-secondary); font-size: 12px;">🔹 Bản đồ vườn cây cao su – Kampong Thom, Cambodia</span>
-        <div style="display: flex; gap: 12px; align-items: center; margin-left: auto; flex-wrap: wrap;">
-          <span style="font-size: 12px; color: var(--text-muted);">Đội:</span>
-          <select class="filter-select" name="doi">
-            <option value="">Tất cả</option>
-          </select>
-          
-          <span style="font-size: 12px; color: var(--text-muted);">Năm trồng:</span>
-          <select class="filter-select" name="nam_trong">
-            <option value="">Tất cả</option>
-          </select>
+        <span style="font-size: 12px; color: var(--text-muted);">Đơn vị:</span>
+        <select class="filter-select" name="doi">
+          <option value="">Tất cả</option>
+        </select>
+        
+        <span style="font-size: 12px; color: var(--text-muted);">Năm trồng:</span>
+        <select class="filter-select" name="nam_trong">
+          <option value="">Tất cả</option>
+        </select>
 
-          <span style="font-size: 12px; color: var(--text-muted);">Giống cây:</span>
-          <select class="filter-select" name="giong">
-            <option value="">Tất cả</option>
-          </select>
+        <span style="font-size: 12px; color: var(--text-muted);">Giống cây:</span>
+        <select class="filter-select" name="giong">
+          <option value="">Tất cả</option>
+        </select>
 
-          <span style="font-size: 12px; color: var(--text-muted);">Phân loại:</span>
-          <select class="filter-select">
-            <option>Tất cả</option>
-          </select>
+        <span style="font-size: 12px; color: var(--text-muted);">Phân loại:</span>
+        <select class="filter-select">
+          <option>Tất cả</option>
+        </select>
 
-          <span style="font-size: 12px; color: var(--text-muted);">Nhịp độ cao:</span>
-          <select class="filter-select">
-            <option>Tất cả</option>
-          </select>
+        <span style="font-size: 12px; color: var(--text-muted);">Nhịp độ cao:</span>
+        <select class="filter-select">
+          <option>Tất cả</option>
+        </select>
 
-          <span style="font-size: 12px; color: var(--text-muted);">Quay hoạch tài canh:</span>
-          <select class="filter-select">
-            <option>Tất cả</option>
-          </select>
-        </div>
+        <span style="font-size: 12px; color: var(--text-muted);">Quay hoạch tài canh:</span>
+        <select class="filter-select">
+          <option>Tất cả</option>
+        </select>
       </div>
 
       <!-- MAP WRAPPER -->
@@ -951,32 +1037,38 @@
           <button class="map-control-btn" onclick="toggleBasemapGallery()" title="Thay đổi bản đồ nền">
             <i class="fas fa-layer-group"></i>
           </button>
-          <button class="map-control-btn" onclick="toggleLayerList()" title="Danh sách lớp">
-            <i class="fas fa-bars"></i>
-          </button>
           <button class="map-control-btn" onclick="togglePanel('map-search-panel')" title="Tìm kiếm lô">
             <i class="fas fa-search"></i>
           </button>
           <button class="map-control-btn" onclick="togglePanel('map-layer-panel')" title="Lớp bản đồ">
-            <i class="fas fa-layer-group"></i>
+            <i class="fas fa-list"></i>
           </button>
         </div>
 
-        <!-- LEGEND PANEL -->
+        <!-- LEGEND PANEL - CẢI THIỆN -->
         <div class="legend-panel" id="legendPanel">
-          <h4>🔹 Giai đoạn cây</h4>
+          <h4>📊 Giai đoạn cây cao su</h4>
           <div class="legend-items">
             <div class="legend-item">
               <span class="legend-color" style="background:#5ee7b1;"></span>
-              <span>Mới trồng</span>
+              <div class="legend-label">
+                <strong>Mới trồng</strong>
+                <small>NT 1</small>
+              </div>
             </div>
             <div class="legend-item">
               <span class="legend-color" style="background:#0ea5e9;"></span>
-              <span>Non</span>
+              <div class="legend-label">
+                <strong>Non</strong>
+                <small>NT 2</small>
+              </div>
             </div>
             <div class="legend-item">
               <span class="legend-color" style="background:#f59e0b;"></span>
-              <span>Trưởng thành</span>
+              <div class="legend-label">
+                <strong>Trưởng thành</strong>
+                <small>NT 3</small>
+              </div>
             </div>
           </div>
         </div>
@@ -984,32 +1076,32 @@
         <!-- LAYER PANEL -->
         <div class="map-layer-panel" id="map-layer-panel">
           <div class="mlp-header">
-            Lớp bản đồ
+            📑 Lớp bản đồ
             <span style="cursor:pointer;color:var(--text-muted)" onclick="togglePanel('map-layer-panel')">✕</span>
           </div>
           <div class="mlp-item" onclick="toggleLayer(this,'lots')">
             <div class="mlp-check on" id="lc-lots">✓</div>
-            <div class="mlp-dot" style="background:#00d68f"></div>
-            Lô vườn cây cao su (509 lô)
+            <div class="mlp-dot" style="background:#10b981"></div>
+            Lô vườn cây cao su
           </div>
           <div class="mlp-item" onclick="toggleLayer(this,'background-layer')">
             <div class="mlp-check on" id="lc-background-layer">✓</div>
             <div class="mlp-dot" style="background:#d4dce8"></div>
-            Lớp nền (509 lô)
+            Lớp nền
           </div>
           <div class="mlp-item" onclick="toggleLayer(this,'boundary')">
             <div class="mlp-check on" id="lc-boundary">✓</div>
-            <div class="mlp-dot" style="background:#ffffff55"></div>
+            <div class="mlp-dot" style="background:#94a3b8"></div>
             Ranh giới xã Kraya
           </div>
           <div class="mlp-item" onclick="toggleLayer(this,'label')">
             <div class="mlp-check on" id="lc-label">✓</div>
-            <div class="mlp-dot" style="background:#00b4ff"></div>
-            Nhãn tên lô (zoom ≥ 12)
+            <div class="mlp-dot" style="background:#0ea5e9"></div>
+            Nhãn tên lô
           </div>
           <div class="mlp-item" onclick="toggleLayer(this,'satellite')">
             <div class="mlp-check on" id="lc-satellite">✓</div>
-            <div class="mlp-dot" style="background:#888"></div>
+            <div class="mlp-dot" style="background:#64748b"></div>
             Ảnh vệ tinh Esri
           </div>
         </div>
@@ -1100,11 +1192,11 @@
         
         if (result.success) {
           const giongSelect = document.querySelector('select[name="giong"]');
-          if (giongSelect) {
-            const options = result.data.map(item => `<option value="${item.giong}">${item.giong} (${item.so_lo})</option>`).join('');
+          if (giongSelect && result.data) {
+            const options = result.data.map(item => `<option value="${item.giong}">${item.giong}</option>`).join('');
             giongSelect.innerHTML = '<option value="">Tất cả</option>' + options;
           }
-          console.log('✅ Giống cây stats:', result.data);
+          console.log('✅ Giống cây:', result.data);
         }
       } catch (error) {
         console.error('❌ Lỗi fetchGiongStats:', error);
@@ -1112,188 +1204,84 @@
     }
 
     // Lấy thống kê năm trồng
-    async function fetchNamTrongStats() {
+    async function fetchYearStats() {
       try {
-        const response = await fetch(`${API_BASE}/api/nam-trong-stats`);
+        const response = await fetch(`${API_BASE}/api/year-stats`);
         const result = await response.json();
         
         if (result.success) {
-          const namTrongSelect = document.querySelector('select[name="nam_trong"]');
-          if (namTrongSelect) {
-            const options = result.data.map(item => `<option value="${item.nam_trong}">${item.nam_trong} (${item.so_lo})</option>`).join('');
-            namTrongSelect.innerHTML = '<option value="">Tất cả</option>' + options;
+          const yearSelect = document.querySelector('select[name="nam_trong"]');
+          if (yearSelect && result.data) {
+            const options = result.data.map(item => `<option value="${item.nam_trong}">${item.nam_trong}</option>`).join('');
+            yearSelect.innerHTML = '<option value="">Tất cả</option>' + options;
           }
-          console.log('✅ Năm trồng stats:', result.data);
+          console.log('✅ Năm trồng:', result.data);
         }
       } catch (error) {
-        console.error('❌ Lỗi fetchNamTrongStats:', error);
+        console.error('❌ Lỗi fetchYearStats:', error);
       }
     }
 
-    // Lấy GeoJSON lô cây từ API (quan trọng nhất)
+    // Lấy dữ liệu lô cao su từ GeoJSON API
     async function fetchLoCaoSu(filters = {}) {
-      console.log('📡 fetchLoCaoSu với filters:', filters);
       try {
-        const params = new URLSearchParams();
-        if (filters.doi) params.append('doi', filters.doi);
-        if (filters.nam_trong) params.append('nam_trong', filters.nam_trong);
-        if (filters.giong) params.append('giong', filters.giong);
-
-        const url = `${API_BASE}/api/lo-cao-su?${params.toString()}`;
-        console.log('🌐 Gọi URL:', url);
-        
+        const queryParams = new URLSearchParams(filters).toString();
+        const url = `${API_BASE}/api/lo-cao-su${queryParams ? '?' + queryParams : ''}`;
         const response = await fetch(url);
-        console.log('📦 Response status:', response.status);
+        const result = await response.json();
         
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        if (result.success && result.data) {
+          console.log('✅ Dữ liệu lô cao su:', result.data);
+          return result.data;
         }
-        
-        const geoData = await response.json();
-        console.log('✅ GeoJSON received:', geoData.features?.length, 'features');
-        
-        if (geoData.features) {
-          console.log('📌 Sample feature:', geoData.features[0]);
-          searchData = geoData.features.map(f => ({
-            id: f.properties.id_lo,
-            name: f.properties.ten_lo,
-            doi: f.properties.doi,
-            giong: f.properties.giong,
-            nam_trong: f.properties.nam_trong,
-            dien_tich_map: f.properties.dien_tich_map,
-            geometry: f.geometry
-          }));
-        }
-
-        return geoData;
+        return { type: 'FeatureCollection', features: [] };
       } catch (error) {
         console.error('❌ Lỗi fetchLoCaoSu:', error);
         return { type: 'FeatureCollection', features: [] };
       }
     }
 
-    // Lấy boundary (ranh giới)
-    async function fetchBoundary(doi = null) {
-      console.log('📡 fetchBoundary với doi:', doi);
-      try {
-        const params = new URLSearchParams();
-        if (doi) params.append('doi', doi);
-
-        const url = `${API_BASE}/api/boundary?${params.toString()}`;
-        console.log('🌐 Gọi URL:', url);
-        
-        const response = await fetch(url);
-        console.log('📦 Response status:', response.status);
-        
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-        
-        const geoData = await response.json();
-        console.log('✅ Boundary received:', geoData.features?.length, 'features');
-        
-        return geoData;
-      } catch (error) {
-        console.error('❌ Lỗi fetchBoundary:', error);
-        return { type: 'FeatureCollection', features: [] };
-      }
-    }
-
-    // Tải tất cả dữ liệu bản đồ
-    async function fetchMapData() {
-      console.log('🔄 fetchMapData: bắt đầu lấy dữ liệu...');
-      try {
-        console.log('📡 Gọi fetchLoCaoSu và fetchBoundary...');
-        const [loData, boundaryData] = await Promise.all([
-          fetchLoCaoSu(),
-          fetchBoundary()
-        ]);
-
-        console.log('📊 loData:', loData);
-        console.log('📊 boundaryData:', boundaryData);
-
-        const result = {
-          plots: loData.features || [],
-          boundaries: boundaryData.features || [],
-          stats: {
-            total: loData.features?.length || 0
-          }
-        };
-
-        console.log('✅ fetchMapData result:', result);
-        return result;
-      } catch (error) {
-        console.error('❌ Lỗi fetchMapData:', error);
-        showToast('Lỗi khi tải dữ liệu bản đồ: ' + error.message, '❌');
-        return null;
-      }
-    }
-
-    // ==================== KHỞI TẠO BẢN ĐỒ ====================
-    async function initDashMap() {
-      console.log('🚀 Bắt đầu initDashMap...');
+    // ==================== TOAST NOTIFICATION ====================
+    function showToast(message, icon = '✅') {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toastMsg');
+      const toastIcon = document.getElementById('toastIcon');
       
+      toastMsg.textContent = message;
+      toastIcon.textContent = icon;
+      toast.classList.add('show');
+      
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+
+    // ==================== MAP INITIALIZATION ====================
+    async function initDashMap() {
+      console.log('🗺️ Đang khởi tạo bản đồ...');
+      
+      // Tạo bản đồ
+      dashMap = L.map('dashMap').setView([12.55301, 105.24596], 12);
+      
+      // Thêm basemap
+      basemapLayers.osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap',
+        maxZoom: 19
+      }).addTo(dashMap);
+
+      basemapLayers.satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: '© ESRI',
+        maxZoom: 18
+      });
+
+      // Lấy dữ liệu và tạo lớp thematic
       try {
-        // Khởi tạo bản đồ
-        console.log('📍 Khởi tạo Leaflet map...');
-        dashMap = L.map('dashMap').setView([12.524, 105.452], 12);
-        console.log('✅ Map created:', dashMap);
-
-        // Basemap layers
-        console.log('🗺️ Thêm OSM basemap...');
-        basemapLayers.osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          attribution: '© OpenStreetMap contributors',
-          maxZoom: 19
-        }).addTo(dashMap);
-        console.log('✅ OSM basemap added');
-
-        basemapLayers.satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-          attribution: 'Tiles &copy; Esri',
-          maxZoom: 19
-        });
-
-        // Lấy dữ liệu từ API
-        console.log('🔄 Lấy dữ liệu từ API...');
-        const mapData = await fetchMapData();
-        console.log('📊 Map data received:', mapData);
+        const loData = await fetchLoCaoSu();
         
-        if (!mapData) {
-          console.error('❌ mapData là null!');
-          return;
-        }
-
-        // Tạo boundary layer (ranh giới)
-        if (mapData.boundaries && mapData.boundaries.length > 0) {
-          console.log('🏗️ Tạo boundary layer với', mapData.boundaries.length, 'features');
-          boundaryOuterLayer = L.geoJSON({
-            type: 'FeatureCollection',
-            features: mapData.boundaries
-          }, {
-            style: {
-              color: '#e5e7eb',
-              weight: 2,
-              opacity: 0.5,
-              fillOpacity: 0.1,
-              dashArray: '5, 5'
-            }
-          }).addTo(dashMap);
-          console.log('✅ Boundary layer added');
-        } else {
-          console.warn('⚠️ Không có boundary data');
-        }
-
-        // Tạo thematic layer (lô cây)
-        if (mapData.plots && mapData.plots.length > 0) {
-          console.log('🎨 Tạo thematic layer với', mapData.plots.length, 'features');
-          console.log('📌 Sample feature:', mapData.plots[0]);
-          
-          thematicLayer = L.geoJSON({
-            type: 'FeatureCollection',
-            features: mapData.plots
-          }, {
+        if (loData.features && loData.features.length > 0) {
+          thematicLayer = L.geoJSON(loData, {
             style: (feature) => {
               let color = '#10b981';
-              
               if (feature.properties.nam_trong) {
                 const year = feature.properties.nam_trong;
                 const yearMap = {
@@ -1306,7 +1294,6 @@
                 };
                 color = yearMap[year] || '#8b5cf6';
               }
-              
               return {
                 color: color,
                 weight: 2,
@@ -1332,82 +1319,36 @@
                 </div>
               `;
               layer.bindPopup(popupContent);
+              
+              // Lưu để tìm kiếm
+              searchData.push({
+                id: props.id_lo,
+                name: props.ten_lo,
+                doi: props.doi,
+                giong: props.giong,
+                nam_trong: props.nam_trong,
+                geometry: feature.geometry
+              });
             }
           }).addTo(dashMap);
-          console.log('✅ Thematic layer added');
-        } else {
-          console.warn('⚠️ Không có plots data');
+
+          console.log('✅ Đã tải thành công', loData.features.length, 'lô');
         }
-
-        // Khởi tạo zoom sync
-        initZoomSync();
-
-        // Tải dropdown filters
-        console.log('📋 Tải filters...');
-        await Promise.all([
-          fetchDashboardStats(),
-          fetchDonViList(),
-          fetchGiongStats(),
-          fetchNamTrongStats()
-        ]);
-        console.log('✅ Filters loaded');
-        
-        showToast('Bản đồ đã tải thành công', '✅');
-        console.log('🎉 initDashMap hoàn tất!');
       } catch (error) {
-        console.error('❌ Lỗi trong initDashMap:', error);
-        showToast('Lỗi khởi tạo bản đồ: ' + error.message, '❌');
+        console.error('❌ Lỗi khi tải dữ liệu:', error);
       }
-    }
 
-    // ==================== ĐIỀU KHIỂN ====================
-    function showToast(msg, icon = '✅') {
-      const t = document.getElementById('toast');
-      document.getElementById('toastIcon').innerHTML = icon;
-      document.getElementById('toastMsg').innerHTML = msg;
-      t.classList.add('show');
-      setTimeout(() => t.classList.remove('show'), 4000);
-    }
+      // Fetch dữ liệu khác
+      fetchDashboardStats();
+      fetchDonViList();
+      fetchGiongStats();
+      fetchYearStats();
 
-    function zoomMapIn() {
-      if (dashMap) {
-        const currentZoom = dashMap.getZoom();
-        dashMap.setZoom(currentZoom + 1);
-        document.getElementById('zoomRange').value = currentZoom + 1;
-        updateZoomLabel(currentZoom + 1);
+      // Cập nhật zoom label
+      function updateZoomLabel(zoom) {
+        document.getElementById('zoomLabel').textContent = zoom;
       }
-    }
 
-    function zoomMapOut() {
-      if (dashMap) {
-        const currentZoom = dashMap.getZoom();
-        dashMap.setZoom(currentZoom - 1);
-        document.getElementById('zoomRange').value = currentZoom - 1;
-        updateZoomLabel(currentZoom - 1);
-      }
-    }
-
-    function setZoomLevel(level) {
-      if (dashMap) {
-        dashMap.setZoom(parseInt(level));
-        updateZoomLabel(level);
-      }
-    }
-
-    function updateZoomLabel(level) {
-      document.getElementById('zoomLabel').textContent = level;
-    }
-
-    function zoomHome() {
-      if (dashMap) {
-        dashMap.setView([12.524, 105.452], 12);
-        document.getElementById('zoomRange').value = 12;
-        updateZoomLabel(12);
-        showToast("Quay về vị trí ban đầu", "🏠");
-      }
-    }
-
-    function initZoomSync() {
       if (dashMap) {
         dashMap.on('zoomend', () => {
           const zoom = dashMap.getZoom();
@@ -1441,6 +1382,23 @@
       }
     }
 
+    function zoomMapIn() {
+      dashMap.zoomIn();
+    }
+
+    function zoomMapOut() {
+      dashMap.zoomOut();
+    }
+
+    function zoomHome() {
+      dashMap.setView([12.55301, 105.24596], 12);
+      showToast('Quay về vị trí gốc', '🏠');
+    }
+
+    function setZoomLevel(value) {
+      dashMap.setZoom(parseInt(value));
+    }
+
     // ==================== FILTER & SEARCH ====================
     async function applyMapFilters() {
       const filters = {
@@ -1449,13 +1407,11 @@
         giong: document.querySelector('select[name="giong"]')?.value || ''
       };
 
-      // Loại bỏ filter rỗng
       Object.keys(filters).forEach(key => filters[key] === '' && delete filters[key]);
 
       console.log('📍 Áp dụng filter:', filters);
       showToast('Đang cập nhật bản đồ...', '⏳');
 
-      // Lấy dữ liệu lọc từ API
       const loData = await fetchLoCaoSu(filters);
       
       if (!loData.features) {
@@ -1463,10 +1419,8 @@
         return;
       }
 
-      // Xóa layer cũ
       if (thematicLayer) dashMap.removeLayer(thematicLayer);
 
-      // Tạo layer mới từ dữ liệu lọc
       if (loData.features.length > 0) {
         thematicLayer = L.geoJSON(loData, {
           style: (feature) => {
@@ -1533,7 +1487,6 @@
         const isChecked = checkbox.classList.contains('on');
         console.log(`Layer ${layerId}: ${isChecked ? 'ON' : 'OFF'}`);
 
-        // Xử lý từng layer
         if (layerId === 'lots' && thematicLayer) {
           if (isChecked) {
             dashMap.addLayer(thematicLayer);
@@ -1553,7 +1506,6 @@
         } else if (layerId === 'label') {
           showToast(isChecked ? 'Hiển thị nhãn tên' : 'Ẩn nhãn tên', '🏷️');
         } else if (layerId === 'satellite') {
-          // Chuyển basemap
           if (isChecked) {
             if (basemapLayers[currentBasemap]) dashMap.removeLayer(basemapLayers[currentBasemap]);
             currentBasemap = 'satellite';
@@ -1618,41 +1570,215 @@
 
       showToast(`Đã chọn lô ${item.id}: ${item.name}`, '✅');
       
-      // Đóng search panel sau khi chọn
       document.getElementById('mapSearchInput').value = '';
       document.getElementById('mapSearchResults').innerHTML = '<div class="msp-result" style="color:var(--text-muted);font-style:italic">Nhập từ khóa để tìm kiếm lô...</div>';
     }
 
-    // Hiện/ẩn search panel khi click vào map
     document.addEventListener('DOMContentLoaded', () => {
       const mapWrapper = document.querySelector('.map-wrapper');
       const searchPanel = document.getElementById('map-search-panel');
       
       if (mapWrapper && searchPanel) {
         mapWrapper.addEventListener('click', (e) => {
-          // Chỉ hiện search panel nếu click vào map, không phải vào UI elements
           if (e.target === mapWrapper || e.target.id === 'dashMap') {
             searchPanel.classList.add('show');
           }
         });
 
-        // Ẩn khi click vào input hoặc results
         searchPanel.addEventListener('click', (e) => {
           e.stopPropagation();
         });
       }
     });
 
+    // ==================== EXPORT MAP FUNCTIONS ====================
+    function toggleExportMenu() {
+      const menu = document.getElementById('exportMenu');
+      menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+      
+      // Đóng menu khi click bên ngoài
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.export-btn') && !e.target.closest('.export-menu')) {
+          menu.style.display = 'none';
+        }
+      }, { once: true });
+    }
+
+    function exportMapAsImage() {
+      const menu = document.getElementById('exportMenu');
+      menu.style.display = 'none';
+      
+      showToast('Đang xuất bản đồ...', '⏳');
+      
+      const mapContainer = document.querySelector('.map-wrapper');
+      
+      html2canvas(mapContainer, {
+        backgroundColor: '#0f172a',
+        scale: 2,
+        useCORS: true,
+        allowTaint: true
+      }).then(canvas => {
+        const link = document.createElement('a');
+        link.href = canvas.toDataURL('image/png');
+        link.download = `ban-do-cao-su-${new Date().toISOString().split('T')[0]}.png`;
+        link.click();
+        showToast('Xuất hình ảnh thành công!', '✅');
+      }).catch(err => {
+        console.error('Export image error:', err);
+        showToast('Lỗi xuất hình ảnh', '❌');
+      });
+    }
+
+    function exportMapAsPDF() {
+      const menu = document.getElementById('exportMenu');
+      menu.style.display = 'none';
+      
+      showToast('Đang xuất PDF...', '⏳');
+      
+      const mapContainer = document.querySelector('.map-wrapper');
+      
+      html2canvas(mapContainer, {
+        backgroundColor: '#0f172a',
+        scale: 2,
+        useCORS: true,
+        allowTaint: true
+      }).then(canvas => {
+        const imgData = canvas.toDataURL('image/png');
+        const { jsPDF } = window.jspdf;
+        
+        // Tính toán kích thước để giữ tỷ lệ
+        const width = canvas.width;
+        const height = canvas.height;
+        const aspectRatio = width / height;
+        
+        let pdfWidth = 210; // A4 width in mm
+        let pdfHeight = pdfWidth / aspectRatio;
+        
+        // Nếu quá dài, điều chỉnh
+        if (pdfHeight > 297) { // A4 max height
+          pdfHeight = 297;
+          pdfWidth = pdfHeight * aspectRatio;
+        }
+        
+        const pdf = new jsPDF({
+          orientation: pdfHeight > pdfWidth ? 'portrait' : 'landscape',
+          unit: 'mm',
+          format: [pdfWidth, pdfHeight]
+        });
+        
+        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+        pdf.save(`ban-do-cao-su-${new Date().toISOString().split('T')[0]}.pdf`);
+        showToast('Xuất PDF thành công!', '✅');
+      }).catch(err => {
+        console.error('Export PDF error:', err);
+        showToast('Lỗi xuất PDF', '❌');
+      });
+    }
+
     // ==================== KHỞI CHẠY ====================
     window.addEventListener('load', initDashMap);
     
-    // Gắn event listener cho filter dropdowns
     document.addEventListener('DOMContentLoaded', () => {
       const filterSelects = document.querySelectorAll('select[name="doi"], select[name="nam_trong"], select[name="giong"]');
       filterSelects.forEach(select => {
         select.addEventListener('change', applyMapFilters);
       });
     });
+
+    // ==================== EXPORT MAP FUNCTIONS ====================
+    function toggleExportMenu() {
+      const menu = document.getElementById('exportMenu');
+      menu.classList.toggle('show');
+    }
+
+    // Close menu when clicking outside
+    document.addEventListener('click', (e) => {
+      const exportDropdown = document.querySelector('.export-dropdown');
+      if (!exportDropdown.contains(e.target)) {
+        document.getElementById('exportMenu').classList.remove('show');
+      }
+    });
+
+    function exportMapAsImage() {
+      const mapElement = document.getElementById('dashMap');
+      showToast('Đang xuất bản đồ thành hình ảnh...', '⏳');
+      
+      html2canvas(mapElement, {
+        backgroundColor: '#0f172a',
+        scale: 2,
+        logging: false,
+        useCORS: true,
+        allowTaint: true
+      }).then(canvas => {
+        const link = document.createElement('a');
+        link.href = canvas.toDataURL('image/png');
+        link.download = `ban-do-cao-su-${new Date().toISOString().split('T')[0]}.png`;
+        link.click();
+        showToast('Xuất bản đồ thành công!', '✅');
+        document.getElementById('exportMenu').classList.remove('show');
+      }).catch(error => {
+        console.error('Export error:', error);
+        showToast('Lỗi khi xuất bản đồ', '❌');
+      });
+    }
+
+    function exportMapAsPDF() {
+      const mapElement = document.getElementById('dashMap');
+      showToast('Đang xuất bản đồ thành PDF...', '⏳');
+      
+      html2canvas(mapElement, {
+        backgroundColor: '#0f172a',
+        scale: 2,
+        logging: false,
+        useCORS: true,
+        allowTaint: true
+      }).then(canvas => {
+        const mapWidth = mapElement.offsetWidth;
+        const mapHeight = mapElement.offsetHeight;
+        const imgData = canvas.toDataURL('image/png');
+        
+        // Calculate dimensions for PDF (landscape orientation)
+        const pdfWidth = 297; // A4 landscape width in mm
+        const pdfHeight = 210; // A4 landscape height in mm
+        const ratio = mapWidth / mapHeight;
+        
+        let finalWidth = pdfWidth;
+        let finalHeight = pdfWidth / ratio;
+        
+        if (finalHeight > pdfHeight) {
+          finalHeight = pdfHeight;
+          finalWidth = pdfHeight * ratio;
+        }
+        
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({
+          orientation: 'landscape',
+          unit: 'mm',
+          format: 'a4'
+        });
+        
+        const xOffset = (pdfWidth - finalWidth) / 2;
+        const yOffset = (pdfHeight - finalHeight) / 2;
+        
+        pdf.addImage(imgData, 'PNG', xOffset, yOffset, finalWidth, finalHeight);
+        
+        // Add title and metadata
+        pdf.setFontSize(16);
+        pdf.text('Bản Đồ Vườn Cây Cao Su', pdfWidth / 2, 15, { align: 'center' });
+        
+        pdf.setFontSize(10);
+        pdf.setTextColor(150);
+        pdf.text(`Xuất ngày: ${new Date().toLocaleDateString('vi-VN')}`, pdfWidth / 2, 20, { align: 'center' });
+        pdf.text('Xã Kraya, Huyện Santuk, Kampong Thom', pdfWidth / 2, 25, { align: 'center' });
+        
+        pdf.save(`ban-do-cao-su-${new Date().toISOString().split('T')[0]}.pdf`);
+        showToast('Xuất PDF thành công!', '✅');
+        document.getElementById('exportMenu').classList.remove('show');
+      }).catch(error => {
+        console.error('Export error:', error);
+        showToast('Lỗi khi xuất PDF', '❌');
+      });
+    }
   </script>
 
 </body>
