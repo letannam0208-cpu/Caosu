@@ -886,54 +886,24 @@
 <script src="https://unpkg.com/@turf/turf@6/turf.min.js"></script>
 
 <script>
-// ==================== BIẾN LAYER TOÀN CỤC ====================
+// ==================== BIẾN TOÀN CỤC ====================
 let dashMap = null;
 
-let basemapSatellite = null;      // 1. Lớp nền ảnh vệ tinh
-let backgroundLotsLayer = null;   // 2. Nền lô nhạt
-let mainLotsLayer = null;         // 3. Lô chính (màu theo năm)
-let labelLayer = null;            // 4. Nhãn lô
-let zoneBoundaryLayer = null;     // 5. Nền vùng (boundary)
+let basemapSatellite = null;
+let backgroundLotsLayer = null;
+let mainLotsLayer = null;
+let labelLayer = null;
+let zoneBoundaryLayer = null;
 
-const layerState = {
-  satellite: true,
-  backgroundLots: true,
-  mainLots: true,
-  labels: true,
-  zones: true
-};
+let currentFilters = {};
 
-// ==================== KHỞI TẠO CẤU HÌNH API ====================
+// ==================== API CONFIG ====================
 const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
   ? 'http://localhost:3000'
   : 'https://caosu-sncx.vercel.app';
 
-// ==================== API CALLS ====================
+// ==================== API FUNCTIONS ====================
 
-// Lấy dữ liệu bản đồ (plots + boundaries)
-async function fetchMapData() {
-  console.log('🔄 fetchMapData: bắt đầu lấy dữ liệu...');
-  try {
-    const [loData, boundaryData] = await Promise.all([
-      fetchLoCaoSu(),
-      fetchBoundary()
-    ]);
-
-    const result = {
-      plots: loData.features || [],
-      boundaries: boundaryData.features || []
-    };
-
-    console.log(`✅ Tải thành công: ${result.plots.length} lô | ${result.boundaries.length} boundary`);
-    return result;
-  } catch (error) {
-    console.error('❌ Lỗi fetchMapData:', error);
-    showToast('Lỗi khi tải dữ liệu bản đồ', '❌');
-    return null;
-  }
-}
-
-// Lấy GeoJSON lô cao su
 async function fetchLoCaoSu(filters = {}) {
   try {
     const params = new URLSearchParams();
@@ -941,30 +911,22 @@ async function fetchLoCaoSu(filters = {}) {
     if (filters.nam_trong) params.append('nam_trong', filters.nam_trong);
     if (filters.giong) params.append('giong', filters.giong);
 
-    const url = `${API_BASE}/api/lo-cao-su?${params.toString()}`;
-    const response = await fetch(url);
-
+    const response = await fetch(`${API_BASE}/api/lo-cao-su?${params.toString()}`);
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-    const geoData = await response.json();
-    console.log(`✅ fetchLoCaoSu: ${geoData.features?.length || 0} features`);
-
-    return geoData;
+    
+    return await response.json();
   } catch (error) {
     console.error('❌ Lỗi fetchLoCaoSu:', error);
     return { type: 'FeatureCollection', features: [] };
   }
 }
 
-// Lấy boundary
 async function fetchBoundary(doi = null) {
   try {
     const params = new URLSearchParams();
     if (doi) params.append('doi', doi);
-
     const response = await fetch(`${API_BASE}/api/boundary?${params.toString()}`);
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
     return await response.json();
   } catch (error) {
     console.error('❌ Lỗi fetchBoundary:', error);
@@ -972,114 +934,133 @@ async function fetchBoundary(doi = null) {
   }
 }
 
-// Các hàm hỗ trợ filter (giữ nguyên từ code cũ)
-async function fetchDashboardStats() { /* ... giữ nguyên nếu cần */ }
-async function fetchDonViList() { /* ... */ }
-async function fetchGiongStats() { /* ... */ }
-async function fetchNamTrongStats() { /* ... */ }
+async function fetchMapData(filters = {}) {
+  try {
+    const [loData, boundaryData] = await Promise.all([
+      fetchLoCaoSu(filters),
+      fetchBoundary(filters.doi || null)
+    ]);
+
+    return {
+      plots: loData.features || [],
+      boundaries: boundaryData.features || []
+    };
+  } catch (error) {
+    console.error('❌ Lỗi fetchMapData:', error);
+    showToast('Lỗi tải dữ liệu bản đồ', '❌');
+    return null;
+  }
+}
 
 // ==================== KHỞI TẠO BẢN ĐỒ ====================
 async function initDashMap() {
-  console.log('🚀 Khởi tạo bản đồ với 6 lớp...');
+  console.log('🚀 Khởi tạo bản đồ...');
 
   dashMap = L.map('dashMap', {
     zoomControl: false,
     attributionControl: true
   }).setView([12.524, 105.452], 12);
 
-  // 1. Lớp nền ảnh vệ tinh (mặc định bật)
+  // Basemap vệ tinh
   basemapSatellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
     attribution: '© Esri World Imagery',
     maxZoom: 19
   }).addTo(dashMap);
 
-  // Tải dữ liệu từ API
-  const mapData = await fetchMapData();
-
+  // Tải dữ liệu lần đầu
+  const mapData = await fetchMapData(currentFilters);
   if (mapData) {
-    // 5. Lớp boundary vùng
-    if (mapData.boundaries?.length > 0) {
-      zoneBoundaryLayer = L.geoJSON({
-        type: 'FeatureCollection',
-        features: mapData.boundaries
-      }, {
-        style: {
-          color: '#94a3b8',
-          weight: 3.5,
-          opacity: 0.75,
-          fillOpacity: 0.06,
-          dashArray: '6, 3'
-        }
-      }).addTo(dashMap);
-    }
-
-    // Tạo các lớp lô + nhãn
-    if (mapData.plots?.length > 0) {
-      createLotsLayers(mapData.plots);
-    }
+    createAllLayers(mapData);
   }
 
-  initZoomSync();
-  await loadFilterData();   // load dropdown filters
+  // Khởi tạo filter dropdowns
+  await loadFilterDropdowns();
 
-  showToast('Bản đồ đã tải thành công với 6 lớp', '✅');
+  // Sự kiện thay đổi filter
+  setupFilterListeners();
+
+  showToast('Bản đồ đã tải thành công', '✅');
 }
 
-// ==================== TẠO CÁC LỚP LÔ + NHÃN (giữ nguyên logic đẹp của bạn) ====================
-function createLotsLayers(plots) {
-  const geoCollection = { type: 'FeatureCollection', features: plots };
+// ==================== TẠO TẤT CẢ CÁC LAYER ====================
+function createAllLayers(mapData) {
+  // Xóa các layer cũ nếu có
+  if (backgroundLotsLayer) dashMap.removeLayer(backgroundLotsLayer);
+  if (mainLotsLayer) dashMap.removeLayer(mainLotsLayer);
+  if (labelLayer) dashMap.removeLayer(labelLayer);
+  if (zoneBoundaryLayer) dashMap.removeLayer(zoneBoundaryLayer);
 
-  // 2. Background Lots (nền nhạt)
-  backgroundLotsLayer = L.geoJSON(geoCollection, {
-    style: {
-      color: '#cbd5e1',
-      weight: 1.5,
-      opacity: 0.65,
-      fillColor: '#1e2937',
-      fillOpacity: 0.18
-    }
-  }).addTo(dashMap);
+  // 5. Zone Boundary
+  if (mapData.boundaries?.length > 0) {
+    zoneBoundaryLayer = L.geoJSON({
+      type: 'FeatureCollection',
+      features: mapData.boundaries
+    }, {
+      style: {
+        color: '#94a3b8',
+        weight: 3.5,
+        opacity: 0.75,
+        fillOpacity: 0.06,
+        dashArray: '6, 3'
+      }
+    }).addTo(dashMap);
+  }
 
-  // 3. Main Lots (màu theo năm trồng)
-  mainLotsLayer = L.geoJSON(geoCollection, {
-    style: (feature) => {
-      const year = parseInt(feature.properties.nam_trong);
-      const colorMap = {
-        2025: '#5ee7b1',
-        2024: '#10b981',
-        2023: '#0ea5e9',
-        2022: '#f59e0b',
-        2021: '#fb923c',
-        2020: '#ef4444'
-      };
-      return {
-        color: colorMap[year] || '#8b5cf6',
-        weight: 2.8,
-        opacity: 0.95,
-        fillOpacity: 0.48
-      };
-    },
-    onEachFeature: (feature, layer) => {
-      const p = feature.properties;
-      const popup = `
-        <div style="min-width: 240px;">
-          <strong style="color:#10b981;">${p.ten_lo || 'Lô ' + p.id_lo}</strong><br>
-          <hr style="margin:6px 0;">
-          Đội: <strong>${p.doi || 'N/A'}</strong><br>
-          Giống: ${p.giong || 'N/A'}<br>
-          Năm trồng: <strong>${p.nam_trong || 'N/A'}</strong><br>
-          Diện tích: <strong>${p.dien_tich_map ? p.dien_tich_map + ' ha' : 'N/A'}</strong>
-        </div>
-      `;
-      layer.bindPopup(popup);
-    }
-  }).addTo(dashMap);
+  if (mapData.plots?.length > 0) {
+    const geoCollection = { type: 'FeatureCollection', features: mapData.plots };
 
-  // 4. Lớp nhãn
-  createLabelLayer(plots);
+    // 2. Background Lots
+    backgroundLotsLayer = L.geoJSON(geoCollection, {
+      style: {
+        color: '#cbd5e1',
+        weight: 1.5,
+        opacity: 0.65,
+        fillColor: '#1e2937',
+        fillOpacity: 0.18
+      }
+    }).addTo(dashMap);
+
+    // 3. Main Lots (màu theo năm)
+    mainLotsLayer = L.geoJSON(geoCollection, {
+      style: (feature) => {
+        const year = parseInt(feature.properties.nam_trong);
+        const colorMap = {
+          2025: '#5ee7b1',
+          2024: '#10b981',
+          2023: '#0ea5e9',
+          2022: '#f59e0b',
+          2021: '#fb923c',
+          2020: '#ef4444'
+        };
+        return {
+          color: colorMap[year] || '#8b5cf6',
+          weight: 2.8,
+          opacity: 0.95,
+          fillOpacity: 0.48
+        };
+      },
+      onEachFeature: (feature, layer) => {
+        const p = feature.properties;
+        const popup = `
+          <div style="min-width: 240px;">
+            <strong style="color:#10b981;">${p.ten_lo || 'Lô ' + p.id_lo}</strong><br>
+            <hr style="margin:6px 0;">
+            Đội: <strong>${p.doi || 'N/A'}</strong><br>
+            Giống: ${p.giong || 'N/A'}<br>
+            Năm trồng: <strong>${p.nam_trong || 'N/A'}</strong><br>
+            Diện tích: <strong>${p.dien_tich_map ? p.dien_tich_map + ' ha' : 'N/A'}</strong>
+          </div>
+        `;
+        layer.bindPopup(popup);
+      }
+    }).addTo(dashMap);
+
+    // 4. Labels
+    createLabelLayer(mapData.plots);
+  }
 }
 
-// ==================== TẠO NHÃN ====================
+// ==================== TẠO LAYER NHÃN ====================
 function createLabelLayer(plots) {
   labelLayer = L.layerGroup().addTo(dashMap);
 
@@ -1109,18 +1090,50 @@ function createLabelLayer(plots) {
 
         labelLayer.addLayer(label);
       } catch (e) {
-        console.warn('Không tạo được nhãn cho lô:', feature.properties.id_lo);
+        console.warn('Không tạo nhãn cho lô:', feature.properties.id_lo);
       }
     }
   });
 }
 
-// ==================== TOGGLE LAYER ====================
-function toggleLayerManager() {
-  const panel = document.getElementById('layerManager');
-  if (panel) panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+// ==================== FILTER FUNCTIONS ====================
+
+async function loadFilterDropdowns() {
+  try {
+    await Promise.all([
+      fetchDashboardStats(),
+      fetchDonViList(),
+      fetchGiongStats(),
+      fetchNamTrongStats()
+    ]);
+  } catch (e) {
+    console.error('Lỗi load filter dropdowns:', e);
+  }
 }
 
+function setupFilterListeners() {
+  const filters = ['doi', 'nam_trong', 'giong'];
+
+  filters.forEach(filterName => {
+    const select = document.querySelector(`select[name="${filterName}"]`);
+    if (select) {
+      select.addEventListener('change', async () => {
+        currentFilters[filterName] = select.value || null;
+        
+        console.log('🔄 Đang áp dụng filter:', currentFilters);
+        
+        // Tải lại dữ liệu với filter mới
+        const mapData = await fetchMapData(currentFilters);
+        if (mapData) {
+          createAllLayers(mapData);
+          showToast(`Đã áp dụng bộ lọc - ${mapData.plots.length} lô`, '🔍');
+        }
+      });
+    }
+  });
+}
+
+// ==================== TOGGLE LAYER ====================
 function toggleBasemap() {
   const checked = document.getElementById('chk-satellite').checked;
   if (checked) {
@@ -1132,7 +1145,7 @@ function toggleBasemap() {
 
 function toggleLayer(layerName) {
   const checked = document.getElementById(`chk-${layerName.replace(/([A-Z])/g, '-$1').toLowerCase()}`).checked;
-
+  
   let layer = null;
   switch(layerName) {
     case 'backgroundLots': layer = backgroundLotsLayer; break;
@@ -1141,12 +1154,12 @@ function toggleLayer(layerName) {
     case 'zones':          layer = zoneBoundaryLayer; break;
   }
 
-  if (!layer) return;
-
-  if (checked) {
-    if (!dashMap.hasLayer(layer)) layer.addTo(dashMap);
-  } else {
-    if (dashMap.hasLayer(layer)) dashMap.removeLayer(layer);
+  if (layer) {
+    if (checked) {
+      if (!dashMap.hasLayer(layer)) layer.addTo(dashMap);
+    } else {
+      if (dashMap.hasLayer(layer)) dashMap.removeLayer(layer);
+    }
   }
 }
 
