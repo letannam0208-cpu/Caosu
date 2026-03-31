@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WebGIS · Thêm Dữ Liệu Lô Cây</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+<style>
+/* Giữ nguyên CSS từ file HTML đã sửa */
+:root {
+  --bg: #0a0e1a;
+  --s1: #111827;
+  --s2: #1a2332;
+  --s3: #242e42;
+  --border: rgba(255,255,255,0.08);
+  --border2: rgba(255,255,255,0.14);
+  --text: #f0f4f9;
+  --muted: #6b7c9d;
+  --muted2: #8fa3bd;
+  --accent: #10b981;
+  --accentB: #06b6d4;
+  --warn: #f59e0b;
+  --danger: #ef4444;
+  --font-d: 'Syne', sans-serif;
+  --font-b: 'Be Vietnam Pro', sans-serif;
+  --nav-w: 200px;
+  --top-h: 64px;
+  --r: 8px;
+  --r-lg: 12px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--font-b);
+  background:var(--bg);
+  color:var(--text);
+  height:100vh;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--s3);border-radius:3px}
+#topbar{
+  height:var(--top-h);flex-shrink:0;background:linear-gradient(180deg,var(--s1),rgba(17,24,39,0.8));
+  border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:24px;z-index:100;backdrop-filter:blur(10px);
+}
+#topbar::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(16,185,129,0.25),transparent);}
+.tb-logo{display:flex;align-items:center;gap:12px;text-decoration:none;flex-shrink:0;transition:0.3s;}
+.tb-logo:hover{transform:translateY(-2px);}
+.tb-icon{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#10b981,#059669);display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff;box-shadow:0 4px 16px rgba(16,185,129,0.25);}
+.tb-title{font-family:var(--font-d);font-size:14px;letter-spacing:0.1em;color:var(--text);font-weight:700;}
+.tb-sub{font-size:10px;color:var(--muted);letter-spacing:0.12em;text-transform:uppercase;margin-top:2px;}
+.tb-pills-group{display:flex;align-items:center;gap:16px;flex:1;}
+.tb-pill{background:transparent;border:1px solid rgba(16,185,129,0.3);padding:6px 12px;border-radius:6px;font-size:12px;color:var(--muted2);display:flex;align-items:center;gap:8px;transition:0.2s;}
+.tb-pill-live{border-color:rgba(16,185,129,0.5);}
+.tb-pill:hover{border-color:rgba(16,185,129,0.6);background:rgba(16,185,129,0.05);}
+.pill-label{color:var(--muted);font-size:11px;}
+.pill-value{color:var(--text);font-weight:600;font-size:13px;}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent);animation:blink 2s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.4}}
+.tb-right{margin-left:auto;display:flex;align-items:center;gap:16px;}
+.icon-btn{width:36px;height:36px;border-radius:var(--r);background:rgba(255,255,255,0.05);border:1px solid var(--border);color:var(--muted2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:0.2s;}
+.icon-btn:hover{color:var(--accentB);background:rgba(6,182,212,0.1);border-color:rgba(6,182,212,0.2);}
+.tb-avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#10b981,#06b6d4);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;cursor:pointer;border:2px solid var(--border2);transition:0.2s;}
+.tb-avatar:hover{transform:scale(1.05);border-color:var(--accent);}
+#body{display:flex;flex:1;overflow:hidden;}
+#nav{width:var(--nav-w);flex-shrink:0;background:linear-gradient(180deg,var(--s1),var(--bg));border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;padding:16px 10px;gap:4px;}
+.nav-section-label{font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);padding:8px 12px 6px;margin:8px 0 2px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--r);cursor:pointer;transition:0.2s;color:var(--muted2);font-size:13px;font-weight:500;border:1px solid transparent;text-decoration:none;}
+.nav-item:hover{background:rgba(255,255,255,0.05);color:var(--text);border-color:var(--border2);}
+.nav-item.active{background:rgba(16,185,129,0.15);border-color:var(--accent);color:var(--accent);font-weight:600;}
+.nav-icon{width:16px;height:16px;text-align:center;font-size:13px;}
+.nav-logout{margin-top:auto;border-top:1px solid var(--border);padding-top:12px;}
+.nav-logout .nav-item{color:#fca5a5;border:1px solid rgba(239,68,68,0.2);background:rgba(239,68,68,0.08);}
+.nav-logout .nav-item:hover{background:rgba(239,68,68,0.15);border-color:rgba(239,68,68,0.4);color:#ff9999;}
+#content{flex:1;overflow-y:auto;padding:20px 24px;background:linear-gradient(135deg,rgba(10,14,26,0),rgba(16,185,129,0.03));}
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;}
+.page-title{font-family:var(--font-d);font-size:28px;font-weight:800;color:var(--text);letter-spacing:-0.02em;}
+.page-subtitle{font-size:12px;color:var(--muted);margin-top:4px;}
+.tab-bar{display:flex;gap:8px;border-bottom:1px solid var(--border);margin-bottom:24px;overflow-x:auto;}
+.tab-btn{background:none;border:none;padding:10px 20px;color:var(--muted2);cursor:pointer;font-weight:500;transition:0.2s;border-bottom:2px solid transparent;white-space:nowrap;}
+.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);}
+.tab-content{display:none;}
+.tab-content.active{display:block;}
+.form-container{background:var(--s1);border:1px solid var(--border);border-radius:var(--r-lg);padding:24px;box-shadow:0 4px 12px rgba(0,0,0,0.2);}
+.form-section-title{font-size:14px;font-weight:700;color:var(--text);margin:0 0 16px 0;padding-bottom:8px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;}
+.form-group{display:flex;flex-direction:column;}
+.form-group label{font-size:12px;font-weight:600;color:var(--muted2);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em;}
+.form-group input,.form-group select,.form-group textarea{padding:10px 12px;border-radius:var(--r);background:var(--s2);border:1px solid var(--border);color:var(--text);font-size:12px;transition:0.2s;}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:none;border-color:var(--accent);background:var(--s3);box-shadow:0 0 12px rgba(16,185,129,0.15);}
+.form-group textarea{resize:vertical;min-height:80px;}
+.btn-submit,.btn-reset,.btn-upload-batch{padding:10px 20px;border-radius:var(--r);font-weight:600;cursor:pointer;transition:0.2s;border:none;display:inline-flex;align-items:center;gap:8px;}
+.btn-submit{background:linear-gradient(135deg,var(--accent),#059669);color:#fff;}
+.btn-submit:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(16,185,129,0.3);}
+.btn-reset{background:rgba(255,255,255,0.05);color:var(--muted2);border:1px solid var(--border);}
+.btn-reset:hover{background:rgba(255,255,255,0.08);color:var(--text);}
+.btn-upload-batch{background:linear-gradient(135deg,var(--accentB),#0891b2);color:#fff;margin-top:16px;}
+.upload-zone{border:2px dashed var(--border2);border-radius:var(--r-lg);padding:30px;text-align:center;cursor:pointer;transition:0.2s;background:rgba(16,185,129,0.03);}
+.upload-zone:hover{border-color:var(--accent);background:rgba(16,185,129,0.08);}
+.upload-icon{font-size:40px;display:block;margin-bottom:12px;}
+.preview-table{overflow-x:auto;margin-top:20px;}
+.preview-table table{width:100%;border-collapse:collapse;font-size:11px;}
+.preview-table th,.preview-table td{border:1px solid var(--border);padding:6px;text-align:left;}
+.preview-table th{background:var(--s2);color:var(--accent);}
+.status-msg{padding:10px;border-radius:var(--r);margin-top:16px;}
+</style>
+</head>
+<body>
+<div id="topbar">
+  <a class="tb-logo" href="#">
+    <div class="tb-icon">✓</div>
+    <div><div class="tb-title">WEBGIS CAO SU</div><div class="tb-sub">Tổng Công Ty</div></div>
+  </a>
+  <div class="tb-pills-group">
+    <div class="tb-pill tb-pill-live"><span class="live-dot"></span><span>Trực tuyến</span></div>
+    <div class="tb-pill"><span class="pill-label">Lô vườn</span><span class="pill-value" id="totalLots">0</span></div>
+    <div class="tb-pill"><span class="pill-label">Diện tích</span><span class="pill-value" id="totalArea">0</span></div>
+  </div>
+  <div class="tb-right">
+    <button class="icon-btn"><i class="fas fa-bell"></i></button>
+    <button class="icon-btn"><i class="fas fa-globe"></i></button>
+    <button class="icon-btn"><i class="fas fa-cog"></i></button>
+    <div style="display:flex;align-items:center;gap:10px;border-left:1px solid var(--border);padding-left:16px">
+      <div style="text-align:right"><div style="font-weight:600"><%= user.displayName %></div><div style="font-size:10px;color:var(--muted)"><%= user.role === 'admin' ? 'Quản trị viên' : 'Người dùng' %></div></div>
+      <div class="tb-avatar"><%= user.displayName.charAt(0).toUpperCase() %></div>
+    </div>
+  </div>
+</div>
+
+<div id="body">
+  <nav id="nav">
+    <div class="nav-section-label">Tổng quan</div>
+    <a href="/" class="nav-item <%= (path === '/' || path === '/dashboard') ? 'active' : '' %>"><i class="fas fa-home nav-icon"></i> Dashboard</a>
+    <div class="nav-section-label">Quản lý dữ liệu</div>
+    <a href="/quan-ly-lo-cay" class="nav-item <%= path === '/quan-ly-lo-cay' ? 'active' : '' %>"><i class="fas fa-tree nav-icon"></i> Quản lý lô cây</a>
+    <a href="/them-du-lieu-lo-cay" class="nav-item active"><i class="fas fa-plus-circle nav-icon"></i> Thêm dữ liệu lô</a>
+    <div class="nav-section-label">Người dùng & Phân quyền</div>
+    <a href="/quan-ly-nguoi-dung" class="nav-item <%= path === '/quan-ly-nguoi-dung' ? 'active' : '' %>"><i class="fas fa-users nav-icon"></i> Quản lý người dùng</a>
+    <div class="nav-section-label">Phân tích</div>
+    <a href="/thong-ke" class="nav-item <%= path === '/thong-ke' ? 'active' : '' %>"><i class="fas fa-chart-bar nav-icon"></i> Thống kê</a>
+    <div class="nav-logout"><a href="/logout" class="nav-item"><i class="fas fa-sign-out-alt nav-icon"></i> Đăng xuất</a></div>
+  </nav>
+
+  <div id="content">
+    <div class="page-header">
+      <div><h1 class="page-title">Thêm Lô Cây Mới</h1><p class="page-subtitle">Nhập thông tin chi tiết từ 8 bảng dữ liệu</p></div>
+    </div>
+
+    <div class="tab-bar">
+      <button class="tab-btn active" data-tab="manual">📝 Nhập tay</button>
+      <button class="tab-btn" data-tab="upload">📁 Nhập file Excel/CSV</button>
+    </div>
+
+    <!-- TAB NHẬP TAY -->
+    <div id="tab-manual" class="tab-content active">
+      <div class="form-container">
+        <form id="manualForm">
+          <!-- Thông tin cơ bản (bảng lo) -->
+          <div class="form-section-title"><i class="fas fa-info-circle"></i> Thông tin cơ bản</div>
+          <div class="form-row">
+            <div class="form-group"><label>Tên lô *</label><input type="text" name="ten_lo" required placeholder="VD: Lô 5.15TK.N1.10.093"></div>
+            <div class="form-group"><label>Năm trồng</label><input type="number" name="nam_trong" placeholder="2020"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Giống</label><input type="text" name="giong" placeholder="PB 260"></div>
+            <div class="form-group"><label>Cao trình TB (m)</label><input type="number" step="0.1" name="cao_trinh_tb"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Đơn vị</label><select name="id_don_vi" id="id_don_vi_manual"><option value="">-- Chọn --</option></select></div>
+            <div class="form-group"><label>Hành chính</label><select name="id_hc" id="id_hc_manual"><option value="">-- Chọn --</option></select></div>
+          </div>
+
+          <!-- Diện tích -->
+          <div class="form-section-title"><i class="fas fa-draw-polygon"></i> Diện tích</div>
+          <div class="form-row">
+            <div class="form-group"><label>DT map (ha)</label><input type="number" step="0.001" name="dien_tich_map"></div>
+            <div class="form-group"><label>DT 01/01/25</label><input type="number" step="0.001" name="dien_tich_010125"></div>
+            <div class="form-group"><label>DT 01/01/26</label><input type="number" step="0.001" name="dien_tich_010126"></div>
+          </div>
+
+          <!-- Hiện trạng cây -->
+          <div class="form-section-title"><i class="fas fa-leaf"></i> Hiện trạng cây</div>
+          <div class="form-row">
+            <div class="form-group"><label>Tổng hộ KK</label><input type="number" name="tong_ho_kk"></div>
+            <div class="form-group"><label>Cây cao</label><input type="number" name="cay_cao"></div>
+            <div class="form-group"><label>Cây chưa cao</label><input type="number" name="cay_chua_cao"></div>
+            <div class="form-group"><label>Cây khô mủ</label><input type="number" name="cay_kho_mu"></div>
+            <div class="form-group"><label>Cây không PT</label><input type="number" name="cay_khong_pt"></div>
+            <div class="form-group"><label>Hố trống</label><input type="number" name="ho_trong"></div>
+            <div class="form-group"><label>Mật độ (cây/ha)</label><input type="number" step="0.1" name="mat_do_cc"></div>
+          </div>
+
+          <!-- Khai thác -->
+          <div class="form-section-title"><i class="fas fa-tachometer-alt"></i> Khai thác</div>
+          <div class="form-row">
+            <div class="form-group"><label>Chế độ cạo</label><input type="text" name="che_do_cao"></div>
+            <div class="form-group"><label>Phiên cạo</label><input type="text" name="phien_cao"></div>
+            <div class="form-group"><label>Nhịp độ</label><input type="text" name="nhip_do_cao"></div>
+            <div class="form-group"><label>Năm mở cạo</label><input type="number" name="nam_mc"></div>
+            <div class="form-group"><label>Tuổi cạo</label><input type="number" name="tuoi_cao"></div>
+            <div class="form-group"><label>Năm cạo up</label><input type="number" name="nam_cao_up"></div>
+            <div class="form-group"><label>Tình trạng mủ</label><input type="text" name="tinh_trang_mc"></div>
+          </div>
+
+          <!-- Sản lượng -->
+          <div class="form-section-title"><i class="fas fa-chart-line"></i> Sản lượng</div>
+          <div class="form-row">
+            <div class="form-group"><label>NS25 kg/ha</label><input type="number" step="0.01" name="ns25_kg_ha"></div>
+            <div class="form-group"><label>NS25 kg/cây</label><input type="number" step="0.01" name="ns25_kg_cay"></div>
+            <div class="form-group"><label>NS26 kg/ha</label><input type="number" step="0.01" name="ns26_kg_ha"></div>
+            <div class="form-group"><label>NS26 kg/cây</label><input type="number" step="0.01" name="ns26_kg_cay"></div>
+            <div class="form-group"><label>Tổng lát cạo</label><input type="number" step="0.01" name="tong_lat_cao"></div>
+            <div class="form-group"><label>Sản lượng</label><input type="number" step="0.01" name="san_luong"></div>
+            <div class="form-group"><label>Phân loại</label><input type="text" name="phan_loai"></div>
+            <div class="form-group"><label>Đối tượng</label><input type="text" name="doi_tuong"></div>
+            <div class="form-group"><label>Tái canh năm</label><input type="number" name="tai_canh_nam"></div>
+          </div>
+
+          <!-- Thông tin trồng -->
+          <div class="form-section-title"><i class="fas fa-seedling"></i> Thông tin trồng</div>
+          <div class="form-row">
+            <div class="form-group"><label>Hạng đất</label><input type="text" name="hang_dat"></div>
+            <div class="form-group"><label>Phương pháp trồng</label><input type="text" name="phuong_phap_trong"></div>
+            <div class="form-group"><label>Khoảng cách trồng</label><input type="text" name="khoang_cach_trong"></div>
+            <div class="form-group"><label>Mật độ TK</label><input type="number" name="mat_do_tk"></div>
+          </div>
+
+          <div class="form-actions" style="display:flex; gap:12px; margin-top:24px; padding-top:16px; border-top:1px solid var(--border);">
+            <button type="submit" class="btn-submit"><i class="fas fa-check"></i> Lưu lô cây</button>
+            <button type="button" class="btn-reset" id="resetManual"><i class="fas fa-undo"></i> Đặt lại</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- TAB NHẬP FILE -->
+    <div id="tab-upload" class="tab-content">
+      <div class="form-container">
+        <div class="form-section-title"><i class="fas fa-file-excel"></i> Tải file Excel/CSV</div>
+        <div class="upload-zone" id="uploadZone">
+          <span class="upload-icon">📁</span>
+          <div class="upload-text">Kéo thả hoặc click để chọn file</div>
+          <div class="upload-hint">Hỗ trợ .xlsx, .xls, .csv</div>
+          <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display:none;">
+        </div>
+        <button class="btn-upload-batch" id="downloadSample"><i class="fas fa-download"></i> Tải file mẫu Excel</button>
+
+        <div id="previewArea" style="margin-top:24px; display:none;">
+          <div class="form-section-title"><i class="fas fa-table"></i> Xem trước dữ liệu (10 dòng đầu)</div>
+          <div class="preview-table" id="previewTable"></div>
+          <button class="btn-submit" id="submitBatch" style="margin-top:16px;"><i class="fas fa-upload"></i> Gửi tất cả</button>
+          <div id="batchStatus" class="status-msg"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ==================== LOAD DROPDOWNS ====================
+  async function loadDonVi(selectId) {
+    const res = await fetch('/api/don-vi');
+    const data = await res.json();
+    if(data.success) {
+      const select = document.getElementById(selectId);
+      select.innerHTML = '<option value="">-- Chọn --</option>';
+      data.data.forEach(dv => {
+        const opt = document.createElement('option');
+        opt.value = dv.id_don_vi;
+        opt.textContent = `${dv.doi} (${dv.du_an})`;
+        select.appendChild(opt);
+      });
+    }
+  }
+  async function loadHanhChinh(selectId) {
+    const res = await fetch('/api/hanh-chinh');
+    const data = await res.json();
+    if(data.success) {
+      const select = document.getElementById(selectId);
+      select.innerHTML = '<option value="">-- Chọn --</option>';
+      data.data.forEach(hc => {
+        const opt = document.createElement('option');
+        opt.value = hc.id_hc;
+        opt.textContent = `${hc.xa}, ${hc.huyen}`;
+        select.appendChild(opt);
+      });
+    }
+  }
+
+  // ==================== THÊM LÔ CÂY (API POST) ====================
+  async function addLoCay(data) {
+    const res = await fetch('/api/lo-cay', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(data)
+    });
+    return await res.json();
+  }
+
+  // ==================== CẬP NHẬT THỐNG KÊ TOPBAR ====================
+  async function updateStats() {
+    const res = await fetch('/api/dashboard-stats');
+    const data = await res.json();
+    if(data.success) {
+      document.getElementById('totalLots').innerText = data.data.tong_lo_cay || 0;
+      document.getElementById('totalArea').innerText = (data.data.tong_dien_tich || 0).toFixed(3);
+    }
+  }
+
+  // ==================== XỬ LÝ FORM NHẬP TAY ====================
+  document.getElementById('manualForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData.entries());
+    Object.keys(data).forEach(k => { if(data[k] === '') delete data[k]; });
+    const result = await addLoCay(data);
+    if(result.success) {
+      alert('✅ Thêm lô cây thành công! ID: ' + result.id);
+      e.target.reset();
+      updateStats();
+    } else {
+      alert('❌ Lỗi: ' + result.error);
+    }
+  });
+
+  document.getElementById('resetManual').addEventListener('click', () => {
+    document.getElementById('manualForm').reset();
+  });
+
+  // ==================== UPLOAD FILE ====================
+  const uploadZone = document.getElementById('uploadZone');
+  const fileInput = document.getElementById('fileInput');
+  let uploadedData = [];
+
+  uploadZone.addEventListener('click', () => fileInput.click());
+  uploadZone.addEventListener('dragover', (e) => { e.preventDefault(); uploadZone.style.borderColor = 'var(--accent)'; });
+  uploadZone.addEventListener('dragleave', () => uploadZone.style.borderColor = 'var(--border2)');
+  uploadZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadZone.style.borderColor = 'var(--border2)';
+    const file = e.dataTransfer.files[0];
+    if(file) handleFile(file);
+  });
+  fileInput.addEventListener('change', (e) => {
+    if(e.target.files.length) handleFile(e.target.files[0]);
+  });
+
+  function handleFile(file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, { type: 'array' });
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(sheet);
+      uploadedData = rows;
+      showPreview(rows.slice(0, 10));
+      document.getElementById('previewArea').style.display = 'block';
+    };
+    reader.readAsArrayBuffer(file);
+  }
+
+  function showPreview(rows) {
+    if(rows.length === 0) return;
+    const headers = Object.keys(rows[0]);
+    let html = '<table><thead><tr>';
+    headers.forEach(h => html += `<th>${h}</th>`);
+    html += '</tr></thead><tbody>';
+    rows.forEach(row => {
+      html += '<tr>';
+      headers.forEach(h => html += `<td>${row[h] || ''}</td>`);
+      html += '</tr>';
+    });
+    html += '</tbody></table>';
+    document.getElementById('previewTable').innerHTML = html;
+  }
+
+  document.getElementById('submitBatch').addEventListener('click', async () => {
+    if(!uploadedData.length) return;
+    const total = uploadedData.length;
+    let success = 0, failed = 0;
+    const statusDiv = document.getElementById('batchStatus');
+    statusDiv.innerHTML = `<div style="background:rgba(16,185,129,0.1); padding:8px;">Đang xử lý 0/${total}...</div>`;
+
+    for(let i=0; i<uploadedData.length; i++) {
+      const row = uploadedData[i];
+      // Loại bỏ các trường rỗng
+      Object.keys(row).forEach(k => { if(row[k] === '' || row[k] === undefined) delete row[k]; });
+      const result = await addLoCay(row);
+      if(result.success) success++;
+      else failed++;
+      statusDiv.innerHTML = `<div style="background:rgba(16,185,129,0.1); padding:8px;">Đã xử lý ${i+1}/${total} (thành công: ${success}, thất bại: ${failed})</div>`;
+    }
+    statusDiv.innerHTML = `<div style="background:rgba(16,185,129,0.2); padding:8px;">✅ Hoàn tất! Thành công: ${success}, Thất bại: ${failed}</div>`;
+    if(success > 0) updateStats();
+  });
+
+  // Tải file mẫu
+  document.getElementById('downloadSample').addEventListener('click', () => {
+    const sampleData = [
+      {
+        ten_lo: "Lô mẫu 1", nam_trong: 2020, giong: "PB 260", cao_trinh_tb: 45.5,
+        id_don_vi: "", id_hc: "", dien_tich_map: 10.5, dien_tich_010125: 10.5, dien_tich_010126: 10.5,
+        tong_ho_kk: 500, cay_cao: 450, cay_chua_cao: 30, cay_kho_mu: 10, cay_khong_pt: 5, ho_trong: 5, mat_do_cc: 500,
+        che_do_cao: "Cạo 1/2", phien_cao: "Phiên 1", nhip_do_cao: "2 ngày/cạo", nam_mc: 2018, tuoi_cao: 5, nam_cao_up: 2023, tinh_trang_mc: "Tốt",
+        ns25_kg_ha: 1800, ns25_kg_cay: 3.6, ns26_kg_ha: 1850, ns26_kg_cay: 3.7, tong_lat_cao: 120, san_luong: 18000, phan_loai: "A", doi_tuong: "Doanh nghiệp", tai_canh_nam: 2035,
+        hang_dat: "Đất đỏ", phuong_phap_trong: "Hàng đơn", khoang_cach_trong: "3x6", mat_do_tk: 550
+      }
+    ];
+    const ws = XLSX.utils.json_to_sheet(sampleData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Mau_nhap_lieu");
+    XLSX.writeFile(wb, "mau_nhap_lieu_cao_su.xlsx");
+  });
+
+  // ==================== CHUYỂN TAB ====================
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tab = btn.dataset.tab;
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(`tab-${tab}`).classList.add('active');
+      btn.classList.add('active');
+    });
+  });
+
+  // ==================== KHỞI TẠO ====================
+  loadDonVi('id_don_vi_manual');
+  loadHanhChinh('id_hc_manual');
+  updateStats();
+</script>
+</body>
+</html>
