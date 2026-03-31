@@ -1129,7 +1129,9 @@ const namPalette = {
   '2007':'#a78bfa','2008':'#818cf8','2009':'#38bdf8',
   '2010':'#00d68f','2011':'#f59e0b','2012':'#f4656a'
 };
-const ntPalette = {'1':'#00d68f','2':'#00b4ff','3':'#f59e0b'};
+const ntPalette = {
+  '1': '#00d68f','2': '#00b4ff','3': '#f59e0b','Đội 1': '#00d68f','Đội 2': '#00b4ff','Đội 3': '#f59e0b','NT 1': '#00d68f','NT 2': '#00b4ff','NT 3': '#f59e0b'
+};
 
 /* ==================== LẤY DỮ LIỆU TỪ API ==================== */
 async function fetchAPI(url) {
@@ -1259,7 +1261,15 @@ function featureVisible(p) {
 function getLotColorReal(p, mode) {
   if (mode === 'giong') return giongPalette[p.giong] || '#5a6a8a';
   if (mode === 'nam') return namPalette[p.nam_trong] || '#5a6a8a';
-  if (mode === 'doi') return ntPalette[p.doi] || '#5a6a8a';
+  if (mode === 'doi') {
+    let doiValue = p.doi;
+    // Nếu là chuỗi "Đội 1" hoặc "NT 1", lấy số cuối
+    if (doiValue && typeof doiValue === 'string') {
+      const match = doiValue.match(/\d+$/);
+      if (match) doiValue = match[0];
+    }
+    return ntPalette[doiValue] || ntPalette[String(doiValue)] || '#5a6a8a';
+  }
   return '#00d68f';
 }
 
