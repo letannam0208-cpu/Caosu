@@ -8,8 +8,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Syne:wght@700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
 <style>
-/* (giữ nguyên style như file trước) */
+/* (giữ nguyên style như trước, thêm một số lớp mới) */
 :root {
   --bg:       #080d18;
   --s1:       #0f1729;
@@ -226,6 +227,32 @@ body{font-family:var(--font-b);background:var(--bg);color:var(--text);height:100
 }
 .badge-green{background:rgba(0,214,143,.15);color:var(--accent)}
 .badge-blue{background:rgba(0,180,255,.15);color:var(--accentB)}
+/* Loading & filter */
+.loader {
+  text-align: center;
+  padding: 40px;
+  color: var(--muted2);
+}
+.filter-bar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.filter-bar select, .filter-bar input {
+  background: var(--s2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 6px 12px;
+  border-radius: var(--r);
+  font-size: 11px;
+  font-family: var(--font-b);
+}
+.filter-bar label {
+  font-size: 11px;
+  color: var(--muted);
+}
 @media(max-width:1400px){.grid-4{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:768px){
   #nav{width:160px;padding:10px 6px}
@@ -233,6 +260,7 @@ body{font-family:var(--font-b);background:var(--bg);color:var(--text);height:100
   .page-title{font-size:18px}
   .grid-4,.grid-2{grid-template-columns:1fr}
   .chart-box,.chart-box-lg{height:280px}
+  .filter-bar { flex-direction: column; align-items: stretch; }
 }
 </style>
 </head>
@@ -296,13 +324,10 @@ body{font-family:var(--font-b);background:var(--bg);color:var(--text);height:100
       </div>
     </div>
 
-    <!-- TAB 1: THEO NÔNG TRƯỜNG (dữ liệu động) -->
+    <!-- TAB 1: THEO NÔNG TRƯỜNG -->
     <div id="tab-nongtruong" class="tab-content">
-      <div class="grid-4" id="kpi-tab1"></div>
-      <div class="card">
-        <div class="card-title">Diện tích & số lô theo nông trường</div>
-        <div class="chart-box-lg"><canvas id="chartDienTichSoLo"></canvas></div>
-      </div>
+      <div class="grid-4" id="kpi-tab1"><div class="loader"><i class="fas fa-spinner fa-pulse"></i> Đang tải...</div></div>
+      <div class="card"><div class="card-title">Diện tích & số lô theo nông trường</div><div class="chart-box-lg"><canvas id="chartDienTichSoLo"></canvas></div></div>
       <div class="grid-2">
         <div class="card"><div class="card-title">Cơ cấu giống theo nông trường</div><div class="chart-box"><canvas id="chartCoCauGiongNT"></canvas></div></div>
         <div class="card"><div class="card-title">Top 10 tổ lớn nhất</div><div class="chart-box"><canvas id="chartTopTo"></canvas></div></div>
@@ -311,10 +336,7 @@ body{font-family:var(--font-b);background:var(--bg);color:var(--text);height:100
 
     <!-- TAB 2: DIỆN TÍCH THEO NĂM -->
     <div id="tab-dientichnam" class="tab-content" style="display:none">
-      <div class="card">
-        <div class="card-title">Diện tích trồng theo năm</div>
-        <div class="chart-box-lg"><canvas id="chartDienTichNam"></canvas></div>
-      </div>
+      <div class="card"><div class="card-title">Diện tích trồng theo năm</div><div class="chart-box-lg"><canvas id="chartDienTichNam"></canvas></div></div>
       <div class="grid-2">
         <div class="card"><div class="card-title">Phân bổ diện tích theo nông trường</div><div class="chart-box"><canvas id="chartPhanBoNT"></canvas></div></div>
         <div class="card"><div class="card-title">Số lô theo năm trồng</div><div class="chart-box"><canvas id="chartSoLoNam"></canvas></div></div>
@@ -333,47 +355,34 @@ body{font-family:var(--font-b);background:var(--bg);color:var(--text);height:100
       </div>
     </div>
 
-    <!-- TAB 4: PHÂN TÍCH CHUYÊN SÂU (chỉ dùng 6 bảng: lo, dien_tich, hien_trang_cay, khai_thac, san_luong, thong_tin_trong) -->
+    <!-- TAB 4: PHÂN TÍCH CHUYÊN SÂU (có bộ lọc) -->
     <div id="tab-chuyensau" class="tab-content" style="display:none">
-      <div class="grid-2">
-        <div class="card">
-          <div class="card-title">Hiện trạng cây trồng</div>
-          <div class="chart-box"><canvas id="chartHienTrangCay"></canvas></div>
-        </div>
-        <div class="card">
-          <div class="card-title">Top 10 lô năng suất cao nhất</div>
-          <div class="chart-box"><canvas id="chartTopNangSuat"></canvas></div>
-        </div>
+      <div class="filter-bar">
+        <label>Lọc theo năm trồng:</label>
+        <select id="filter-year">
+          <option value="all">Tất cả</option>
+        </select>
+        <label>Lọc theo giống:</label>
+        <select id="filter-variety">
+          <option value="all">Tất cả</option>
+        </select>
+        <button id="apply-filter" class="btn-export" style="margin:0; padding:6px 12px;"><i class="fas fa-filter"></i> Áp dụng</button>
       </div>
       <div class="grid-2">
-        <div class="card">
-          <div class="card-title">Phân bố mật độ trồng</div>
-          <div class="chart-box"><canvas id="chartMatDoTrong"></canvas></div>
-        </div>
-        <div class="card">
-          <div class="card-title">Biến động diện tích (010125 → 010126)</div>
-          <div class="chart-box"><canvas id="chartBienDongDT"></canvas></div>
-        </div>
+        <div class="card"><div class="card-title">Hiện trạng cây trồng</div><div class="chart-box"><canvas id="chartHienTrangCay"></canvas></div></div>
+        <div class="card"><div class="card-title">Top 10 lô năng suất cao nhất</div><div class="chart-box"><canvas id="chartTopNangSuat"></canvas></div></div>
       </div>
       <div class="grid-2">
-        <div class="card">
-          <div class="card-title">Phân bố diện tích lô</div>
-          <div class="chart-box"><canvas id="chartPhanBoDienTichLo"></canvas></div>
-        </div>
-        <div class="card">
-          <div class="card-title">Tình trạng khai thác</div>
-          <div class="chart-box"><canvas id="chartTinhTrangKhaiThac"></canvas></div>
-        </div>
+        <div class="card"><div class="card-title">Phân bố mật độ trồng</div><div class="chart-box"><canvas id="chartMatDoTrong"></canvas></div></div>
+        <div class="card"><div class="card-title">Biến động diện tích (010125 → 010126)</div><div class="chart-box"><canvas id="chartBienDongDT"></canvas></div></div>
       </div>
       <div class="grid-2">
-        <div class="card">
-          <div class="card-title">Tương quan diện tích – sản lượng</div>
-          <div class="chart-box"><canvas id="chartScatterSLDT"></canvas></div>
-        </div>
-        <div class="card">
-          <div class="card-title">Năng suất trung bình theo giống</div>
-          <div class="chart-box"><canvas id="chartNangSuatTheoGiong"></canvas></div>
-        </div>
+        <div class="card"><div class="card-title">Phân bố diện tích lô</div><div class="chart-box"><canvas id="chartPhanBoDienTichLo"></canvas></div></div>
+        <div class="card"><div class="card-title">Tình trạng khai thác</div><div class="chart-box"><canvas id="chartTinhTrangKhaiThac"></canvas></div></div>
+      </div>
+      <div class="grid-2">
+        <div class="card"><div class="card-title">Tương quan diện tích – sản lượng</div><div class="chart-box"><canvas id="chartScatterSLDT"></canvas></div></div>
+        <div class="card"><div class="card-title">Năng suất trung bình theo giống</div><div class="chart-box"><canvas id="chartNangSuatTheoGiong"></canvas></div></div>
       </div>
     </div>
   </div>
@@ -391,11 +400,12 @@ let apiData = {
   sanLuong: [],
   thongTinTrong: []
 };
+let filteredLo = []; // dùng cho tab chuyên sâu sau khi lọc
 
 // ====================== FETCH ALL 8 TABLES ======================
 async function fetchAllData() {
   const endpoints = [
-    '/api/lo-cay',           // lấy thông tin lo + join don_vi, dien_tich, hien_trang_cay, khai_thac, san_luong, thong_tin_trong
+    '/api/lo-cay',
     '/api/don-vi',
     '/api/hanh-chinh',
     '/api/dien-tich',
@@ -405,8 +415,10 @@ async function fetchAllData() {
     '/api/thong-tin-trong'
   ];
   try {
-    const responses = await Promise.all(endpoints.map(url => fetch(url).then(res => res.json())));
-    // responses[0] là /api/lo-cay (trả về GeoJSON)
+    const responses = await Promise.all(endpoints.map(url => fetch(url).then(res => {
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.json();
+    })));
     if (responses[0].features) {
       apiData.lo = responses[0].features.map(f => f.properties);
     } else {
@@ -420,9 +432,12 @@ async function fetchAllData() {
     apiData.sanLuong = responses[6].data || [];
     apiData.thongTinTrong = responses[7].data || [];
 
-    console.log('✅ Đã tải dữ liệu từ 8 bảng', apiData);
+    console.log('✅ Đã tải dữ liệu từ 8 bảng');
+    return true;
   } catch (err) {
     console.error('❌ Lỗi tải dữ liệu:', err);
+    document.querySelectorAll('.loader').forEach(el => el.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Lỗi tải dữ liệu: ${err.message}`);
+    return false;
   }
 }
 
@@ -431,11 +446,9 @@ function getAreaFromLo(lo) {
   return parseFloat(lo.dien_tich_map) || 0;
 }
 
-// ====================== VẼ TẤT CẢ BIỂU ĐỒ ======================
-function renderAllCharts() {
-  // ---- TAB 1 & 2 & 3 dùng dữ liệu từ apiData.lo (vẫn giữ nguyên để tương thích với các tab cũ) ----
+// ====================== RENDER TABS 1-3 (không lọc) ======================
+function renderTabs123() {
   const loList = apiData.lo;
-  // Tổng hợp theo nông trường (du_an)
   const farmMap = new Map();
   loList.forEach(lo => {
     const farm = lo.du_an || 'Không xác định';
@@ -449,7 +462,6 @@ function renderAllCharts() {
   const farmAreas = farmNames.map(n => farmMap.get(n).area);
   const farmCounts = farmNames.map(n => farmMap.get(n).count);
 
-  // Tổng hợp theo giống
   const varietyMap = new Map();
   loList.forEach(lo => {
     const giong = lo.giong || 'Khác';
@@ -459,7 +471,6 @@ function renderAllCharts() {
   const varieties = Array.from(varietyMap.keys());
   const varietyAreas = varieties.map(v => varietyMap.get(v));
 
-  // Tổng hợp theo năm trồng
   const yearMap = new Map();
   loList.forEach(lo => {
     const year = lo.nam_trong;
@@ -474,7 +485,6 @@ function renderAllCharts() {
   const yearAreas = years.map(y => yearMap.get(y).area);
   const yearCounts = years.map(y => yearMap.get(y).count);
 
-  // Tổng hợp theo tổ (doi) – dùng cho tab1
   const toMap = new Map();
   loList.forEach(lo => {
     const to = lo.doi || 'Không xác định';
@@ -485,7 +495,6 @@ function renderAllCharts() {
   const toNames = topTo.map(t=>t[0]);
   const toAreas = topTo.map(t=>t[1]);
 
-  // Tổng hợp theo giống + nông trường cho biểu đồ cơ cấu giống theo nông trường
   const farmVarietyMap = new Map();
   loList.forEach(lo => {
     const farm = lo.du_an || 'Không xác định';
@@ -503,7 +512,6 @@ function renderAllCharts() {
     return giongList.map(g => gmap.get(g) || 0);
   });
 
-  // KPI cho tab1
   const totalArea = farmAreas.reduce((a,b)=>a+b,0);
   const totalLots = loList.length;
   const avgArea = totalLots ? (totalArea/totalLots).toFixed(1) : 0;
@@ -523,31 +531,40 @@ function renderAllCharts() {
     <div class="kpi"><div class="kpi-label">Giống chủ lực</div><div class="kpi-value">${topVariety}</div><div class="kpi-delta" style="color:var(--accentB)">${topVarietyArea.toFixed(1)} ha · ${topVarietyPercent}%</div></div>
   `;
 
-  // Vẽ biểu đồ cho tab1,2,3 (giữ nguyên logic như trước)
+  // Vẽ các biểu đồ (tái sử dụng các chart cũ, nhưng cần hủy cũ trước khi tạo mới để tránh chồng)
+  destroyChartIfExists('chartDienTichSoLo');
   new Chart(document.getElementById('chartDienTichSoLo'), {
     type: 'bar', data: { labels: farmNames, datasets: [
       { label: 'Diện tích (ha)', data: farmAreas, backgroundColor: ['#00d68f','#00b4ff','#f59e0b'], yAxisID: 'y' },
       { label: 'Số lô', data: farmCounts, type: 'line', borderColor: '#f59e0b', borderWidth: 3, pointBackgroundColor: '#fff', pointRadius: 5, yAxisID: 'y1' }
     ]}, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#8a9ab8' } } }, scales: { y: { ticks: { color: '#8a9ab8' } }, y1: { position: 'right', ticks: { color: '#8a9ab8' }, grid: { drawOnChartArea: false } } } }
   });
+  destroyChartIfExists('chartCoCauGiongNT');
   new Chart(document.getElementById('chartCoCauGiongNT'), {
     type: 'bar', data: { labels: giongList, datasets: farmNames.map((farm, idx) => ({ label: farm, data: farmGiongData[idx], backgroundColor: ['#00d68f','#00b4ff','#f59e0b'][idx % 3] })) },
     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#8a9ab8' } } } }
   });
+  destroyChartIfExists('chartTopTo');
   new Chart(document.getElementById('chartTopTo'), {
     type: 'bar', data: { labels: toNames, datasets: [{ label: 'Diện tích (ha)', data: toAreas, backgroundColor: '#f59e0b' }] },
     options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false }
   });
+  destroyChartIfExists('chartDienTichNam');
   new Chart(document.getElementById('chartDienTichNam'), {
     type: 'bar', data: { labels: years, datasets: [
       { label: 'Diện tích (ha)', data: yearAreas, backgroundColor: '#00b4ff', yAxisID: 'y' },
       { label: 'Số lô', data: yearCounts, type: 'line', borderColor: '#f59e0b', borderWidth: 3, pointBackgroundColor: '#fff', pointRadius: 5, yAxisID: 'y1' }
     ]}, options: { responsive: true, maintainAspectRatio: false, scales: { y: { ticks: { color: '#8a9ab8' } }, y1: { position: 'right', ticks: { color: '#8a9ab8' }, grid: { drawOnChartArea: false } } } }
   });
+  destroyChartIfExists('chartPhanBoNT');
   new Chart(document.getElementById('chartPhanBoNT'), { type: 'doughnut', data: { labels: farmNames, datasets: [{ data: farmAreas, backgroundColor: ['#00d68f','#00b4ff','#f59e0b'] }] }, options: { responsive: true } });
+  destroyChartIfExists('chartSoLoNam');
   new Chart(document.getElementById('chartSoLoNam'), { type: 'bar', data: { labels: years, datasets: [{ label: 'Số lô', data: yearCounts, backgroundColor: '#00d68f' }] }, options: { responsive: true } });
+  destroyChartIfExists('chartTyLeGiong');
   new Chart(document.getElementById('chartTyLeGiong'), { type: 'doughnut', data: { labels: varieties, datasets: [{ data: varietyAreas, backgroundColor: ['#00b4ff','#00d68f','#f59e0b','#a78bfa','#f87171','#64748b'] }] }, options: { responsive: true } });
+  destroyChartIfExists('chartDienTichGiong');
   new Chart(document.getElementById('chartDienTichGiong'), { type: 'bar', data: { labels: varieties, datasets: [{ label: 'Diện tích (ha)', data: varietyAreas, backgroundColor: '#00b4ff' }] }, options: { indexAxis: 'y', responsive: true } });
+  destroyChartIfExists('chartDienTichNT');
   new Chart(document.getElementById('chartDienTichNT'), { type: 'bar', data: { labels: farmNames, datasets: [{ label: 'Diện tích (ha)', data: farmAreas, backgroundColor: ['#00d68f','#00b4ff','#f59e0b'] }] }, options: { responsive: true } });
   const groupGiong = (giong) => {
     if(giong.includes('PB')) return 'PB series';
@@ -561,10 +578,34 @@ function renderAllCharts() {
     const area = getAreaFromLo(lo);
     groupMap.set(g, (groupMap.get(g) || 0) + area);
   });
+  destroyChartIfExists('chartCoCauGiong');
   new Chart(document.getElementById('chartCoCauGiong'), { type: 'doughnut', data: { labels: Array.from(groupMap.keys()), datasets: [{ data: Array.from(groupMap.values()), backgroundColor: ['#00b4ff','#00d68f','#f59e0b','#64748b'] }] }, options: { responsive: true } });
+}
 
-  // ========== TAB 4: PHÂN TÍCH CHUYÊN SÂU (chỉ dùng 6 bảng) ==========
-  // 1. Hiện trạng cây (từ hien_trang_cay)
+// Helper để hủy chart cũ
+let chartInstances = {};
+function destroyChartIfExists(id) {
+  if (chartInstances[id]) {
+    chartInstances[id].destroy();
+    delete chartInstances[id];
+  }
+}
+function registerChart(id, chart) {
+  destroyChartIfExists(id);
+  chartInstances[id] = chart;
+}
+
+// ====================== RENDER TAB CHUYÊN SÂU (có lọc) ======================
+function renderAdvancedTab() {
+  const yearFilter = document.getElementById('filter-year').value;
+  const varietyFilter = document.getElementById('filter-variety').value;
+  filteredLo = apiData.lo.filter(lo => {
+    if (yearFilter !== 'all' && lo.nam_trong != yearFilter) return false;
+    if (varietyFilter !== 'all' && lo.giong !== varietyFilter) return false;
+    return true;
+  });
+  const loList = filteredLo;
+  // 1. Hiện trạng cây (từ hien_trang_cay, không lọc theo lo, lấy tất cả)
   const htc = apiData.hienTrangCay;
   let sumCayCao = 0, sumChuaCao = 0, sumKhoMu = 0, sumKhongPT = 0;
   htc.forEach(row => {
@@ -573,14 +614,14 @@ function renderAllCharts() {
     sumKhoMu += Number(row.cay_kho_mu) || 0;
     sumKhongPT += Number(row.cay_khong_pt) || 0;
   });
-  new Chart(document.getElementById('chartHienTrangCay'), {
+  registerChart('chartHienTrangCay', new Chart(document.getElementById('chartHienTrangCay'), {
     type: 'doughnut',
-    data: { labels: ['Cây cao', 'Cây chưa cao', 'Cây khô mủ', 'Cây không PT'], datasets: [{ data: [sumCayCao, sumChuaCao, sumKhoMu, sumKhongPT], backgroundColor: ['#00d68f','#00b4ff','#f59e0b','#f87171'] }] },
+    data: { labels: ['Cây cao', 'Cây chưa cao', 'Cây khô mủ', 'Cây không PT'], datasets: [{ data: [sumCayCao, sumChuaCao, sumKhoMu, sumKhoMu, sumKhongPT], backgroundColor: ['#00d68f','#00b4ff','#f59e0b','#f87171'] }] },
     options: { responsive: true, maintainAspectRatio: false }
-  });
+  }));
 
-  // 2. Top 10 lô năng suất cao nhất (từ san_luong và lo)
-  const yieldMap = new Map(); // id_lo -> { ten_lo, nangSuat }
+  // 2. Top 10 lô năng suất cao nhất (chỉ lấy những lô trong filteredLo)
+  const yieldMap = new Map();
   apiData.sanLuong.forEach(sl => {
     if(sl.id_lo && sl.ns25_kg_ha) {
       const lo = loList.find(l => l.id_lo === sl.id_lo);
@@ -590,12 +631,12 @@ function renderAllCharts() {
     }
   });
   const topYield = Array.from(yieldMap.entries()).sort((a,b)=>b[1]-a[1]).slice(0,10);
-  new Chart(document.getElementById('chartTopNangSuat'), {
+  registerChart('chartTopNangSuat', new Chart(document.getElementById('chartTopNangSuat'), {
     type: 'bar', data: { labels: topYield.map(y=>y[0]), datasets: [{ label: 'NS25 (kg/ha)', data: topYield.map(y=>y[1]), backgroundColor: '#00d68f' }] },
     options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false }
-  });
+  }));
 
-  // 3. Phân bố mật độ trồng (từ thong_tin_trong.mat_do_tk)
+  // 3. Phân bố mật độ trồng (từ thong_tin_trong, không lọc)
   const matDoList = apiData.thongTinTrong.map(t => parseFloat(t.mat_do_tk)).filter(v => v>0);
   const matDoHist = Array(10).fill(0);
   const maxMatDo = Math.max(...matDoList, 100);
@@ -603,13 +644,13 @@ function renderAllCharts() {
     const idx = Math.min(9, Math.floor(v / (maxMatDo/10)));
     matDoHist[idx]++;
   });
-  new Chart(document.getElementById('chartMatDoTrong'), {
+  registerChart('chartMatDoTrong', new Chart(document.getElementById('chartMatDoTrong'), {
     type: 'bar', data: { labels: Array.from({length:10}, (_,i)=>`${(i*maxMatDo/10).toFixed(0)}-${((i+1)*maxMatDo/10).toFixed(0)}`), datasets: [{ label: 'Số lô', data: matDoHist, backgroundColor: '#00b4ff' }] },
     options: { responsive: true, maintainAspectRatio: false }
-  });
+  }));
 
-  // 4. Biến động diện tích (dien_tich_010125 → dien_tich_010126)
-  const dtMap = new Map(); // id_lo -> {dt125, dt126}
+  // 4. Biến động diện tích (chỉ lấy những lô trong filteredLo)
+  const dtMap = new Map();
   apiData.dienTich.forEach(dt => {
     if(dt.id_lo) dtMap.set(dt.id_lo, { dt125: parseFloat(dt.dien_tich_010125)||0, dt126: parseFloat(dt.dien_tich_010126)||0 });
   });
@@ -618,14 +659,14 @@ function renderAllCharts() {
   const changeLabels = changeData.map(c => c.name).slice(0,20);
   const changeBefore = changeData.map(c => c.before).slice(0,20);
   const changeAfter = changeData.map(c => c.after).slice(0,20);
-  new Chart(document.getElementById('chartBienDongDT'), {
+  registerChart('chartBienDongDT', new Chart(document.getElementById('chartBienDongDT'), {
     type: 'line', data: { labels: changeLabels, datasets: [
       { label: 'DT 01/01/25', data: changeBefore, borderColor: '#00d68f', fill: false },
       { label: 'DT 01/01/26', data: changeAfter, borderColor: '#f59e0b', fill: false }
     ]}, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#8a9ab8' } } } }
-  });
+  }));
 
-  // 5. Phân bố diện tích lô (histogram từ dien_tich_map)
+  // 5. Phân bố diện tích lô (histogram từ dien_tich_map của filteredLo)
   const areaList = loList.map(l => getAreaFromLo(l)).filter(a => a>0);
   const areaHist = Array(10).fill(0);
   const maxArea = Math.max(...areaList, 10);
@@ -633,20 +674,20 @@ function renderAllCharts() {
     const idx = Math.min(9, Math.floor(a / (maxArea/10)));
     areaHist[idx]++;
   });
-  new Chart(document.getElementById('chartPhanBoDienTichLo'), {
+  registerChart('chartPhanBoDienTichLo', new Chart(document.getElementById('chartPhanBoDienTichLo'), {
     type: 'bar', data: { labels: Array.from({length:10}, (_,i)=>`${(i*maxArea/10).toFixed(1)}-${((i+1)*maxArea/10).toFixed(1)}`), datasets: [{ label: 'Số lô', data: areaHist, backgroundColor: '#f59e0b' }] },
     options: { responsive: true, maintainAspectRatio: false }
-  });
+  }));
 
-  // 6. Tình trạng khai thác (từ khai_thac.che_do_cao)
+  // 6. Tình trạng khai thác (từ khai_thac, không lọc)
   const khaiThacMap = new Map();
   apiData.khaiThac.forEach(kt => { if(kt.che_do_cao) khaiThacMap.set(kt.che_do_cao, (khaiThacMap.get(kt.che_do_cao) || 0) + 1); });
-  new Chart(document.getElementById('chartTinhTrangKhaiThac'), {
+  registerChart('chartTinhTrangKhaiThac', new Chart(document.getElementById('chartTinhTrangKhaiThac'), {
     type: 'pie', data: { labels: Array.from(khaiThacMap.keys()), datasets: [{ data: Array.from(khaiThacMap.values()), backgroundColor: ['#00d68f','#00b4ff','#f59e0b','#a78bfa','#f87171'] }] },
     options: { responsive: true, maintainAspectRatio: false }
-  });
+  }));
 
-  // 7. Tương quan diện tích – sản lượng (scatter)
+  // 7. Tương quan diện tích – sản lượng (chỉ dùng filteredLo)
   const scatterData = [];
   loList.forEach(lo => {
     const area = getAreaFromLo(lo);
@@ -654,13 +695,13 @@ function renderAllCharts() {
     const yieldVal = sl ? (parseFloat(sl.ns25_kg_ha) || 0) : 0;
     if(area>0 && yieldVal>0) scatterData.push({x: area, y: yieldVal});
   });
-  new Chart(document.getElementById('chartScatterSLDT'), {
+  registerChart('chartScatterSLDT', new Chart(document.getElementById('chartScatterSLDT'), {
     type: 'scatter', data: { datasets: [{ label: 'Năng suất (kg/ha)', data: scatterData, backgroundColor: '#00d68f', pointRadius: 4 }] },
     options: { responsive: true, maintainAspectRatio: false, scales: { x: { title: { display: true, text: 'Diện tích (ha)', color: '#8a9ab8' } }, y: { title: { display: true, text: 'NS25 (kg/ha)', color: '#8a9ab8' } } } }
-  });
+  }));
 
-  // 8. Năng suất trung bình theo giống (từ lo.giong và san_luong.ns25_kg_ha)
-  const giongYieldMap = new Map(); // key: giống, value: { sum, count }
+  // 8. Năng suất trung bình theo giống (chỉ dùng filteredLo)
+  const giongYieldMap = new Map();
   loList.forEach(lo => {
     const giong = lo.giong || 'Khác';
     const sl = apiData.sanLuong.find(s => s.id_lo === lo.id_lo);
@@ -674,16 +715,67 @@ function renderAllCharts() {
   });
   const giongNames = Array.from(giongYieldMap.keys());
   const avgYieldByGiong = giongNames.map(g => giongYieldMap.get(g).sum / giongYieldMap.get(g).count);
-  new Chart(document.getElementById('chartNangSuatTheoGiong'), {
+  registerChart('chartNangSuatTheoGiong', new Chart(document.getElementById('chartNangSuatTheoGiong'), {
     type: 'bar', data: { labels: giongNames, datasets: [{ label: 'NS25 TB (kg/ha)', data: avgYieldByGiong, backgroundColor: '#00b4ff' }] },
     options: { responsive: true, maintainAspectRatio: false }
-  });
+  }));
+}
+
+// ====================== EXPORT EXCEL ======================
+function exportToExcel() {
+  // Tạo workbook và worksheet từ các bảng
+  const wb = XLSX.utils.book_new();
+  const sheets = {
+    'Lô cây': apiData.lo,
+    'Đơn vị': apiData.donVi,
+    'Hành chính': apiData.hanhChinh,
+    'Diện tích': apiData.dienTich,
+    'Hiện trạng cây': apiData.hienTrangCay,
+    'Khai thác': apiData.khaiThac,
+    'Sản lượng': apiData.sanLuong,
+    'Thông tin trồng': apiData.thongTinTrong
+  };
+  for (const [name, data] of Object.entries(sheets)) {
+    if (data && data.length) {
+      const ws = XLSX.utils.json_to_sheet(data);
+      XLSX.utils.book_append_sheet(wb, ws, name);
+    }
+  }
+  XLSX.writeFile(wb, `ThongKe_CaoSu_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.xlsx`);
 }
 
 // ====================== INIT ======================
 async function init() {
-  await fetchAllData();
-  renderAllCharts();
+  const success = await fetchAllData();
+  if (!success) return;
+  renderTabs123();
+  // Populate filter dropdowns
+  const yearsSet = new Set();
+  const varietiesSet = new Set();
+  apiData.lo.forEach(lo => {
+    if (lo.nam_trong) yearsSet.add(lo.nam_trong);
+    if (lo.giong) varietiesSet.add(lo.giong);
+  });
+  const yearSelect = document.getElementById('filter-year');
+  const varietySelect = document.getElementById('filter-variety');
+  Array.from(yearsSet).sort().forEach(y => {
+    const opt = document.createElement('option');
+    opt.value = y;
+    opt.textContent = y;
+    yearSelect.appendChild(opt);
+  });
+  Array.from(varietiesSet).sort().forEach(v => {
+    const opt = document.createElement('option');
+    opt.value = v;
+    opt.textContent = v;
+    varietySelect.appendChild(opt);
+  });
+  // Apply filter button
+  document.getElementById('apply-filter').addEventListener('click', () => {
+    renderAdvancedTab();
+  });
+  // Mặc định hiển thị tab chuyên sâu khi chuyển sang
+  renderAdvancedTab(); // khởi tạo lần đầu
 }
 init();
 
@@ -692,10 +784,12 @@ function switchTab(tabId, btn) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById(tabId).style.display = 'block';
   btn.classList.add('active');
+  // Nếu chuyển sang tab chuyên sâu, cập nhật lại biểu đồ (có thể đã thay đổi dữ liệu)
+  if (tabId === 'tab-chuyensau') {
+    renderAdvancedTab();
+  }
 }
-document.getElementById('exportExcel').addEventListener('click', () => {
-  alert('Chức năng xuất Excel sẽ được tích hợp sau!');
-});
+document.getElementById('exportExcel').addEventListener('click', exportToExcel);
 </script>
 </body>
 </html>
