@@ -115,6 +115,7 @@ app.get('/api/nam-trong-stats', async (req, res) => {
 });
 
 // GeoJSON cho bản đồ
+// GeoJSON cho bản đồ (bổ sung phiên cạo, nhịp độ cạo, tái canh năm)
 app.get('/api/lo-cao-su', async (req, res) => {
   try {
     const { doi, nam_trong, giong, phien_cao, nhip_do_cao, tai_canh_nam } = req.query;

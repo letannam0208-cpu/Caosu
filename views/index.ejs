@@ -1152,7 +1152,7 @@ async function loadCaosuData() {
     if (p.giong) fullGiong.add(p.giong);
     if (p.phien_cao) fullPhienCao.add(p.phien_cao);
     if (p.nhip_do_cao) fullNhipDo.add(p.nhip_do_cao);
-    if (p.quy_hoach_tai_canh) fullQuyHoach.add(p.quy_hoach_tai_canh);
+    if (p.tai_canh_nam) fullQuyHoach.add(p.tai_canh_nam);
   });
   filterNT = new Set(fullNT);
   filterNam = new Set(fullNam);
@@ -1228,7 +1228,7 @@ function featureVisible(p) {
   const g = p.giong || '';
   const pc = p.phien_cao || '';
   const nd = p.nhip_do_cao || '';
-  const qh = p.quy_hoach_tai_canh || '';
+  const qh = p.tai_canh_nam || '';
   return filterNT.has(nt) && filterNam.has(nam) && filterGiong.has(g) &&
          filterPhienCao.has(pc) && filterNhipDo.has(nd) && filterQuyHoach.has(qh);
 }
