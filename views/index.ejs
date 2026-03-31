@@ -1241,7 +1241,7 @@ async function buildFilterUI() {
 
 function featureVisible(p) {
   // Tạm thời bỏ qua kiểm tra ten_lo để debug
-  // if (!p.ten_lo) return false;
+  if (!p.ten_lo) return false;
   const nt = p.doi || '';
   const nam = String(p.nam_trong || '');
   const g = p.giong || '';
@@ -1261,14 +1261,14 @@ function featureVisible(p) {
 function getLotColorReal(p, mode) {
   if (mode === 'giong') return giongPalette[p.giong] || '#5a6a8a';
   if (mode === 'nam') return namPalette[p.nam_trong] || '#5a6a8a';
-  if (mode === 'doi') {
-    let doiValue = p.doi;
-    // Nếu là chuỗi "Đội 1" hoặc "NT 1", lấy số cuối
-    if (doiValue && typeof doiValue === 'string') {
-      const match = doiValue.match(/\d+$/);
-      if (match) doiValue = match[0];
+  if (mode === 'nt') {
+    let doi = p.doi;
+    if (doi && typeof doi === 'string') {
+      // Thử lấy số cuối cùng nếu có
+      const match = doi.match(/\d+$/);
+      if (match) doi = match[0];
     }
-    return ntPalette[doiValue] || ntPalette[String(doiValue)] || '#5a6a8a';
+    return ntPalette[doi] || ntPalette[p.doi] || '#5a6a8a';
   }
   return '#00d68f';
 }
