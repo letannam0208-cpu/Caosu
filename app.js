@@ -1146,6 +1146,25 @@ app.get('/dashboard', (req, res) => {
   renderPage(res, 'index', 'Dashboard - WebGIS Cao Su');
 });
 
+app.get('/quan-ly-lo-cay', (req, res) => {
+  res.locals.path = '/quan-ly-lo-cay';
+  renderPage(res, 'quan-ly-lo-cay', 'Quản lý lô cây cao su');
+});
+
+app.get('/them-du-lieu-lo-cay', (req, res) => {
+  res.locals.path = '/them-du-lieu-lo-cay';
+  renderPage(res, 'them-du-lieu-lo-cay', 'Thêm dữ liệu lô cây');
+});
+
+app.get('/thong-ke', (req, res) => {
+  res.locals.path = '/thong-ke';
+  renderPage(res, 'thong-ke', 'Thống kê vườn cây');
+});
+
+app.get('/quan-ly-nguoi-dung', (req, res) => {
+  res.locals.path = '/quan-ly-nguoi-dung';
+  renderPage(res, 'quan-ly-nguoi-dung', 'Quản lý người dùng');
+});
 // 404 Handler
 app.use((req, res) => {
   res.status(404).render('404', {
