@@ -1141,25 +1141,38 @@ async function fetchAPI(url) {
 let fullNT = new Set(), fullNam = new Set(), fullGiong = new Set(), fullPhienCao = new Set(), fullNhipDo = new Set(), fullQuyHoach = new Set();
 
 async function loadCaosuData() {
-  const data = await fetchAPI('/api/lo-cao-su');
-  caosuFeatures = data.features || [];
-  fullNT.clear(); fullNam.clear(); fullGiong.clear();
-  fullPhienCao.clear(); fullNhipDo.clear(); fullQuyHoach.clear();
-  caosuFeatures.forEach(f => {
-    const p = f.properties;
-    if (p.doi) fullNT.add(p.doi);
-    if (p.nam_trong) fullNam.add(String(p.nam_trong));
-    if (p.giong) fullGiong.add(p.giong);
-    if (p.phien_cao) fullPhienCao.add(p.phien_cao);
-    if (p.nhip_do_cao) fullNhipDo.add(p.nhip_do_cao);
-    if (p.tai_canh_nam) fullQuyHoach.add(p.tai_canh_nam);
-  });
-  filterNT = new Set(fullNT);
-  filterNam = new Set(fullNam);
-  filterGiong = new Set(fullGiong);
-  filterPhienCao = new Set(fullPhienCao);
-  filterNhipDo = new Set(fullNhipDo);
-  filterQuyHoach = new Set(fullQuyHoach);
+  try {
+    const data = await fetchAPI('/api/lo-cao-su');
+    caosuFeatures = data.features || [];
+    console.log('📦 Đã tải', caosuFeatures.length, 'lô từ API');
+    if (caosuFeatures.length === 0) {
+      console.warn('⚠️ Không có lô nào được trả về từ API. Kiểm tra database và endpoint /api/lo-cao-su');
+    } else {
+      console.log('Ví dụ feature đầu tiên:', caosuFeatures[0]);
+    }
+    fullNT.clear(); fullNam.clear(); fullGiong.clear();
+    fullPhienCao.clear(); fullNhipDo.clear(); fullQuyHoach.clear();
+    caosuFeatures.forEach(f => {
+      const p = f.properties;
+      if (p.doi) fullNT.add(p.doi);
+      if (p.nam_trong) fullNam.add(String(p.nam_trong));
+      if (p.giong) fullGiong.add(p.giong);
+      if (p.phien_cao) fullPhienCao.add(p.phien_cao);
+      if (p.nhip_do_cao) fullNhipDo.add(p.nhip_do_cao);
+      if (p.tai_canh_nam) fullQuyHoach.add(p.tai_canh_nam);
+    });
+    // Khởi tạo filter mặc định là tất cả
+    filterNT = new Set(fullNT);
+    filterNam = new Set(fullNam);
+    filterGiong = new Set(fullGiong);
+    filterPhienCao = new Set(fullPhienCao);
+    filterNhipDo = new Set(fullNhipDo);
+    filterQuyHoach = new Set(fullQuyHoach);
+    console.log('Filters initialized:', { fullNT: Array.from(fullNT), fullNam: Array.from(fullNam), fullGiong: Array.from(fullGiong) });
+  } catch (err) {
+    console.error('❌ Lỗi loadCaosuData:', err);
+    caosuFeatures = [];
+  }
 }
 
 async function buildFilterUI() {
@@ -1190,47 +1203,57 @@ async function buildFilterUI() {
     giongEl.appendChild(opt);
   });
 
-  // Phiên cạo
-const phienCaoEl = document.getElementById('filter-phien_cao');
-phienCaoEl.innerHTML = '<option value="all">Tất cả</option>';
-Array.from(fullPhienCao).sort().forEach(v => {
-  const opt = document.createElement('option');
-  opt.value = v;
-  opt.textContent = v;
-  phienCaoEl.appendChild(opt);
-});
+  const phienCaoEl = document.getElementById('filter-phien_cao');
+  if (phienCaoEl) {
+    phienCaoEl.innerHTML = '<option value="all">Tất cả</option>';
+    Array.from(fullPhienCao).sort().forEach(v => {
+      const opt = document.createElement('option');
+      opt.value = v;
+      opt.textContent = v;
+      phienCaoEl.appendChild(opt);
+    });
+  }
 
-// Nhịp độ cạo
-const nhipDoEl = document.getElementById('filter-Nhip_do_cao');
-nhipDoEl.innerHTML = '<option value="all">Tất cả</option>';
-Array.from(fullNhipDo).sort().forEach(v => {
-  const opt = document.createElement('option');
-  opt.value = v;
-  opt.textContent = v;
-  nhipDoEl.appendChild(opt);
-});
+  const nhipDoEl = document.getElementById('filter-Nhip_do_cao');
+  if (nhipDoEl) {
+    nhipDoEl.innerHTML = '<option value="all">Tất cả</option>';
+    Array.from(fullNhipDo).sort().forEach(v => {
+      const opt = document.createElement('option');
+      opt.value = v;
+      opt.textContent = v;
+      nhipDoEl.appendChild(opt);
+    });
+  }
 
-// Quy hoạch tái canh
-const quyHoachEl = document.getElementById('filter-quy_hoach_tai_canh');
-quyHoachEl.innerHTML = '<option value="all">Tất cả</option>';
-Array.from(fullQuyHoach).sort().forEach(v => {
-  const opt = document.createElement('option');
-  opt.value = v;
-  opt.textContent = v;
-  quyHoachEl.appendChild(opt);
-});
+  const quyHoachEl = document.getElementById('filter-quy_hoach_tai_canh');
+  if (quyHoachEl) {
+    quyHoachEl.innerHTML = '<option value="all">Tất cả</option>';
+    Array.from(fullQuyHoach).sort().forEach(v => {
+      const opt = document.createElement('option');
+      opt.value = v;
+      opt.textContent = v;
+      quyHoachEl.appendChild(opt);
+    });
+  }
 }
 
 function featureVisible(p) {
-  if (!p.ten_lo) return false;
+  // Tạm thời bỏ qua kiểm tra ten_lo để debug
+  // if (!p.ten_lo) return false;
   const nt = p.doi || '';
   const nam = String(p.nam_trong || '');
   const g = p.giong || '';
   const pc = p.phien_cao || '';
   const nd = p.nhip_do_cao || '';
   const qh = p.tai_canh_nam || '';
-  return filterNT.has(nt) && filterNam.has(nam) && filterGiong.has(g) &&
-         filterPhienCao.has(pc) && filterNhipDo.has(nd) && filterQuyHoach.has(qh);
+  // Nếu filter đang rỗng (chưa có dữ liệu) thì coi như true
+  const okNT = filterNT.size === 0 || filterNT.has(nt);
+  const okNam = filterNam.size === 0 || filterNam.has(nam);
+  const okGiong = filterGiong.size === 0 || filterGiong.has(g);
+  const okPC = filterPhienCao.size === 0 || filterPhienCao.has(pc);
+  const okND = filterNhipDo.size === 0 || filterNhipDo.has(nd);
+  const okQH = filterQuyHoach.size === 0 || filterQuyHoach.has(qh);
+  return okNT && okNam && okGiong && okPC && okND && okQH;
 }
 
 function getLotColorReal(p, mode) {
@@ -1242,10 +1265,16 @@ function getLotColorReal(p, mode) {
 
 /* ==================== RENDER BẢN ĐỒ ==================== */
 function renderRealLots() {
+  if (!dashMap) return;
   lotLayers.forEach(o => dashMap.removeLayer(o.layer));
   backgroundLotLayers.forEach(o => dashMap.removeLayer(o.layer));
   labelLayers.forEach(l => dashMap.removeLayer(l));
   lotLayers = []; backgroundLotLayers = []; labelLayers = [];
+
+  if (!caosuFeatures.length) {
+    console.warn('renderRealLots: không có feature nào để render');
+    return;
+  }
 
   // Nền cho tất cả lô
   caosuFeatures.forEach((feat, idx) => {
@@ -1324,16 +1353,17 @@ function renderRealLots() {
   });
 
   renderMapLegend();
-  document.getElementById('selCountTop').textContent = count ? `${count} lô hiển thị` : '';
+  document.getElementById('selCountTop').textContent = count ? `${count} lô hiển thị` : 'Không có lô nào';
+  console.log(`Đã render ${count} lô (tổng số feature: ${caosuFeatures.length})`);
 }
 
 function renderMapLegend() {
   const leg = document.getElementById('mapLegend');
+  if (!leg) return;
   let entries;
   if (mapViewMode === 'giong') entries = Object.entries(giongPalette);
   else if (mapViewMode === 'nam') entries = Object.entries(namPalette);
   else entries = Object.entries(ntPalette);
-  // Chuyển đổi tên hiển thị cho đội
   const displayEntries = entries.map(([k, v]) => {
     if (mapViewMode === 'nt') {
       let displayName = k;
@@ -1456,8 +1486,11 @@ function setMapTool(tool, btn) {
 function toggleLotLabels(btn) {
   labelsVis = !labelsVis;
   btn.classList.toggle('active', labelsVis);
-  document.getElementById('lc-label').classList.toggle('on', labelsVis);
-  document.getElementById('lc-label').textContent = labelsVis ? '✓' : '';
+  const labelCheck = document.getElementById('lc-label');
+  if (labelCheck) {
+    labelCheck.classList.toggle('on', labelsVis);
+    labelCheck.textContent = labelsVis ? '✓' : '';
+  }
   renderRealLots();
   showToast(labelsVis ? 'Đã bật nhãn tên lô' : 'Đã tắt nhãn lô', '🏷');
 }
@@ -1465,9 +1498,13 @@ function toggleLotLabels(btn) {
 function toggleBoundary(btn) {
   boundaryVis = !boundaryVis;
   btn.classList.toggle('active', boundaryVis);
-  document.getElementById('lc-boundary').classList.toggle('on', boundaryVis);
-  document.getElementById('lc-boundary').textContent = boundaryVis ? '✓' : '';
-  if (boundaryVis) xaLayer.addTo(dashMap); else dashMap.removeLayer(xaLayer);
+  const boundaryCheck = document.getElementById('lc-boundary');
+  if (boundaryCheck) {
+    boundaryCheck.classList.toggle('on', boundaryVis);
+    boundaryCheck.textContent = boundaryVis ? '✓' : '';
+  }
+  if (boundaryVis && xaLayer) xaLayer.addTo(dashMap);
+  else if (xaLayer) dashMap.removeLayer(xaLayer);
   showToast(boundaryVis ? 'Hiện ranh giới xã' : 'Ẩn ranh giới xã', '🗂');
 }
 
@@ -1777,13 +1814,23 @@ async function initDashMap() {
     { maxZoom: 19 }
   ).addTo(dashMap);
 
-  // Lớp ranh giới xã (tạm dùng file tĩnh, có thể thay bằng API sau)
-  const xaRes = await fetch('/data/xa_cambodia.geojson');
-  const xaGeojson = await xaRes.json();
-  xaLayer = L.geoJSON(xaGeojson, {
-    style: { color: '#ffffff', weight: 2.5, fillColor: 'transparent', fillOpacity: 0, dashArray: '6,4', opacity: 0.6 }
-  }).addTo(dashMap);
-  xaLayer.bindTooltip('Xã Kraya · Huyện Santuk · Kampong Thom', { sticky: true });
+  // Lớp ranh giới xã (bỏ qua nếu lỗi)
+  try {
+    const xaRes = await fetch('/data/xa_cambodia.geojson');
+    if (xaRes.ok) {
+      const xaGeojson = await xaRes.json();
+      xaLayer = L.geoJSON(xaGeojson, {
+        style: { color: '#ffffff', weight: 2.5, fillColor: 'transparent', fillOpacity: 0, dashArray: '6,4', opacity: 0.6 }
+      }).addTo(dashMap);
+      xaLayer.bindTooltip('Xã Kraya · Huyện Santuk · Kampong Thom', { sticky: true });
+    } else {
+      console.warn('Không tìm thấy file ranh giới xã, bỏ qua');
+      xaLayer = L.geoJSON({ type: "FeatureCollection", features: [] }).addTo(dashMap);
+    }
+  } catch (err) {
+    console.warn('Lỗi tải ranh giới xã:', err);
+    xaLayer = L.geoJSON({ type: "FeatureCollection", features: [] }).addTo(dashMap);
+  }
 
   await loadCaosuData();
   await buildFilterUI();
@@ -1816,13 +1863,14 @@ async function initDashMap() {
 /* ==================== TOAST ==================== */
 function showToast(msg, icon = '✅') {
   const t = document.getElementById('toast');
+  if (!t) return;
   document.getElementById('toastMsg').textContent = msg;
   document.getElementById('toastIcon').textContent = icon;
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-/* ==================== ĐIỀU HƯỚNG TRANG (CHỈ CẦN CHO DASHBOARD) ==================== */
+/* ==================== ĐIỀU HƯỚNG TRANG ==================== */
 function goTo(id, el) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -1834,7 +1882,7 @@ function goTo(id, el) {
 /* ==================== KHỞI CHẠY ==================== */
 setTimeout(initDashMap, 200);
 
-// Các sự kiện cho menu sidebar (không liên quan đến dữ liệu)
+// Các sự kiện cho menu sidebar
 document.querySelectorAll('.nav-item').forEach(item => {
   item.addEventListener('click', function (e) {
     if (this.getAttribute('href') === '/logout') return;
