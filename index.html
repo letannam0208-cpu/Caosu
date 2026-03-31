@@ -1138,25 +1138,27 @@ async function fetchAPI(url) {
   return res.json();
 }
 
+let fullNT = new Set(), fullNam = new Set(), fullGiong = new Set();
+
 async function loadCaosuData() {
   const data = await fetchAPI('/api/lo-cao-su');
   caosuFeatures = data.features || [];
-  const ntSet = new Set(), namSet = new Set(), giongSet = new Set();
+  fullNT.clear(); fullNam.clear(); fullGiong.clear();
   caosuFeatures.forEach(f => {
     const p = f.properties;
-    if (p.doi) ntSet.add(p.doi);
-    if (p.nam_trong) namSet.add(String(p.nam_trong));
-    if (p.giong) giongSet.add(p.giong);
+    if (p.doi) fullNT.add(p.doi);
+    if (p.nam_trong) fullNam.add(String(p.nam_trong));
+    if (p.giong) fullGiong.add(p.giong);
   });
-  filterNT = ntSet;
-  filterNam = namSet;
-  filterGiong = giongSet;
+  filterNT = new Set(fullNT);
+  filterNam = new Set(fullNam);
+  filterGiong = new Set(fullGiong);
 }
 
 async function buildFilterUI() {
   const ntEl = document.getElementById('filter-nt');
   ntEl.innerHTML = '<option value="all">Tất cả</option>';
-  Array.from(filterNT).sort().forEach(nt => {
+  Array.from(fullNT).sort().forEach(nt => {
     const opt = document.createElement('option');
     opt.value = nt;
     opt.textContent = nt;
@@ -1165,7 +1167,7 @@ async function buildFilterUI() {
 
   const namEl = document.getElementById('filter-nam');
   namEl.innerHTML = '<option value="all">Tất cả</option>';
-  Array.from(filterNam).sort().forEach(y => {
+  Array.from(fullNam).sort().forEach(y => {
     const opt = document.createElement('option');
     opt.value = y;
     opt.textContent = y;
@@ -1174,7 +1176,7 @@ async function buildFilterUI() {
 
   const giongEl = document.getElementById('filter-giong');
   giongEl.innerHTML = '<option value="all">Tất cả</option>';
-  Array.from(filterGiong).sort().forEach(g => {
+  Array.from(fullGiong).sort().forEach(g => {
     const opt = document.createElement('option');
     opt.value = g;
     opt.textContent = g;
@@ -1309,9 +1311,9 @@ function switchMapView(mode, btn) {
 function updateMapFilters(type, selectEl) {
   const val = selectEl.value;
   if (val === 'all') {
-    if (type === 'NT') filterNT = new Set(Array.from(filterNT));
-    else if (type === 'nam') filterNam = new Set(Array.from(filterNam));
-    else if (type === 'giong') filterGiong = new Set(Array.from(filterGiong));
+    if (type === 'NT') filterNT = new Set(fullNT);
+    else if (type === 'nam') filterNam = new Set(fullNam);
+    else if (type === 'giong') filterGiong = new Set(fullGiong);
   } else {
     if (type === 'NT') filterNT = new Set([val]);
     else if (type === 'nam') filterNam = new Set([val]);

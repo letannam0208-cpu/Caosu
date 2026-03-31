@@ -117,27 +117,32 @@ app.get('/api/nam-trong-stats', async (req, res) => {
 // GeoJSON cho bản đồ
 app.get('/api/lo-cao-su', async (req, res) => {
   try {
-    const { doi, nam_trong, giong } = req.query;
+    const { doi, nam_trong, giong, phien_cao, nhip_do_cao, tai_canh_nam } = req.query;
     let whereClause = 'WHERE l.geometry IS NOT NULL';
     const params = [];
     let paramIndex = 1;
     if (doi) { params.push(doi); whereClause += ` AND dv.doi = $${paramIndex++}`; }
     if (nam_trong) { params.push(parseInt(nam_trong)); whereClause += ` AND l.nam_trong = $${paramIndex++}`; }
     if (giong) { params.push(giong); whereClause += ` AND l.giong = $${paramIndex++}`; }
+    if (phien_cao) { params.push(phien_cao); whereClause += ` AND kh.phien_cao = $${paramIndex++}`; }
+    if (nhip_do_cao) { params.push(nhip_do_cao); whereClause += ` AND kh.nhip_do_cao = $${paramIndex++}`; }
+    if (tai_canh_nam) { params.push(parseInt(tai_canh_nam)); whereClause += ` AND sl.tai_canh_nam = $${paramIndex++}`; }
 
     const result = await pool.query(`
       SELECT
         l.id_lo, l.ten_lo, l.giong, l.nam_trong,
         dv.doi, dv.du_an, dv.khu_vuc,
         dt.dien_tich_map,
-        kh.che_do_cao,
+        kh.che_do_cao, kh.phien_cao, kh.nhip_do_cao,
         htc.cay_cao,
+        sl.tai_canh_nam,
         ST_AsGeoJSON(ST_Transform(l.geometry, 4326)) AS geometry
       FROM lo l
       LEFT JOIN don_vi dv ON l.id_don_vi = dv.id_don_vi
       LEFT JOIN dien_tich dt ON l.id_lo = dt.id_lo
       LEFT JOIN khai_thac kh ON l.id_lo = kh.id_lo
       LEFT JOIN hien_trang_cay htc ON l.id_lo = htc.id_lo
+      LEFT JOIN san_luong sl ON l.id_lo = sl.id_lo
       ${whereClause}
     `, params);
 
@@ -152,7 +157,10 @@ app.get('/api/lo-cao-su', async (req, res) => {
         doi: row.doi,
         dien_tich_map: row.dien_tich_map,
         che_do_cao: row.che_do_cao,
-        cay_cao: row.cay_cao
+        cay_cao: row.cay_cao,
+        phien_cao: row.phien_cao,
+        nhip_do_cao: row.nhip_do_cao,
+        tai_canh_nam: row.tai_canh_nam
       }
     }));
     res.json({ type: "FeatureCollection", features });
