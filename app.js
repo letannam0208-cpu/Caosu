@@ -469,8 +469,508 @@ app.delete('/api/lo-cay/:id', async (req, res) => {
   }
 });
 
+// ====================== API UPSERT CHO CÁC BẢNG (Hỗ trợ nhập file) ======================
+
+// UPSERT cho bảng lô cây
+app.post('/api/lo-cay/upsert', async (req, res) => {
+  const client = await pool.connect();
+  const importMode = req.headers['x-import-mode'] || 'upsert';
+  
+  try {
+    const {
+      id_lo, ten_lo, nam_trong, giong, cao_trinh_tb,
+      id_don_vi, id_hc
+    } = req.body;
+
+    if (!id_lo) {
+      return res.status(400).json({ success: false, error: 'Thiếu id_lo' });
+    }
+
+    await client.query('BEGIN');
+    
+    const existing = await client.query('SELECT * FROM lo WHERE id_lo = $1', [id_lo]);
+    
+    if (existing.rows.length > 0) {
+      if (importMode === 'insert') {
+        await client.query('COMMIT');
+        return res.json({ 
+          success: true, 
+          action: 'skip',
+          message: `Bỏ qua (ID ${id_lo} đã tồn tại)`
+        });
+      }
+      
+      const updateFields = [];
+      const updateValues = [];
+      let paramIndex = 1;
+      
+      if (ten_lo !== undefined) { updateFields.push(`ten_lo = $${paramIndex++}`); updateValues.push(ten_lo); }
+      if (nam_trong !== undefined) { updateFields.push(`nam_trong = $${paramIndex++}`); updateValues.push(nam_trong); }
+      if (giong !== undefined) { updateFields.push(`giong = $${paramIndex++}`); updateValues.push(giong); }
+      if (cao_trinh_tb !== undefined) { updateFields.push(`cao_trinh_tb = $${paramIndex++}`); updateValues.push(cao_trinh_tb); }
+      if (id_don_vi !== undefined) { updateFields.push(`id_don_vi = $${paramIndex++}`); updateValues.push(id_don_vi); }
+      if (id_hc !== undefined) { updateFields.push(`id_hc = $${paramIndex++}`); updateValues.push(id_hc); }
+      
+      if (updateFields.length > 0) {
+        updateValues.push(id_lo);
+        await client.query(
+          `UPDATE lo SET ${updateFields.join(', ')} WHERE id_lo = $${paramIndex}`,
+          updateValues
+        );
+      }
+      
+      await client.query('COMMIT');
+      res.json({ 
+        success: true, 
+        action: 'update',
+        message: `Cập nhật lô ${id_lo} thành công`
+      });
+    } else {
+      await client.query(`
+        INSERT INTO lo (id_lo, ten_lo, nam_trong, giong, cao_trinh_tb, id_don_vi, id_hc)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
+      `, [id_lo, ten_lo, nam_trong, giong, cao_trinh_tb, id_don_vi, id_hc]);
+      
+      await client.query('COMMIT');
+      res.json({ 
+        success: true, 
+        action: 'insert',
+        message: `Thêm mới lô ${id_lo} thành công`
+      });
+    }
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error('Lỗi UPSERT lo-cay:', err.message);
+    res.status(500).json({ success: false, error: err.message });
+  } finally {
+    client.release();
+  }
+});
+
+// UPSERT cho bảng đơn vị
+app.post('/api/don-vi/upsert', async (req, res) => {
+  const client = await pool.connect();
+  const importMode = req.headers['x-import-mode'] || 'upsert';
+  
+  try {
+    const { id_don_vi, du_an, doi, khu_vuc } = req.body;
+    
+    if (!id_don_vi) {
+      return res.status(400).json({ success: false, error: 'Thiếu id_don_vi' });
+    }
+    
+    await client.query('BEGIN');
+    const existing = await client.query('SELECT * FROM don_vi WHERE id_don_vi = $1', [id_don_vi]);
+    
+    if (existing.rows.length > 0) {
+      if (importMode === 'insert') {
+        await client.query('COMMIT');
+        return res.json({ success: true, action: 'skip', message: `Bỏ qua (ID ${id_don_vi} đã tồn tại)` });
+      }
+      
+      const updateFields = [];
+      const updateValues = [];
+      let paramIndex = 1;
+      
+      if (du_an !== undefined) { updateFields.push(`du_an = $${paramIndex++}`); updateValues.push(du_an); }
+      if (doi !== undefined) { updateFields.push(`doi = $${paramIndex++}`); updateValues.push(doi); }
+      if (khu_vuc !== undefined) { updateFields.push(`khu_vuc = $${paramIndex++}`); updateValues.push(khu_vuc); }
+      
+      if (updateFields.length > 0) {
+        updateValues.push(id_don_vi);
+        await client.query(
+          `UPDATE don_vi SET ${updateFields.join(', ')} WHERE id_don_vi = $${paramIndex}`,
+          updateValues
+        );
+      }
+      
+      await client.query('COMMIT');
+      res.json({ success: true, action: 'update', message: `Cập nhật đơn vị ${id_don_vi} thành công` });
+    } else {
+      await client.query(
+        'INSERT INTO don_vi (id_don_vi, du_an, doi, khu_vuc) VALUES ($1, $2, $3, $4)',
+        [id_don_vi, du_an, doi, khu_vuc]
+      );
+      await client.query('COMMIT');
+      res.json({ success: true, action: 'insert', message: `Thêm mới đơn vị ${id_don_vi} thành công` });
+    }
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error('Lỗi UPSERT don-vi:', err.message);
+    res.status(500).json({ success: false, error: err.message });
+  } finally {
+    client.release();
+  }
+});
+
+// UPSERT cho bảng hành chính
+app.post('/api/hanh-chinh/upsert', async (req, res) => {
+  const client = await pool.connect();
+  const importMode = req.headers['x-import-mode'] || 'upsert';
+  
+  try {
+    const { id_hc, xa, huyen, tinh } = req.body;
+    
+    if (!id_hc) {
+      return res.status(400).json({ success: false, error: 'Thiếu id_hc' });
+    }
+    
+    await client.query('BEGIN');
+    const existing = await client.query('SELECT * FROM hanh_chinh WHERE id_hc = $1', [id_hc]);
+    
+    if (existing.rows.length > 0) {
+      if (importMode === 'insert') {
+        await client.query('COMMIT');
+        return res.json({ success: true, action: 'skip', message: `Bỏ qua (ID ${id_hc} đã tồn tại)` });
+      }
+      
+      const updateFields = [];
+      const updateValues = [];
+      let paramIndex = 1;
+      
+      if (xa !== undefined) { updateFields.push(`xa = $${paramIndex++}`); updateValues.push(xa); }
+      if (huyen !== undefined) { updateFields.push(`huyen = $${paramIndex++}`); updateValues.push(huyen); }
+      if (tinh !== undefined) { updateFields.push(`tinh = $${paramIndex++}`); updateValues.push(tinh); }
+      
+      if (updateFields.length > 0) {
+        updateValues.push(id_hc);
+        await client.query(
+          `UPDATE hanh_chinh SET ${updateFields.join(', ')} WHERE id_hc = $${paramIndex}`,
+          updateValues
+        );
+      }
+      
+      await client.query('COMMIT');
+      res.json({ success: true, action: 'update', message: `Cập nhật hành chính ${id_hc} thành công` });
+    } else {
+      await client.query(
+        'INSERT INTO hanh_chinh (id_hc, xa, huyen, tinh) VALUES ($1, $2, $3, $4)',
+        [id_hc, xa, huyen, tinh]
+      );
+      await client.query('COMMIT');
+      res.json({ success: true, action: 'insert', message: `Thêm mới hành chính ${id_hc} thành công` });
+    }
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error('Lỗi UPSERT hanh-chinh:', err.message);
+    res.status(500).json({ success: false, error: err.message });
+  } finally {
+    client.release();
+  }
+});
+
+// UPSERT cho bảng diện tích
+app.post('/api/dien-tich/upsert', async (req, res) => {
+  const client = await pool.connect();
+  const importMode = req.headers['x-import-mode'] || 'upsert';
+  
+  try {
+    const { id_dien_tich, id_lo, dien_tich_map, dien_tich_010125, dien_tich_010126 } = req.body;
+    
+    if (!id_lo) {
+      return res.status(400).json({ success: false, error: 'Thiếu id_lo' });
+    }
+    
+    const finalId = id_dien_tich || `DT_${id_lo}`;
+    
+    await client.query('BEGIN');
+    const existing = await client.query('SELECT * FROM dien_tich WHERE id_lo = $1', [id_lo]);
+    
+    if (existing.rows.length > 0) {
+      if (importMode === 'insert') {
+        await client.query('COMMIT');
+        return res.json({ success: true, action: 'skip', message: `Bỏ qua (diện tích lô ${id_lo} đã tồn tại)` });
+      }
+      
+      const updateFields = [];
+      const updateValues = [];
+      let paramIndex = 1;
+      
+      if (dien_tich_map !== undefined) { updateFields.push(`dien_tich_map = $${paramIndex++}`); updateValues.push(dien_tich_map); }
+      if (dien_tich_010125 !== undefined) { updateFields.push(`dien_tich_010125 = $${paramIndex++}`); updateValues.push(dien_tich_010125); }
+      if (dien_tich_010126 !== undefined) { updateFields.push(`dien_tich_010126 = $${paramIndex++}`); updateValues.push(dien_tich_010126); }
+      
+      if (updateFields.length > 0) {
+        updateValues.push(id_lo);
+        await client.query(
+          `UPDATE dien_tich SET ${updateFields.join(', ')} WHERE id_lo = $${paramIndex}`,
+          updateValues
+        );
+      }
+      
+      await client.query('COMMIT');
+      res.json({ success: true, action: 'update', message: `Cập nhật diện tích cho lô ${id_lo} thành công` });
+    } else {
+      await client.query(
+        `INSERT INTO dien_tich (id_dien_tich, id_lo, dien_tich_map, dien_tich_010125, dien_tich_010126)
+         VALUES ($1, $2, $3, $4, $5)`,
+        [finalId, id_lo, dien_tich_map, dien_tich_010125, dien_tich_010126]
+      );
+      await client.query('COMMIT');
+      res.json({ success: true, action: 'insert', message: `Thêm mới diện tích cho lô ${id_lo} thành công` });
+    }
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error('Lỗi UPSERT dien-tich:', err.message);
+    res.status(500).json({ success: false, error: err.message });
+  } finally {
+    client.release();
+  }
+});
+
+// UPSERT cho bảng hiện trạng cây
+app.post('/api/hien-trang-cay/upsert', async (req, res) => {
+  const client = await pool.connect();
+  const importMode = req.headers['x-import-mode'] || 'upsert';
+  
+  try {
+    const { id_htc, id_lo, tong_ho_kk, cay_cao, cay_chua_cao, cay_kho_mu, cay_khong_pt, ho_trong, mat_do_cc } = req.body;
+    
+    if (!id_lo) {
+      return res.status(400).json({ success: false, error: 'Thiếu id_lo' });
+    }
+    
+    const finalId = id_htc || `HTC_${id_lo}`;
+    
+    await client.query('BEGIN');
+    const existing = await client.query('SELECT * FROM hien_trang_cay WHERE id_lo = $1', [id_lo]);
+    
+    if (existing.rows.length > 0) {
+      if (importMode === 'insert') {
+        await client.query('COMMIT');
+        return res.json({ success: true, action: 'skip', message: `Bỏ qua (hiện trạng lô ${id_lo} đã tồn tại)` });
+      }
+      
+      const updateFields = [];
+      const updateValues = [];
+      let paramIndex = 1;
+      
+      if (tong_ho_kk !== undefined) { updateFields.push(`tong_ho_kk = $${paramIndex++}`); updateValues.push(tong_ho_kk); }
+      if (cay_cao !== undefined) { updateFields.push(`cay_cao = $${paramIndex++}`); updateValues.push(cay_cao); }
+      if (cay_chua_cao !== undefined) { updateFields.push(`cay_chua_cao = $${paramIndex++}`); updateValues.push(cay_chua_cao); }
+      if (cay_kho_mu !== undefined) { updateFields.push(`cay_kho_mu = $${paramIndex++}`); updateValues.push(cay_kho_mu); }
+      if (cay_khong_pt !== undefined) { updateFields.push(`cay_khong_pt = $${paramIndex++}`); updateValues.push(cay_khong_pt); }
+      if (ho_trong !== undefined) { updateFields.push(`ho_trong = $${paramIndex++}`); updateValues.push(ho_trong); }
+      if (mat_do_cc !== undefined) { updateFields.push(`mat_do_cc = $${paramIndex++}`); updateValues.push(mat_do_cc); }
+      
+      if (updateFields.length > 0) {
+        updateValues.push(id_lo);
+        await client.query(
+          `UPDATE hien_trang_cay SET ${updateFields.join(', ')} WHERE id_lo = $${paramIndex}`,
+          updateValues
+        );
+      }
+      
+      await client.query('COMMIT');
+      res.json({ success: true, action: 'update', message: `Cập nhật hiện trạng cho lô ${id_lo} thành công` });
+    } else {
+      await client.query(
+        `INSERT INTO hien_trang_cay (id_htc, id_lo, tong_ho_kk, cay_cao, cay_chua_cao, cay_kho_mu, cay_khong_pt, ho_trong, mat_do_cc)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+        [finalId, id_lo, tong_ho_kk, cay_cao, cay_chua_cao, cay_kho_mu, cay_khong_pt, ho_trong, mat_do_cc]
+      );
+      await client.query('COMMIT');
+      res.json({ success: true, action: 'insert', message: `Thêm mới hiện trạng cho lô ${id_lo} thành công` });
+    }
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error('Lỗi UPSERT hien-trang-cay:', err.message);
+    res.status(500).json({ success: false, error: err.message });
+  } finally {
+    client.release();
+  }
+});
+
+// UPSERT cho bảng khai thác
+app.post('/api/khai-thac/upsert', async (req, res) => {
+  const client = await pool.connect();
+  const importMode = req.headers['x-import-mode'] || 'upsert';
+  
+  try {
+    const { id_kt, id_lo, che_do_cao, phien_cao, nhip_do_cao, nam_mc, tuoi_cao, nam_cao_up, tinh_trang_mc } = req.body;
+    
+    if (!id_lo) {
+      return res.status(400).json({ success: false, error: 'Thiếu id_lo' });
+    }
+    
+    const finalId = id_kt || `KT_${id_lo}`;
+    
+    await client.query('BEGIN');
+    const existing = await client.query('SELECT * FROM khai_thac WHERE id_lo = $1', [id_lo]);
+    
+    if (existing.rows.length > 0) {
+      if (importMode === 'insert') {
+        await client.query('COMMIT');
+        return res.json({ success: true, action: 'skip', message: `Bỏ qua (khai thác lô ${id_lo} đã tồn tại)` });
+      }
+      
+      const updateFields = [];
+      const updateValues = [];
+      let paramIndex = 1;
+      
+      if (che_do_cao !== undefined) { updateFields.push(`che_do_cao = $${paramIndex++}`); updateValues.push(che_do_cao); }
+      if (phien_cao !== undefined) { updateFields.push(`phien_cao = $${paramIndex++}`); updateValues.push(phien_cao); }
+      if (nhip_do_cao !== undefined) { updateFields.push(`nhip_do_cao = $${paramIndex++}`); updateValues.push(nhip_do_cao); }
+      if (nam_mc !== undefined) { updateFields.push(`nam_mc = $${paramIndex++}`); updateValues.push(nam_mc); }
+      if (tuoi_cao !== undefined) { updateFields.push(`tuoi_cao = $${paramIndex++}`); updateValues.push(tuoi_cao); }
+      if (nam_cao_up !== undefined) { updateFields.push(`nam_cao_up = $${paramIndex++}`); updateValues.push(nam_cao_up); }
+      if (tinh_trang_mc !== undefined) { updateFields.push(`tinh_trang_mc = $${paramIndex++}`); updateValues.push(tinh_trang_mc); }
+      
+      if (updateFields.length > 0) {
+        updateValues.push(id_lo);
+        await client.query(
+          `UPDATE khai_thac SET ${updateFields.join(', ')} WHERE id_lo = $${paramIndex}`,
+          updateValues
+        );
+      }
+      
+      await client.query('COMMIT');
+      res.json({ success: true, action: 'update', message: `Cập nhật khai thác cho lô ${id_lo} thành công` });
+    } else {
+      await client.query(
+        `INSERT INTO khai_thac (id_kt, id_lo, che_do_cao, phien_cao, nhip_do_cao, nam_mc, tuoi_cao, nam_cao_up, tinh_trang_mc)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+        [finalId, id_lo, che_do_cao, phien_cao, nhip_do_cao, nam_mc, tuoi_cao, nam_cao_up, tinh_trang_mc]
+      );
+      await client.query('COMMIT');
+      res.json({ success: true, action: 'insert', message: `Thêm mới khai thác cho lô ${id_lo} thành công` });
+    }
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error('Lỗi UPSERT khai-thac:', err.message);
+    res.status(500).json({ success: false, error: err.message });
+  } finally {
+    client.release();
+  }
+});
+
+// UPSERT cho bảng sản lượng
+app.post('/api/san-luong/upsert', async (req, res) => {
+  const client = await pool.connect();
+  const importMode = req.headers['x-import-mode'] || 'upsert';
+  
+  try {
+    const { id_sl, id_lo, ns25_kg_ha, ns25_kg_cay, ns26_kg_ha, ns26_kg_cay, tong_lat_cao, san_luong, phan_loai, doi_tuong, tai_canh_nam } = req.body;
+    
+    if (!id_lo) {
+      return res.status(400).json({ success: false, error: 'Thiếu id_lo' });
+    }
+    
+    const finalId = id_sl || `SL_${id_lo}`;
+    
+    await client.query('BEGIN');
+    const existing = await client.query('SELECT * FROM san_luong WHERE id_lo = $1', [id_lo]);
+    
+    if (existing.rows.length > 0) {
+      if (importMode === 'insert') {
+        await client.query('COMMIT');
+        return res.json({ success: true, action: 'skip', message: `Bỏ qua (sản lượng lô ${id_lo} đã tồn tại)` });
+      }
+      
+      const updateFields = [];
+      const updateValues = [];
+      let paramIndex = 1;
+      
+      if (ns25_kg_ha !== undefined) { updateFields.push(`ns25_kg_ha = $${paramIndex++}`); updateValues.push(ns25_kg_ha); }
+      if (ns25_kg_cay !== undefined) { updateFields.push(`ns25_kg_cay = $${paramIndex++}`); updateValues.push(ns25_kg_cay); }
+      if (ns26_kg_ha !== undefined) { updateFields.push(`ns26_kg_ha = $${paramIndex++}`); updateValues.push(ns26_kg_ha); }
+      if (ns26_kg_cay !== undefined) { updateFields.push(`ns26_kg_cay = $${paramIndex++}`); updateValues.push(ns26_kg_cay); }
+      if (tong_lat_cao !== undefined) { updateFields.push(`tong_lat_cao = $${paramIndex++}`); updateValues.push(tong_lat_cao); }
+      if (san_luong !== undefined) { updateFields.push(`san_luong = $${paramIndex++}`); updateValues.push(san_luong); }
+      if (phan_loai !== undefined) { updateFields.push(`phan_loai = $${paramIndex++}`); updateValues.push(phan_loai); }
+      if (doi_tuong !== undefined) { updateFields.push(`doi_tuong = $${paramIndex++}`); updateValues.push(doi_tuong); }
+      if (tai_canh_nam !== undefined) { updateFields.push(`tai_canh_nam = $${paramIndex++}`); updateValues.push(tai_canh_nam); }
+      
+      if (updateFields.length > 0) {
+        updateValues.push(id_lo);
+        await client.query(
+          `UPDATE san_luong SET ${updateFields.join(', ')} WHERE id_lo = $${paramIndex}`,
+          updateValues
+        );
+      }
+      
+      await client.query('COMMIT');
+      res.json({ success: true, action: 'update', message: `Cập nhật sản lượng cho lô ${id_lo} thành công` });
+    } else {
+      await client.query(
+        `INSERT INTO san_luong (id_sl, id_lo, ns25_kg_ha, ns25_kg_cay, ns26_kg_ha, ns26_kg_cay, tong_lat_cao, san_luong, phan_loai, doi_tuong, tai_canh_nam)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+        [finalId, id_lo, ns25_kg_ha, ns25_kg_cay, ns26_kg_ha, ns26_kg_cay, tong_lat_cao, san_luong, phan_loai, doi_tuong, tai_canh_nam]
+      );
+      await client.query('COMMIT');
+      res.json({ success: true, action: 'insert', message: `Thêm mới sản lượng cho lô ${id_lo} thành công` });
+    }
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error('Lỗi UPSERT san-luong:', err.message);
+    res.status(500).json({ success: false, error: err.message });
+  } finally {
+    client.release();
+  }
+});
+
+// UPSERT cho bảng thông tin trồng
+app.post('/api/thong-tin-trong/upsert', async (req, res) => {
+  const client = await pool.connect();
+  const importMode = req.headers['x-import-mode'] || 'upsert';
+  
+  try {
+    const { id_ttt, id_lo, hang_dat, phuong_phap_trong, khoang_cach_trong, mat_do_tk } = req.body;
+    
+    if (!id_lo) {
+      return res.status(400).json({ success: false, error: 'Thiếu id_lo' });
+    }
+    
+    const finalId = id_ttt || `TTT_${id_lo}`;
+    
+    await client.query('BEGIN');
+    const existing = await client.query('SELECT * FROM thong_tin_trong WHERE id_lo = $1', [id_lo]);
+    
+    if (existing.rows.length > 0) {
+      if (importMode === 'insert') {
+        await client.query('COMMIT');
+        return res.json({ success: true, action: 'skip', message: `Bỏ qua (thông tin trồng lô ${id_lo} đã tồn tại)` });
+      }
+      
+      const updateFields = [];
+      const updateValues = [];
+      let paramIndex = 1;
+      
+      if (hang_dat !== undefined) { updateFields.push(`hang_dat = $${paramIndex++}`); updateValues.push(hang_dat); }
+      if (phuong_phap_trong !== undefined) { updateFields.push(`phuong_phap_trong = $${paramIndex++}`); updateValues.push(phuong_phap_trong); }
+      if (khoang_cach_trong !== undefined) { updateFields.push(`khoang_cach_trong = $${paramIndex++}`); updateValues.push(khoang_cach_trong); }
+      if (mat_do_tk !== undefined) { updateFields.push(`mat_do_tk = $${paramIndex++}`); updateValues.push(mat_do_tk); }
+      
+      if (updateFields.length > 0) {
+        updateValues.push(id_lo);
+        await client.query(
+          `UPDATE thong_tin_trong SET ${updateFields.join(', ')} WHERE id_lo = $${paramIndex}`,
+          updateValues
+        );
+      }
+      
+      await client.query('COMMIT');
+      res.json({ success: true, action: 'update', message: `Cập nhật thông tin trồng cho lô ${id_lo} thành công` });
+    } else {
+      await client.query(
+        `INSERT INTO thong_tin_trong (id_ttt, id_lo, hang_dat, phuong_phap_trong, khoang_cach_trong, mat_do_tk)
+         VALUES ($1, $2, $3, $4, $5, $6)`,
+        [finalId, id_lo, hang_dat, phuong_phap_trong, khoang_cach_trong, mat_do_tk]
+      );
+      await client.query('COMMIT');
+      res.json({ success: true, action: 'insert', message: `Thêm mới thông tin trồng cho lô ${id_lo} thành công` });
+    }
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error('Lỗi UPSERT thong-tin-trong:', err.message);
+    res.status(500).json({ success: false, error: err.message });
+  } finally {
+    client.release();
+  }
+});
+
 // ====================== API CHO CÁC BẢNG KHÁC ======================
-// ====================== API QUẢN LÝ ĐƠN VỊ ======================
+// ĐƠN VỊ
 app.get('/api/don-vi', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM don_vi ORDER BY doi');
@@ -514,7 +1014,7 @@ app.delete('/api/don-vi/:id', async (req, res) => {
   }
 });
 
-// ====================== API QUẢN LÝ HÀNH CHÍNH ======================
+// HÀNH CHÍNH
 app.get('/api/hanh-chinh', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM hanh_chinh ORDER BY xa');
@@ -558,7 +1058,7 @@ app.delete('/api/hanh-chinh/:id', async (req, res) => {
   }
 });
 
-// ====================== API QUẢN LÝ DIỆN TÍCH ======================
+// DIỆN TÍCH
 app.get('/api/dien-tich', async (req, res) => {
   try {
     const result = await pool.query(`
@@ -608,7 +1108,7 @@ app.delete('/api/dien-tich/:id', async (req, res) => {
   }
 });
 
-// ====================== API QUẢN LÝ HIỆN TRẠNG CÂY ======================
+// HIỆN TRẠNG CÂY
 app.get('/api/hien-trang-cay', async (req, res) => {
   try {
     const result = await pool.query(`
@@ -659,7 +1159,7 @@ app.delete('/api/hien-trang-cay/:id', async (req, res) => {
   }
 });
 
-// ====================== API QUẢN LÝ KHAI THÁC ======================
+// KHAI THÁC
 app.get('/api/khai-thac', async (req, res) => {
   try {
     const result = await pool.query(`
@@ -710,7 +1210,7 @@ app.delete('/api/khai-thac/:id', async (req, res) => {
   }
 });
 
-// ====================== API QUẢN LÝ SẢN LƯỢNG ======================
+// SẢN LƯỢNG
 app.get('/api/san-luong', async (req, res) => {
   try {
     const result = await pool.query(`
@@ -761,7 +1261,7 @@ app.delete('/api/san-luong/:id', async (req, res) => {
   }
 });
 
-// ====================== API QUẢN LÝ THÔNG TIN TRỒNG ======================
+// THÔNG TIN TRỒNG
 app.get('/api/thong-tin-trong', async (req, res) => {
   try {
     const result = await pool.query(`
@@ -810,338 +1310,6 @@ app.delete('/api/thong-tin-trong/:id', async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
-// Bảng đơn vị
-app.get('/api/don-vi', async (req, res) => {
-  try {
-    const result = await pool.query('SELECT * FROM don_vi ORDER BY doi');
-    res.json({ success: true, data: result.rows });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-app.post('/api/don-vi', async (req, res) => {
-  const { id_don_vi, du_an, doi, khu_vuc } = req.body;
-  try {
-    await pool.query(
-      'INSERT INTO don_vi (id_don_vi, du_an, doi, khu_vuc) VALUES ($1, $2, $3, $4)',
-      [id_don_vi, du_an, doi, khu_vuc]
-    );
-    res.json({ success: true, message: 'Thêm đơn vị thành công' });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-app.put('/api/don-vi/:id', async (req, res) => {
-  const { id } = req.params;
-  const { du_an, doi, khu_vuc } = req.body;
-  try {
-    await pool.query(
-      'UPDATE don_vi SET du_an=$1, doi=$2, khu_vuc=$3 WHERE id_don_vi=$4',
-      [du_an, doi, khu_vuc, id]
-    );
-    res.json({ success: true, message: 'Cập nhật thành công' });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-app.delete('/api/don-vi/:id', async (req, res) => {
-  const { id } = req.params;
-  try {
-    await pool.query('DELETE FROM don_vi WHERE id_don_vi=$1', [id]);
-    res.json({ success: true, message: 'Xóa thành công' });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-// Bảng hành chính
-app.get('/api/hanh-chinh', async (req, res) => {
-  try {
-    const result = await pool.query('SELECT * FROM hanh_chinh ORDER BY xa');
-    res.json({ success: true, data: result.rows });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-app.post('/api/hanh-chinh', async (req, res) => {
-  const { id_hc, xa, huyen, tinh } = req.body;
-  try {
-    await pool.query(
-      'INSERT INTO hanh_chinh (id_hc, xa, huyen, tinh) VALUES ($1, $2, $3, $4)',
-      [id_hc, xa, huyen, tinh]
-    );
-    res.json({ success: true, message: 'Thêm hành chính thành công' });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-app.put('/api/hanh-chinh/:id', async (req, res) => {
-  const { id } = req.params;
-  const { xa, huyen, tinh } = req.body;
-  try {
-    await pool.query(
-      'UPDATE hanh_chinh SET xa=$1, huyen=$2, tinh=$3 WHERE id_hc=$4',
-      [xa, huyen, tinh, id]
-    );
-    res.json({ success: true, message: 'Cập nhật thành công' });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-app.delete('/api/hanh-chinh/:id', async (req, res) => {
-  const { id } = req.params;
-  try {
-    await pool.query('DELETE FROM hanh_chinh WHERE id_hc=$1', [id]);
-    res.json({ success: true, message: 'Xóa thành công' });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-// Bảng diện tích
-app.get('/api/dien-tich', async (req, res) => {
-  try {
-    const result = await pool.query(`
-      SELECT dt.*, l.ten_lo 
-      FROM dien_tich dt 
-      LEFT JOIN lo l ON dt.id_lo = l.id_lo
-      ORDER BY dt.id_lo
-    `);
-    res.json({ success: true, data: result.rows });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-app.post('/api/dien-tich', async (req, res) => {
-  const { id_dien_tich, id_lo, dien_tich_map, dien_tich_010125, dien_tich_010126 } = req.body;
-  try {
-    await pool.query(
-      'INSERT INTO dien_tich (id_dien_tich, id_lo, dien_tich_map, dien_tich_010125, dien_tich_010126) VALUES ($1, $2, $3, $4, $5)',
-      [id_dien_tich, id_lo, dien_tich_map, dien_tich_010125, dien_tich_010126]
-    );
-    res.json({ success: true, message: 'Thêm diện tích thành công' });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-app.put('/api/dien-tich/:id', async (req, res) => {
-  const { id } = req.params;
-  const { dien_tich_map, dien_tich_010125, dien_tich_010126 } = req.body;
-  try {
-    await pool.query(
-      'UPDATE dien_tich SET dien_tich_map=$1, dien_tich_010125=$2, dien_tich_010126=$3 WHERE id_dien_tich=$4',
-      [dien_tich_map, dien_tich_010125, dien_tich_010126, id]
-    );
-    res.json({ success: true, message: 'Cập nhật thành công' });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-app.delete('/api/dien-tich/:id', async (req, res) => {
-  const { id } = req.params;
-  try {
-    await pool.query('DELETE FROM dien_tich WHERE id_dien_tich=$1', [id]);
-    res.json({ success: true, message: 'Xóa thành công' });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-// Bảng hiện trạng cây
-app.get('/api/hien-trang-cay', async (req, res) => {
-  try {
-    const result = await pool.query(`
-      SELECT htc.*, l.ten_lo 
-      FROM hien_trang_cay htc 
-      LEFT JOIN lo l ON htc.id_lo = l.id_lo
-      ORDER BY htc.id_lo
-    `);
-    res.json({ success: true, data: result.rows });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-app.post('/api/hien-trang-cay', async (req, res) => {
-  const { id_htc, id_lo, tong_ho_kk, cay_cao, cay_chua_cao, cay_kho_mu, cay_khong_pt, ho_trong, mat_do_cc } = req.body;
-  try {
-    await pool.query(
-      'INSERT INTO hien_trang_cay (id_htc, id_lo, tong_ho_kk, cay_cao, cay_chua_cao, cay_kho_mu, cay_khong_pt, ho_trong, mat_do_cc) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)',
-      [id_htc, id_lo, tong_ho_kk, cay_cao, cay_chua_cao, cay_kho_mu, cay_khong_pt, ho_trong, mat_do_cc]
-    );
-    res.json({ success: true, message: 'Thêm hiện trạng cây thành công' });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-app.put('/api/hien-trang-cay/:id', async (req, res) => {
-  const { id } = req.params;
-  const { tong_ho_kk, cay_cao, cay_chua_cao, cay_kho_mu, cay_khong_pt, ho_trong, mat_do_cc } = req.body;
-  try {
-    await pool.query(
-      'UPDATE hien_trang_cay SET tong_ho_kk=$1, cay_cao=$2, cay_chua_cao=$3, cay_kho_mu=$4, cay_khong_pt=$5, ho_trong=$6, mat_do_cc=$7 WHERE id_htc=$8',
-      [tong_ho_kk, cay_cao, cay_chua_cao, cay_kho_mu, cay_khong_pt, ho_trong, mat_do_cc, id]
-    );
-    res.json({ success: true, message: 'Cập nhật thành công' });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-app.delete('/api/hien-trang-cay/:id', async (req, res) => {
-  const { id } = req.params;
-  try {
-    await pool.query('DELETE FROM hien_trang_cay WHERE id_htc=$1', [id]);
-    res.json({ success: true, message: 'Xóa thành công' });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-// Bảng khai thác
-app.get('/api/khai-thac', async (req, res) => {
-  try {
-    const result = await pool.query(`
-      SELECT kh.*, l.ten_lo 
-      FROM khai_thac kh 
-      LEFT JOIN lo l ON kh.id_lo = l.id_lo
-      ORDER BY kh.id_lo
-    `);
-    res.json({ success: true, data: result.rows });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-app.post('/api/khai-thac', async (req, res) => {
-  const { id_kt, id_lo, che_do_cao, phien_cao, nhip_do_cao, nam_mc, tuoi_cao, nam_cao_up, tinh_trang_mc } = req.body;
-  try {
-    await pool.query(
-      'INSERT INTO khai_thac (id_kt, id_lo, che_do_cao, phien_cao, nhip_do_cao, nam_mc, tuoi_cao, nam_cao_up, tinh_trang_mc) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)',
-      [id_kt, id_lo, che_do_cao, phien_cao, nhip_do_cao, nam_mc, tuoi_cao, nam_cao_up, tinh_trang_mc]
-    );
-    res.json({ success: true, message: 'Thêm khai thác thành công' });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-app.put('/api/khai-thac/:id', async (req, res) => {
-  const { id } = req.params;
-  const { che_do_cao, phien_cao, nhip_do_cao, nam_mc, tuoi_cao, nam_cao_up, tinh_trang_mc } = req.body;
-  try {
-    await pool.query(
-      'UPDATE khai_thac SET che_do_cao=$1, phien_cao=$2, nhip_do_cao=$3, nam_mc=$4, tuoi_cao=$5, nam_cao_up=$6, tinh_trang_mc=$7 WHERE id_kt=$8',
-      [che_do_cao, phien_cao, nhip_do_cao, nam_mc, tuoi_cao, nam_cao_up, tinh_trang_mc, id]
-    );
-    res.json({ success: true, message: 'Cập nhật thành công' });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-app.delete('/api/khai-thac/:id', async (req, res) => {
-  const { id } = req.params;
-  try {
-    await pool.query('DELETE FROM khai_thac WHERE id_kt=$1', [id]);
-    res.json({ success: true, message: 'Xóa thành công' });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-// Bảng sản lượng
-app.get('/api/san-luong', async (req, res) => {
-  try {
-    const result = await pool.query(`
-      SELECT sl.*, l.ten_lo 
-      FROM san_luong sl 
-      LEFT JOIN lo l ON sl.id_lo = l.id_lo
-      ORDER BY sl.id_lo
-    `);
-    res.json({ success: true, data: result.rows });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-app.post('/api/san-luong', async (req, res) => {
-  const { id_sl, id_lo, ns25_kg_ha, ns25_kg_cay, ns26_kg_ha, ns26_kg_cay, tong_lat_cao, san_luong, phan_loai, doi_tuong, tai_canh_nam } = req.body;
-  try {
-    await pool.query(
-      'INSERT INTO san_luong (id_sl, id_lo, ns25_kg_ha, ns25_kg_cay, ns26_kg_ha, ns26_kg_cay, tong_lat_cao, san_luong, phan_loai, doi_tuong, tai_canh_nam) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)',
-      [id_sl, id_lo, ns25_kg_ha, ns25_kg_cay, ns26_kg_ha, ns26_kg_cay, tong_lat_cao, san_luong, phan_loai, doi_tuong, tai_canh_nam]
-    );
-    res.json({ success: true, message: 'Thêm sản lượng thành công' });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-app.put('/api/san-luong/:id', async (req, res) => {
-  const { id } = req.params;
-  const { ns25_kg_ha, ns25_kg_cay, ns26_kg_ha, ns26_kg_cay, tong_lat_cao, san_luong, phan_loai, doi_tuong, tai_canh_nam } = req.body;
-  try {
-    await pool.query(
-      'UPDATE san_luong SET ns25_kg_ha=$1, ns25_kg_cay=$2, ns26_kg_ha=$3, ns26_kg_cay=$4, tong_lat_cao=$5, san_luong=$6, phan_loai=$7, doi_tuong=$8, tai_canh_nam=$9 WHERE id_sl=$10',
-      [ns25_kg_ha, ns25_kg_cay, ns26_kg_ha, ns26_kg_cay, tong_lat_cao, san_luong, phan_loai, doi_tuong, tai_canh_nam, id]
-    );
-    res.json({ success: true, message: 'Cập nhật thành công' });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-app.delete('/api/san-luong/:id', async (req, res) => {
-  const { id } = req.params;
-  try {
-    await pool.query('DELETE FROM san_luong WHERE id_sl=$1', [id]);
-    res.json({ success: true, message: 'Xóa thành công' });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-// Bảng thông tin trồng
-app.get('/api/thong-tin-trong', async (req, res) => {
-  try {
-    const result = await pool.query(`
-      SELECT ttt.*, l.ten_lo 
-      FROM thong_tin_trong ttt 
-      LEFT JOIN lo l ON ttt.id_lo = l.id_lo
-      ORDER BY ttt.id_lo
-    `);
-    res.json({ success: true, data: result.rows });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-app.post('/api/thong-tin-trong', async (req, res) => {
-  const { id_ttt, id_lo, hang_dat, phuong_phap_trong, khoang_cach_trong, mat_do_tk } = req.body;
-  try {
-    await pool.query(
-      'INSERT INTO thong_tin_trong (id_ttt, id_lo, hang_dat, phuong_phap_trong, khoang_cach_trong, mat_do_tk) VALUES ($1, $2, $3, $4, $5, $6)',
-      [id_ttt, id_lo, hang_dat, phuong_phap_trong, khoang_cach_trong, mat_do_tk]
-    );
-    res.json({ success: true, message: 'Thêm thông tin trồng thành công' });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-app.put('/api/thong-tin-trong/:id', async (req, res) => {
-  const { id } = req.params;
-  const { hang_dat, phuong_phap_trong, khoang_cach_trong, mat_do_tk } = req.body;
-  try {
-    await pool.query(
-      'UPDATE thong_tin_trong SET hang_dat=$1, phuong_phap_trong=$2, khoang_cach_trong=$3, mat_do_tk=$4 WHERE id_ttt=$5',
-      [hang_dat, phuong_phap_trong, khoang_cach_trong, mat_do_tk, id]
-    );
-    res.json({ success: true, message: 'Cập nhật thành công' });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-app.delete('/api/thong-tin-trong/:id', async (req, res) => {
-  const { id } = req.params;
-  try {
-    await pool.query('DELETE FROM thong_tin_trong WHERE id_ttt=$1', [id]);
-    res.json({ success: true, message: 'Xóa thành công' });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
 
 // ====================== ROUTES ======================
 app.get('/', (req, res) => {
@@ -1173,6 +1341,7 @@ app.get('/quan-ly-nguoi-dung', (req, res) => {
   res.locals.path = '/quan-ly-nguoi-dung';
   renderPage(res, 'quan-ly-nguoi-dung', 'Quản lý người dùng');
 });
+
 // 404 Handler
 app.use((req, res) => {
   res.status(404).render('404', {
