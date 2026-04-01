@@ -607,7 +607,10 @@ function renderDonViTable(data) {
     row.insertCell(2).innerText = dv.doi || '';
     row.insertCell(3).innerText = dv.khu_vuc || '';
     const actionCell = row.insertCell(4);
-    actionCell.innerHTML = `<button class="btn-dash" onclick="editDonVi('${dv.id_don_vi}')">Sửa</button><button class="btn-view" onclick="deleteDonVi('${dv.id_don_vi}')">Xóa</button>`;
+    actionCell.innerHTML = `
+      <button class="btn-dash editDonVi" data-id="${dv.id_don_vi}"><i class="fas fa-edit"></i> Sửa</button>
+      <button class="btn-view deleteDonVi" data-id="${dv.id_don_vi}" style="margin-left:8px;"><i class="fas fa-trash"></i> Xóa</button>
+    `;
   });
   document.getElementById('dvResultCount').innerText = data.length;
 }
