@@ -478,11 +478,54 @@ function showLoForm(l = null) {
     </div>
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
       <div><label>Cao trình TB (m)</label><input type="number" step="0.1" id="cao_trinh_tb" name="cao_trinh_tb" class="search-box" value="${l ? l.cao_trinh_tb : ''}"></div>
-      <div><label>Đơn vị (ID)</label><select id="id_don_vi" name="id_don_vi" class="select-filter" style="width:100%;" required></select></div>
+      <div><label>Đơn vị (ID)</label><select id="id_don_vi" name="id_don_vi" class="select-filter" style="width:100%;"></select></div>
     </div>
     <div><label>Hành chính (ID)</label><select id="id_hc" name="id_hc" class="select-filter" style="width:100%;"></select></div>
-    <hr><h4>Diện tích</h4>...
-    ... (các phần còn lại giữ nguyên như file gốc, vì dài nên tôi lược bỏ)
+    <hr><h4>Diện tích</h4>
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;">
+      <div><label>DT map (ha)</label><input type="number" step="0.001" id="dien_tich_map" name="dien_tich_map" class="search-box" value="${l ? l.dien_tich_map : ''}"></div>
+      <div><label>DT 01/01/25</label><input type="number" step="0.001" id="dien_tich_010125" name="dien_tich_010125" class="search-box" value="${l ? l.dien_tich_010125 : ''}"></div>
+      <div><label>DT 01/01/26</label><input type="number" step="0.001" id="dien_tich_010126" name="dien_tich_010126" class="search-box" value="${l ? l.dien_tich_010126 : ''}"></div>
+    </div>
+    <h4>Hiện trạng cây</h4>
+    <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:12px;">
+      <div><label>Tổng hộ KK</label><input type="number" id="tong_ho_kk" name="tong_ho_kk" class="search-box" value="${l ? l.tong_ho_kk : ''}"></div>
+      <div><label>Cây cao</label><input type="number" id="cay_cao" name="cay_cao" class="search-box" value="${l ? l.cay_cao : ''}"></div>
+      <div><label>Cây chưa cao</label><input type="number" id="cay_chua_cao" name="cay_chua_cao" class="search-box" value="${l ? l.cay_chua_cao : ''}"></div>
+      <div><label>Cây khô mủ</label><input type="number" id="cay_kho_mu" name="cay_kho_mu" class="search-box" value="${l ? l.cay_kho_mu : ''}"></div>
+      <div><label>Cây không PT</label><input type="number" id="cay_khong_pt" name="cay_khong_pt" class="search-box" value="${l ? l.cay_khong_pt : ''}"></div>
+      <div><label>Hố trống</label><input type="number" id="ho_trong" name="ho_trong" class="search-box" value="${l ? l.ho_trong : ''}"></div>
+      <div><label>Mật độ (cây/ha)</label><input type="number" step="0.1" id="mat_do_cc" name="mat_do_cc" class="search-box" value="${l ? l.mat_do_cc : ''}"></div>
+    </div>
+    <h4>Khai thác</h4>
+    <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:12px;">
+      <div><label>Chế độ cạo</label><input type="text" id="che_do_cao" name="che_do_cao" class="search-box" value="${l ? l.che_do_cao : ''}"></div>
+      <div><label>Phiên cạo</label><input type="text" id="phien_cao" name="phien_cao" class="search-box" value="${l ? l.phien_cao : ''}"></div>
+      <div><label>Nhịp độ cạo</label><input type="text" id="nhip_do_cao" name="nhip_do_cao" class="search-box" value="${l ? l.nhip_do_cao : ''}"></div>
+      <div><label>Năm mở cạo</label><input type="number" id="nam_mc" name="nam_mc" class="search-box" value="${l ? l.nam_mc : ''}"></div>
+      <div><label>Tuổi cạo</label><input type="number" id="tuoi_cao" name="tuoi_cao" class="search-box" value="${l ? l.tuoi_cao : ''}"></div>
+      <div><label>Năm cạo up</label><input type="number" id="nam_cao_up" name="nam_cao_up" class="search-box" value="${l ? l.nam_cao_up : ''}"></div>
+      <div><label>Tình trạng mủ</label><input type="text" id="tinh_trang_mc" name="tinh_trang_mc" class="search-box" value="${l ? l.tinh_trang_mc : ''}"></div>
+    </div>
+    <h4>Sản lượng</h4>
+    <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:12px;">
+      <div><label>NS25 kg/ha</label><input type="number" step="0.01" id="ns25_kg_ha" name="ns25_kg_ha" class="search-box" value="${l ? l.ns25_kg_ha : ''}"></div>
+      <div><label>NS25 kg/cây</label><input type="number" step="0.01" id="ns25_kg_cay" name="ns25_kg_cay" class="search-box" value="${l ? l.ns25_kg_cay : ''}"></div>
+      <div><label>NS26 kg/ha</label><input type="number" step="0.01" id="ns26_kg_ha" name="ns26_kg_ha" class="search-box" value="${l ? l.ns26_kg_ha : ''}"></div>
+      <div><label>NS26 kg/cây</label><input type="number" step="0.01" id="ns26_kg_cay" name="ns26_kg_cay" class="search-box" value="${l ? l.ns26_kg_cay : ''}"></div>
+      <div><label>Tổng lát cạo</label><input type="number" step="0.01" id="tong_lat_cao" name="tong_lat_cao" class="search-box" value="${l ? l.tong_lat_cao : ''}"></div>
+      <div><label>Sản lượng</label><input type="number" step="0.01" id="san_luong" name="san_luong" class="search-box" value="${l ? l.san_luong : ''}"></div>
+      <div><label>Phân loại</label><input type="text" id="phan_loai" name="phan_loai" class="search-box" value="${l ? l.phan_loai : ''}"></div>
+      <div><label>Đối tượng</label><input type="text" id="doi_tuong" name="doi_tuong" class="search-box" value="${l ? l.doi_tuong : ''}"></div>
+      <div><label>Tái canh năm</label><input type="number" id="tai_canh_nam" name="tai_canh_nam" class="search-box" value="${l ? l.tai_canh_nam : ''}"></div>
+    </div>
+    <h4>Thông tin trồng</h4>
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;">
+      <div><label>Hạng đất</label><input type="text" id="hang_dat" name="hang_dat" class="search-box" value="${l ? l.hang_dat : ''}"></div>
+      <div><label>Phương pháp trồng</label><input type="text" id="phuong_phap_trong" name="phuong_phap_trong" class="search-box" value="${l ? l.phuong_phap_trong : ''}"></div>
+      <div><label>Khoảng cách trồng</label><input type="text" id="khoang_cach_trong" name="khoang_cach_trong" class="search-box" value="${l ? l.khoang_cach_trong : ''}"></div>
+      <div><label>Mật độ TK</label><input type="number" id="mat_do_tk" name="mat_do_tk" class="search-box" value="${l ? l.mat_do_tk : ''}"></div>
+    </div>
     <div style="margin-top:24px; text-align:right;">
       <button type="button" id="cancelModalBtn" class="btn-dash" style="margin-right:12px;">Hủy</button>
       <button type="submit" class="btn-add">Lưu</button>
@@ -607,7 +650,10 @@ function renderDonViTable(data) {
     row.insertCell(2).innerText = dv.doi || '';
     row.insertCell(3).innerText = dv.khu_vuc || '';
     const actionCell = row.insertCell(4);
-    actionCell.innerHTML = `<button class="btn-dash" onclick="editDonVi('${dv.id_don_vi}')">Sửa</button><button class="btn-view" onclick="deleteDonVi('${dv.id_don_vi}')">Xóa</button>`;
+    actionCell.innerHTML = `
+      <button class="btn-dash editDonVi" data-id="${dv.id_don_vi}"><i class="fas fa-edit"></i> Sửa</button>
+      <button class="btn-view deleteDonVi" data-id="${dv.id_don_vi}" style="margin-left:8px;"><i class="fas fa-trash"></i> Xóa</button>
+    `;
   });
   document.getElementById('dvResultCount').innerText = data.length;
 }
