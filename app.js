@@ -4,6 +4,8 @@ const express = require('express');
 const path = require('path');
 const cors = require('cors');
 const { Pool } = require('pg');
+const session = require('express-session');
+const bcrypt = require('bcrypt');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -13,9 +15,31 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(session({
+    secret: process.env.SESSION_SECRET || 'webgis_caosu_secret_key',
+    resave: false,
+    saveUninitialized: false,
+    cookie: { secure: false, maxAge: 24 * 60 * 60 * 1000 } // 1 ngày
+}));
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
+
+// Middleware kiểm tra đăng nhập
+const requireAuth = (req, res, next) => {
+    if (!req.session.user) {
+        return res.redirect('/login');
+    }
+    next();
+};
+
+// Middleware kiểm tra quyền admin
+const requireAdmin = (req, res, next) => {
+    if (!req.session.user || req.session.user.role !== 'admin') {
+        return res.status(403).render('403', { title: 'Truy cập bị từ chối', user: req.session.user, path: req.path });
+    }
+    next();
+};
 
 // ====================== DATABASE CONNECTION (NEON) ======================
 const pool = new Pool({
@@ -32,23 +56,6 @@ const pool = new Pool({
 
 pool.on('connect', () => console.log('✅ Kết nối PostgreSQL (Neon) thành công!'));
 pool.on('error', (err) => console.error('❌ Lỗi kết nối Pool:', err.message));
-
-// ====================== MOCK USER ======================
-const getMockUser = () => ({
-  username: "tannam",
-  displayName: "Lê Tấn Nam",
-  role: "admin"
-});
-
-// ====================== HELPER RENDER ======================
-const renderPage = (res, viewName, title, extraData = {}) => {
-  res.render(viewName, {
-    title,
-    user: getMockUser(),
-    path: res.locals.path || `/${viewName.replace(/\.ejs$/, '')}`,
-    ...extraData
-  });
-};
 
 // ====================== API ENDPOINTS ======================
 
@@ -207,6 +214,162 @@ app.get('/api/boundary', async (req, res) => {
     console.error('Lỗi /api/boundary:', err.message);
     res.status(500).json({ success: false, error: 'Lỗi lấy ranh giới bản đồ' });
   }
+});
+
+// ====================== API QUẢN LÝ NGƯỜI DÙNG ======================
+
+// Lấy danh sách users (có filter)
+app.get('/api/users', requireAuth, async (req, res) => {
+    try {
+        const { role, status, search } = req.query;
+        let sql = `SELECT id, username, fullname, email, role, status, unit, avatar_color, last_login, created_at
+                   FROM users WHERE 1=1`;
+        const params = [];
+        if (role) { params.push(role); sql += ` AND role = $${params.length}`; }
+        if (status) { params.push(status); sql += ` AND status = $${params.length}`; }
+        if (search) {
+            params.push(`%${search}%`);
+            sql += ` AND (fullname ILIKE $${params.length} OR username ILIKE $${params.length} OR email ILIKE $${params.length})`;
+        }
+        sql += ` ORDER BY fullname`;
+        const result = await pool.query(sql, params);
+        res.json({ success: true, data: result.rows });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// Lấy thông tin user theo id
+app.get('/api/users/:id', requireAuth, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const result = await pool.query(`SELECT id, username, fullname, email, role, status, unit, avatar_color, last_login
+                                         FROM users WHERE id = $1`, [id]);
+        if (result.rows.length === 0) return res.status(404).json({ success: false, error: 'Không tìm thấy user' });
+        res.json({ success: true, data: result.rows[0] });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// Thêm user mới
+app.post('/api/users', requireAdmin, async (req, res) => {
+    const { username, password, fullname, email, role, status, unit, avatar_color } = req.body;
+    if (!username || !password || !fullname) {
+        return res.status(400).json({ success: false, error: 'Thiếu thông tin bắt buộc' });
+    }
+    try {
+        const hashed = await bcrypt.hash(password, 10);
+        const result = await pool.query(
+            `INSERT INTO users (username, password_hash, fullname, email, role, status, unit, avatar_color)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
+            [username, hashed, fullname, email, role || 'staff', status || 'active', unit, avatar_color || '#10b981']
+        );
+        res.json({ success: true, message: 'Thêm người dùng thành công', id: result.rows[0].id });
+    } catch (err) {
+        if (err.code === '23505') res.status(400).json({ success: false, error: 'Tên đăng nhập hoặc email đã tồn tại' });
+        else res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// Cập nhật user
+app.put('/api/users/:id', requireAdmin, async (req, res) => {
+    const { id } = req.params;
+    const { fullname, email, role, status, unit, avatar_color, password } = req.body;
+    try {
+        let updateFields = [];
+        let values = [];
+        let idx = 1;
+        if (fullname !== undefined) { updateFields.push(`fullname = $${idx++}`); values.push(fullname); }
+        if (email !== undefined) { updateFields.push(`email = $${idx++}`); values.push(email); }
+        if (role !== undefined) { updateFields.push(`role = $${idx++}`); values.push(role); }
+        if (status !== undefined) { updateFields.push(`status = $${idx++}`); values.push(status); }
+        if (unit !== undefined) { updateFields.push(`unit = $${idx++}`); values.push(unit); }
+        if (avatar_color !== undefined) { updateFields.push(`avatar_color = $${idx++}`); values.push(avatar_color); }
+        if (password) {
+            const hashed = await bcrypt.hash(password, 10);
+            updateFields.push(`password_hash = $${idx++}`);
+            values.push(hashed);
+        }
+        updateFields.push(`updated_at = NOW()`);
+        values.push(id);
+        if (updateFields.length > 0) {
+            await pool.query(`UPDATE users SET ${updateFields.join(', ')} WHERE id = $${idx}`, values);
+        }
+        res.json({ success: true, message: 'Cập nhật thành công' });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// Xóa user
+app.delete('/api/users/:id', requireAdmin, async (req, res) => {
+    const { id } = req.params;
+    if (parseInt(id) === req.session.user?.id) {
+        return res.status(400).json({ success: false, error: 'Không thể xóa chính mình' });
+    }
+    try {
+        await pool.query('DELETE FROM users WHERE id = $1', [id]);
+        res.json({ success: true, message: 'Xóa người dùng thành công' });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// Đăng nhập
+app.post('/api/login', async (req, res) => {
+    const { username, password } = req.body;
+    try {
+        const result = await pool.query(`SELECT id, username, password_hash, fullname, role, status, unit, avatar_color
+                                         FROM users WHERE username = $1`, [username]);
+        if (result.rows.length === 0) {
+            return res.status(401).json({ success: false, error: 'Sai tên đăng nhập hoặc mật khẩu' });
+        }
+        const user = result.rows[0];
+        if (user.status !== 'active') {
+            return res.status(401).json({ success: false, error: 'Tài khoản đã bị khóa hoặc chưa kích hoạt' });
+        }
+        const match = await bcrypt.compare(password, user.password_hash);
+        if (!match) {
+            return res.status(401).json({ success: false, error: 'Sai tên đăng nhập hoặc mật khẩu' });
+        }
+        // Cập nhật last_login
+        await pool.query(`UPDATE users SET last_login = NOW() WHERE id = $1`, [user.id]);
+        // Lưu session
+        req.session.user = {
+            id: user.id,
+            username: user.username,
+            fullname: user.fullname,
+            role: user.role,
+            unit: user.unit,
+            avatar_color: user.avatar_color
+        };
+        res.json({ success: true, message: 'Đăng nhập thành công', redirect: '/' });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// Đăng xuất (POST)
+app.post('/api/logout', (req, res) => {
+    req.session.destroy(err => {
+        if (err) return res.status(500).json({ success: false, error: err.message });
+        res.json({ success: true, redirect: '/login' });
+    });
+});
+
+// Đăng xuất (GET) - hỗ trợ link
+app.get('/logout', (req, res) => {
+    req.session.destroy(err => {
+        if (err) console.error(err);
+        res.redirect('/login');
+    });
+});
+
+// Lấy thông tin user hiện tại
+app.get('/api/me', (req, res) => {
+    if (!req.session.user) return res.status(401).json({ success: false, error: 'Chưa đăng nhập' });
+    res.json({ success: true, data: req.session.user });
 });
 
 // ====================== QUẢN LÝ LÔ CÂY ======================
@@ -1409,59 +1572,84 @@ app.delete('/api/thong-tin-trong/:id', async (req, res) => {
   }
 });
 
-// ====================== ROUTES ======================
-app.get('/', (req, res) => {
-  res.locals.path = '/';
-  renderPage(res, 'index', 'WebGIS · Vườn Cây Cao Su');
+// ====================== CÁC TRANG (VIEW) ======================
+// Trang đăng nhập
+app.get('/login', (req, res) => {
+    if (req.session.user) return res.redirect('/');
+    res.render('login', { title: 'Đăng nhập' });
 });
 
-app.get('/dashboard', (req, res) => {
-  res.locals.path = '/dashboard';
-  renderPage(res, 'index', 'Dashboard - WebGIS Cao Su');
+// Trang chủ và các trang khác đều yêu cầu đăng nhập
+app.get('/', requireAuth, (req, res) => {
+    res.render('index', {
+        title: 'WebGIS · Vườn Cây Cao Su',
+        user: req.session.user,
+        path: '/'
+    });
 });
 
-app.get('/quan-ly-lo-cay', (req, res) => {
-  res.locals.path = '/quan-ly-lo-cay';
-  renderPage(res, 'quan-ly-lo-cay', 'Quản lý lô cây cao su');
+app.get('/dashboard', requireAuth, (req, res) => {
+    res.render('index', {
+        title: 'Dashboard - WebGIS Cao Su',
+        user: req.session.user,
+        path: '/dashboard'
+    });
 });
 
-app.get('/them-du-lieu-lo-cay', (req, res) => {
-  res.locals.path = '/them-du-lieu-lo-cay';
-  renderPage(res, 'them-du-lieu-lo-cay', 'Thêm dữ liệu lô cây');
+app.get('/quan-ly-lo-cay', requireAuth, (req, res) => {
+    res.render('quan-ly-lo-cay', {
+        title: 'Quản lý lô cây cao su',
+        user: req.session.user,
+        path: '/quan-ly-lo-cay'
+    });
 });
 
-app.get('/thong-ke', (req, res) => {
-  res.locals.path = '/thong-ke';
-  renderPage(res, 'thong-ke', 'Thống kê vườn cây');
+app.get('/them-du-lieu-lo-cay', requireAuth, (req, res) => {
+    res.render('them-du-lieu-lo-cay', {
+        title: 'Thêm dữ liệu lô cây',
+        user: req.session.user,
+        path: '/them-du-lieu-lo-cay'
+    });
 });
 
-app.get('/quan-ly-nguoi-dung', (req, res) => {
-  res.locals.path = '/quan-ly-nguoi-dung';
-  renderPage(res, 'quan-ly-nguoi-dung', 'Quản lý người dùng');
+app.get('/thong-ke', requireAuth, (req, res) => {
+    res.render('thong-ke', {
+        title: 'Thống kê vườn cây',
+        user: req.session.user,
+        path: '/thong-ke'
+    });
+});
+
+app.get('/quan-ly-nguoi-dung', requireAuth, (req, res) => {
+    res.render('quan-ly-nguoi-dung', {
+        title: 'Quản lý người dùng',
+        user: req.session.user,
+        path: '/quan-ly-nguoi-dung'
+    });
 });
 
 // 404 Handler
 app.use((req, res) => {
-  res.status(404).render('404', {
-    title: 'Không tìm thấy trang',
-    user: getMockUser(),
-    path: req.path
-  });
+    res.status(404).render('404', {
+        title: 'Không tìm thấy trang',
+        user: req.session.user || null,
+        path: req.path
+    });
 });
 
 // ====================== START SERVER ======================
 const startServer = async () => {
-  try {
-    await pool.query('SELECT NOW()');
-    console.log('🟢 Kết nối Neon Database thành công!');
-    app.listen(port, () => {
-      console.log(`🚀 Server đang chạy tại: http://localhost:${port}`);
-      console.log(`🌐 Database: Neon (${process.env.DB_HOST})`);
-    });
-  } catch (err) {
-    console.error('❌ Không thể kết nối đến Neon Database:', err.message);
-    process.exit(1);
-  }
+    try {
+        await pool.query('SELECT NOW()');
+        console.log('🟢 Kết nối Neon Database thành công!');
+        app.listen(port, () => {
+            console.log(`🚀 Server đang chạy tại: http://localhost:${port}`);
+            console.log(`🌐 Database: Neon (${process.env.DB_HOST})`);
+        });
+    } catch (err) {
+        console.error('❌ Không thể kết nối đến Neon Database:', err.message);
+        process.exit(1);
+    }
 };
 
 startServer();
