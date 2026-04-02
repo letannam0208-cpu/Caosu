@@ -786,7 +786,8 @@ td.mono{font-family:monospace;font-size:11px;color:var(--muted)}
       <div style="margin-left:auto;display:flex;gap:6px;align-items:center">
         <span id="selCountTop" style="font-size:11px;color:var(--muted)">425 lô hiển thị</span>
         <button class="map-chip" onclick="goHome()">⌂ <span data-lang="all-area">Toàn vùng</span></button>
-        <button class="map-chip" id="exportRectBtn" onclick="activateRectangleSelection()">↓ <span data-lang="export-map">Xuất vùng chọn</span></button>
+        <button class="map-chip" onclick="exportMapToPDF()">📄 PDF</button>
+        <button class="map-chip" onclick="exportMapToJPEG()">🖼️ JPEG</button>
       </div>
     </div>
     <!-- Row 2: filters with dropdowns -->
@@ -934,15 +935,6 @@ td.mono{font-family:monospace;font-size:11px;color:var(--muted)}
 
       <!-- RIGHT TOOLBAR -->
       <div class="map-ctrl-right">
-        <!-- Cancel selection button -->
-        <div class="map-ctrl-group">
-            <button class="mc-btn" id="btn-cancel-rect" onclick="cancelRectangleSelection()" title="Hủy vùng chọn">
-                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-                </svg>
-                <span class="mc-tooltip mc-tooltip-right">Hủy vùng chọn</span>
-            </button>
-        </div>
         <!-- Search -->
         <div class="map-ctrl-group">
           <button class="mc-btn" onclick="togglePanel('map-search-panel')" title="">
@@ -1898,204 +1890,173 @@ function goTo(id, el) {
   if (id === 'dashboard') setTimeout(() => dashMap && dashMap.invalidateSize(), 120);
 }
 
-// ==================== XUẤT PDF THEO VÙNG CHỌN ====================
-let selectionRectangle = null;
-let drawControl = null;
-let currentBounds = null; // lưu bounds của vùng chọn
-
-// Kích hoạt chế độ vẽ hình chữ nhật
-window.activateRectangleSelection = function() {
-  // Xóa rectangle cũ nếu có
-  if (selectionRectangle) {
-    dashMap.removeLayer(selectionRectangle);
-    selectionRectangle = null;
-    currentBounds = null;
-  }
-  if (drawControl) {
-    dashMap.removeControl(drawControl);
-  }
-  // Tạo control vẽ
-  drawControl = new L.Draw.Rectangle(dashMap, {
-    shapeOptions: {
-      color: '#00d68f',
-      weight: 3,
-      fillColor: '#00d68f',
-      fillOpacity: 0.2
-    }
-  });
-  drawControl.enable();
-  showToast('Kéo thả để vẽ vùng cần xuất', '✏️');
-  
-  dashMap.once('draw:created', function(e) {
-    const layer = e.layer;
-    selectionRectangle = layer;
-    currentBounds = layer.getBounds(); // lưu bounds ngay lập tức
-    dashMap.addLayer(selectionRectangle);
-    dashMap.removeControl(drawControl);
-    drawControl = null;
-    
-    if (confirm('Xuất vùng đã chọn ra PDF?')) {
-      exportSelectedAreaToPDF(currentBounds);
-    } else {
-      dashMap.removeLayer(selectionRectangle);
-      selectionRectangle = null;
-      currentBounds = null;
-    }
-  });
-};
-
-// Hủy vùng chọn
-window.cancelRectangleSelection = function() {
-  if (drawControl) {
-    drawControl.disable();
-    dashMap.removeControl(drawControl);
-    drawControl = null;
-    showToast('Đã hủy chế độ vẽ', '✖️');
-  }
-  if (selectionRectangle) {
-    dashMap.removeLayer(selectionRectangle);
-    selectionRectangle = null;
-    currentBounds = null;
-    showToast('Đã xóa vùng chọn', '🗑️');
-  }
-  dashMap.getContainer().style.cursor = '';
-};
-
-// Xuất vùng đã chọn
-async function exportSelectedAreaToPDF(bounds) {
-  if (!bounds) {
-    showToast('Không có vùng chọn', '⚠️');
-    return;
-  }
-  
-  const mapContainer = document.getElementById('dashMap');
+// ==================== XUẤT TOÀN BỘ BẢN ĐỒ ====================
+async function exportMapToPDF() {
+  const mapContainer = document.querySelector('.map-canvas-wrap');
   const legend = document.getElementById('mapLegend');
   
-  showToast('Đang xử lý vùng chọn...', '⏳');
-  
-  // Ẩn các control
-  const leftToolbar = document.querySelector('.map-ctrl-left');
-  const rightToolbar = document.querySelector('.map-ctrl-right');
-  const coordBar = document.querySelector('.map-coord-bar');
-  const selBar = document.querySelector('.map-sel-bar');
-  const measurePanel = document.getElementById('measure-panel');
-  
-  if (leftToolbar) leftToolbar.style.visibility = 'hidden';
-  if (rightToolbar) rightToolbar.style.visibility = 'hidden';
-  if (coordBar) coordBar.style.visibility = 'hidden';
-  if (selBar) selBar.style.visibility = 'hidden';
-  if (measurePanel) measurePanel.style.visibility = 'hidden';
-  
-  // Ẩn viền rectangle tạm thời
-  if (selectionRectangle) {
-    selectionRectangle.setStyle({ fillOpacity: 0, weight: 0 });
+  if (!mapContainer) {
+    showToast('Không tìm thấy vùng bản đồ', '⚠️');
+    return;
   }
-  
+
+  showToast('Đang xuất PDF...', '⏳');
+
   try {
-    // Chụp toàn bộ map container
-    const fullCanvas = await html2canvas(mapContainer, {
+    // Ẩn control tạm thời
+    const leftToolbar = document.querySelector('.map-ctrl-left');
+    const rightToolbar = document.querySelector('.map-ctrl-right');
+    const coordBar = document.querySelector('.map-coord-bar');
+    const selBar = document.querySelector('.map-sel-bar');
+    const measurePanel = document.getElementById('measure-panel');
+    
+    if (leftToolbar) leftToolbar.style.visibility = 'hidden';
+    if (rightToolbar) rightToolbar.style.visibility = 'hidden';
+    if (coordBar) coordBar.style.visibility = 'hidden';
+    if (selBar) selBar.style.visibility = 'hidden';
+    if (measurePanel) measurePanel.style.visibility = 'hidden';
+
+    // Capture map
+    const mapCanvas = await html2canvas(mapContainer, {
       scale: 3,
       backgroundColor: '#0a0e1a',
       logging: false,
       useCORS: true
     });
-    
-    // Lấy tọa độ pixel của bounds
-    const northWest = bounds.getNorthWest();
-    const southEast = bounds.getSouthEast();
-    const topLeft = dashMap.latLngToContainerPoint(northWest);
-    const bottomRight = dashMap.latLngToContainerPoint(southEast);
-    
-    const scale = 3;
-    let x = topLeft.x * scale;
-    let y = topLeft.y * scale;
-    let width = (bottomRight.x - topLeft.x) * scale;
-    let height = (bottomRight.y - topLeft.y) * scale;
-    
-    // Giới hạn trong canvas
-    if (x < 0) { width += x; x = 0; }
-    if (y < 0) { height += y; y = 0; }
-    if (x + width > fullCanvas.width) width = fullCanvas.width - x;
-    if (y + height > fullCanvas.height) height = fullCanvas.height - y;
-    if (width <= 0 || height <= 0) throw new Error('Vùng chọn không hợp lệ hoặc quá nhỏ');
-    
-    // Cắt ảnh
-    const tempCanvas = document.createElement('canvas');
-    tempCanvas.width = width;
-    tempCanvas.height = height;
-    const ctx = tempCanvas.getContext('2d');
-    ctx.drawImage(fullCanvas, x, y, width, height, 0, 0, width, height);
-    
-    // Chụp legend
+
+    // Capture legend
     let legendCanvas = null;
     if (legend) {
       legendCanvas = await html2canvas(legend, { scale: 2, backgroundColor: '#0a0e1a' });
     }
-    
-    // Khôi phục hiển thị
-    if (leftToolbar) leftToolbar.style.visibility = 'visible';
-    if (rightToolbar) rightToolbar.style.visibility = 'visible';
-    if (coordBar) coordBar.style.visibility = 'visible';
-    if (selBar) selBar.style.visibility = 'visible';
-    if (measurePanel) measurePanel.style.visibility = 'visible';
-    if (selectionRectangle) {
-      selectionRectangle.setStyle({ fillOpacity: 0.2, weight: 3 });
-    }
-    
-    // Tạo PDF
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = pdf.internal.pageSize.getHeight();
-    
-    const imgData = tempCanvas.toDataURL('image/jpeg', 1.0);
-    const imgWidth = pdfWidth;
-    const imgHeight = (tempCanvas.height * imgWidth) / tempCanvas.width;
-    
-    let yOffset = 0;
-    pdf.addImage(imgData, 'JPEG', 0, yOffset, imgWidth, imgHeight);
-    
-    // Thêm legend
-    if (legendCanvas) {
-      const legendWidth = pdfWidth * 0.6;
-      const legendHeight = (legendCanvas.height * legendWidth) / legendCanvas.width;
-      yOffset = imgHeight + 5;
-      if (yOffset + legendHeight > pdfHeight) {
-        pdf.addPage();
-        yOffset = 0;
-      }
-      pdf.addImage(legendCanvas, 'JPEG', (pdfWidth - legendWidth) / 2, yOffset, legendWidth, legendHeight);
-    }
-    
-    // Tiêu đề
-    const title = 'Báo cáo bản đồ vườn cây cao su (vùng chọn)';
-    const date = new Date().toLocaleString('vi-VN');
-    pdf.setFontSize(10);
-    pdf.setTextColor(100);
-    pdf.text(title, pdfWidth / 2, 8, { align: 'center' });
-    pdf.text(`Xuất ngày: ${date}`, pdfWidth - 20, 8, { align: 'right' });
-    
-    pdf.save(`ban_do_cao_su_chon_vung_${Date.now()}.pdf`);
-    showToast('Xuất PDF vùng chọn thành công!', '✅');
-    
-    // Xóa rectangle
-    if (selectionRectangle) {
-      dashMap.removeLayer(selectionRectangle);
-      selectionRectangle = null;
-      currentBounds = null;
-    }
-  } catch (err) {
-    console.error('Lỗi xuất vùng:', err);
-    showToast('Lỗi xuất vùng: ' + err.message, '❌');
+
     // Khôi phục
     if (leftToolbar) leftToolbar.style.visibility = 'visible';
     if (rightToolbar) rightToolbar.style.visibility = 'visible';
     if (coordBar) coordBar.style.visibility = 'visible';
     if (selBar) selBar.style.visibility = 'visible';
     if (measurePanel) measurePanel.style.visibility = 'visible';
-    if (selectionRectangle) {
-      selectionRectangle.setStyle({ fillOpacity: 0.2, weight: 3 });
+
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = pdf.internal.pageSize.getHeight();
+
+    const mapImgData = mapCanvas.toDataURL('image/jpeg', 1.0);
+    const mapImgWidth = pdfWidth;
+    const mapImgHeight = (mapCanvas.height * mapImgWidth) / mapCanvas.width;
+
+    let yOffset = 0;
+    pdf.addImage(mapImgData, 'JPEG', 0, yOffset, mapImgWidth, mapImgHeight);
+
+    if (legendCanvas) {
+      const legendWidth = pdfWidth * 0.6;
+      const legendHeight = (legendCanvas.height * legendWidth) / legendCanvas.width;
+      yOffset = mapImgHeight + 5;
+      if (yOffset + legendHeight > pdfHeight) {
+        pdf.addPage();
+        yOffset = 0;
+      }
+      pdf.addImage(legendCanvas, 'JPEG', (pdfWidth - legendWidth) / 2, yOffset, legendWidth, legendHeight);
     }
+
+    const title = 'Báo cáo bản đồ vườn cây cao su';
+    const date = new Date().toLocaleString('vi-VN');
+    pdf.setFontSize(10);
+    pdf.setTextColor(100);
+    pdf.text(title, pdfWidth / 2, 8, { align: 'center' });
+    pdf.text(`Xuất ngày: ${date}`, pdfWidth - 20, 8, { align: 'right' });
+
+    pdf.save(`ban_do_cao_su_${Date.now()}.pdf`);
+    showToast('Xuất PDF thành công!', '✅');
+  } catch (err) {
+    console.error(err);
+    showToast('Lỗi xuất PDF: ' + err.message, '❌');
+  }
+}
+
+async function exportMapToJPEG() {
+  const mapContainer = document.querySelector('.map-canvas-wrap');
+  const legend = document.getElementById('mapLegend');
+  
+  if (!mapContainer) {
+    showToast('Không tìm thấy vùng bản đồ', '⚠️');
+    return;
+  }
+
+  showToast('Đang xuất JPEG...', '⏳');
+
+  try {
+    // Ẩn control
+    const leftToolbar = document.querySelector('.map-ctrl-left');
+    const rightToolbar = document.querySelector('.map-ctrl-right');
+    const coordBar = document.querySelector('.map-coord-bar');
+    const selBar = document.querySelector('.map-sel-bar');
+    const measurePanel = document.getElementById('measure-panel');
+    
+    if (leftToolbar) leftToolbar.style.visibility = 'hidden';
+    if (rightToolbar) rightToolbar.style.visibility = 'hidden';
+    if (coordBar) coordBar.style.visibility = 'hidden';
+    if (selBar) selBar.style.visibility = 'hidden';
+    if (measurePanel) measurePanel.style.visibility = 'hidden';
+
+    // Capture map
+    const mapCanvas = await html2canvas(mapContainer, {
+      scale: 2,
+      backgroundColor: '#0a0e1a',
+      logging: false,
+      useCORS: true
+    });
+
+    // Capture legend
+    let legendCanvas = null;
+    if (legend) {
+      legendCanvas = await html2canvas(legend, { scale: 2, backgroundColor: '#0a0e1a' });
+    }
+
+    // Khôi phục
+    if (leftToolbar) leftToolbar.style.visibility = 'visible';
+    if (rightToolbar) rightToolbar.style.visibility = 'visible';
+    if (coordBar) coordBar.style.visibility = 'visible';
+    if (selBar) selBar.style.visibility = 'visible';
+    if (measurePanel) measurePanel.style.visibility = 'visible';
+
+    // Tạo canvas ghép map + legend
+    const finalCanvas = document.createElement('canvas');
+    const mapWidth = mapCanvas.width;
+    const mapHeight = mapCanvas.height;
+    let legendHeight = 0;
+    if (legendCanvas) legendHeight = legendCanvas.height;
+    finalCanvas.width = mapWidth;
+    finalCanvas.height = mapHeight + legendHeight + 20; // margin 20px
+    const ctx = finalCanvas.getContext('2d');
+    ctx.fillStyle = '#0a0e1a';
+    ctx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
+    ctx.drawImage(mapCanvas, 0, 0);
+    if (legendCanvas) {
+      const legendX = (mapWidth - legendCanvas.width) / 2;
+      ctx.drawImage(legendCanvas, legendX, mapHeight + 10);
+    }
+    // Thêm tiêu đề, ngày tháng
+    ctx.font = 'bold 20px "Be Vietnam Pro"';
+    ctx.fillStyle = '#e8eeff';
+    ctx.fillText('Báo cáo bản đồ vườn cây cao su', 20, 40);
+    ctx.font = '12px "Be Vietnam Pro"';
+    ctx.fillStyle = '#8a9ab8';
+    ctx.fillText(`Xuất ngày: ${new Date().toLocaleString('vi-VN')}`, finalCanvas.width - 200, 30);
+
+    finalCanvas.toBlob(blob => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `ban_do_cao_su_${Date.now()}.jpg`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('Xuất JPEG thành công!', '✅');
+    }, 'image/jpeg', 0.95);
+  } catch (err) {
+    console.error(err);
+    showToast('Lỗi xuất JPEG: ' + err.message, '❌');
   }
 }
 /* ==================== KHỞI CHẠY ==================== */
