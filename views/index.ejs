@@ -1890,10 +1890,12 @@ function goTo(id, el) {
   if (id === 'dashboard') setTimeout(() => dashMap && dashMap.invalidateSize(), 120);
 }
 
-// ==================== XUẤT TOÀN BỘ BẢN ĐỒ ====================
-// Hàm đợi map render xong (tạm dừng để đảm bảo các tile được tải)
-function waitForMapRender(delay = 500) {
-  return new Promise(resolve => setTimeout(resolve, delay));
+// ==================== XUẤT BẢN ĐỒ (GIỮ NHÃN LÔ) ====================
+async function waitForMapStable() {
+  // Đảm bảo map đã được invalidate size (fix hiển thị)
+  if (dashMap) dashMap.invalidateSize();
+  // Đợi 500ms để các layer ổn định
+  return new Promise(resolve => setTimeout(resolve, 500));
 }
 
 async function exportMapToPDF() {
@@ -1905,17 +1907,10 @@ async function exportMapToPDF() {
     return;
   }
 
-  showToast('Đang chuẩn bị xuất PDF (có thể mất vài giây)...', '⏳');
+  showToast('Đang xuất PDF (giữ nhãn lô)...', '⏳');
 
   try {
-    // Lưu trạng thái label hiện tại
-    const wasLabelsVis = labelsVis;
-    // Tạm ẩn label để tránh rối mắt khi chụp
-    if (labelsVis) {
-      toggleLotLabels(document.getElementById('btn-label'));
-    }
-    
-    // Ẩn các control
+    // Ẩn các thanh công cụ, panel để ảnh sạch
     const leftToolbar = document.querySelector('.map-ctrl-left');
     const rightToolbar = document.querySelector('.map-ctrl-right');
     const coordBar = document.querySelector('.map-coord-bar');
@@ -1928,10 +1923,10 @@ async function exportMapToPDF() {
     if (selBar) selBar.style.visibility = 'hidden';
     if (measurePanel) measurePanel.style.visibility = 'hidden';
 
-    // Đợi một chút để map ổn định
-    await waitForMapRender(300);
+    // Đợi map ổn định
+    await waitForMapStable();
 
-    // Capture map với scale cao hơn (4) và chất lượng tốt hơn
+    // Chụp bản đồ với độ phân giải cao (scale=4)
     const mapCanvas = await html2canvas(mapContainer, {
       scale: 4,
       backgroundColor: '#0a0e1a',
@@ -1941,7 +1936,7 @@ async function exportMapToPDF() {
       imageTimeout: 0
     });
 
-    // Capture legend
+    // Chụp legend
     let legendCanvas = null;
     if (legend) {
       legendCanvas = await html2canvas(legend, { scale: 3, backgroundColor: '#0a0e1a' });
@@ -1953,16 +1948,12 @@ async function exportMapToPDF() {
     if (coordBar) coordBar.style.visibility = 'visible';
     if (selBar) selBar.style.visibility = 'visible';
     if (measurePanel) measurePanel.style.visibility = 'visible';
-    
-    // Khôi phục trạng thái label
-    if (wasLabelsVis !== labelsVis) {
-      toggleLotLabels(document.getElementById('btn-label'));
-    }
 
+    // Tạo PDF A4 ngang
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = pdf.internal.pageSize.getHeight();
+    const pdfWidth = pdf.internal.pageSize.getWidth();   // 297mm
+    const pdfHeight = pdf.internal.pageSize.getHeight(); // 210mm
 
     const mapImgData = mapCanvas.toDataURL('image/jpeg', 1.0);
     const mapImgWidth = pdfWidth;
@@ -1971,8 +1962,9 @@ async function exportMapToPDF() {
     let yOffset = 0;
     pdf.addImage(mapImgData, 'JPEG', 0, yOffset, mapImgWidth, mapImgHeight);
 
+    // Thêm legend (nếu có)
     if (legendCanvas) {
-      const legendWidth = pdfWidth * 0.7; // tăng kích thước legend
+      const legendWidth = pdfWidth * 0.7;
       const legendHeight = (legendCanvas.height * legendWidth) / legendCanvas.width;
       yOffset = mapImgHeight + 5;
       if (yOffset + legendHeight > pdfHeight) {
@@ -1996,7 +1988,7 @@ async function exportMapToPDF() {
   } catch (err) {
     console.error(err);
     showToast('Lỗi xuất PDF: ' + err.message, '❌');
-    // Khôi phục UI nếu có lỗi
+    // Khôi phục UI nếu lỗi
     const leftToolbar = document.querySelector('.map-ctrl-left');
     const rightToolbar = document.querySelector('.map-ctrl-right');
     const coordBar = document.querySelector('.map-coord-bar');
@@ -2019,15 +2011,9 @@ async function exportMapToJPEG() {
     return;
   }
 
-  showToast('Đang xuất JPEG (độ phân giải cao)...', '⏳');
+  showToast('Đang xuất JPEG (giữ nhãn lô)...', '⏳');
 
   try {
-    // Lưu trạng thái label
-    const wasLabelsVis = labelsVis;
-    if (labelsVis) {
-      toggleLotLabels(document.getElementById('btn-label'));
-    }
-    
     // Ẩn control
     const leftToolbar = document.querySelector('.map-ctrl-left');
     const rightToolbar = document.querySelector('.map-ctrl-right');
@@ -2041,9 +2027,9 @@ async function exportMapToJPEG() {
     if (selBar) selBar.style.visibility = 'hidden';
     if (measurePanel) measurePanel.style.visibility = 'hidden';
 
-    await waitForMapRender(300);
+    await waitForMapStable();
 
-    // Capture map với scale=3 (cân bằng giữa chất lượng và dung lượng)
+    // Chụp bản đồ (scale=3 đủ cho JPEG)
     const mapCanvas = await html2canvas(mapContainer, {
       scale: 3,
       backgroundColor: '#0a0e1a',
@@ -2063,45 +2049,42 @@ async function exportMapToJPEG() {
     if (coordBar) coordBar.style.visibility = 'visible';
     if (selBar) selBar.style.visibility = 'visible';
     if (measurePanel) measurePanel.style.visibility = 'visible';
-    if (wasLabelsVis !== labelsVis) {
-      toggleLotLabels(document.getElementById('btn-label'));
-    }
 
-    // Tạo canvas tổng hợp
+    // Tạo canvas tổng hợp (map + legend + tiêu đề)
     const finalCanvas = document.createElement('canvas');
     const mapWidth = mapCanvas.width;
     const mapHeight = mapCanvas.height;
     let legendHeight = legendCanvas ? legendCanvas.height : 0;
     const padding = 30;
     finalCanvas.width = mapWidth;
-    finalCanvas.height = mapHeight + legendHeight + padding + 60; // thêm khoảng cho tiêu đề
+    finalCanvas.height = mapHeight + legendHeight + padding + 70;
     const ctx = finalCanvas.getContext('2d');
     ctx.fillStyle = '#0a0e1a';
     ctx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
     
-    // Vẽ tiêu đề
-    ctx.font = 'bold 28px "Be Vietnam Pro", "Syne", sans-serif';
+    // Tiêu đề
+    ctx.font = 'bold 32px "Be Vietnam Pro", "Syne", sans-serif';
     ctx.fillStyle = '#e8eeff';
-    ctx.fillText('BÁO CÁO BẢN ĐỒ VƯỜN CÂY CAO SU', 20, 50);
-    ctx.font = '14px "Be Vietnam Pro", sans-serif';
+    ctx.fillText('BÁO CÁO BẢN ĐỒ VƯỜN CÂY CAO SU', 20, 55);
+    ctx.font = '16px "Be Vietnam Pro", sans-serif';
     ctx.fillStyle = '#8a9ab8';
     const dateStr = `Xuất ngày: ${new Date().toLocaleString('vi-VN')}`;
-    ctx.fillText(dateStr, finalCanvas.width - ctx.measureText(dateStr).width - 20, 50);
+    ctx.fillText(dateStr, finalCanvas.width - ctx.measureText(dateStr).width - 20, 55);
     
-    // Vẽ map
-    ctx.drawImage(mapCanvas, 0, 80);
+    // Bản đồ
+    ctx.drawImage(mapCanvas, 0, 85);
     
-    // Vẽ legend
+    // Legend căn giữa
     if (legendCanvas) {
       const legendX = (mapWidth - legendCanvas.width) / 2;
-      const legendY = 80 + mapHeight + 10;
+      const legendY = 85 + mapHeight + 15;
       ctx.drawImage(legendCanvas, legendX, legendY);
     }
     
-    // Thêm watermark nhẹ
-    ctx.font = '10px "Be Vietnam Pro"';
+    // Watermark nhẹ
+    ctx.font = '12px "Be Vietnam Pro"';
     ctx.fillStyle = '#5a6a8a';
-    ctx.fillText('WebGIS Cao Su - Hệ thống quản lý vườn cây thông minh', finalCanvas.width - 250, finalCanvas.height - 10);
+    ctx.fillText('WebGIS Cao Su - Hệ thống quản lý vườn cây thông minh', finalCanvas.width - 280, finalCanvas.height - 12);
     
     finalCanvas.toBlob(blob => {
       const url = URL.createObjectURL(blob);
