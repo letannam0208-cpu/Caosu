@@ -1891,6 +1891,11 @@ function goTo(id, el) {
 }
 
 // ==================== XUẤT TOÀN BỘ BẢN ĐỒ ====================
+// Hàm đợi map render xong (tạm dừng để đảm bảo các tile được tải)
+function waitForMapRender(delay = 500) {
+  return new Promise(resolve => setTimeout(resolve, delay));
+}
+
 async function exportMapToPDF() {
   const mapContainer = document.querySelector('.map-canvas-wrap');
   const legend = document.getElementById('mapLegend');
@@ -1900,10 +1905,17 @@ async function exportMapToPDF() {
     return;
   }
 
-  showToast('Đang xuất PDF...', '⏳');
+  showToast('Đang chuẩn bị xuất PDF (có thể mất vài giây)...', '⏳');
 
   try {
-    // Ẩn control tạm thời
+    // Lưu trạng thái label hiện tại
+    const wasLabelsVis = labelsVis;
+    // Tạm ẩn label để tránh rối mắt khi chụp
+    if (labelsVis) {
+      toggleLotLabels(document.getElementById('btn-label'));
+    }
+    
+    // Ẩn các control
     const leftToolbar = document.querySelector('.map-ctrl-left');
     const rightToolbar = document.querySelector('.map-ctrl-right');
     const coordBar = document.querySelector('.map-coord-bar');
@@ -1916,26 +1928,36 @@ async function exportMapToPDF() {
     if (selBar) selBar.style.visibility = 'hidden';
     if (measurePanel) measurePanel.style.visibility = 'hidden';
 
-    // Capture map
+    // Đợi một chút để map ổn định
+    await waitForMapRender(300);
+
+    // Capture map với scale cao hơn (4) và chất lượng tốt hơn
     const mapCanvas = await html2canvas(mapContainer, {
-      scale: 3,
+      scale: 4,
       backgroundColor: '#0a0e1a',
       logging: false,
-      useCORS: true
+      useCORS: true,
+      allowTaint: false,
+      imageTimeout: 0
     });
 
     // Capture legend
     let legendCanvas = null;
     if (legend) {
-      legendCanvas = await html2canvas(legend, { scale: 2, backgroundColor: '#0a0e1a' });
+      legendCanvas = await html2canvas(legend, { scale: 3, backgroundColor: '#0a0e1a' });
     }
 
-    // Khôi phục
+    // Khôi phục hiển thị
     if (leftToolbar) leftToolbar.style.visibility = 'visible';
     if (rightToolbar) rightToolbar.style.visibility = 'visible';
     if (coordBar) coordBar.style.visibility = 'visible';
     if (selBar) selBar.style.visibility = 'visible';
     if (measurePanel) measurePanel.style.visibility = 'visible';
+    
+    // Khôi phục trạng thái label
+    if (wasLabelsVis !== labelsVis) {
+      toggleLotLabels(document.getElementById('btn-label'));
+    }
 
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
@@ -1950,7 +1972,7 @@ async function exportMapToPDF() {
     pdf.addImage(mapImgData, 'JPEG', 0, yOffset, mapImgWidth, mapImgHeight);
 
     if (legendCanvas) {
-      const legendWidth = pdfWidth * 0.6;
+      const legendWidth = pdfWidth * 0.7; // tăng kích thước legend
       const legendHeight = (legendCanvas.height * legendWidth) / legendCanvas.width;
       yOffset = mapImgHeight + 5;
       if (yOffset + legendHeight > pdfHeight) {
@@ -1960,18 +1982,31 @@ async function exportMapToPDF() {
       pdf.addImage(legendCanvas, 'JPEG', (pdfWidth - legendWidth) / 2, yOffset, legendWidth, legendHeight);
     }
 
-    const title = 'Báo cáo bản đồ vườn cây cao su';
+    // Tiêu đề và ngày tháng
+    const title = 'BÁO CÁO BẢN ĐỒ VƯỜN CÂY CAO SU';
     const date = new Date().toLocaleString('vi-VN');
-    pdf.setFontSize(10);
-    pdf.setTextColor(100);
-    pdf.text(title, pdfWidth / 2, 8, { align: 'center' });
-    pdf.text(`Xuất ngày: ${date}`, pdfWidth - 20, 8, { align: 'right' });
+    pdf.setFontSize(12);
+    pdf.setTextColor(200, 200, 200);
+    pdf.text(title, pdfWidth / 2, 10, { align: 'center' });
+    pdf.setFontSize(9);
+    pdf.text(`Xuất ngày: ${date}`, pdfWidth - 20, 10, { align: 'right' });
 
     pdf.save(`ban_do_cao_su_${Date.now()}.pdf`);
     showToast('Xuất PDF thành công!', '✅');
   } catch (err) {
     console.error(err);
     showToast('Lỗi xuất PDF: ' + err.message, '❌');
+    // Khôi phục UI nếu có lỗi
+    const leftToolbar = document.querySelector('.map-ctrl-left');
+    const rightToolbar = document.querySelector('.map-ctrl-right');
+    const coordBar = document.querySelector('.map-coord-bar');
+    const selBar = document.querySelector('.map-sel-bar');
+    const measurePanel = document.getElementById('measure-panel');
+    if (leftToolbar) leftToolbar.style.visibility = 'visible';
+    if (rightToolbar) rightToolbar.style.visibility = 'visible';
+    if (coordBar) coordBar.style.visibility = 'visible';
+    if (selBar) selBar.style.visibility = 'visible';
+    if (measurePanel) measurePanel.style.visibility = 'visible';
   }
 }
 
@@ -1984,9 +2019,15 @@ async function exportMapToJPEG() {
     return;
   }
 
-  showToast('Đang xuất JPEG...', '⏳');
+  showToast('Đang xuất JPEG (độ phân giải cao)...', '⏳');
 
   try {
+    // Lưu trạng thái label
+    const wasLabelsVis = labelsVis;
+    if (labelsVis) {
+      toggleLotLabels(document.getElementById('btn-label'));
+    }
+    
     // Ẩn control
     const leftToolbar = document.querySelector('.map-ctrl-left');
     const rightToolbar = document.querySelector('.map-ctrl-right');
@@ -2000,15 +2041,17 @@ async function exportMapToJPEG() {
     if (selBar) selBar.style.visibility = 'hidden';
     if (measurePanel) measurePanel.style.visibility = 'hidden';
 
-    // Capture map
+    await waitForMapRender(300);
+
+    // Capture map với scale=3 (cân bằng giữa chất lượng và dung lượng)
     const mapCanvas = await html2canvas(mapContainer, {
-      scale: 2,
+      scale: 3,
       backgroundColor: '#0a0e1a',
       logging: false,
-      useCORS: true
+      useCORS: true,
+      allowTaint: false
     });
 
-    // Capture legend
     let legendCanvas = null;
     if (legend) {
       legendCanvas = await html2canvas(legend, { scale: 2, backgroundColor: '#0a0e1a' });
@@ -2020,31 +2063,46 @@ async function exportMapToJPEG() {
     if (coordBar) coordBar.style.visibility = 'visible';
     if (selBar) selBar.style.visibility = 'visible';
     if (measurePanel) measurePanel.style.visibility = 'visible';
+    if (wasLabelsVis !== labelsVis) {
+      toggleLotLabels(document.getElementById('btn-label'));
+    }
 
-    // Tạo canvas ghép map + legend
+    // Tạo canvas tổng hợp
     const finalCanvas = document.createElement('canvas');
     const mapWidth = mapCanvas.width;
     const mapHeight = mapCanvas.height;
-    let legendHeight = 0;
-    if (legendCanvas) legendHeight = legendCanvas.height;
+    let legendHeight = legendCanvas ? legendCanvas.height : 0;
+    const padding = 30;
     finalCanvas.width = mapWidth;
-    finalCanvas.height = mapHeight + legendHeight + 20; // margin 20px
+    finalCanvas.height = mapHeight + legendHeight + padding + 60; // thêm khoảng cho tiêu đề
     const ctx = finalCanvas.getContext('2d');
     ctx.fillStyle = '#0a0e1a';
     ctx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
-    ctx.drawImage(mapCanvas, 0, 0);
+    
+    // Vẽ tiêu đề
+    ctx.font = 'bold 28px "Be Vietnam Pro", "Syne", sans-serif';
+    ctx.fillStyle = '#e8eeff';
+    ctx.fillText('BÁO CÁO BẢN ĐỒ VƯỜN CÂY CAO SU', 20, 50);
+    ctx.font = '14px "Be Vietnam Pro", sans-serif';
+    ctx.fillStyle = '#8a9ab8';
+    const dateStr = `Xuất ngày: ${new Date().toLocaleString('vi-VN')}`;
+    ctx.fillText(dateStr, finalCanvas.width - ctx.measureText(dateStr).width - 20, 50);
+    
+    // Vẽ map
+    ctx.drawImage(mapCanvas, 0, 80);
+    
+    // Vẽ legend
     if (legendCanvas) {
       const legendX = (mapWidth - legendCanvas.width) / 2;
-      ctx.drawImage(legendCanvas, legendX, mapHeight + 10);
+      const legendY = 80 + mapHeight + 10;
+      ctx.drawImage(legendCanvas, legendX, legendY);
     }
-    // Thêm tiêu đề, ngày tháng
-    ctx.font = 'bold 20px "Be Vietnam Pro"';
-    ctx.fillStyle = '#e8eeff';
-    ctx.fillText('Báo cáo bản đồ vườn cây cao su', 20, 40);
-    ctx.font = '12px "Be Vietnam Pro"';
-    ctx.fillStyle = '#8a9ab8';
-    ctx.fillText(`Xuất ngày: ${new Date().toLocaleString('vi-VN')}`, finalCanvas.width - 200, 30);
-
+    
+    // Thêm watermark nhẹ
+    ctx.font = '10px "Be Vietnam Pro"';
+    ctx.fillStyle = '#5a6a8a';
+    ctx.fillText('WebGIS Cao Su - Hệ thống quản lý vườn cây thông minh', finalCanvas.width - 250, finalCanvas.height - 10);
+    
     finalCanvas.toBlob(blob => {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
