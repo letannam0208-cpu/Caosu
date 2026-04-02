@@ -1,11 +1,11 @@
-// app.js
 require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const cors = require('cors');
 const { Pool } = require('pg');
-const session = require('express-session');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const cookieParser = require('cookie-parser');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -14,32 +14,11 @@ const port = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser(process.env.JWT_SECRET)); // Dùng để ký/verify cookie (không bắt buộc nhưng tốt)
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(session({
-    secret: process.env.SESSION_SECRET || 'webgis_caosu_secret_key',
-    resave: false,
-    saveUninitialized: false,
-    cookie: { secure: false, maxAge: 24 * 60 * 60 * 1000 } // 1 ngày
-}));
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
-
-// Middleware kiểm tra đăng nhập
-const requireAuth = (req, res, next) => {
-    if (!req.session.user) {
-        return res.redirect('/login');
-    }
-    next();
-};
-
-// Middleware kiểm tra quyền admin
-const requireAdmin = (req, res, next) => {
-    if (!req.session.user || req.session.user.role !== 'admin') {
-        return res.status(403).render('403', { title: 'Truy cập bị từ chối', user: req.session.user, path: req.path });
-    }
-    next();
-};
 
 // ====================== DATABASE CONNECTION (NEON) ======================
 const pool = new Pool({
@@ -57,10 +36,48 @@ const pool = new Pool({
 pool.on('connect', () => console.log('✅ Kết nối PostgreSQL (Neon) thành công!'));
 pool.on('error', (err) => console.error('❌ Lỗi kết nối Pool:', err.message));
 
+// ====================== MIDDLEWARE XÁC THỰC JWT ======================
+const authenticateToken = (req, res, next) => {
+  const token = req.cookies.token;
+  if (!token) {
+    // Nếu là request API -> trả về 401, nếu là request trang -> redirect về login
+    if (req.path.startsWith('/api/')) {
+      return res.status(401).json({ success: false, error: 'Chưa đăng nhập' });
+    }
+    return res.redirect('/login');
+  }
+
+  try {
+    const user = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = user;
+    next();
+  } catch (err) {
+    console.error('Lỗi xác thực token:', err.message);
+    res.clearCookie('token');
+    if (req.path.startsWith('/api/')) {
+      return res.status(401).json({ success: false, error: 'Token không hợp lệ' });
+    }
+    res.redirect('/login');
+  }
+};
+
+// Middleware kiểm tra quyền admin
+const requireAdmin = (req, res, next) => {
+  if (req.user && req.user.role === 'admin') {
+    next();
+  } else {
+    if (req.path.startsWith('/api/')) {
+      res.status(403).json({ success: false, error: 'Không có quyền truy cập' });
+    } else {
+      res.status(403).render('403', { title: 'Truy cập bị từ chối', user: req.user, path: req.path });
+    }
+  }
+};
+
 // ====================== API ENDPOINTS ======================
 
 // Dashboard Stats
-app.get('/api/dashboard-stats', async (req, res) => {
+app.get('/api/dashboard-stats', authenticateToken, async (req, res) => {
   try {
     const result = await pool.query(`
       SELECT
@@ -80,7 +97,7 @@ app.get('/api/dashboard-stats', async (req, res) => {
 });
 
 // Danh sách đơn vị (cho filter dropdown)
-app.get('/api/don-vi-list', async (req, res) => {
+app.get('/api/don-vi-list', authenticateToken, async (req, res) => {
   try {
     const result = await pool.query('SELECT id_don_vi, doi FROM don_vi ORDER BY doi');
     res.json({ success: true, data: result.rows });
@@ -90,7 +107,7 @@ app.get('/api/don-vi-list', async (req, res) => {
 });
 
 // Giống cây (cho filter)
-app.get('/api/giong-stats', async (req, res) => {
+app.get('/api/giong-stats', authenticateToken, async (req, res) => {
   try {
     const result = await pool.query(`
       SELECT giong, COUNT(*) as so_lo 
@@ -106,7 +123,7 @@ app.get('/api/giong-stats', async (req, res) => {
 });
 
 // Năm trồng (cho filter)
-app.get('/api/nam-trong-stats', async (req, res) => {
+app.get('/api/nam-trong-stats', authenticateToken, async (req, res) => {
   try {
     const result = await pool.query(`
       SELECT nam_trong, COUNT(*) as so_lo 
@@ -122,7 +139,7 @@ app.get('/api/nam-trong-stats', async (req, res) => {
 });
 
 // GeoJSON cho bản đồ
-app.get('/api/lo-cao-su', async (req, res) => {
+app.get('/api/lo-cao-su', authenticateToken, async (req, res) => {
   try {
     const { doi, nam_trong, giong, phien_cao, nhip_do_cao, tai_canh_nam } = req.query;
     let whereClause = 'WHERE l.geometry IS NOT NULL';
@@ -178,7 +195,7 @@ app.get('/api/lo-cao-su', async (req, res) => {
 });
 
 // API ranh giới
-app.get('/api/boundary', async (req, res) => {
+app.get('/api/boundary', authenticateToken, async (req, res) => {
   try {
     const { doi } = req.query;
     let whereClause = 'WHERE l.geometry IS NOT NULL';
@@ -219,7 +236,7 @@ app.get('/api/boundary', async (req, res) => {
 // ====================== API QUẢN LÝ NGƯỜI DÙNG ======================
 
 // Lấy danh sách users (có filter)
-app.get('/api/users', requireAuth, async (req, res) => {
+app.get('/api/users', authenticateToken, async (req, res) => {
     try {
         const { role, status, search } = req.query;
         let sql = `SELECT id, username, fullname, email, role, status, unit, avatar_color, last_login, created_at
@@ -240,7 +257,7 @@ app.get('/api/users', requireAuth, async (req, res) => {
 });
 
 // Lấy thông tin user theo id
-app.get('/api/users/:id', requireAuth, async (req, res) => {
+app.get('/api/users/:id', authenticateToken, async (req, res) => {
     try {
         const { id } = req.params;
         const result = await pool.query(`SELECT id, username, fullname, email, role, status, unit, avatar_color, last_login
@@ -253,7 +270,7 @@ app.get('/api/users/:id', requireAuth, async (req, res) => {
 });
 
 // Thêm user mới
-app.post('/api/users', requireAdmin, async (req, res) => {
+app.post('/api/users', authenticateToken, requireAdmin, async (req, res) => {
     const { username, password, fullname, email, role, status, unit, avatar_color } = req.body;
     if (!username || !password || !fullname) {
         return res.status(400).json({ success: false, error: 'Thiếu thông tin bắt buộc' });
@@ -273,7 +290,7 @@ app.post('/api/users', requireAdmin, async (req, res) => {
 });
 
 // Cập nhật user
-app.put('/api/users/:id', requireAdmin, async (req, res) => {
+app.put('/api/users/:id', authenticateToken, requireAdmin, async (req, res) => {
     const { id } = req.params;
     const { fullname, email, role, status, unit, avatar_color, password } = req.body;
     try {
@@ -303,9 +320,9 @@ app.put('/api/users/:id', requireAdmin, async (req, res) => {
 });
 
 // Xóa user
-app.delete('/api/users/:id', requireAdmin, async (req, res) => {
+app.delete('/api/users/:id', authenticateToken, requireAdmin, async (req, res) => {
     const { id } = req.params;
-    if (parseInt(id) === req.session.user?.id) {
+    if (parseInt(id) === req.user?.id) {
         return res.status(400).json({ success: false, error: 'Không thể xóa chính mình' });
     }
     try {
@@ -316,7 +333,7 @@ app.delete('/api/users/:id', requireAdmin, async (req, res) => {
     }
 });
 
-// Đăng nhập
+// Đăng nhập (tạo JWT)
 app.post('/api/login', async (req, res) => {
     const { username, password } = req.body;
     try {
@@ -335,56 +352,45 @@ app.post('/api/login', async (req, res) => {
         }
         // Cập nhật last_login
         await pool.query(`UPDATE users SET last_login = NOW() WHERE id = $1`, [user.id]);
-        // Lưu session
-        req.session.user = {
-            id: user.id,
-            username: user.username,
-            fullname: user.fullname,
-            role: user.role,
-            unit: user.unit,
-            avatar_color: user.avatar_color
-        };
+        
+        // Tạo JWT token
+        const token = jwt.sign(
+            { id: user.id, username: user.username, fullname: user.fullname, role: user.role, unit: user.unit, avatar_color: user.avatar_color },
+            process.env.JWT_SECRET,
+            { expiresIn: '24h' }
+        );
+        // Set cookie httpOnly
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            maxAge: 24 * 60 * 60 * 1000,
+            sameSite: 'lax'
+        });
         res.json({ success: true, message: 'Đăng nhập thành công', redirect: '/' });
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });
     }
 });
 
-// Đăng xuất (POST)
+// Đăng xuất (xóa cookie)
 app.post('/api/logout', (req, res) => {
-    req.session.destroy(err => {
-        if (err) return res.status(500).json({ success: false, error: err.message });
-        res.json({ success: true, redirect: '/login' });
-    });
+    res.clearCookie('token');
+    res.json({ success: true, redirect: '/login' });
 });
 
-// Đăng xuất (GET) - hỗ trợ link
 app.get('/logout', (req, res) => {
-    req.session.destroy(err => {
-        if (err) console.error(err);
-        res.redirect('/login');
-    });
+    res.clearCookie('token');
+    res.redirect('/login');
 });
 
-// Lấy thông tin user hiện tại
-app.get('/api/me', (req, res) => {
-    if (!req.session.user) return res.status(401).json({ success: false, error: 'Chưa đăng nhập' });
-    res.json({ success: true, data: req.session.user });
+// Lấy thông tin user hiện tại từ token
+app.get('/api/me', authenticateToken, (req, res) => {
+    res.json({ success: true, data: req.user });
 });
 
 // ====================== QUẢN LÝ LÔ CÂY ======================
-// Render trang quản lý
-app.get('/quan-ly-lo-cay', (req, res) => {
-  res.locals.path = '/quan-ly-lo-cay';
-  res.render('quan-ly-lo-cay', {
-    title: 'Quản lý lô cây cao su',
-    user: getMockUser(),
-    path: '/quan-ly-lo-cay'
-  });
-});
-
 // API lấy danh sách lô cây (full thông tin)
-app.get('/api/lo-cay', async (req, res) => {
+app.get('/api/lo-cay', authenticateToken, async (req, res) => {
   try {
     const result = await pool.query(`
       SELECT
@@ -414,7 +420,7 @@ app.get('/api/lo-cay', async (req, res) => {
 });
 
 // API chi tiết lô cây theo id
-app.get('/api/lo-cay/:id', async (req, res) => {
+app.get('/api/lo-cay/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
     const result = await pool.query(`
@@ -445,7 +451,7 @@ app.get('/api/lo-cay/:id', async (req, res) => {
 });
 
 // API thêm mới lô cây (transaction)
-app.post('/api/lo-cay', async (req, res) => {
+app.post('/api/lo-cay', authenticateToken, async (req, res) => {
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
@@ -509,7 +515,7 @@ app.post('/api/lo-cay', async (req, res) => {
 });
 
 // API cập nhật lô cây (transaction)
-app.put('/api/lo-cay/:id', async (req, res) => {
+app.put('/api/lo-cay/:id', authenticateToken, async (req, res) => {
   const client = await pool.connect();
   const id_lo = req.params.id;
   try {
@@ -610,7 +616,7 @@ app.put('/api/lo-cay/:id', async (req, res) => {
 });
 
 // API xóa lô cây (xóa cascade)
-app.delete('/api/lo-cay/:id', async (req, res) => {
+app.delete('/api/lo-cay/:id', authenticateToken, async (req, res) => {
   const client = await pool.connect();
   const id_lo = req.params.id;
   try {
@@ -633,9 +639,8 @@ app.delete('/api/lo-cay/:id', async (req, res) => {
 });
 
 // ====================== API UPSERT CHO CÁC BẢNG (Hỗ trợ nhập file) ======================
-
 // UPSERT cho bảng lô cây
-app.post('/api/lo-cay/upsert', async (req, res) => {
+app.post('/api/lo-cay/upsert', authenticateToken, async (req, res) => {
   const client = await pool.connect();
   const importMode = req.headers['x-import-mode'] || 'upsert';
   
@@ -711,7 +716,7 @@ app.post('/api/lo-cay/upsert', async (req, res) => {
 });
 
 // UPSERT cho bảng đơn vị
-app.post('/api/don-vi/upsert', async (req, res) => {
+app.post('/api/don-vi/upsert', authenticateToken, async (req, res) => {
   const client = await pool.connect();
   const importMode = req.headers['x-import-mode'] || 'upsert';
   
@@ -767,7 +772,7 @@ app.post('/api/don-vi/upsert', async (req, res) => {
 });
 
 // UPSERT cho bảng hành chính
-app.post('/api/hanh-chinh/upsert', async (req, res) => {
+app.post('/api/hanh-chinh/upsert', authenticateToken, async (req, res) => {
   const client = await pool.connect();
   const importMode = req.headers['x-import-mode'] || 'upsert';
   
@@ -823,7 +828,7 @@ app.post('/api/hanh-chinh/upsert', async (req, res) => {
 });
 
 // UPSERT cho bảng diện tích
-app.post('/api/dien-tich/upsert', async (req, res) => {
+app.post('/api/dien-tich/upsert', authenticateToken, async (req, res) => {
   const client = await pool.connect();
   const importMode = req.headers['x-import-mode'] || 'upsert';
   
@@ -882,7 +887,7 @@ app.post('/api/dien-tich/upsert', async (req, res) => {
 });
 
 // UPSERT cho bảng hiện trạng cây
-app.post('/api/hien-trang-cay/upsert', async (req, res) => {
+app.post('/api/hien-trang-cay/upsert', authenticateToken, async (req, res) => {
   const client = await pool.connect();
   const importMode = req.headers['x-import-mode'] || 'upsert';
   
@@ -945,7 +950,7 @@ app.post('/api/hien-trang-cay/upsert', async (req, res) => {
 });
 
 // UPSERT cho bảng khai thác
-app.post('/api/khai-thac/upsert', async (req, res) => {
+app.post('/api/khai-thac/upsert', authenticateToken, async (req, res) => {
   const client = await pool.connect();
   const importMode = req.headers['x-import-mode'] || 'upsert';
   
@@ -1008,7 +1013,7 @@ app.post('/api/khai-thac/upsert', async (req, res) => {
 });
 
 // UPSERT cho bảng sản lượng
-app.post('/api/san-luong/upsert', async (req, res) => {
+app.post('/api/san-luong/upsert', authenticateToken, async (req, res) => {
   const client = await pool.connect();
   const importMode = req.headers['x-import-mode'] || 'upsert';
   
@@ -1073,7 +1078,7 @@ app.post('/api/san-luong/upsert', async (req, res) => {
 });
 
 // UPSERT cho bảng thông tin trồng
-app.post('/api/thong-tin-trong/upsert', async (req, res) => {
+app.post('/api/thong-tin-trong/upsert', authenticateToken, async (req, res) => {
   const client = await pool.connect();
   const importMode = req.headers['x-import-mode'] || 'upsert';
   
@@ -1134,7 +1139,7 @@ app.post('/api/thong-tin-trong/upsert', async (req, res) => {
 
 // ====================== API CHO CÁC BẢNG KHÁC ======================
 // ĐƠN VỊ
-app.get('/api/don-vi', async (req, res) => {
+app.get('/api/don-vi', authenticateToken, async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM don_vi ORDER BY doi');
     res.json({ success: true, data: result.rows });
@@ -1142,7 +1147,7 @@ app.get('/api/don-vi', async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
-app.get('/api/don-vi/:id', async (req, res) => {
+app.get('/api/don-vi/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
     const result = await pool.query('SELECT * FROM don_vi WHERE id_don_vi = $1', [id]);
@@ -1152,7 +1157,7 @@ app.get('/api/don-vi/:id', async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
-app.post('/api/don-vi', async (req, res) => {
+app.post('/api/don-vi', authenticateToken, async (req, res) => {
   const { id_don_vi, du_an, doi, khu_vuc } = req.body;
   const finalId = id_don_vi || `DV_${Date.now()}`;
   try {
@@ -1165,7 +1170,7 @@ app.post('/api/don-vi', async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
-app.put('/api/don-vi/:id', async (req, res) => {
+app.put('/api/don-vi/:id', authenticateToken, async (req, res) => {
   const { id } = req.params;
   const { du_an, doi, khu_vuc } = req.body;
   try {
@@ -1178,7 +1183,7 @@ app.put('/api/don-vi/:id', async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
-app.delete('/api/don-vi/:id', async (req, res) => {
+app.delete('/api/don-vi/:id', authenticateToken, async (req, res) => {
   const { id } = req.params;
   try {
     await pool.query('DELETE FROM don_vi WHERE id_don_vi=$1', [id]);
@@ -1189,7 +1194,7 @@ app.delete('/api/don-vi/:id', async (req, res) => {
 });
 
 // HÀNH CHÍNH
-app.get('/api/hanh-chinh', async (req, res) => {
+app.get('/api/hanh-chinh', authenticateToken, async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM hanh_chinh ORDER BY xa');
     res.json({ success: true, data: result.rows });
@@ -1197,7 +1202,7 @@ app.get('/api/hanh-chinh', async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
-app.get('/api/hanh-chinh/:id', async (req, res) => {
+app.get('/api/hanh-chinh/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
     const result = await pool.query('SELECT * FROM hanh_chinh WHERE id_hc = $1', [id]);
@@ -1207,7 +1212,7 @@ app.get('/api/hanh-chinh/:id', async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
-app.post('/api/hanh-chinh', async (req, res) => {
+app.post('/api/hanh-chinh', authenticateToken, async (req, res) => {
   const { id_hc, xa, huyen, tinh } = req.body;
   const finalId = id_hc || `HC_${Date.now()}`;
   try {
@@ -1220,7 +1225,7 @@ app.post('/api/hanh-chinh', async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
-app.put('/api/hanh-chinh/:id', async (req, res) => {
+app.put('/api/hanh-chinh/:id', authenticateToken, async (req, res) => {
   const { id } = req.params;
   const { xa, huyen, tinh } = req.body;
   try {
@@ -1233,7 +1238,7 @@ app.put('/api/hanh-chinh/:id', async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
-app.delete('/api/hanh-chinh/:id', async (req, res) => {
+app.delete('/api/hanh-chinh/:id', authenticateToken, async (req, res) => {
   const { id } = req.params;
   try {
     await pool.query('DELETE FROM hanh_chinh WHERE id_hc=$1', [id]);
@@ -1244,7 +1249,7 @@ app.delete('/api/hanh-chinh/:id', async (req, res) => {
 });
 
 // DIỆN TÍCH
-app.get('/api/dien-tich', async (req, res) => {
+app.get('/api/dien-tich', authenticateToken, async (req, res) => {
   try {
     const result = await pool.query(`
       SELECT dt.*, l.ten_lo FROM dien_tich dt
@@ -1256,7 +1261,7 @@ app.get('/api/dien-tich', async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
-app.get('/api/dien-tich/:id', async (req, res) => {
+app.get('/api/dien-tich/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
     const result = await pool.query(`
@@ -1270,7 +1275,7 @@ app.get('/api/dien-tich/:id', async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
-app.post('/api/dien-tich', async (req, res) => {
+app.post('/api/dien-tich', authenticateToken, async (req, res) => {
   const { id_dien_tich, id_lo, dien_tich_map, dien_tich_010125, dien_tich_010126 } = req.body;
   const finalId = id_dien_tich || `DT_${id_lo}_${Date.now()}`;
   try {
@@ -1284,7 +1289,7 @@ app.post('/api/dien-tich', async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
-app.put('/api/dien-tich/:id', async (req, res) => {
+app.put('/api/dien-tich/:id', authenticateToken, async (req, res) => {
   const { id } = req.params;
   const { dien_tich_map, dien_tich_010125, dien_tich_010126, id_lo } = req.body;
   try {
@@ -1298,7 +1303,7 @@ app.put('/api/dien-tich/:id', async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
-app.delete('/api/dien-tich/:id', async (req, res) => {
+app.delete('/api/dien-tich/:id', authenticateToken, async (req, res) => {
   const { id } = req.params;
   try {
     await pool.query('DELETE FROM dien_tich WHERE id_dien_tich=$1', [id]);
@@ -1309,7 +1314,7 @@ app.delete('/api/dien-tich/:id', async (req, res) => {
 });
 
 // HIỆN TRẠNG CÂY
-app.get('/api/hien-trang-cay', async (req, res) => {
+app.get('/api/hien-trang-cay', authenticateToken, async (req, res) => {
   try {
     const result = await pool.query(`
       SELECT htc.*, l.ten_lo FROM hien_trang_cay htc
@@ -1321,7 +1326,7 @@ app.get('/api/hien-trang-cay', async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
-app.get('/api/hien-trang-cay/:id', async (req, res) => {
+app.get('/api/hien-trang-cay/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
     const result = await pool.query(`
@@ -1335,7 +1340,7 @@ app.get('/api/hien-trang-cay/:id', async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
-app.post('/api/hien-trang-cay', async (req, res) => {
+app.post('/api/hien-trang-cay', authenticateToken, async (req, res) => {
   const { id_htc, id_lo, tong_ho_kk, cay_cao, cay_chua_cao, cay_kho_mu, cay_khong_pt, ho_trong, mat_do_cc } = req.body;
   const finalId = id_htc || `HTC_${id_lo}_${Date.now()}`;
   try {
@@ -1349,7 +1354,7 @@ app.post('/api/hien-trang-cay', async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
-app.put('/api/hien-trang-cay/:id', async (req, res) => {
+app.put('/api/hien-trang-cay/:id', authenticateToken, async (req, res) => {
   const { id } = req.params;
   const { id_lo, tong_ho_kk, cay_cao, cay_chua_cao, cay_kho_mu, cay_khong_pt, ho_trong, mat_do_cc } = req.body;
   try {
@@ -1364,7 +1369,7 @@ app.put('/api/hien-trang-cay/:id', async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
-app.delete('/api/hien-trang-cay/:id', async (req, res) => {
+app.delete('/api/hien-trang-cay/:id', authenticateToken, async (req, res) => {
   const { id } = req.params;
   try {
     await pool.query('DELETE FROM hien_trang_cay WHERE id_htc=$1', [id]);
@@ -1375,7 +1380,7 @@ app.delete('/api/hien-trang-cay/:id', async (req, res) => {
 });
 
 // KHAI THÁC
-app.get('/api/khai-thac', async (req, res) => {
+app.get('/api/khai-thac', authenticateToken, async (req, res) => {
   try {
     const result = await pool.query(`
       SELECT kh.*, l.ten_lo FROM khai_thac kh
@@ -1387,7 +1392,7 @@ app.get('/api/khai-thac', async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
-app.get('/api/khai-thac/:id', async (req, res) => {
+app.get('/api/khai-thac/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
     const result = await pool.query(`
@@ -1401,7 +1406,7 @@ app.get('/api/khai-thac/:id', async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
-app.post('/api/khai-thac', async (req, res) => {
+app.post('/api/khai-thac', authenticateToken, async (req, res) => {
   const { id_kt, id_lo, che_do_cao, phien_cao, nhip_do_cao, nam_mc, tuoi_cao, nam_cao_up, tinh_trang_mc } = req.body;
   const finalId = id_kt || `KT_${id_lo}_${Date.now()}`;
   try {
@@ -1415,7 +1420,7 @@ app.post('/api/khai-thac', async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
-app.put('/api/khai-thac/:id', async (req, res) => {
+app.put('/api/khai-thac/:id', authenticateToken, async (req, res) => {
   const { id } = req.params;
   const { id_lo, che_do_cao, phien_cao, nhip_do_cao, nam_mc, tuoi_cao, nam_cao_up, tinh_trang_mc } = req.body;
   try {
@@ -1430,7 +1435,7 @@ app.put('/api/khai-thac/:id', async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
-app.delete('/api/khai-thac/:id', async (req, res) => {
+app.delete('/api/khai-thac/:id', authenticateToken, async (req, res) => {
   const { id } = req.params;
   try {
     await pool.query('DELETE FROM khai_thac WHERE id_kt=$1', [id]);
@@ -1441,7 +1446,7 @@ app.delete('/api/khai-thac/:id', async (req, res) => {
 });
 
 // SẢN LƯỢNG
-app.get('/api/san-luong', async (req, res) => {
+app.get('/api/san-luong', authenticateToken, async (req, res) => {
   try {
     const result = await pool.query(`
       SELECT sl.*, l.ten_lo FROM san_luong sl
@@ -1453,7 +1458,7 @@ app.get('/api/san-luong', async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
-app.get('/api/san-luong/:id', async (req, res) => {
+app.get('/api/san-luong/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
     const result = await pool.query(`
@@ -1467,7 +1472,7 @@ app.get('/api/san-luong/:id', async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
-app.post('/api/san-luong', async (req, res) => {
+app.post('/api/san-luong', authenticateToken, async (req, res) => {
   const { id_sl, id_lo, ns25_kg_ha, ns25_kg_cay, ns26_kg_ha, ns26_kg_cay, tong_lat_cao, san_luong, phan_loai, doi_tuong, tai_canh_nam } = req.body;
   const finalId = id_sl || `SL_${id_lo}_${Date.now()}`; 
   try {
@@ -1481,7 +1486,7 @@ app.post('/api/san-luong', async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
-app.put('/api/san-luong/:id', async (req, res) => {
+app.put('/api/san-luong/:id', authenticateToken, async (req, res) => {
   const { id } = req.params;
   const { id_lo, ns25_kg_ha, ns25_kg_cay, ns26_kg_ha, ns26_kg_cay, tong_lat_cao, san_luong, phan_loai, doi_tuong, tai_canh_nam } = req.body;
   try {
@@ -1496,7 +1501,7 @@ app.put('/api/san-luong/:id', async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
-app.delete('/api/san-luong/:id', async (req, res) => {
+app.delete('/api/san-luong/:id', authenticateToken, async (req, res) => {
   const { id } = req.params;
   try {
     await pool.query('DELETE FROM san_luong WHERE id_sl=$1', [id]);
@@ -1507,7 +1512,7 @@ app.delete('/api/san-luong/:id', async (req, res) => {
 });
 
 // THÔNG TIN TRỒNG
-app.get('/api/thong-tin-trong', async (req, res) => {
+app.get('/api/thong-tin-trong', authenticateToken, async (req, res) => {
   try {
     const result = await pool.query(`
       SELECT ttt.*, l.ten_lo FROM thong_tin_trong ttt
@@ -1520,7 +1525,7 @@ app.get('/api/thong-tin-trong', async (req, res) => {
   }
 });
 // Thông tin trồng theo id
-app.get('/api/thong-tin-trong/:id', async (req, res) => {
+app.get('/api/thong-tin-trong/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
     const result = await pool.query(`
@@ -1534,7 +1539,7 @@ app.get('/api/thong-tin-trong/:id', async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
-app.post('/api/thong-tin-trong', async (req, res) => {
+app.post('/api/thong-tin-trong', authenticateToken, async (req, res) => {
   const { id_ttt, id_lo, hang_dat, phuong_phap_trong, khoang_cach_trong, mat_do_tk } = req.body;
   const finalId = id_ttt || `TTT_${id_lo}_${Date.now()}`; 
   try {
@@ -1548,7 +1553,7 @@ app.post('/api/thong-tin-trong', async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
-app.put('/api/thong-tin-trong/:id', async (req, res) => {
+app.put('/api/thong-tin-trong/:id', authenticateToken, async (req, res) => {
   const { id } = req.params;
   const { id_lo, hang_dat, phuong_phap_trong, khoang_cach_trong, mat_do_tk } = req.body;
   try {
@@ -1562,7 +1567,7 @@ app.put('/api/thong-tin-trong/:id', async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
-app.delete('/api/thong-tin-trong/:id', async (req, res) => {
+app.delete('/api/thong-tin-trong/:id', authenticateToken, async (req, res) => {
   const { id } = req.params;
   try {
     await pool.query('DELETE FROM thong_tin_trong WHERE id_ttt=$1', [id]);
@@ -1573,57 +1578,60 @@ app.delete('/api/thong-tin-trong/:id', async (req, res) => {
 });
 
 // ====================== CÁC TRANG (VIEW) ======================
-// Trang đăng nhập
+// Trang đăng nhập (không cần xác thực)
 app.get('/login', (req, res) => {
-    if (req.session.user) return res.redirect('/');
+    if (req.cookies.token) {
+        // Nếu đã có token thì chuyển về trang chủ
+        return res.redirect('/');
+    }
     res.render('login', { title: 'Đăng nhập' });
 });
 
 // Trang chủ và các trang khác đều yêu cầu đăng nhập
-app.get('/', requireAuth, (req, res) => {
+app.get('/', authenticateToken, (req, res) => {
     res.render('index', {
         title: 'WebGIS · Vườn Cây Cao Su',
-        user: req.session.user,
+        user: req.user,
         path: '/'
     });
 });
 
-app.get('/dashboard', requireAuth, (req, res) => {
+app.get('/dashboard', authenticateToken, (req, res) => {
     res.render('index', {
         title: 'Dashboard - WebGIS Cao Su',
-        user: req.session.user,
+        user: req.user,
         path: '/dashboard'
     });
 });
 
-app.get('/quan-ly-lo-cay', requireAuth, (req, res) => {
+app.get('/quan-ly-lo-cay', authenticateToken, (req, res) => {
     res.render('quan-ly-lo-cay', {
         title: 'Quản lý lô cây cao su',
-        user: req.session.user,
+        user: req.user,
         path: '/quan-ly-lo-cay'
     });
 });
 
-app.get('/them-du-lieu-lo-cay', requireAuth, (req, res) => {
+app.get('/them-du-lieu-lo-cay', authenticateToken, (req, res) => {
     res.render('them-du-lieu-lo-cay', {
         title: 'Thêm dữ liệu lô cây',
-        user: req.session.user,
+        user: req.user,
         path: '/them-du-lieu-lo-cay'
     });
 });
 
-app.get('/thong-ke', requireAuth, (req, res) => {
+app.get('/thong-ke', authenticateToken, (req, res) => {
     res.render('thong-ke', {
         title: 'Thống kê vườn cây',
-        user: req.session.user,
+        user: req.user,
         path: '/thong-ke'
     });
 });
 
-app.get('/quan-ly-nguoi-dung', requireAuth, (req, res) => {
+app.get('/quan-ly-nguoi-dung', authenticateToken, (req, res) => {
     res.render('quan-ly-nguoi-dung', {
         title: 'Quản lý người dùng',
-        user: req.session.user,
+        user: req.user,
         path: '/quan-ly-nguoi-dung'
     });
 });
@@ -1632,24 +1640,25 @@ app.get('/quan-ly-nguoi-dung', requireAuth, (req, res) => {
 app.use((req, res) => {
     res.status(404).render('404', {
         title: 'Không tìm thấy trang',
-        user: req.session.user || null,
+        user: req.user || null,
         path: req.path
     });
 });
 
 // ====================== START SERVER ======================
 const startServer = async () => {
-    try {
-        await pool.query('SELECT NOW()');
-        console.log('🟢 Kết nối Neon Database thành công!');
-        app.listen(port, () => {
-            console.log(`🚀 Server đang chạy tại: http://localhost:${port}`);
-            console.log(`🌐 Database: Neon (${process.env.DB_HOST})`);
-        });
-    } catch (err) {
-        console.error('❌ Không thể kết nối đến Neon Database:', err.message);
-        process.exit(1);
-    }
+  try {
+    await pool.query('SELECT NOW()');
+    console.log('🟢 Kết nối Neon Database thành công!');
+    app.listen(port, () => {
+      console.log(`🚀 Server đang chạy tại: http://localhost:${port}`);
+      console.log(`🌐 Database: Neon (${process.env.DB_HOST})`);
+      console.log(`🔐 Xác thực JWT đã được kích hoạt.`);
+    });
+  } catch (err) {
+    console.error('❌ Không thể kết nối đến Neon Database:', err.message);
+    process.exit(1);
+  }
 };
 
 startServer();
