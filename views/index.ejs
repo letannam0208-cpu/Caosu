@@ -1895,7 +1895,7 @@ async function waitForMapStable() {
   // Đảm bảo map đã được invalidate size (fix hiển thị)
   if (dashMap) dashMap.invalidateSize();
   // Đợi 500ms để các layer ổn định
-  return new Promise(resolve => setTimeout(resolve, 500));
+  return new Promise(resolve => setTimeout(resolve, 800));
 }
 
 async function exportMapToPDF() {
