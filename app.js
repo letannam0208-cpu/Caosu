@@ -979,12 +979,23 @@ app.get('/api/don-vi', async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
+app.get('/api/don-vi/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await pool.query('SELECT * FROM don_vi WHERE id_don_vi = $1', [id]);
+    if (result.rows.length === 0) return res.status(404).json({ success: false, error: 'Không tìm thấy' });
+    res.json({ success: true, data: result.rows[0] });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
 app.post('/api/don-vi', async (req, res) => {
   const { id_don_vi, du_an, doi, khu_vuc } = req.body;
+  const finalId = id_don_vi || `DV_${Date.now()}`;
   try {
     await pool.query(
       'INSERT INTO don_vi (id_don_vi, du_an, doi, khu_vuc) VALUES ($1, $2, $3, $4)',
-      [id_don_vi, du_an, doi, khu_vuc]
+      [finalId, du_an, doi, khu_vuc]
     );
     res.json({ success: true, message: 'Thêm đơn vị thành công' });
   } catch (err) {
@@ -1023,12 +1034,23 @@ app.get('/api/hanh-chinh', async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
+app.get('/api/hanh-chinh/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await pool.query('SELECT * FROM hanh_chinh WHERE id_hc = $1', [id]);
+    if (result.rows.length === 0) return res.status(404).json({ success: false, error: 'Không tìm thấy' });
+    res.json({ success: true, data: result.rows[0] });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
 app.post('/api/hanh-chinh', async (req, res) => {
   const { id_hc, xa, huyen, tinh } = req.body;
+  const finalId = id_hc || `HC_${Date.now()}`;
   try {
     await pool.query(
       'INSERT INTO hanh_chinh (id_hc, xa, huyen, tinh) VALUES ($1, $2, $3, $4)',
-      [id_hc, xa, huyen, tinh]
+      [finalId, xa, huyen, tinh]
     );
     res.json({ success: true, message: 'Thêm thành công' });
   } catch (err) {
@@ -1071,13 +1093,28 @@ app.get('/api/dien-tich', async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
+app.get('/api/dien-tich/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await pool.query(`
+      SELECT dt.*, l.ten_lo FROM dien_tich dt
+      LEFT JOIN lo l ON dt.id_lo = l.id_lo
+      WHERE dt.id_dien_tich = $1
+    `, [id]);
+    if (result.rows.length === 0) return res.status(404).json({ success: false, error: 'Không tìm thấy' });
+    res.json({ success: true, data: result.rows[0] });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
 app.post('/api/dien-tich', async (req, res) => {
   const { id_dien_tich, id_lo, dien_tich_map, dien_tich_010125, dien_tich_010126 } = req.body;
+  const finalId = id_dien_tich || `DT_${id_lo}_${Date.now()}`;
   try {
     await pool.query(
       `INSERT INTO dien_tich (id_dien_tich, id_lo, dien_tich_map, dien_tich_010125, dien_tich_010126)
        VALUES ($1, $2, $3, $4, $5)`,
-      [id_dien_tich, id_lo, dien_tich_map, dien_tich_010125, dien_tich_010126]
+      [finalId, id_lo, dien_tich_map, dien_tich_010125, dien_tich_010126]
     );
     res.json({ success: true, message: 'Thêm thành công' });
   } catch (err) {
@@ -1121,13 +1158,28 @@ app.get('/api/hien-trang-cay', async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
+app.get('/api/hien-trang-cay/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await pool.query(`
+      SELECT htc.*, l.ten_lo FROM hien_trang_cay htc
+      LEFT JOIN lo l ON htc.id_lo = l.id_lo
+      WHERE htc.id_htc = $1
+    `, [id]);
+    if (result.rows.length === 0) return res.status(404).json({ success: false, error: 'Không tìm thấy' });
+    res.json({ success: true, data: result.rows[0] });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
 app.post('/api/hien-trang-cay', async (req, res) => {
   const { id_htc, id_lo, tong_ho_kk, cay_cao, cay_chua_cao, cay_kho_mu, cay_khong_pt, ho_trong, mat_do_cc } = req.body;
+  const finalId = id_htc || `HTC_${id_lo}_${Date.now()}`;
   try {
     await pool.query(
       `INSERT INTO hien_trang_cay (id_htc, id_lo, tong_ho_kk, cay_cao, cay_chua_cao, cay_kho_mu, cay_khong_pt, ho_trong, mat_do_cc)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-      [id_htc, id_lo, tong_ho_kk, cay_cao, cay_chua_cao, cay_kho_mu, cay_khong_pt, ho_trong, mat_do_cc]
+      [finalId, id_lo, tong_ho_kk, cay_cao, cay_chua_cao, cay_kho_mu, cay_khong_pt, ho_trong, mat_do_cc]
     );
     res.json({ success: true, message: 'Thêm thành công' });
   } catch (err) {
@@ -1172,13 +1224,28 @@ app.get('/api/khai-thac', async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
+app.get('/api/khai-thac/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await pool.query(`
+      SELECT kh.*, l.ten_lo FROM khai_thac kh
+      LEFT JOIN lo l ON kh.id_lo = l.id_lo
+      WHERE kh.id_kt = $1
+    `, [id]);
+    if (result.rows.length === 0) return res.status(404).json({ success: false, error: 'Không tìm thấy' });
+    res.json({ success: true, data: result.rows[0] });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
 app.post('/api/khai-thac', async (req, res) => {
   const { id_kt, id_lo, che_do_cao, phien_cao, nhip_do_cao, nam_mc, tuoi_cao, nam_cao_up, tinh_trang_mc } = req.body;
+  const finalId = id_kt || `KT_${id_lo}_${Date.now()}`;
   try {
     await pool.query(
       `INSERT INTO khai_thac (id_kt, id_lo, che_do_cao, phien_cao, nhip_do_cao, nam_mc, tuoi_cao, nam_cao_up, tinh_trang_mc)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-      [id_kt, id_lo, che_do_cao, phien_cao, nhip_do_cao, nam_mc, tuoi_cao, nam_cao_up, tinh_trang_mc]
+      [finalId, id_lo, che_do_cao, phien_cao, nhip_do_cao, nam_mc, tuoi_cao, nam_cao_up, tinh_trang_mc]
     );
     res.json({ success: true, message: 'Thêm thành công' });
   } catch (err) {
@@ -1223,13 +1290,28 @@ app.get('/api/san-luong', async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
+app.get('/api/san-luong/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await pool.query(`
+      SELECT sl.*, l.ten_lo FROM san_luong sl
+      LEFT JOIN lo l ON sl.id_lo = l.id_lo
+      WHERE sl.id_sl = $1
+    `, [id]);
+    if (result.rows.length === 0) return res.status(404).json({ success: false, error: 'Không tìm thấy' });
+    res.json({ success: true, data: result.rows[0] });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
 app.post('/api/san-luong', async (req, res) => {
   const { id_sl, id_lo, ns25_kg_ha, ns25_kg_cay, ns26_kg_ha, ns26_kg_cay, tong_lat_cao, san_luong, phan_loai, doi_tuong, tai_canh_nam } = req.body;
+  const finalId = id_sl || `SL_${id_lo}_${Date.now()}`; 
   try {
     await pool.query(
       `INSERT INTO san_luong (id_sl, id_lo, ns25_kg_ha, ns25_kg_cay, ns26_kg_ha, ns26_kg_cay, tong_lat_cao, san_luong, phan_loai, doi_tuong, tai_canh_nam)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
-      [id_sl, id_lo, ns25_kg_ha, ns25_kg_cay, ns26_kg_ha, ns26_kg_cay, tong_lat_cao, san_luong, phan_loai, doi_tuong, tai_canh_nam]
+      [finalId, id_lo, ns25_kg_ha, ns25_kg_cay, ns26_kg_ha, ns26_kg_cay, tong_lat_cao, san_luong, phan_loai, doi_tuong, tai_canh_nam]
     );
     res.json({ success: true, message: 'Thêm thành công' });
   } catch (err) {
@@ -1274,13 +1356,29 @@ app.get('/api/thong-tin-trong', async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
+// Thông tin trồng theo id
+app.get('/api/thong-tin-trong/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await pool.query(`
+      SELECT ttt.*, l.ten_lo FROM thong_tin_trong ttt
+      LEFT JOIN lo l ON ttt.id_lo = l.id_lo
+      WHERE ttt.id_ttt = $1
+    `, [id]);
+    if (result.rows.length === 0) return res.status(404).json({ success: false, error: 'Không tìm thấy' });
+    res.json({ success: true, data: result.rows[0] });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
 app.post('/api/thong-tin-trong', async (req, res) => {
   const { id_ttt, id_lo, hang_dat, phuong_phap_trong, khoang_cach_trong, mat_do_tk } = req.body;
+  const finalId = id_ttt || `TTT_${id_lo}_${Date.now()}`; 
   try {
     await pool.query(
       `INSERT INTO thong_tin_trong (id_ttt, id_lo, hang_dat, phuong_phap_trong, khoang_cach_trong, mat_do_tk)
        VALUES ($1, $2, $3, $4, $5, $6)`,
-      [id_ttt, id_lo, hang_dat, phuong_phap_trong, khoang_cach_trong, mat_do_tk]
+      [finalId, id_lo, hang_dat, phuong_phap_trong, khoang_cach_trong, mat_do_tk]
     );
     res.json({ success: true, message: 'Thêm thành công' });
   } catch (err) {
