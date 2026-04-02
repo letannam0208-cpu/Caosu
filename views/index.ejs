@@ -1346,20 +1346,26 @@ function renderRealLots() {
     }
 
     // Nhãn tên lô
-    if (labelsVis && p.ten_lo) {
-      const z = dashMap.getZoom();
-      const fs = Math.max(2, (z - 3) * 0.75);
-      if (fs > 0) {
-        const center = L.geoJSON(feat).getBounds().getCenter();
-        const col = getLotColorReal(p, mapViewMode);
-        const cleanName = p.ten_lo.replace(/\s*-\s*KV\s*\d+\s*$/i, '');
-        const namCuoi = p.nam_trong ? String(p.nam_trong).slice(-2) : '';
-        const line1 = namCuoi ? `${cleanName} - ${namCuoi}` : cleanName;
-        const html = `<div style="background:transparent; color:#fff; font-size:${fs}px; padding:${Math.max(2, fs * 0.4)}px ${Math.max(4, fs * 0.7)}px; border-radius:4px; border-left:${Math.max(2, fs * 0.25)}px solid ${col}; white-space:nowrap; pointer-events:none; font-family:'Be Vietnam Pro',sans-serif; line-height:1.6; font-weight:700; text-shadow:0 1px 3px rgba(0,0,0,0.5); transform:scale(${z / 16}); transform-origin:top left; text-align:center;"><strong style="display:block">${line1}</strong>${p.giong ? `<span style="display:block; margin-top:2px">${p.giong}</span>` : ''}</div>`;
-        const lbl = L.marker(center, { icon: L.divIcon({ html, className: '', iconAnchor: [0, 0] }) }).addTo(dashMap);
-        labelLayers.push(lbl);
-      }
-    }
+if (labelsVis && p.ten_lo) {
+  const z = dashMap.getZoom();
+  // Điều chỉnh font-size trực tiếp, không scale
+  let fontSize = 12;
+  if (z >= 14) fontSize = 14;
+  else if (z >= 12) fontSize = 12;
+  else if (z >= 10) fontSize = 10;
+  else fontSize = 8;
+  
+  const center = L.geoJSON(feat).getBounds().getCenter();
+  const col = getLotColorReal(p, mapViewMode);
+  const cleanName = p.ten_lo.replace(/\s*-\s*KV\s*\d+\s*$/i, '');
+  const namCuoi = p.nam_trong ? String(p.nam_trong).slice(-2) : '';
+  const line1 = namCuoi ? `${cleanName} - ${namCuoi}` : cleanName;
+  // Tạo div với kích thước cố định, không scale
+  const html = `<div style="background:rgba(0,0,0,0.7); color:#fff; font-size:${fontSize}px; padding:2px 6px; border-radius:4px; border-left:3px solid ${col}; white-space:nowrap; pointer-events:none; font-family:'Be Vietnam Pro',sans-serif; font-weight:600; text-shadow:0 1px 2px rgba(0,0,0,0.5);"><strong>${line1}</strong>${p.giong ? `<span style="margin-left:4px; font-size:${fontSize-2}px;">(${p.giong})</span>` : ''}</div>`;
+  const icon = L.divIcon({ html, className: 'custom-label-icon', iconSize: [null, null], iconAnchor: [0, 0] });
+  const lbl = L.marker(center, { icon: icon, interactive: false }).addTo(dashMap);
+  labelLayers.push(lbl);
+}
     count++;
   });
 
