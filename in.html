@@ -1113,6 +1113,7 @@ let mapViewMode = 'nt';
 let selectedIdx = new Set();
 let currentTool = 'pointer';
 let filterNT = new Set(), filterNam = new Set(), filterGiong = new Set(), filterPhienCao = new Set(), filterNhipDo = new Set(), filterQuyHoach = new Set();
+let filterKhuVuc = new Set(), filterTuoiCao = new Set(), filterCheDoCao = new Set();  // BỔ SUNG 3 FILTER
 let caosuFeatures = [];
 
 // Màu sắc cho các đối tượng (giống, năm trồng, Đội)
@@ -1471,6 +1472,10 @@ function updateMapFilters(type, selectEl) {
     else if (type === 'phien_cao') filterPhienCao = new Set(fullPhienCao);
     else if (type === 'nhip_do_cao') filterNhipDo = new Set(fullNhipDo);
     else if (type === 'quy_hoach_tai_canh') filterQuyHoach = new Set(fullQuyHoach);
+    // === THÊM 3 CASE MỚI ===
+    else if (type === 'khu_vuc') filterKhuVuc = new Set(fullKhuVuc);
+    else if (type === 'tuoi_cao') filterTuoiCao = new Set(fullTuoiCao);
+    else if (type === 'che_do_cao') filterCheDoCao = new Set(fullCheDoCao);
   } else {
     if (type === 'NT') filterNT = new Set([val]);
     else if (type === 'nam') filterNam = new Set([val]);
@@ -1478,6 +1483,10 @@ function updateMapFilters(type, selectEl) {
     else if (type === 'phien_cao') filterPhienCao = new Set([val]);
     else if (type === 'nhip_do_cao') filterNhipDo = new Set([val]);
     else if (type === 'quy_hoach_tai_canh') filterQuyHoach = new Set([val]);
+    // === THÊM 3 CASE MỚI ===
+    else if (type === 'khu_vuc') filterKhuVuc = new Set([val]);
+    else if (type === 'tuoi_cao') filterTuoiCao = new Set([val]);
+    else if (type === 'che_do_cao') filterCheDoCao = new Set([val]);
   }
   renderRealLots();
 }
