@@ -253,7 +253,7 @@ tbody tr:last-child td{border-bottom:none;}
       <div class="toolbar">
         <div class="filter-bar">
           <input type="text" id="searchInput" class="search-box" placeholder="🔍 Tìm kiếm lô cây, mã định danh...">
-          <select id="doiFilter" class="select-filter"><option value="">Tất cả đơn vị</option></select>
+          <select id="doiFilter" class="select-filter"><option value="">Tất cả đội</option></select>
           <select id="giongFilter" class="select-filter"><option value="">Tất cả giống</option></select>
           <select id="namFilter" class="select-filter"><option value="">Tất cả năm</option></select>
           <select id="phienFilter" class="select-filter"><option value="">Tất cả phiên</option><option value="1">Phiên 1</option><option value="2">Phiên 2</option></select>
@@ -265,7 +265,7 @@ tbody tr:last-child td{border-bottom:none;}
         <button id="btnAddLo" class="btn-add" style="margin-bottom:16px;"><i class="fas fa-plus"></i> Thêm lô cây</button>
         <table>
           <thead>
-            <tr><th>Lô Cây</th><th>Mã định danh</th><th>Đơn vị</th><th>Giống</th><th>Năm trồng</th><th>Cao trình TB (m)</th><th>Hành động</th></tr>
+            <tr><th>Lô Cây</th><th>Mã định danh</th><th>Đội</th><th>Giống</th><th>Năm trồng</th><th>Cao trình TB (m)</th><th>Hành động</th></tr>
           </thead>
           <tbody id="tableBody"></tbody>
         </table>
@@ -516,7 +516,7 @@ function showLoForm(l = null) {
     </div>
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:15px;">
       <div><label>Cao trình TB (m)</label><input type="number" step="0.1" id="cao_trinh_tb" name="cao_trinh_tb" class="search-box" style="width:100%;" value="${l ? l.cao_trinh_tb : ''}"></div>
-      <div><label>Đơn vị *</label><select id="id_don_vi" name="id_don_vi" class="select-filter" style="width:100%;" required></select></div>
+      <div><label>Đội *</label><select id="id_don_vi" name="id_don_vi" class="select-filter" style="width:100%;" required></select></div>
     </div>
     <div><label>Hành chính</label><select id="id_hc" name="id_hc" class="select-filter" style="width:100%;"></select></div>
     <div style="margin-top:24px; text-align:right;">
@@ -541,7 +541,7 @@ function showLoForm(l = null) {
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData);
     const id_lo = document.getElementById('id_lo').value;
-    if(!data.id_don_vi) { alert('Vui lòng chọn đơn vị'); return; }
+    if(!data.id_don_vi) { alert('Vui lòng chọn đội'); return; }
     
     const url = id_lo ? `/api/lo-cay/${id_lo}` : '/api/lo-cay';
     const method = id_lo ? 'PUT' : 'POST';

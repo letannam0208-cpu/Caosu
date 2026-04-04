@@ -791,66 +791,63 @@ td.mono{font-family:monospace;font-size:11px;color:var(--muted)}
       </div>
     </div>
     <!-- Row 2: filters with dropdowns -->
-    <div class="map-topbar" style="background:rgba(15,23,41,0.6);padding:7px 14px;gap:12px;display:flex;align-items:center">
-      <span class="map-label" style="flex-shrink:0" data-lang="team">Đội:</span>
-      <select id="filter-nt" style="
-        background:var(--s2);border:1px solid var(--border);border-radius:var(--r);
-        color:var(--muted2);padding:6px 10px;font-size:11px;font-family:var(--font-b);
-        cursor:pointer;transition:.2s;max-width:120px;
-      " onchange="updateMapFilters('NT', this)">
-        <option value="all" data-lang="all-farms">Tất cả</option>
-      </select>
-      <div class="map-sep"></div>
-      <span class="map-label" style="flex-shrink:0" data-lang="plant-year">Năm trồng:</span>
-      <select id="filter-nam" style="
-        background:var(--s2);border:1px solid var(--border);border-radius:var(--r);
-        color:var(--muted2);padding:6px 10px;font-size:11px;font-family:var(--font-b);
-        cursor:pointer;transition:.2s;max-width:120px;
-      " onchange="updateMapFilters('nam', this)">
-        <option value="all" data-lang="all-years">Tất cả</option>
-      </select>
-      <div class="map-sep"></div>
-      <span class="map-label" style="flex-shrink:0" data-lang="species">Giống cây:</span>
-      <select id="filter-giong" style="
-        background:var(--s2);border:1px solid var(--border);border-radius:var(--r);
-        color:var(--muted2);padding:6px 10px;font-size:11px;font-family:var(--font-b);
-        cursor:pointer;transition:.2s;max-width:120px;
-      " onchange="updateMapFilters('giong', this)">
-        <option value="all" data-lang="all-species">Tất cả</option>
-      </select>
-    <div class="map-sep"></div>
+<div class="map-topbar" style="background:rgba(15,23,41,0.6);padding:7px 14px;gap:12px;display:flex;align-items:center;flex-wrap:wrap;">
+  <span class="map-label" style="flex-shrink:0" data-lang="team">Đội:</span>
+  <select id="filter-nt" style="background:var(--s2);border:1px solid var(--border);border-radius:var(--r);color:var(--muted2);padding:6px 10px;font-size:11px;font-family:var(--font-b);cursor:pointer;transition:.2s;max-width:120px;" onchange="updateMapFilters('NT', this)">
+    <option value="all" data-lang="all-farms">Tất cả</option>
+  </select>
+  <div class="map-sep"></div>
 
-        <span class="map-label" style="flex-shrink:0">Phiên cạo:</span>
-        <select id="filter-phien_cao"
-        style="background:var(--s2);border:1px solid var(--border);border-radius:var(--r);
-        color:var(--muted2);padding:6px 10px;font-size:11px;font-family:var(--font-b);
-        cursor:pointer;transition:.2s;max-width:120px;"
-        onchange="updateMapFilters('phien_cao', this)">
-        <option value="all">Tất cả</option>
-        </select>
+  <span class="map-label" style="flex-shrink:0" data-lang="plant-year">Năm trồng:</span>
+  <select id="filter-nam" style="background:var(--s2);border:1px solid var(--border);border-radius:var(--r);color:var(--muted2);padding:6px 10px;font-size:11px;font-family:var(--font-b);cursor:pointer;transition:.2s;max-width:120px;" onchange="updateMapFilters('nam', this)">
+    <option value="all" data-lang="all-years">Tất cả</option>
+  </select>
+  <div class="map-sep"></div>
 
-        <div class="map-sep"></div>
+  <span class="map-label" style="flex-shrink:0" data-lang="species">Giống cây:</span>
+  <select id="filter-giong" style="background:var(--s2);border:1px solid var(--border);border-radius:var(--r);color:var(--muted2);padding:6px 10px;font-size:11px;font-family:var(--font-b);cursor:pointer;transition:.2s;max-width:120px;" onchange="updateMapFilters('giong', this)">
+    <option value="all" data-lang="all-species">Tất cả</option>
+  </select>
+  <div class="map-sep"></div>
 
-        <span class="map-label" style="flex-shrink:0">Nhịp độ cạo:</span>
-        <select id="filter-Nhip_do_cao"
-        style="background:var(--s2);border:1px solid var(--border);border-radius:var(--r);
-        color:var(--muted2);padding:6px 10px;font-size:11px;font-family:var(--font-b);
-        cursor:pointer;transition:.2s;max-width:120px;"
-        onchange="updateMapFilters('nhip_do_cao', this)">
-        <option value="all">Tất cả</option>
-        </select>
+  <span class="map-label" style="flex-shrink:0">Phiên cạo:</span>
+  <select id="filter-phien_cao" style="background:var(--s2);border:1px solid var(--border);border-radius:var(--r);color:var(--muted2);padding:6px 10px;font-size:11px;font-family:var(--font-b);cursor:pointer;transition:.2s;max-width:120px;" onchange="updateMapFilters('phien_cao', this)">
+    <option value="all">Tất cả</option>
+  </select>
+  <div class="map-sep"></div>
 
-        <div class="map-sep"></div>
+  <span class="map-label" style="flex-shrink:0">Nhịp độ cạo:</span>
+  <select id="filter-Nhip_do_cao" style="background:var(--s2);border:1px solid var(--border);border-radius:var(--r);color:var(--muted2);padding:6px 10px;font-size:11px;font-family:var(--font-b);cursor:pointer;transition:.2s;max-width:120px;" onchange="updateMapFilters('nhip_do_cao', this)">
+    <option value="all">Tất cả</option>
+  </select>
+  <div class="map-sep"></div>
 
-        <span class="map-label" style="flex-shrink:0">Quy hoạch tái canh:</span>
-        <select id="filter-quy_hoach_tai_canh"
-        style="background:var(--s2);border:1px solid var(--border);border-radius:var(--r);
-        color:var(--muted2);padding:6px 10px;font-size:11px;font-family:var(--font-b);
-        cursor:pointer;transition:.2s;max-width:120px;"
-        onchange="updateMapFilters('quy_hoach_tai_canh', this)">
-        <option value="all">Tất cả</option>
-        </select>
-    </div>
+  <span class="map-label" style="flex-shrink:0">Quy hoạch tái canh:</span>
+  <select id="filter-quy_hoach_tai_canh" style="background:var(--s2);border:1px solid var(--border);border-radius:var(--r);color:var(--muted2);padding:6px 10px;font-size:11px;font-family:var(--font-b);cursor:pointer;transition:.2s;max-width:120px;" onchange="updateMapFilters('quy_hoach_tai_canh', this)">
+    <option value="all">Tất cả</option>
+  </select>
+  <div class="map-sep"></div>
+
+  <!-- BỘ LỌC MỚI: KHU VỰC -->
+  <span class="map-label" style="flex-shrink:0">Khu vực:</span>
+  <select id="filter-khu-vuc" style="background:var(--s2);border:1px solid var(--border);border-radius:var(--r);color:var(--muted2);padding:6px 10px;font-size:11px;font-family:var(--font-b);cursor:pointer;transition:.2s;max-width:120px;" onchange="updateMapFilters('khu_vuc', this)">
+    <option value="all">Tất cả</option>
+  </select>
+  <div class="map-sep"></div>
+
+  <!-- BỘ LỌC MỚI: TUỔI CẠO -->
+  <span class="map-label" style="flex-shrink:0">Tuổi cạo:</span>
+  <select id="filter-tuoi-cao" style="background:var(--s2);border:1px solid var(--border);border-radius:var(--r);color:var(--muted2);padding:6px 10px;font-size:11px;font-family:var(--font-b);cursor:pointer;transition:.2s;max-width:120px;" onchange="updateMapFilters('tuoi_cao', this)">
+    <option value="all">Tất cả</option>
+  </select>
+  <div class="map-sep"></div>
+
+  <!-- BỘ LỌC MỚI: CHẾ ĐỘ CẠO -->
+  <span class="map-label" style="flex-shrink:0">Chế độ cạo:</span>
+  <select id="filter-che-do-cao" style="background:var(--s2);border:1px solid var(--border);border-radius:var(--r);color:var(--muted2);padding:6px 10px;font-size:11px;font-family:var(--font-b);cursor:pointer;transition:.2s;max-width:140px;" onchange="updateMapFilters('che_do_cao', this)">
+    <option value="all">Tất cả</option>
+  </select>
+</div>
 
     <!-- Map canvas + overlays -->
     <div class="map-canvas-wrap">
@@ -1142,6 +1139,7 @@ async function fetchAPI(url) {
 }
 
 let fullNT = new Set(), fullNam = new Set(), fullGiong = new Set(), fullPhienCao = new Set(), fullNhipDo = new Set(), fullQuyHoach = new Set();
+let fullKhuVuc = new Set(), fullTuoiCao = new Set(), fullCheDoCao = new Set();  // Bộ lọc mới
 
 async function loadCaosuData() {
   try {
@@ -1155,6 +1153,8 @@ async function loadCaosuData() {
     }
     fullNT.clear(); fullNam.clear(); fullGiong.clear();
     fullPhienCao.clear(); fullNhipDo.clear(); fullQuyHoach.clear();
+    fullKhuVuc.clear(); fullTuoiCao.clear(); fullCheDoCao.clear();  // Xóa dữ liệu cũ
+
     caosuFeatures.forEach(f => {
       const p = f.properties;
       if (p.doi) fullNT.add(p.doi);
@@ -1163,7 +1163,11 @@ async function loadCaosuData() {
       if (p.phien_cao) fullPhienCao.add(p.phien_cao);
       if (p.nhip_do_cao) fullNhipDo.add(p.nhip_do_cao);
       if (p.tai_canh_nam) fullQuyHoach.add(p.tai_canh_nam);
+      if (p.khu_vuc) fullKhuVuc.add(p.khu_vuc);
+      if (p.tuoi_cao) fullTuoiCao.add(String(p.tuoi_cao));
+      if (p.che_do_cao) fullCheDoCao.add(p.che_do_cao);
     });
+
     // Khởi tạo filter mặc định là tất cả
     filterNT = new Set(fullNT);
     filterNam = new Set(fullNam);
@@ -1171,7 +1175,18 @@ async function loadCaosuData() {
     filterPhienCao = new Set(fullPhienCao);
     filterNhipDo = new Set(fullNhipDo);
     filterQuyHoach = new Set(fullQuyHoach);
-    console.log('Filters initialized:', { fullNT: Array.from(fullNT), fullNam: Array.from(fullNam), fullGiong: Array.from(fullGiong) });
+    filterKhuVuc = new Set(fullKhuVuc);
+    filterTuoiCao = new Set(fullTuoiCao);
+    filterCheDoCao = new Set(fullCheDoCao);
+
+    console.log('Filters initialized:', {
+      fullNT: Array.from(fullNT),
+      fullNam: Array.from(fullNam),
+      fullGiong: Array.from(fullGiong),
+      fullKhuVuc: Array.from(fullKhuVuc),
+      fullTuoiCao: Array.from(fullTuoiCao),
+      fullCheDoCao: Array.from(fullCheDoCao)
+    });
   } catch (err) {
     console.error('❌ Lỗi loadCaosuData:', err);
     caosuFeatures = [];
@@ -1238,6 +1253,40 @@ async function buildFilterUI() {
       quyHoachEl.appendChild(opt);
     });
   }
+
+  // === BỔ SUNG 3 BỘ LỌC MỚI ===
+  const khuVucEl = document.getElementById('filter-khu-vuc');
+  if (khuVucEl) {
+    khuVucEl.innerHTML = '<option value="all">Tất cả</option>';
+    Array.from(fullKhuVuc).sort().forEach(v => {
+      const opt = document.createElement('option');
+      opt.value = v;
+      opt.textContent = v;
+      khuVucEl.appendChild(opt);
+    });
+  }
+
+  const tuoiCaoEl = document.getElementById('filter-tuoi-cao');
+  if (tuoiCaoEl) {
+    tuoiCaoEl.innerHTML = '<option value="all">Tất cả</option>';
+    Array.from(fullTuoiCao).sort((a,b) => Number(a) - Number(b)).forEach(v => {
+      const opt = document.createElement('option');
+      opt.value = v;
+      opt.textContent = v;
+      tuoiCaoEl.appendChild(opt);
+    });
+  }
+
+  const cheDoCaoEl = document.getElementById('filter-che-do-cao');
+  if (cheDoCaoEl) {
+    cheDoCaoEl.innerHTML = '<option value="all">Tất cả</option>';
+    Array.from(fullCheDoCao).sort().forEach(v => {
+      const opt = document.createElement('option');
+      opt.value = v;
+      opt.textContent = v;
+      cheDoCaoEl.appendChild(opt);
+    });
+  }
 }
 
 function featureVisible(p) {
@@ -1249,14 +1298,21 @@ function featureVisible(p) {
   const pc = p.phien_cao || '';
   const nd = p.nhip_do_cao || '';
   const qh = p.tai_canh_nam || '';
-  // Nếu filter đang rỗng (chưa có dữ liệu) thì coi như true
+  const kv = p.khu_vuc || '';
+  const tc = String(p.tuoi_cao || '');
+  const cdc = p.che_do_cao || '';
+
   const okNT = filterNT.size === 0 || filterNT.has(nt);
   const okNam = filterNam.size === 0 || filterNam.has(nam);
   const okGiong = filterGiong.size === 0 || filterGiong.has(g);
   const okPC = filterPhienCao.size === 0 || filterPhienCao.has(pc);
   const okND = filterNhipDo.size === 0 || filterNhipDo.has(nd);
   const okQH = filterQuyHoach.size === 0 || filterQuyHoach.has(qh);
-  return okNT && okNam && okGiong && okPC && okND && okQH;
+  const okKV = filterKhuVuc.size === 0 || filterKhuVuc.has(kv);
+  const okTC = filterTuoiCao.size === 0 || filterTuoiCao.has(tc);
+  const okCDC = filterCheDoCao.size === 0 || filterCheDoCao.has(cdc);
+
+  return okNT && okNam && okGiong && okPC && okND && okQH && okKV && okTC && okCDC;
 }
 
 function getLotColorReal(p, mode) {
