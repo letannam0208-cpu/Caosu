@@ -157,7 +157,7 @@ app.get('/api/lo-cao-su', authenticateToken, async (req, res) => {
         l.id_lo, l.ten_lo, l.giong, l.nam_trong,
         dv.doi, dv.du_an, dv.khu_vuc,
         dt.dien_tich_map,
-        kh.che_do_cao, kh.phien_cao, kh.nhip_do_cao,
+        kh.che_do_cao, kh.phien_cao, kh.nhip_do_cao, kh.tuoi_cao,
         htc.cay_cao,
         sl.tai_canh_nam,
         ST_AsGeoJSON(ST_Transform(l.geometry, 4326)) AS geometry
@@ -184,7 +184,9 @@ app.get('/api/lo-cao-su', authenticateToken, async (req, res) => {
         cay_cao: row.cay_cao,
         phien_cao: row.phien_cao,
         nhip_do_cao: row.nhip_do_cao,
-        tai_canh_nam: row.tai_canh_nam
+        tai_canh_nam: row.tai_canh_nam,
+        khu_vuc: row.khu_vuc,          // thêm khu_vuc
+        tuoi_cao: row.tuoi_cao          // thêm tuoi_cao
       }
     }));
     res.json({ type: "FeatureCollection", features });
