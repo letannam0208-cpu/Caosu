@@ -1964,7 +1964,7 @@ if (focusLotId) {
   if (idx !== -1) {
     setTimeout(() => {
       flyToFeature(idx);
-      showToast(`📍 Đã chuyển đến lô: ${caosuFeatures[idx].properties.ten_lo || focusLotId}`, '📍');
+      showToast(` Đã chuyển đến lô: ${caosuFeatures[idx].properties.ten_lo || focusLotId}`, '📍');
     }, 500);
   } else {
     showToast(`⚠️ Không tìm thấy lô với ID: ${focusLotId}`, '⚠️');
