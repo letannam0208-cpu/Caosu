@@ -20,6 +20,9 @@
   --muted2: #8fa3bd;
   --accent: #10b981;
   --accentB: #06b6d4;
+  --warn: #f59e0b;
+  --danger: #ef4444;
+  --purple: #a78bfa;
   --font-d: 'Syne', sans-serif;
   --font-b: 'Be Vietnam Pro', sans-serif;
   --nav-w: 200px;
@@ -43,6 +46,7 @@ body{
 ::-webkit-scrollbar{width:6px;height:6px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--s3);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--s2)}
 #topbar{
   height:var(--top-h);
   flex-shrink:0;
@@ -56,135 +60,172 @@ body{
   z-index:100;
   backdrop-filter:blur(10px);
 }
-.tb-logo{display:flex;align-items:center;gap:12px;text-decoration:none;flex-shrink:0;}
+#topbar::after{
+  content:'';
+  position:absolute;
+  bottom:0;
+  left:0;
+  right:0;
+  height:1px;
+  background:linear-gradient(90deg,transparent,rgba(16,185,129,0.25),transparent);
+}
+.tb-logo{display:flex;align-items:center;gap:12px;text-decoration:none;flex-shrink:0;transition:all 0.3s;}
+.tb-logo:hover{transform:translateY(-2px);}
 .tb-icon{
   width:40px;height:40px;border-radius:10px;
   background:linear-gradient(135deg,#10b981,#059669);
   display:flex;align-items:center;justify-content:center;font-size:20px;
-  box-shadow:0 4px 16px rgba(16,185,129,0.25);
+  box-shadow:0 4px 16px rgba(16,185,129,0.25);flex-shrink:0;
 }
-.tb-title{font-family:var(--font-d);font-size:14px;letter-spacing:0.1em;font-weight:700;}
-.tb-sub{font-size:10px;color:var(--muted);text-transform:uppercase;}
+.tb-title{font-family:var(--font-d);font-size:14px;letter-spacing:0.1em;color:var(--text);font-weight:700;}
+.tb-sub{font-size:10px;color:var(--muted);letter-spacing:0.12em;text-transform:uppercase;margin-top:2px;}
 .tb-sep{width:1px;height:28px;background:var(--border);margin:0 4px;}
-.tb-pill{background:transparent;border:none;padding:6px 12px;font-size:12px;color:var(--muted2);display:flex;align-items:center;gap:8px;border-radius:6px;}
-.tb-pill strong{color:var(--accent);}
+.tb-pill{
+  background:transparent;border:none;padding:6px 12px;font-size:12px;
+  color:var(--muted2);display:flex;align-items:center;gap:8px;
+  border-radius:6px;transition:all 0.2s;
+}
+.tb-pill:hover{background:rgba(255,255,255,0.05);}
+.tb-pill strong{color:var(--accent);font-weight:600;font-size:13px;}
 .live-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent);animation:blink 2s infinite;}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:0.4}}
 .tb-right{margin-left:auto;display:flex;align-items:center;gap:16px;}
 .icon-btn{
   width:36px;height:36px;border-radius:var(--r);background:rgba(255,255,255,0.05);
   border:1px solid var(--border);color:var(--muted2);cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
+  display:flex;align-items:center;justify-content:center;font-size:15px;transition:all 0.2s;
 }
-.icon-btn:hover{color:var(--accentB);background:rgba(6,182,212,0.1);}
+.icon-btn:hover{color:var(--accentB);background:rgba(6,182,212,0.1);border-color:rgba(6,182,212,0.2);}
 .tb-avatar{
   width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#10b981,#06b6d4);
   display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;
-  color:#fff;cursor:pointer;border:2px solid var(--border2);
+  color:#fff;cursor:pointer;border:2px solid var(--border2);transition:all 0.2s;
 }
+.tb-avatar:hover{transform:scale(1.05);border-color:var(--accent);}
 .tb-user-info{text-align:right;font-size:12px;}
-.tb-user-name{font-weight:600;}
-.tb-user-role{font-size:11px;color:var(--muted);}
+.tb-user-name{font-weight:600;color:var(--text);}
+.tb-user-role{font-size:11px;color:var(--muted);margin-top:2px;}
 #body{display:flex;flex:1;overflow:hidden;}
 #nav{
   width:var(--nav-w);flex-shrink:0;background:linear-gradient(180deg,var(--s1),var(--bg));
   border-right:1px solid var(--border);display:flex;flex-direction:column;
   overflow-y:auto;padding:16px 10px;gap:4px;
 }
-.nav-section-label{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--muted);padding:8px 12px 6px;}
+.nav-section-label{
+  font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;
+  color:var(--muted);padding:8px 12px 6px;margin-top:8px;margin-bottom:2px;
+}
 .nav-item{
   display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--r);
-  cursor:pointer;color:var(--muted2);font-size:13px;font-weight:500;
-  border:1px solid transparent;text-decoration:none;
+  cursor:pointer;transition:all 0.2s;color:var(--muted2);font-size:13px;font-weight:500;
+  border:1px solid transparent;position:relative;text-decoration:none;white-space:nowrap;
 }
-.nav-item:hover{background:rgba(255,255,255,0.05);color:var(--text);}
-.nav-item.active{background:rgba(16,185,129,0.15);border-color:var(--accent);color:var(--accent);}
-.nav-icon{width:16px;text-align:center;}
+.nav-item:hover{background:rgba(255,255,255,0.05);color:var(--text);border-color:var(--border2);}
+.nav-item.active{background:rgba(16,185,129,0.15);border-color:var(--accent);color:var(--accent);font-weight:600;box-shadow:inset 0 0 8px rgba(16,185,129,0.1);}
+.nav-item.active::before{content:'';position:absolute;left:0;top:20%;bottom:20%;width:3px;border-radius:0 2px 2px 0;background:var(--accent);}
+.nav-icon{width:16px;height:16px;flex-shrink:0;text-align:center;font-size:13px;}
+.nav-badge{margin-left:auto;background:rgba(239,68,68,0.2);color:#fca5a5;font-size:10px;font-weight:700;padding:2px 6px;border-radius:8px;flex-shrink:0;}
 .nav-logout{margin-top:auto;border-top:1px solid var(--border);padding-top:12px;}
+.nav-logout .nav-item{color:#fca5a5;border:1px solid rgba(239,68,68,0.2);background:rgba(239,68,68,0.08);}
+.nav-logout .nav-item:hover{background:rgba(239,68,68,0.15);border-color:rgba(239,68,68,0.4);color:#ff9999;}
 #content{flex:1;overflow-y:auto;padding:20px 24px;background:linear-gradient(135deg,rgba(10,14,26,0),rgba(16,185,129,0.03));}
 .page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;gap:16px;flex-wrap:wrap;}
-.page-title{font-family:var(--font-d);font-size:28px;font-weight:800;letter-spacing:-0.02em;}
+.page-title{font-family:var(--font-d);font-size:28px;font-weight:800;color:var(--text);letter-spacing:-0.02em;margin-bottom:4px;}
 .page-subtitle{font-size:12px;color:var(--muted);}
 .btn-add{
   background:linear-gradient(135deg,var(--accent),#059669);color:#fff;border:none;
-  padding:10px 20px;border-radius:var(--r);font-size:13px;font-weight:600;
-  cursor:pointer;display:inline-flex;align-items:center;gap:8px;box-shadow:0 4px 12px rgba(16,185,129,0.2);
+  padding:10px 20px;border-radius:var(--r);font-family:var(--font-b);font-size:13px;
+  font-weight:600;cursor:pointer;transition:all 0.2s;display:inline-flex;align-items:center;
+  gap:8px;flex-shrink:0;box-shadow:0 4px 12px rgba(16,185,129,0.2);
 }
-.btn-add:hover{transform:translateY(-2px);}
+.btn-add:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(16,185,129,0.3);}
+.btn-add:active{transform:scale(0.98);}
 .filter-bar{
   display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr 1fr;gap:12px;margin-bottom:12px;
-  background:var(--s1);padding:14px;border-radius:var(--r-lg);border:1px solid var(--border);
+  background:var(--s1);padding:14px;border-radius:var(--r-lg);border:1px solid var(--border);box-shadow:var(--shadow-sm);
 }
 .search-box,.select-filter{
   padding:10px 14px;border-radius:var(--r);background:var(--s2);border:1px solid var(--border);
-  color:var(--text);font-size:12px;
+  color:var(--text);font-family:var(--font-b);font-size:12px;transition:all 0.2s;
 }
-.search-box:focus,.select-filter:focus{outline:none;border-color:var(--accent);}
-.show-info{font-size:12px;color:var(--muted);margin-bottom:12px;display:flex;align-items:center;gap:6px;}
-
-/* Bảng với thanh cuộn ngang cố định */
-.table-wrapper {
-  background: var(--s1);
-  border: 1px solid var(--border);
-  border-radius: var(--r-lg);
-  box-shadow: var(--shadow-sm);
-  display: flex;
-  flex-direction: column;
-  height: calc(100vh - 280px);
-  min-height: 400px;
+.search-box:focus,.select-filter:focus{outline:none;border-color:var(--accent);background:var(--s3);box-shadow:0 0 12px rgba(16,185,129,0.15);}
+.select-filter{cursor:pointer;}
+.show-info{font-size:12px;color:var(--muted);margin-bottom:12px;display:flex;align-items:center;gap:6px;padding:0 2px;}
+.table-container{
+  background:var(--s1);
+  border:1px solid var(--border);
+  border-radius:var(--r-lg);
+  overflow-x:scroll;           /* Luôn hiển thị thanh cuộn ngang */
+  overflow-y:auto;
+  box-shadow:var(--shadow-sm);
+  scrollbar-width:thin;
+  scrollbar-color:var(--accent) var(--s3);
+  position:relative;
 }
-.table-container {
-  flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
-  position: relative;
+/* Tùy chỉnh thanh cuộn WebKit */
+.table-container::-webkit-scrollbar {
+  height: 8px;
 }
-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 12px;
-  min-width: 2400px;
+.table-container::-webkit-scrollbar-track {
+  background: var(--s3);
+  border-radius: 4px;
 }
-thead {
-  background: linear-gradient(180deg, var(--s2), var(--s1));
+.table-container::-webkit-scrollbar-thumb {
+  background: var(--accent);
+  border-radius: 4px;
+}
+.table-container::-webkit-scrollbar-thumb:hover {
+  background: var(--accentB);
+}
+/* Gradient mờ bên phải báo hiệu có thể cuộn */
+.table-container::after {
+  content: '';
   position: sticky;
+  right: 0;
   top: 0;
-  z-index: 10;
+  bottom: 0;
+  width: 30px;
+  background: linear-gradient(90deg, transparent, rgba(0,0,0,0.4));
+  pointer-events: none;
+  z-index: 5;
+  display: block;
+  float: right;
 }
-th, td {
-  padding: 10px 12px;
-  text-align: left;
-  border-bottom: 1px solid var(--border);
-  white-space: nowrap;
+table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:12px;
+  min-width:2400px;  /* Đảm bảo bảng rộng để xuất hiện thanh cuộn */
 }
-th {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--muted2);
-  text-transform: uppercase;
-  border-bottom: 1px solid var(--border2);
+thead{
+  background:linear-gradient(180deg,var(--s2),var(--s1));
+  position:sticky;
+  top:0;
+  z-index:10;
 }
-tbody tr:hover { background: rgba(16,185,129,0.04); }
-.horizontal-scrollbar {
-  overflow-x: auto;
-  overflow-y: hidden;
-  background: var(--s2);
-  border-top: 1px solid var(--border);
-  border-radius: 0 0 var(--r-lg) var(--r-lg);
-  scrollbar-width: thin;
+th{
+  padding:12px 10px;
+  text-align:left;
+  border-bottom:1px solid var(--border2);
+  font-size:11px;
+  font-weight:700;
+  color:var(--muted2);
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  white-space:nowrap;
 }
-.horizontal-scrollbar::-webkit-scrollbar { height: 8px; }
-.horizontal-scrollbar::-webkit-scrollbar-track { background: var(--s3); border-radius: 4px; }
-.horizontal-scrollbar::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 4px; }
-.scroll-spacer { height: 1px; width: 2400px; }
-.btn-dash{
-  background:rgba(16,185,129,0.2);border:1px solid rgba(16,185,129,0.4);color:var(--accent);padding:5px 10px;border-radius:var(--r);font-size:11px;cursor:pointer;font-weight:600;
+td{
+  padding:10px;
+  border-bottom:1px solid var(--border);
+  white-space:nowrap;
 }
-.btn-dash:hover{background:rgba(16,185,129,0.3);}
-.btn-view{
-  background:rgba(239,68,68,0.2);border:1px solid rgba(239,68,68,0.4);color:#fca5a5;padding:5px 10px;border-radius:var(--r);font-size:11px;cursor:pointer;font-weight:600;
-}
-.btn-view:hover{background:rgba(239,68,68,0.3);}
+tbody tr{transition:all 0.15s;}
+tbody tr:hover{background:rgba(16,185,129,0.04);}
+tbody tr:last-child td{border-bottom:none;}
+.btn-dash{background:rgba(16,185,129,0.2);border:1px solid rgba(16,185,129,0.4);color:var(--accent);padding:5px 10px;border-radius:var(--r);font-size:11px;cursor:pointer;transition:all 0.18s;font-weight:600;}
+.btn-dash:hover{background:rgba(16,185,129,0.3);box-shadow:0 2px 8px rgba(16,185,129,0.15);transform:translateY(-1px);}
+.btn-view{background:rgba(239,68,68,0.2);border:1px solid rgba(239,68,68,0.4);color:#fca5a5;padding:5px 10px;border-radius:var(--r);font-size:11px;cursor:pointer;transition:all 0.18s;font-weight:600;}
+.btn-view:hover{background:rgba(239,68,68,0.3);box-shadow:0 2px 8px rgba(239,68,68,0.15);transform:translateY(-1px);}
 .modal{
   position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);
   z-index:1000;display:none;align-items:center;justify-content:center;
@@ -193,7 +234,9 @@ tbody tr:hover { background: rgba(16,185,129,0.04); }
 .modal-content{
   background:var(--s1);border-radius:20px;width:95%;max-width:1200px;
   max-height:90vh;overflow-y:auto;padding:24px;border:1px solid var(--border2);
+  box-shadow:var(--shadow);
 }
+.modal-content::-webkit-scrollbar{width:4px;}
 .form-grid{
   display:grid;
   grid-template-columns:repeat(auto-fill, minmax(320px, 1fr));
@@ -201,10 +244,10 @@ tbody tr:hover { background: rgba(16,185,129,0.04); }
   margin-bottom:24px;
 }
 .form-field{display:flex;flex-direction:column;gap:6px;}
-.form-field label{font-size:12px;font-weight:600;color:var(--muted2);}
+.form-field label{font-size:12px;font-weight:600;color:var(--muted2);letter-spacing:0.02em;}
 .form-field input,.form-field select{
   padding:10px 12px;background:var(--s2);border:1px solid var(--border);
-  border-radius:var(--r);color:var(--text);font-size:13px;
+  border-radius:var(--r);color:var(--text);font-size:13px;transition:all 0.2s;
 }
 .form-field input:focus,.form-field select:focus{
   outline:none;border-color:var(--accent);box-shadow:0 0 0 2px rgba(16,185,129,0.2);
@@ -221,6 +264,7 @@ tbody tr:hover { background: rgba(16,185,129,0.04); }
   .page-header{flex-direction:column;align-items:flex-start;}
   .page-title{font-size:22px}
   .filter-bar{grid-template-columns:1fr;padding:10px;gap:10px}
+  .search-box{grid-column:1/-1}
   .form-grid{grid-template-columns:1fr;}
   .modal-content{width:98%;padding:16px;}
   .tb-pill{display:none}
@@ -229,20 +273,18 @@ tbody tr:hover { background: rgba(16,185,129,0.04); }
 </head>
 <body>
 <div id="topbar">
-  <a class="tb-logo" href="/">
+  <a class="tb-logo" href="#">
     <div class="tb-icon">🌿</div>
-    <div>
-      <div class="tb-title">GIS_TBKRUCO</div>
-    </div>
+    <div><div class="tb-title">GIS_TBKRUCO</div></div>
   </a>
   <div class="tb-sep"></div>
   <div class="tb-pill"><span class="live-dot"></span><span>Trực tuyến</span></div>
   <div class="tb-pill"><strong>Lô vườn</strong> <span id="total-lots">0</span></div>
   <div class="tb-pill"><strong>Diện tích</strong> <span id="total-area">0</span> ha</div>
   <div class="tb-right">
-    <button class="icon-btn" onclick="window.location.href='/'" title="Dashboard"><i class="fas fa-home"></i></button>
-    <button class="icon-btn" onclick="location.reload()" title="Làm mới"><i class="fas fa-sync-alt"></i></button>
-    <button class="icon-btn" title="Thông báo"><i class="fas fa-bell"></i></button>
+    <button class="icon-btn"><i class="fas fa-bell"></i></button>
+    <button class="icon-btn"><i class="fas fa-globe"></i></button>
+    <button class="icon-btn"><i class="fas fa-cog"></i></button>
     <div style="display:flex;align-items:center;gap:10px;border-left:1px solid var(--border);padding-left:16px">
       <div class="tb-user-info"><div class="tb-user-name">Nguyễn Văn An</div><div class="tb-user-role">Quản trị viên</div></div>
       <div class="tb-avatar">NA</div>
@@ -257,266 +299,306 @@ tbody tr:hover { background: rgba(16,185,129,0.04); }
     <div class="nav-section-label">Quản lý dữ liệu</div>
     <a href="/quan-ly-lo-cay" class="nav-item active"><i class="fas fa-tree nav-icon"></i> Quản lý lô cây</a>
     <a href="/them-du-lieu-lo-cay" class="nav-item"><i class="fas fa-plus-circle nav-icon"></i> Thêm dữ liệu lô</a>
-    <div class="nav-section-label">Người dùng</div>
+    <div class="nav-section-label">Người dùng & Phân quyền</div>
     <a href="/quan-ly-nguoi-dung" class="nav-item"><i class="fas fa-users nav-icon"></i> Quản lý người dùng</a>
     <div class="nav-section-label">Phân tích</div>
     <a href="/thong-ke" class="nav-item"><i class="fas fa-chart-bar nav-icon"></i> Thống kê</a>
     <div class="nav-logout"><a href="/logout" class="nav-item"><i class="fas fa-sign-out-alt nav-icon"></i> Đăng xuất</a></div>
   </nav>
-
   <div id="content">
     <div class="page-header">
-      <div>
-        <div class="page-title">Quản lý lô cây cao su</div>
-        <div class="page-subtitle">Danh sách chi tiết các lô vườn · Cập nhật thông tin đa chiều</div>
-      </div>
-      <button class="btn-add" onclick="openAddModal()"><i class="fas fa-plus"></i> Thêm lô mới</button>
+      <div><h1 class="page-title">Quản Lý Lô Cây Cao Su</h1><p class="page-subtitle">Toàn bộ thông tin chi tiết của từng lô cây</p></div>
+      <button id="btnAddLo" class="btn-add"><i class="fas fa-plus"></i> Thêm lô cây</button>
     </div>
-
-    <!-- Bộ lọc -->
     <div class="filter-bar">
-      <input type="text" id="searchInput" class="search-box" placeholder="🔍 Tìm theo tên lô, mã lô, giống, đội..." oninput="filterTable()">
-      <select id="filterDoi" class="select-filter" onchange="filterTable()"><option value="">Tất cả đội</option></select>
-      <select id="filterNamTrong" class="select-filter" onchange="filterTable()"><option value="">Tất cả năm</option></select>
-      <select id="filterGiong" class="select-filter" onchange="filterTable()"><option value="">Tất cả giống</option></select>
-      <select id="filterPhienCao" class="select-filter" onchange="filterTable()"><option value="">Tất cả phiên cạo</option></select>
-      <select id="filterCheDoCao" class="select-filter" onchange="filterTable()"><option value="">Tất cả chế độ cạo</option></select>
+      <input type="text" id="searchInput" class="search-box" placeholder="🔍 Tìm kiếm (ID, tên lô, đội, xã, huyện...)">
+      <select id="doiFilter" class="select-filter"><option value="">Tất cả đội</option></select>
+      <select id="giongFilter" class="select-filter"><option value="">Tất cả giống</option></select>
+      <select id="namFilter" class="select-filter"><option value="">Tất cả năm trồng</option></select>
+      <select id="huyenFilter" class="select-filter"><option value="">Tất cả huyện</option></select>
+      <select id="phanLoaiFilter" class="select-filter"><option value="">Phân loại SL</option></select>
     </div>
-    <div class="show-info"><i class="fas fa-table"></i> Hiển thị <span id="rowCount">0</span> / <span id="totalCount">0</span> lô</div>
-
-    <!-- Bảng dữ liệu với cuộn ngang -->
-    <div class="table-wrapper">
-      <div class="table-container">
-        <table id="dataTable">
-          <thead>
-            <tr><th>Mã lô</th><th>Tên lô</th><th>Đội</th><th>Khu vực</th><th>Năm trồng</th><th>Giống</th><th>Diện tích (ha)</th><th>Chế độ cạo</th><th>Phiên cạo</th><th>Nhịp độ cạo</th><th>Tuổi cạo</th><th>Cây cao</th><th>Sản lượng (kg)</th><th>Tái canh năm</th><th>Hành động</th></tr>
-          </thead>
-          <tbody id="tableBody"></tbody>
-        </table>
-      </div>
-      <div class="horizontal-scrollbar" id="horizontalScrollbar">
-        <div class="scroll-spacer"></div>
-      </div>
+    <div class="show-info"><i class="fas fa-info-circle"></i> Hiển thị <strong id="resultCount">0</strong> lô cây</div>
+    <div class="table-container">
+      <table id="mainTable">
+        <thead>
+          <tr>
+            <th>ID Lô</th><th>Dự án</th><th>Đội</th><th>Khu vực</th><th>Tên lô</th><th>Năm trồng</th><th>Hạng đất</th><th>Cao trình TB</th>
+            <th>Phương pháp trồng</th><th>Khoảng cách trồng</th><th>Mật độ TK</th><th>Giống</th><th>Diện tích 01/01/25</th><th>Diện tích 01/01/26</th>
+            <th>Diện tích map</th><th>Tổng hộ KK</th><th>Cây cao</th><th>Cây chưa cao</th><th>Cây khô mủ</th><th>Cây không PT</th>
+            <th>Hố trống</th><th>Mật độ (cây/ha)</th><th>Chế độ cạo</th><th>Năm MC</th><th>Tuổi cạo</th><th>Năm cạo up</th><th>Tình trạng mủ</th>
+            <th>NS25 kg/ha</th><th>NS25 kg/cây</th><th>Tổng lát cạo</th><th>Phân loại</th><th>Xã</th><th>Huyện</th><th>Tỉnh</th>
+            <th>NS26 kg/ha</th><th>NS26 kg/cây</th><th>Sản lượng</th><th>Phiên cạo</th><th>Nhịp độ cạo</th><th>Tái canh năm</th><th>Đối tượng</th>
+            <th>Hành động</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
     </div>
   </div>
 </div>
 
-<!-- Modal thêm/sửa lô -->
-<div id="lotModal" class="modal">
+<div id="modal" class="modal">
   <div class="modal-content">
-    <h3 style="margin-bottom:20px" id="modalTitle">Thêm lô cây mới</h3>
-    <form id="lotForm">
-      <div class="form-grid">
-        <div class="form-field"><label>ID lô (tự động)</label><input type="text" id="id_lo" readonly placeholder="Tự sinh"></div>
-        <div class="form-field"><label>Tên lô *</label><input type="text" id="ten_lo" required></div>
-        <div class="form-field"><label>Năm trồng</label><input type="number" id="nam_trong"></div>
-        <div class="form-field"><label>Giống cây</label><input type="text" id="giong"></div>
-        <div class="form-field"><label>Đơn vị (ID)</label><input type="text" id="id_don_vi" placeholder="Mã đội"></div>
-        <div class="form-field"><label>Hành chính (ID)</label><input type="text" id="id_hc"></div>
-        <div class="form-field"><label>Diện tích map (ha)</label><input type="number" step="0.001" id="dien_tich_map"></div>
-        <div class="form-field"><label>Diện tích 01/01/2025</label><input type="number" step="0.001" id="dien_tich_010125"></div>
-        <div class="form-field"><label>Diện tích 01/01/2026</label><input type="number" step="0.001" id="dien_tich_010126"></div>
-        <div class="form-field"><label>Tổng hộ khai thác</label><input type="number" id="tong_ho_kk"></div>
-        <div class="form-field"><label>Cây cao</label><input type="number" id="cay_cao"></div>
-        <div class="form-field"><label>Cây chưa cao</label><input type="number" id="cay_chua_cao"></div>
-        <div class="form-field"><label>Chế độ cạo</label><input type="text" id="che_do_cao"></div>
-        <div class="form-field"><label>Phiên cạo</label><input type="text" id="phien_cao"></div>
-        <div class="form-field"><label>Nhịp độ cạo</label><input type="text" id="nhip_do_cao"></div>
-        <div class="form-field"><label>Tuổi cạo</label><input type="number" id="tuoi_cao"></div>
-        <div class="form-field"><label>Sản lượng (kg)</label><input type="number" id="san_luong"></div>
-        <div class="form-field"><label>Tái canh năm</label><input type="number" id="tai_canh_nam"></div>
-      </div>
-      <div class="modal-actions">
-        <button type="button" class="btn-dash" onclick="closeModal()">Hủy</button>
-        <button type="submit" class="btn-add" style="background:var(--accent)">Lưu</button>
-      </div>
-    </form>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+      <h3 id="modalTitle" style="font-family:var(--font-d); font-size:22px;">➕ Thêm lô cây</h3>
+      <button class="icon-btn" id="closeModal" style="background:rgba(255,255,255,0.05);"><i class="fas fa-times"></i></button>
+    </div>
+    <form id="modalForm"></form>
   </div>
 </div>
 
 <script>
-let allLots = [];
-let currentEditId = null;
+let loCayData = [];
 
-// Fetch dữ liệu từ API
-async function fetchLots() {
-  try {
-    const res = await fetch('/api/lo-cay');
-    const json = await res.json();
-    if (json.success) {
-      allLots = json.data;
-      updateStats();
-      populateFilters();
-      renderTable();
-    } else console.error('Lỗi tải dữ liệu:', json.error);
-  } catch (err) { console.error(err); }
+async function loadLoCay() {
+  const res = await fetch('/api/lo-cay');
+  const data = await res.json();
+  if(data.success) {
+    loCayData = data.data;
+    renderTable(loCayData);
+    updateFilters(loCayData);
+    document.getElementById('total-lots').innerText = loCayData.length;
+    const totalArea = loCayData.reduce((sum, l) => sum + (parseFloat(l.dien_tich_map) || 0), 0);
+    document.getElementById('total-area').innerText = totalArea.toFixed(2);
+  }
 }
 
-function updateStats() {
-  document.getElementById('total-lots').innerText = allLots.length;
-  let totalArea = allLots.reduce((sum, l) => sum + (parseFloat(l.dien_tich_map) || 0), 0);
-  document.getElementById('total-area').innerText = totalArea.toFixed(2);
-}
-
-function populateFilters() {
-  const doiSet = new Set(); const namSet = new Set(); const giongSet = new Set();
-  const phienSet = new Set(); const cheDoSet = new Set();
-  allLots.forEach(l => {
-    if (l.doi) doiSet.add(l.doi);
-    if (l.nam_trong) namSet.add(l.nam_trong);
-    if (l.giong) giongSet.add(l.giong);
-    if (l.phien_cao) phienSet.add(l.phien_cao);
-    if (l.che_do_cao) cheDoSet.add(l.che_do_cao);
-  });
-  const doiSelect = document.getElementById('filterDoi');
-  doiSelect.innerHTML = '<option value="">Tất cả đội</option>' + Array.from(doiSet).sort().map(d => `<option value="${d}">${d}</option>`).join('');
-  const namSelect = document.getElementById('filterNamTrong');
-  namSelect.innerHTML = '<option value="">Tất cả năm</option>' + Array.from(namSet).sort().map(n => `<option value="${n}">${n}</option>`).join('');
-  const giongSelect = document.getElementById('filterGiong');
-  giongSelect.innerHTML = '<option value="">Tất cả giống</option>' + Array.from(giongSet).sort().map(g => `<option value="${g}">${g}</option>`).join('');
-  const phienSelect = document.getElementById('filterPhienCao');
-  phienSelect.innerHTML = '<option value="">Tất cả phiên cạo</option>' + Array.from(phienSet).sort().map(p => `<option value="${p}">${p}</option>`).join('');
-  const cheDoSelect = document.getElementById('filterCheDoCao');
-  cheDoSelect.innerHTML = '<option value="">Tất cả chế độ cạo</option>' + Array.from(cheDoSet).sort().map(c => `<option value="${c}">${c}</option>`).join('');
-}
-
-function filterTable() {
-  const search = document.getElementById('searchInput').value.toLowerCase();
-  const doi = document.getElementById('filterDoi').value;
-  const nam = document.getElementById('filterNamTrong').value;
-  const giong = document.getElementById('filterGiong').value;
-  const phien = document.getElementById('filterPhienCao').value;
-  const cheDo = document.getElementById('filterCheDoCao').value;
-  const filtered = allLots.filter(l => {
-    if (doi && l.doi !== doi) return false;
-    if (nam && l.nam_trong != nam) return false;
-    if (giong && l.giong !== giong) return false;
-    if (phien && l.phien_cao !== phien) return false;
-    if (cheDo && l.che_do_cao !== cheDo) return false;
-    if (search && !(l.ten_lo?.toLowerCase().includes(search) || l.id_lo?.toLowerCase().includes(search) || l.giong?.toLowerCase().includes(search) || l.doi?.toLowerCase().includes(search))) return false;
-    return true;
-  });
-  renderTable(filtered);
-  document.getElementById('rowCount').innerText = filtered.length;
-  document.getElementById('totalCount').innerText = allLots.length;
-}
-
-function renderTable(data = allLots) {
+function renderTable(data) {
   const tbody = document.getElementById('tableBody');
   tbody.innerHTML = '';
   data.forEach(l => {
     const row = tbody.insertRow();
-    row.insertCell(0).innerHTML = `<strong>${l.id_lo || '—'}</strong>`;
-    row.insertCell(1).innerHTML = l.ten_lo || '—';
-    row.insertCell(2).innerHTML = l.doi || '—';
-    row.insertCell(3).innerHTML = l.khu_vuc || '—';
-    row.insertCell(4).innerHTML = l.nam_trong || '—';
-    row.insertCell(5).innerHTML = l.giong || '—';
-    row.insertCell(6).innerHTML = l.dien_tich_map ? parseFloat(l.dien_tich_map).toFixed(2) : '—';
-    row.insertCell(7).innerHTML = l.che_do_cao || '—';
-    row.insertCell(8).innerHTML = l.phien_cao || '—';
-    row.insertCell(9).innerHTML = l.nhip_do_cao || '—';
-    row.insertCell(10).innerHTML = l.tuoi_cao || '—';
-    row.insertCell(11).innerHTML = l.cay_cao || '—';
-    row.insertCell(12).innerHTML = l.san_luong ? l.san_luong.toLocaleString() : '—';
-    row.insertCell(13).innerHTML = l.tai_canh_nam || '—';
-    const actionCell = row.insertCell(14);
-    actionCell.innerHTML = `<button class="btn-dash" onclick="editLot('${l.id_lo}')"><i class="fas fa-edit"></i> Sửa</button> <button class="btn-view" onclick="deleteLot('${l.id_lo}')"><i class="fas fa-trash"></i> Xóa</button>`;
+    row.insertCell(0).innerText = l.id_lo || '';
+    row.insertCell(1).innerText = l.du_an || '';
+    row.insertCell(2).innerText = l.doi || '';
+    row.insertCell(3).innerText = l.khu_vuc || '';
+    row.insertCell(4).innerText = l.ten_lo || '';
+    row.insertCell(5).innerText = l.nam_trong || '';
+    row.insertCell(6).innerText = l.hang_dat || '';
+    row.insertCell(7).innerText = l.cao_trinh_tb || '';
+    row.insertCell(8).innerText = l.phuong_phap_trong || '';
+    row.insertCell(9).innerText = l.khoang_cach_trong || '';
+    row.insertCell(10).innerText = l.mat_do_tk || '';
+    row.insertCell(11).innerText = l.giong || '';
+    row.insertCell(12).innerText = l.dien_tich_010125 || '';
+    row.insertCell(13).innerText = l.dien_tich_010126 || '';
+    row.insertCell(14).innerText = l.dien_tich_map || '';
+    row.insertCell(15).innerText = l.tong_ho_kk || '';
+    row.insertCell(16).innerText = l.cay_cao || '';
+    row.insertCell(17).innerText = l.cay_chua_cao || '';
+    row.insertCell(18).innerText = l.cay_kho_mu || '';
+    row.insertCell(19).innerText = l.cay_khong_pt || '';
+    row.insertCell(20).innerText = l.ho_trong || '';
+    row.insertCell(21).innerText = l.mat_do_cc || '';
+    row.insertCell(22).innerText = l.che_do_cao || '';
+    row.insertCell(23).innerText = l.nam_mc || '';
+    row.insertCell(24).innerText = l.tuoi_cao || '';
+    row.insertCell(25).innerText = l.nam_cao_up || '';
+    row.insertCell(26).innerText = l.tinh_trang_mc || '';
+    row.insertCell(27).innerText = l.ns25_kg_ha || '';
+    row.insertCell(28).innerText = l.ns25_kg_cay || '';
+    row.insertCell(29).innerText = l.tong_lat_cao || '';
+    row.insertCell(30).innerText = l.phan_loai || '';
+    row.insertCell(31).innerText = l.xa || '';
+    row.insertCell(32).innerText = l.huyen || '';
+    row.insertCell(33).innerText = l.tinh || '';
+    row.insertCell(34).innerText = l.ns26_kg_ha || '';
+    row.insertCell(35).innerText = l.ns26_kg_cay || '';
+    row.insertCell(36).innerText = l.san_luong || '';
+    row.insertCell(37).innerText = l.phien_cao || '';
+    row.insertCell(38).innerText = l.nhip_do_cao || '';
+    row.insertCell(39).innerText = l.tai_canh_nam || '';
+    row.insertCell(40).innerText = l.doi_tuong || '';
+    const actionCell = row.insertCell(41);
+    actionCell.innerHTML = `<button class="btn-dash edit-lo" data-id="${l.id_lo}"><i class="fas fa-edit"></i> Sửa</button>
+                            <button class="btn-view delete-lo" data-id="${l.id_lo}" style="margin-left:8px;"><i class="fas fa-trash"></i> Xóa</button>`;
   });
-  // Đồng bộ thanh cuộn ngang
-  const scrollbar = document.getElementById('horizontalScrollbar');
-  const tableContainer = document.querySelector('.table-container');
-  scrollbar.onscroll = () => { tableContainer.scrollLeft = scrollbar.scrollLeft; };
-  tableContainer.onscroll = () => { scrollbar.scrollLeft = tableContainer.scrollLeft; };
+  document.getElementById('resultCount').innerText = data.length;
+  attachEvents();
 }
 
-function openAddModal() {
-  currentEditId = null;
-  document.getElementById('modalTitle').innerText = 'Thêm lô cây mới';
-  document.getElementById('lotForm').reset();
-  document.getElementById('id_lo').value = '';
-  document.getElementById('lotModal').style.display = 'flex';
+function attachEvents() {
+  document.querySelectorAll('.edit-lo').forEach(btn => btn.addEventListener('click', () => editLo(btn.dataset.id)));
+  document.querySelectorAll('.delete-lo').forEach(btn => btn.addEventListener('click', () => deleteLo(btn.dataset.id)));
 }
 
-async function editLot(id) {
-  try {
-    const res = await fetch(`/api/lo-cay/${id}`);
-    const json = await res.json();
-    if (json.success) {
-      currentEditId = id;
-      const l = json.data;
-      document.getElementById('id_lo').value = l.id_lo;
-      document.getElementById('ten_lo').value = l.ten_lo || '';
-      document.getElementById('nam_trong').value = l.nam_trong || '';
-      document.getElementById('giong').value = l.giong || '';
-      document.getElementById('id_don_vi').value = l.id_don_vi || '';
-      document.getElementById('id_hc').value = l.id_hc || '';
-      document.getElementById('dien_tich_map').value = l.dien_tich_map || '';
-      document.getElementById('dien_tich_010125').value = l.dien_tich_010125 || '';
-      document.getElementById('dien_tich_010126').value = l.dien_tich_010126 || '';
-      document.getElementById('tong_ho_kk').value = l.tong_ho_kk || '';
-      document.getElementById('cay_cao').value = l.cay_cao || '';
-      document.getElementById('cay_chua_cao').value = l.cay_chua_cao || '';
-      document.getElementById('che_do_cao').value = l.che_do_cao || '';
-      document.getElementById('phien_cao').value = l.phien_cao || '';
-      document.getElementById('nhip_do_cao').value = l.nhip_do_cao || '';
-      document.getElementById('tuoi_cao').value = l.tuoi_cao || '';
-      document.getElementById('san_luong').value = l.san_luong || '';
-      document.getElementById('tai_canh_nam').value = l.tai_canh_nam || '';
-      document.getElementById('modalTitle').innerText = 'Sửa lô cây';
-      document.getElementById('lotModal').style.display = 'flex';
-    }
-  } catch (err) { alert('Lỗi tải dữ liệu lô'); }
+async function editLo(id) {
+  const res = await fetch(`/api/lo-cay/${id}`);
+  const data = await res.json();
+  if(data.success) showForm(data.data);
 }
 
-document.getElementById('lotForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const formData = {
-    ten_lo: document.getElementById('ten_lo').value,
-    nam_trong: parseInt(document.getElementById('nam_trong').value) || null,
-    giong: document.getElementById('giong').value || null,
-    id_don_vi: document.getElementById('id_don_vi').value || null,
-    id_hc: document.getElementById('id_hc').value || null,
-    dien_tich_map: parseFloat(document.getElementById('dien_tich_map').value) || null,
-    dien_tich_010125: parseFloat(document.getElementById('dien_tich_010125').value) || null,
-    dien_tich_010126: parseFloat(document.getElementById('dien_tich_010126').value) || null,
-    tong_ho_kk: parseInt(document.getElementById('tong_ho_kk').value) || null,
-    cay_cao: parseInt(document.getElementById('cay_cao').value) || null,
-    cay_chua_cao: parseInt(document.getElementById('cay_chua_cao').value) || null,
-    che_do_cao: document.getElementById('che_do_cao').value || null,
-    phien_cao: document.getElementById('phien_cao').value || null,
-    nhip_do_cao: document.getElementById('nhip_do_cao').value || null,
-    tuoi_cao: parseInt(document.getElementById('tuoi_cao').value) || null,
-    san_luong: parseFloat(document.getElementById('san_luong').value) || null,
-    tai_canh_nam: parseInt(document.getElementById('tai_canh_nam').value) || null
-  };
-  const url = currentEditId ? `/api/lo-cay/${currentEditId}` : '/api/lo-cay';
-  const method = currentEditId ? 'PUT' : 'POST';
-  try {
-    const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(formData) });
-    const json = await res.json();
-    if (json.success) {
-      alert(currentEditId ? 'Cập nhật thành công' : 'Thêm lô thành công');
-      closeModal();
-      fetchLots();
-    } else alert('Lỗi: ' + json.error);
-  } catch (err) { alert('Lỗi kết nối'); }
-});
-
-async function deleteLot(id) {
-  if (!confirm('Xóa lô này sẽ xóa tất cả dữ liệu liên quan (diện tích, khai thác, sản lượng...). Bạn chắc chắn?')) return;
-  try {
+async function deleteLo(id) {
+  if(confirm('Xóa lô cây này sẽ xóa tất cả dữ liệu liên quan (diện tích, hiện trạng, khai thác, sản lượng). Bạn có chắc?')) {
     const res = await fetch(`/api/lo-cay/${id}`, { method: 'DELETE' });
-    const json = await res.json();
-    if (json.success) { fetchLots(); alert('Xóa thành công'); }
-    else alert('Lỗi: ' + json.error);
-  } catch (err) { alert('Lỗi kết nối'); }
+    const data = await res.json();
+    if(data.success) { alert('✅ Xóa thành công'); loadLoCay(); }
+    else alert('❌ Lỗi: ' + data.error);
+  }
 }
 
-function closeModal() { document.getElementById('lotModal').style.display = 'none'; }
-window.onclick = function(e) { if (e.target === document.getElementById('lotModal')) closeModal(); };
+function updateFilters(data) {
+  const doiSet = new Set(data.map(l => l.doi).filter(v=>v));
+  const doiSel = document.getElementById('doiFilter');
+  doiSel.innerHTML = '<option value="">Tất cả đội</option>';
+  [...doiSet].sort().forEach(d => { let opt = document.createElement('option'); opt.value=d; opt.textContent=d; doiSel.appendChild(opt); });
+  
+  const giongSet = new Set(data.map(l => l.giong).filter(v=>v));
+  const giongSel = document.getElementById('giongFilter');
+  giongSel.innerHTML = '<option value="">Tất cả giống</option>';
+  [...giongSet].sort().forEach(g => { let opt = document.createElement('option'); opt.value=g; opt.textContent=g; giongSel.appendChild(opt); });
+  
+  const namSet = new Set(data.map(l => l.nam_trong).filter(v=>v));
+  const namSel = document.getElementById('namFilter');
+  namSel.innerHTML = '<option value="">Tất cả năm</option>';
+  [...namSet].sort().forEach(n => { let opt = document.createElement('option'); opt.value=n; opt.textContent=n; namSel.appendChild(opt); });
+  
+  const huyenSet = new Set(data.map(l => l.huyen).filter(v=>v));
+  const huyenSel = document.getElementById('huyenFilter');
+  huyenSel.innerHTML = '<option value="">Tất cả huyện</option>';
+  [...huyenSet].sort().forEach(h => { let opt = document.createElement('option'); opt.value=h; opt.textContent=h; huyenSel.appendChild(opt); });
+  
+  const phanLoaiSet = new Set(data.map(l => l.phan_loai).filter(v=>v));
+  const plSel = document.getElementById('phanLoaiFilter');
+  plSel.innerHTML = '<option value="">Phân loại SL</option>';
+  [...phanLoaiSet].sort().forEach(p => { let opt = document.createElement('option'); opt.value=p; opt.textContent=p; plSel.appendChild(opt); });
+}
 
-fetchLots();
+function filterRows() {
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  const doi = document.getElementById('doiFilter').value;
+  const giong = document.getElementById('giongFilter').value;
+  const nam = document.getElementById('namFilter').value;
+  const huyen = document.getElementById('huyenFilter').value;
+  const phanLoai = document.getElementById('phanLoaiFilter').value;
+  const filtered = loCayData.filter(l => {
+    const text = `${l.id_lo} ${l.ten_lo} ${l.doi} ${l.xa} ${l.huyen} ${l.giong}`.toLowerCase();
+    return (!search || text.includes(search)) &&
+           (!doi || l.doi === doi) &&
+           (!giong || l.giong === giong) &&
+           (!nam || l.nam_trong == nam) &&
+           (!huyen || l.huyen === huyen) &&
+           (!phanLoai || l.phan_loai === phanLoai);
+  });
+  renderTable(filtered);
+}
+
+function showForm(l = null) {
+  const isEdit = !!l;
+  const formHtml = `
+    <input type="hidden" id="id_lo" name="id_lo" value="${l ? l.id_lo : ''}">
+    <div class="form-grid">
+      <div class="form-field"><label>Tên lô *</label><input type="text" name="ten_lo" value="${l ? l.ten_lo : ''}" required placeholder="VD: Lô A1"></div>
+      <div class="form-field"><label>Năm trồng</label><input type="number" name="nam_trong" value="${l ? l.nam_trong : ''}" placeholder="2020"></div>
+      <div class="form-field"><label>Giống</label><input type="text" name="giong" value="${l ? l.giong : ''}" placeholder="PB 260"></div>
+      <div class="form-field"><label>Cao trình TB (m)</label><input type="number" step="0.1" name="cao_trinh_tb" value="${l ? l.cao_trinh_tb : ''}" placeholder="120.5"></div>
+      <div class="form-field"><label>Đội *</label><select name="id_don_vi" id="id_don_vi" required></select></div>
+      <div class="form-field"><label>Hành chính</label><select name="id_hc" id="id_hc"></select></div>
+      <div class="form-field"><label>Hạng đất</label><input type="text" name="hang_dat" value="${l ? l.hang_dat : ''}" placeholder="Hạng I"></div>
+      <div class="form-field"><label>Phương pháp trồng</label><input type="text" name="phuong_phap_trong" value="${l ? l.phuong_phap_trong : ''}" placeholder="Trồng thuần"></div>
+      <div class="form-field"><label>Khoảng cách trồng</label><input type="text" name="khoang_cach_trong" value="${l ? l.khoang_cach_trong : ''}" placeholder="7x3m"></div>
+      <div class="form-field"><label>Mật độ TK</label><input type="number" name="mat_do_tk" value="${l ? l.mat_do_tk : ''}" placeholder="cây/ha"></div>
+      <div class="form-field"><label>Diện tích map (ha)</label><input type="number" step="0.001" name="dien_tich_map" value="${l ? l.dien_tich_map : ''}" placeholder="10.5"></div>
+      <div class="form-field"><label>Diện tích 01/01/25</label><input type="number" step="0.001" name="dien_tich_010125" value="${l ? l.dien_tich_010125 : ''}"></div>
+      <div class="form-field"><label>Diện tích 01/01/26</label><input type="number" step="0.001" name="dien_tich_010126" value="${l ? l.dien_tich_010126 : ''}"></div>
+      <div class="form-field"><label>Tổng hộ KK</label><input type="number" name="tong_ho_kk" value="${l ? l.tong_ho_kk : ''}"></div>
+      <div class="form-field"><label>Cây cao</label><input type="number" name="cay_cao" value="${l ? l.cay_cao : ''}"></div>
+      <div class="form-field"><label>Cây chưa cao</label><input type="number" name="cay_chua_cao" value="${l ? l.cay_chua_cao : ''}"></div>
+      <div class="form-field"><label>Cây khô mủ</label><input type="number" name="cay_kho_mu" value="${l ? l.cay_kho_mu : ''}"></div>
+      <div class="form-field"><label>Cây không PT</label><input type="number" name="cay_khong_pt" value="${l ? l.cay_khong_pt : ''}"></div>
+      <div class="form-field"><label>Hố trống</label><input type="number" name="ho_trong" value="${l ? l.ho_trong : ''}"></div>
+      <div class="form-field"><label>Mật độ (cây/ha)</label><input type="number" step="0.1" name="mat_do_cc" value="${l ? l.mat_do_cc : ''}"></div>
+      <div class="form-field"><label>Chế độ cạo</label><input type="text" name="che_do_cao" value="${l ? l.che_do_cao : ''}" placeholder="S/2 d/3"></div>
+      <div class="form-field"><label>Phiên cạo</label><input type="text" name="phien_cao" value="${l ? l.phien_cao : ''}" placeholder="Phiên 1"></div>
+      <div class="form-field"><label>Nhịp độ cạo</label><input type="text" name="nhip_do_cao" value="${l ? l.nhip_do_cao : ''}" placeholder="3 ngày/lần"></div>
+      <div class="form-field"><label>Năm MC</label><input type="number" name="nam_mc" value="${l ? l.nam_mc : ''}"></div>
+      <div class="form-field"><label>Tuổi cạo</label><input type="number" name="tuoi_cao" value="${l ? l.tuoi_cao : ''}"></div>
+      <div class="form-field"><label>Năm cạo up</label><input type="number" name="nam_cao_up" value="${l ? l.nam_cao_up : ''}"></div>
+      <div class="form-field"><label>Tình trạng mủ</label><input type="text" name="tinh_trang_mc" value="${l ? l.tinh_trang_mc : ''}"></div>
+      <div class="form-field"><label>NS25 kg/ha</label><input type="number" step="0.01" name="ns25_kg_ha" value="${l ? l.ns25_kg_ha : ''}"></div>
+      <div class="form-field"><label>NS25 kg/cây</label><input type="number" step="0.01" name="ns25_kg_cay" value="${l ? l.ns25_kg_cay : ''}"></div>
+      <div class="form-field"><label>NS26 kg/ha</label><input type="number" step="0.01" name="ns26_kg_ha" value="${l ? l.ns26_kg_ha : ''}"></div>
+      <div class="form-field"><label>NS26 kg/cây</label><input type="number" step="0.01" name="ns26_kg_cay" value="${l ? l.ns26_kg_cay : ''}"></div>
+      <div class="form-field"><label>Tổng lát cạo</label><input type="number" step="0.01" name="tong_lat_cao" value="${l ? l.tong_lat_cao : ''}"></div>
+      <div class="form-field"><label>Sản lượng</label><input type="number" step="0.01" name="san_luong" value="${l ? l.san_luong : ''}"></div>
+      <div class="form-field"><label>Phân loại</label><input type="text" name="phan_loai" value="${l ? l.phan_loai : ''}" placeholder="Loại A"></div>
+      <div class="form-field"><label>Đối tượng</label><input type="text" name="doi_tuong" value="${l ? l.doi_tuong : ''}"></div>
+      <div class="form-field"><label>Tái canh năm</label><input type="number" name="tai_canh_nam" value="${l ? l.tai_canh_nam : ''}"></div>
+    </div>
+    <div class="modal-actions">
+      <button type="button" id="cancelModalBtn" class="btn-dash"><i class="fas fa-times"></i> Hủy</button>
+      <button type="submit" class="btn-add"><i class="fas fa-save"></i> Lưu lại</button>
+    </div>
+  `;
+  document.getElementById('modalForm').innerHTML = formHtml;
+  document.getElementById('modalTitle').innerHTML = isEdit ? '<i class="fas fa-edit"></i> ✏️ Sửa lô cây' : '<i class="fas fa-plus-circle"></i> ➕ Thêm lô cây mới';
+  document.getElementById('modal').style.display = 'flex';
+  
+  loadDonViList(l ? l.id_don_vi : null);
+  loadHanhChinhList(l ? l.id_hc : null);
+  
+  document.getElementById('cancelModalBtn').onclick = () => closeModal();
+  document.getElementById('modalForm').onsubmit = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData);
+    const id_lo = document.getElementById('id_lo').value;
+    if(!data.id_don_vi) { alert('⚠️ Vui lòng chọn đội'); return; }
+    const url = id_lo ? `/api/lo-cay/${id_lo}` : '/api/lo-cay';
+    const method = id_lo ? 'PUT' : 'POST';
+    const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+    const result = await res.json();
+    if(result.success) {
+      alert(id_lo ? '✅ Cập nhật thành công' : '✅ Thêm thành công');
+      closeModal();
+      loadLoCay();
+    } else alert('❌ Lỗi: ' + result.error);
+  };
+}
+
+async function loadDonViList(selectedId) {
+  const res = await fetch('/api/don-vi-list');
+  const data = await res.json();
+  if(data.success) {
+    const select = document.getElementById('id_don_vi');
+    select.innerHTML = '<option value="">-- Chọn đơn vị --</option>';
+    data.data.forEach(dv => {
+      const opt = document.createElement('option');
+      opt.value = dv.id_don_vi;
+      opt.textContent = dv.doi;
+      if(selectedId && selectedId === dv.id_don_vi) opt.selected = true;
+      select.appendChild(opt);
+    });
+  }
+}
+async function loadHanhChinhList(selectedId) {
+  const res = await fetch('/api/hanh-chinh');
+  const data = await res.json();
+  if(data.success) {
+    const select = document.getElementById('id_hc');
+    select.innerHTML = '<option value="">-- Chọn xã/huyện --</option>';
+    data.data.forEach(hc => {
+      const opt = document.createElement('option');
+      opt.value = hc.id_hc;
+      opt.textContent = `${hc.xa}, ${hc.huyen}`;
+      if(selectedId && selectedId === hc.id_hc) opt.selected = true;
+      select.appendChild(opt);
+    });
+  }
+}
+function closeModal() { document.getElementById('modal').style.display = 'none'; }
+
+document.getElementById('closeModal').addEventListener('click', closeModal);
+document.getElementById('btnAddLo').addEventListener('click', () => showForm());
+document.getElementById('searchInput').addEventListener('input', filterRows);
+document.getElementById('doiFilter').addEventListener('change', filterRows);
+document.getElementById('giongFilter').addEventListener('change', filterRows);
+document.getElementById('namFilter').addEventListener('change', filterRows);
+document.getElementById('huyenFilter').addEventListener('change', filterRows);
+document.getElementById('phanLoaiFilter').addEventListener('change', filterRows);
+
+loadLoCay();
 </script>
 </body>
 </html>
