@@ -200,6 +200,12 @@ tbody tr:hover { background: rgba(16,185,129,0.04); }
   background:rgba(239,68,68,0.2);border:1px solid rgba(239,68,68,0.4);color:#fca5a5;padding:5px 10px;border-radius:var(--r);font-size:11px;cursor:pointer;font-weight:600;
 }
 .btn-view:hover{background:rgba(239,68,68,0.3);transform:translateY(-1px);}
+/* Nút vị trí bản đồ */
+.btn-location{
+  background:rgba(6,182,212,0.2);border:1px solid rgba(6,182,212,0.4);color:var(--accentB);padding:5px 10px;border-radius:var(--r);font-size:11px;cursor:pointer;font-weight:600;
+  margin-right:6px;
+}
+.btn-location:hover{background:rgba(6,182,212,0.3);transform:translateY(-1px);}
 .modal{
   position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);
   z-index:1000;display:none;align-items:center;justify-content:center;
@@ -337,7 +343,6 @@ async function loadLoCay() {
     document.getElementById('total-lots').innerText = loCayData.length;
     const totalArea = loCayData.reduce((sum, l) => sum + (parseFloat(l.dien_tich_map) || 0), 0);
     document.getElementById('total-area').innerText = totalArea.toFixed(2);
-    // Cập nhật chiều rộng của thanh cuộn ngang
     syncScrollbarWidth();
     attachHorizontalScroll();
   }
@@ -390,17 +395,41 @@ function renderTable(data) {
     row.insertCell(39).innerText = l.tai_canh_nam || '';
     row.insertCell(40).innerText = l.doi_tuong || '';
     const actionCell = row.insertCell(41);
-    actionCell.innerHTML = `<button class="btn-dash edit-lo" data-id="${l.id_lo}"><i class="fas fa-edit"></i> Sửa</button>
-                            <button class="btn-view delete-lo" data-id="${l.id_lo}" style="margin-left:8px;"><i class="fas fa-trash"></i> Xóa</button>`;
+    // Thêm nút 📍 để xem vị trí trên bản đồ
+    actionCell.innerHTML = `
+      <button class="btn-location location-lo" data-id="${l.id_lo}" title="Xem vị trí trên bản đồ"><i class="fas fa-map-marker-alt"></i> 📍</button>
+      <button class="btn-dash edit-lo" data-id="${l.id_lo}"><i class="fas fa-edit"></i> Sửa</button>
+      <button class="btn-view delete-lo" data-id="${l.id_lo}" style="margin-left:8px;"><i class="fas fa-trash"></i> Xóa</button>
+    `;
   });
   document.getElementById('resultCount').innerText = data.length;
   attachEvents();
-  syncScrollbarWidth(); // đảm bảo thanh cuộn cập nhật sau khi render
+  syncScrollbarWidth();
 }
 
 function attachEvents() {
   document.querySelectorAll('.edit-lo').forEach(btn => btn.addEventListener('click', () => editLo(btn.dataset.id)));
   document.querySelectorAll('.delete-lo').forEach(btn => btn.addEventListener('click', () => deleteLo(btn.dataset.id)));
+  document.querySelectorAll('.location-lo').forEach(btn => btn.addEventListener('click', () => showLocation(btn.dataset.id)));
+}
+
+// Hàm xem vị trí trên Google Maps dựa vào địa chỉ (xã, huyện, tỉnh)
+function showLocation(id) {
+  const lot = loCayData.find(l => l.id_lo == id);
+  if (!lot) {
+    alert('Không tìm thấy thông tin lô!');
+    return;
+  }
+  const xa = lot.xa || '';
+  const huyen = lot.huyen || '';
+  const tinh = lot.tinh || '';
+  const address = [xa, huyen, tinh].filter(v => v).join(', ');
+  if (!address) {
+    alert('Lô này chưa có thông tin địa chỉ (xã, huyện, tỉnh) để hiển thị bản đồ.');
+    return;
+  }
+  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+  window.open(mapsUrl, '_blank');
 }
 
 async function editLo(id) {
@@ -464,7 +493,6 @@ function filterRows() {
   renderTable(filtered);
 }
 
-// Đồng bộ chiều rộng của thanh cuộn ngang với bảng
 function syncScrollbarWidth() {
   const table = document.querySelector('#mainTable');
   const scrollSpacer = document.getElementById('scrollSpacer');
@@ -474,13 +502,10 @@ function syncScrollbarWidth() {
   }
 }
 
-// Kết nối sự kiện cuộn: khi kéo thanh cuộn ngang, cuộn bảng theo
 function attachHorizontalScroll() {
   const horizontalScroll = document.getElementById('horizontalScrollbar');
   const tableContainer = document.getElementById('tableContainer');
   if (!horizontalScroll || !tableContainer) return;
-
-  // Xóa sự kiện cũ để tránh trùng lặp
   horizontalScroll.removeEventListener('scroll', syncScroll);
   tableContainer.removeEventListener('scroll', syncScrollFromTable);
   
