@@ -1955,6 +1955,21 @@ async function initDashMap() {
     if (e.key === '-' || e.key === '_') mapZoomOut();
     if (e.key === 'h' || e.key === 'H') goHome();
   });
+// ========== FOCUS LÔ TỪ TRANG QUẢN LÝ ==========
+const focusLotId = localStorage.getItem('focus_lot_id');
+if (focusLotId) {
+  localStorage.removeItem('focus_lot_id'); // Xóa ngay sau khi đọc
+  // Tìm index của lô trong mảng caosuFeatures
+  const idx = caosuFeatures.findIndex(f => f.properties.id_lo === focusLotId);
+  if (idx !== -1) {
+    setTimeout(() => {
+      flyToFeature(idx);
+      showToast(`📍 Đã chuyển đến lô: ${caosuFeatures[idx].properties.ten_lo || focusLotId}`, '📍');
+    }, 500);
+  } else {
+    showToast(`⚠️ Không tìm thấy lô với ID: ${focusLotId}`, '⚠️');
+  }
+}
 }
 
 /* ==================== TOAST ==================== */
@@ -2208,50 +2223,6 @@ window.addEventListener('load', () => {
 });
 function logout() {
   if (confirm('Bạn có chắc muốn đăng xuất?')) window.location.href = '/logout';
-}
-// ==================== XỬ LÝ CHUYỂN HƯỚNG TỪ TRANG QUẢN LÝ LÔ ====================
-async function handleLocationFromURL() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const loId = urlParams.get('lo_id');
-  if (!loId) return;
-
-  console.log('🔍 Tìm lô có id:', loId);
-
-  // Đợi dữ liệu lô được tải xong
-  if (!caosuFeatures || caosuFeatures.length === 0) {
-    // Nếu chưa có dữ liệu, đợi sự kiện hoặc kiểm tra lại sau 500ms
-    const checkInterval = setInterval(() => {
-      if (caosuFeatures && caosuFeatures.length > 0) {
-        clearInterval(checkInterval);
-        findAndFlyToLot(loId);
-      }
-    }, 200);
-    // timeout sau 5 giây
-    setTimeout(() => clearInterval(checkInterval), 5000);
-    return;
-  }
-  findAndFlyToLot(loId);
-}
-
-function findAndFlyToLot(loId) {
-  // Tìm feature có properties.id_lo == loId (so sánh chuỗi hoặc số)
-  const idx = caosuFeatures.findIndex(f => String(f.properties.id_lo) === String(loId));
-  if (idx === -1) {
-    console.warn('Không tìm thấy lô với id:', loId);
-    showToast(`Không tìm thấy lô #${loId}`, '⚠️');
-    return;
-  }
-
-  // Gọi hàm flyToFeature có sẵn (đã định nghĩa trong file)
-  flyToFeature(idx);
-  showToast(`Đã tìm thấy lô: ${caosuFeatures[idx].properties.ten_lo || caosuFeatures[idx].properties.id_lo}`, '📍');
-}
-
-// Gọi hàm xử lý sau khi trang và dữ liệu đã sẵn sàng
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', handleLocationFromURL);
-} else {
-  handleLocationFromURL();
 }
 </script>
 </body>

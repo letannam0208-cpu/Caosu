@@ -415,21 +415,10 @@ function attachEvents() {
 
 // Hàm xem vị trí trên Google Maps dựa vào địa chỉ (xã, huyện, tỉnh)
 function showLocation(id) {
-  const lot = loCayData.find(l => l.id_lo == id);
-  if (!lot) {
-    alert('Không tìm thấy thông tin lô!');
-    return;
-  }
-  const xa = lot.xa || '';
-  const huyen = lot.huyen || '';
-  const tinh = lot.tinh || '';
-  const address = [xa, huyen, tinh].filter(v => v).join(', ');
-  if (!address) {
-    alert('Lô này chưa có thông tin địa chỉ (xã, huyện, tỉnh) để hiển thị bản đồ.');
-    return;
-  }
-  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
-  window.open(mapsUrl, '_blank');
+  // Lưu ID lô cần focus vào localStorage
+  localStorage.setItem('focus_lot_id', id);
+  // Chuyển hướng về trang dashboard (bản đồ)
+  window.location.href = '/';
 }
 
 async function editLo(id) {
