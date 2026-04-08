@@ -1367,55 +1367,57 @@ function renderRealLots() {
 
   let count = 0;
   caosuFeatures.forEach((feat, idx) => {
-    const p = feat.properties;
-    if (!featureVisible(p)) return;
-    const isSel = selectedIdx.has(idx);
-    const col = getLotColorReal(p, mapViewMode);
+  const p = feat.properties;
+  if (!featureVisible(p)) return;
+  const isSel = selectedIdx.has(idx);
+  const col = getLotColorReal(p, mapViewMode);
 
-    if (lotsVis) {
-      const layer = L.geoJSON(feat, {
-        style: {
-          color: isSel ? '#ffffff' : col,
-          weight: isSel ? 2.5 : 1,
-          fillColor: col,
-          fillOpacity: isSel ? 0.65 : 0.52
-        }
-      });
-      const bs = `background:${col}22;color:${col};border:1px solid ${col}55`;
-      layer.bindPopup(`
-        <div class="lo-popup-title">
-          <span class="lo-popup-badge" style="${bs}">${p.giong || '—'}</span>
-          ${p.ten_lo || p.id_lo || '—'}
-        </div>
-        <div class="lo-popup-grid">
-          <span class="lo-popup-label">Mã lô</span><span class="lo-popup-val">${p.id_lo || '—'}</span>
-          <span class="lo-popup-label">Đội</span><span class="lo-popup-val">${p.doi || '—'}</span>
-          <span class="lo-popup-label">Năm trồng</span><span class="lo-popup-val">${p.nam_trong || '—'}</span>
-          <span class="lo-popup-label">Giống cây</span><span class="lo-popup-val">${p.giong || '—'}</span>
-          <span class="lo-popup-label">Diện tích</span><span class="lo-popup-val">${p.dien_tich_map ? p.dien_tich_map + ' ha' : '—'}</span>
-        </div>
-        <div class="lo-popup-actions">
-          <div class="lo-popup-btn" onclick="showToast('Chi tiết: ${(p.ten_lo || '').replace(/'/g, '')}','📋')">Chi tiết</div>
-          <div class="lo-popup-btn" onclick="showToast('Sửa lô: ${(p.ten_lo || '').replace(/'/g, '')}','✏️')">Sửa</div>
-        </div>`, { maxWidth: 260 });
+  // Vẽ polygon lô (luôn vẽ nếu lotsVis = true)
+  if (lotsVis) {
+    const layer = L.geoJSON(feat, {
+      style: {
+        color: isSel ? '#ffffff' : col,
+        weight: isSel ? 2.5 : 1,
+        fillColor: col,
+        fillOpacity: isSel ? 0.65 : 0.52
+      }
+    });
+    const bs = `background:${col}22;color:${col};border:1px solid ${col}55`;
+    layer.bindPopup(`
+      <div class="lo-popup-title">
+        <span class="lo-popup-badge" style="${bs}">${p.giong || '—'}</span>
+        ${p.ten_lo || p.id_lo || '—'}
+      </div>
+      <div class="lo-popup-grid">
+        <span class="lo-popup-label">Mã lô</span><span class="lo-popup-val">${p.id_lo || '—'}</span>
+        <span class="lo-popup-label">Đội</span><span class="lo-popup-val">${p.doi || '—'}</span>
+        <span class="lo-popup-label">Năm trồng</span><span class="lo-popup-val">${p.nam_trong || '—'}</span>
+        <span class="lo-popup-label">Giống cây</span><span class="lo-popup-val">${p.giong || '—'}</span>
+        <span class="lo-popup-label">Diện tích</span><span class="lo-popup-val">${p.dien_tich_map ? p.dien_tich_map + ' ha' : '—'}</span>
+      </div>
+      <div class="lo-popup-actions">
+        <div class="lo-popup-btn" onclick="showToast('Chi tiết: ${(p.ten_lo || '').replace(/'/g, '')}','📋')">Chi tiết</div>
+        <div class="lo-popup-btn" onclick="showToast('Sửa lô: ${(p.ten_lo || '').replace(/'/g, '')}','✏️')">Sửa</div>
+      </div>`, { maxWidth: 260 });
 
-      layer.on('mouseover', () => layer.setStyle({ fillOpacity: 0.7, weight: 2 }));
-      layer.on('mouseout', () => { if (!selectedIdx.has(idx)) layer.setStyle({ fillOpacity: 0.52, weight: 1 }); });
-      layer.on('click', e => {
-        if (currentTool === 'pointer') {
-          selectedIdx.has(idx) ? selectedIdx.delete(idx) : selectedIdx.add(idx);
-          updateSelBar();
-          renderRealLots();
-          L.DomEvent.stopPropagation(e);
-        }
-      });
-      layer.addTo(dashMap);
-      lotLayers.push({ layer, p, idx });
-    }
+    layer.on('mouseover', () => layer.setStyle({ fillOpacity: 0.7, weight: 2 }));
+    layer.on('mouseout', () => { if (!selectedIdx.has(idx)) layer.setStyle({ fillOpacity: 0.52, weight: 1 }); });
+    layer.on('click', e => {
+      if (currentTool === 'pointer') {
+        selectedIdx.has(idx) ? selectedIdx.delete(idx) : selectedIdx.add(idx);
+        updateSelBar();
+        renderRealLots();
+        L.DomEvent.stopPropagation(e);
+      }
+    });
+    layer.addTo(dashMap);
+    lotLayers.push({ layer, p, idx });
+  }
 
-    // Nhãn tên lô
-    if (labelsVis && p.ten_lo) {
-      const z = dashMap.getZoom();
+  // Nhãn tên lô - CHỈ HIỂN THỊ KHI ZOOM <= 13
+  if (labelsVis && p.ten_lo) {
+    const z = dashMap.getZoom();
+    if (z <= 13) {                     // <--- Điều kiện mới
       const fs = Math.max(2, (z - 3) * 0.75);
       if (fs > 0) {
         const center = L.geoJSON(feat).getBounds().getCenter();
@@ -1428,7 +1430,9 @@ function renderRealLots() {
         labelLayers.push(lbl);
       }
     }
-    count++;
+  }
+
+    count++;   // Tăng biến đếm cho mỗi lô hiển thị (đã qua featureVisible)
   });
 
   renderMapLegend();
