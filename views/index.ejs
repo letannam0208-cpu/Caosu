@@ -1417,7 +1417,7 @@ function renderRealLots() {
   // Nhãn tên lô - CHỈ HIỂN THỊ KHI ZOOM <= 13
   if (labelsVis && p.ten_lo) {
     const z = dashMap.getZoom();
-    if (z <= 13) {                     // <--- Điều kiện mới
+    if (13 < z) {                     // <--- Điều kiện mới
       const fs = Math.max(2, (z - 3) * 0.75);
       if (fs > 0) {
         const center = L.geoJSON(feat).getBounds().getCenter();
