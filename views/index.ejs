@@ -1114,6 +1114,8 @@ let currentTool = 'pointer';
 let filterNT = new Set(), filterNam = new Set(), filterGiong = new Set(), filterPhienCao = new Set(), filterNhipDo = new Set(), filterQuyHoach = new Set();
 let filterKhuVuc = new Set(), filterTuoiCao = new Set(), filterCheDoCao = new Set();  // BỔ SUNG 3 FILTER
 let caosuFeatures = [];
+let userLocationMarker = null;
+let userLocationCircle = null;
 
 // Màu sắc cho các đối tượng (giống, năm trồng, Đội)
 const giongPalette = {
@@ -1631,10 +1633,65 @@ function toggleLayer(el, type) {
 }
 
 function locateUser() {
-  showToast('Đang xác định vị trí...', '📍');
-  dashMap.locate({ setView: true, maxZoom: 14 });
-  dashMap.on('locationfound', e => showToast(`Vị trí: ${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)}`, '✅'));
-  dashMap.on('locationerror', () => showToast('Không thể xác định vị trí', '⚠️'));
+  if (!dashMap) return;
+  
+  // Xóa marker và circle cũ nếu có
+  if (userLocationMarker) {
+    dashMap.removeLayer(userLocationMarker);
+    userLocationMarker = null;
+  }
+  if (userLocationCircle) {
+    dashMap.removeLayer(userLocationCircle);
+    userLocationCircle = null;
+  }
+
+  showToast('📍 Đang xác định vị trí của bạn...', '⏳');
+  
+  dashMap.locate({ setView: true, maxZoom: 16, enableHighAccuracy: true });
+  
+  dashMap.once('locationfound', (e) => {
+    const { lat, lng } = e.latlng;
+    const accuracy = e.accuracy; // mét
+    
+    // Tạo marker xanh với icon tùy chỉnh (hoặc dùng default)
+    const greenIcon = L.divIcon({
+      className: 'user-location-marker',
+      html: `<div style="background-color: #10b981; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 0 2px #10b981;"></div>`,
+      iconSize: [12, 12],
+      iconAnchor: [6, 6]
+    });
+    // Hoặc dùng L.circleMarker đơn giản hơn:
+    userLocationMarker = L.circleMarker([lat, lng], {
+      radius: 8,
+      fillColor: '#10b981',
+      color: '#ffffff',
+      weight: 2,
+      fillOpacity: 1
+    }).addTo(dashMap);
+    
+    // Thêm vòng tròn thể hiện độ chính xác
+    userLocationCircle = L.circle([lat, lng], {
+      radius: accuracy,
+      color: '#10b981',
+      weight: 1,
+      fillColor: '#10b981',
+      fillOpacity: 0.1
+    }).addTo(dashMap);
+    
+    // Bind popup hiển thị thông tin
+    userLocationMarker.bindPopup(`
+      <b>📍 Vị trí của bạn</b><br>
+      ${lat.toFixed(5)}, ${lng.toFixed(5)}<br>
+      Độ chính xác: ±${Math.round(accuracy)} m
+    `).openPopup();
+    
+    showToast(`✅ Đã xác định vị trí (${lat.toFixed(5)}, ${lng.toFixed(5)})`, '📍');
+  });
+  
+  dashMap.once('locationerror', (e) => {
+    console.warn('Location error:', e.message);
+    showToast('❌ Không thể xác định vị trí. Vui lòng bật GPS và cho phép truy cập vị trí.', '⚠️');
+  });
 }
 
 function toggleFullscreen() {
