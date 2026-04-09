@@ -1149,14 +1149,23 @@ async function loadCaosuData() {
     caosuFeatures.forEach(f => {
       const p = f.properties;
       if (p.doi) fullNT.add(p.doi);
+      else fullNT.add(''); 
       if (p.nam_trong) fullNam.add(String(p.nam_trong));
+      else fullNam.add(''); 
       if (p.giong) fullGiong.add(p.giong);
+      else fullGiong.add(''); 
       if (p.phien_cao) fullPhienCao.add(p.phien_cao);
+      else fullPhienCao.add('');
       if (p.nhip_do_cao) fullNhipDo.add(p.nhip_do_cao);
+      else fullNhipDo.add(''); 
       if (p.tai_canh_nam) fullQuyHoach.add(p.tai_canh_nam);
+      else fullQuyHoach.add(''); 
       if (p.khu_vuc) fullKhuVuc.add(p.khu_vuc);
+      else fullKhuVuc.add(''); 
       if (p.tuoi_cao) fullTuoiCao.add(String(p.tuoi_cao));
+      else fullTuoiCao.add(''); 
       if (p.che_do_cao) fullCheDoCao.add(p.che_do_cao);
+      else fullCheDoCao.add(''); 
     });
 
     // Khởi tạo filter mặc định là tất cả
@@ -1215,7 +1224,7 @@ async function buildFilterUI() {
   const phienCaoEl = document.getElementById('filter-phien_cao');
   if (phienCaoEl) {
     phienCaoEl.innerHTML = '<option value="all">Tất cả</option>';
-    Array.from(fullPhienCao).sort().forEach(v => {
+    Array.from(fullPhienCao).filter(v => v !== '').sort().forEach(v => {
       const opt = document.createElement('option');
       opt.value = v;
       opt.textContent = v;
@@ -1226,7 +1235,7 @@ async function buildFilterUI() {
   const nhipDoEl = document.getElementById('filter-Nhip_do_cao');
   if (nhipDoEl) {
     nhipDoEl.innerHTML = '<option value="all">Tất cả</option>';
-    Array.from(fullNhipDo).sort().forEach(v => {
+    Array.from(fullNhipDo).filter(v => v !== '').sort().forEach(v => {
       const opt = document.createElement('option');
       opt.value = v;
       opt.textContent = v;
@@ -1237,7 +1246,7 @@ async function buildFilterUI() {
   const quyHoachEl = document.getElementById('filter-quy_hoach_tai_canh');
   if (quyHoachEl) {
     quyHoachEl.innerHTML = '<option value="all">Tất cả</option>';
-    Array.from(fullQuyHoach).sort().forEach(v => {
+    Array.from(fullQuyHoach).filter(v => v !== '').sort().forEach(v => {
       const opt = document.createElement('option');
       opt.value = v;
       opt.textContent = v;
@@ -1248,7 +1257,7 @@ async function buildFilterUI() {
   const khuVucEl = document.getElementById('filter-khu-vuc');
   if (khuVucEl) {
     khuVucEl.innerHTML = '<option value="all">Tất cả</option>';
-    Array.from(fullKhuVuc).sort().forEach(v => {
+    Array.from(fullKhuVuc).filter(v => v !== '').sort().forEach(v => {
       const opt = document.createElement('option');
       opt.value = v;
       opt.textContent = v;
@@ -1259,7 +1268,7 @@ async function buildFilterUI() {
   const tuoiCaoEl = document.getElementById('filter-tuoi-cao');
   if (tuoiCaoEl) {
     tuoiCaoEl.innerHTML = '<option value="all">Tất cả</option>';
-    Array.from(fullTuoiCao).sort((a,b) => Number(a) - Number(b)).forEach(v => {
+    Array.from(fullTuoiCao).filter(v => v !== '').sort((a,b) => Number(a) - Number(b)).forEach(v => {
       const opt = document.createElement('option');
       opt.value = v;
       opt.textContent = v;
@@ -1270,7 +1279,7 @@ async function buildFilterUI() {
   const cheDoCaoEl = document.getElementById('filter-che-do-cao');
   if (cheDoCaoEl) {
     cheDoCaoEl.innerHTML = '<option value="all">Tất cả</option>';
-    Array.from(fullCheDoCao).sort().forEach(v => {
+    Array.from(fullCheDoCao).filter(v => v !== '').sort().forEach(v => {
       const opt = document.createElement('option');
       opt.value = v;
       opt.textContent = v;
