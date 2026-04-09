@@ -568,43 +568,21 @@ function showForm(l = null) {
   
   document.getElementById('cancelModalBtn').onclick = () => closeModal();
   document.getElementById('modalForm').onsubmit = async (e) => {
-  e.preventDefault();
-  const formData = new FormData(e.target);
-  const rawData = Object.fromEntries(formData);
-  
-  // Chuyển đổi: nếu giá trị là chuỗi rỗng thì gán thành null
-  const data = {};
-  for (const [key, value] of Object.entries(rawData)) {
-    // Các trường cần xử lý số (double precision)
-    const numberFields = [
-      'nam_trong', 'cao_trinh_tb', 'dien_tich_map', 'dien_tich_010125', 'dien_tich_010126',
-      'tong_ho_kk', 'cay_cao', 'cay_chua_cao', 'cay_kho_mu', 'cay_khong_pt', 'ho_trong',
-      'mat_do_cc', 'mat_do_tk', 'nam_mc', 'tuoi_cao', 'nam_cao_up', 'ns25_kg_ha',
-      'ns25_kg_cay', 'ns26_kg_ha', 'ns26_kg_cay', 'tong_lat_cao', 'san_luong', 'tai_canh_nam'
-    ];
-    if (numberFields.includes(key) && value === '') {
-      data[key] = null;
-    } else {
-      data[key] = value;
-    }
-  }
-  
-  const id_lo = document.getElementById('id_lo').value;
-  if (!data.id_don_vi) { alert('Vui lòng chọn đội'); return; }
-  const url = id_lo ? `/api/lo-cay/${id_lo}` : '/api/lo-cay';
-  const method = id_lo ? 'PUT' : 'POST';
-  const res = await fetch(url, {
-    method,
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data)
-  });
-  const result = await res.json();
-  if (result.success) {
-    alert(id_lo ? 'Cập nhật thành công' : 'Thêm thành công');
-    closeModal();
-    loadLoCay();
-  } else alert('Lỗi: ' + result.error);
-};
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData);
+    const id_lo = document.getElementById('id_lo').value;
+    if(!data.id_don_vi) { alert('Vui lòng chọn đội'); return; }
+    const url = id_lo ? `/api/lo-cay/${id_lo}` : '/api/lo-cay';
+    const method = id_lo ? 'PUT' : 'POST';
+    const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+    const result = await res.json();
+    if(result.success) {
+      alert(id_lo ? 'Cập nhật thành công' : 'Thêm thành công');
+      closeModal();
+      loadLoCay();
+    } else alert('Lỗi: ' + result.error);
+  };
 }
 
 async function loadDonViList(selectedId) {
