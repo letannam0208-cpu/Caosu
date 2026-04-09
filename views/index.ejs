@@ -1158,7 +1158,7 @@ async function loadCaosuData() {
       else fullPhienCao.add('');
       if (p.nhip_do_cao) fullNhipDo.add(p.nhip_do_cao);
       else fullNhipDo.add(''); 
-      if (p.tai_canh_nam) fullQuyHoach.add(p.tai_canh_nam);
+      if (p.tai_canh_nam) fullQuyHoach.add(String(p.tai_canh_nam));
       else fullQuyHoach.add(''); 
       if (p.khu_vuc) fullKhuVuc.add(p.khu_vuc);
       else fullKhuVuc.add(''); 
@@ -1295,7 +1295,7 @@ function featureVisible(p) {
   const g = p.giong || '';
   const pc = p.phien_cao || '';
   const nd = p.nhip_do_cao || '';
-  const qh = p.tai_canh_nam || '';
+  const qh = String(p.tai_canh_nam || '');
   const kv = p.khu_vuc || '';
   const tc = String(p.tuoi_cao || '');
   const cdc = p.che_do_cao || '';

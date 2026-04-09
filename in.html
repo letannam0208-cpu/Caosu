@@ -687,57 +687,39 @@ td.mono{font-family:monospace;font-size:11px;color:var(--muted)}
   </div>
   <div class="tb-sep"></div>
   <div class="tb-pill"><div class="live-dot"></div><span data-lang="online">Trực tuyến</span></div>
-  <div class="tb-pill"><span data-lang="farms">Lô vườn</span> <strong>425</strong></div>
-  <div class="tb-pill"><span data-lang="area">Diện tích</span> <strong>7.244 ha</strong></div>
+  <div class="tb-pill"><span data-lang="farms">Lô vườn</span> <strong id="totalLots">0</strong></div>
+  <div class="tb-pill"><span data-lang="area">Diện tích</span> <strong id="totalArea">0 ha</strong></div>
   <div class="tb-right">
-    <div class="notif-wrap">
-      <button class="icon-btn" title="Thông báo" data-lang-title="notification" onclick="showToast('Bạn có 3 thông báo mới','📬')">
-        <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-      </button>
-      <div class="notif-badge">3</div>
-    </div>
-    <button class="icon-btn" title="Thay đổi ngôn ngữ" onclick="toggleLanguageMenu()" id="langBtn">
-      <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-    </button>
-    <div class="lang-menu" id="langMenu" style="display:none">
-      <div class="lang-search">
-        <input type="text" placeholder="Tìm ngôn ngữ..." id="langSearch" oninput="filterLanguages()">
-      </div>
-      <div class="lang-list" id="langList"></div>
-    </div>
-    <button class="icon-btn" title="Cài đặt">
-      <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-    </button>
     <div class="tb-user-info">
-      <div class="tb-user-name">Nguyễn Văn An</div>
-      <div class="tb-user-role" data-lang="admin">Quản trị viên</div>
+      <div class="tb-user-name" id="userFullName">Nguyễn Văn An</div>
+      <div class="tb-user-role" id="userRole">Quản trị viên</div>
     </div>
-    <div class="tb-avatar">NA</div>
+    <div class="tb-avatar" id="userAvatar">NA</div>
   </div>
 </div>
 
 <div id="body">
   <nav id="nav">
       <div class="nav-section-label">Tổng quan</div>
-      <a href="/" class="nav-item <%= (path === '/' || path === '/dashboard') ? 'active' : '' %>">
+      <a href="/" class="nav-item">
         <i class="fas fa-home nav-icon"></i> Dashboard
       </a>
 
       <div class="nav-section-label">Quản lý dữ liệu</div>
-      <a href="/quan-ly-lo-cay" class="nav-item <%= path === '/quan-ly-lo-cay' ? 'active' : '' %>">
+      <a href="/quan-ly-lo-cay" class="nav-item">
         <i class="fas fa-tree nav-icon"></i> Quản lý lô cây
       </a>
-      <a href="/them-du-lieu-lo-cay" class="nav-item <%= path === '/them-du-lieu-lo-cay' ? 'active' : '' %>">
+      <a href="/them-du-lieu-lo-cay" class="nav-item">
         <i class="fas fa-plus-circle nav-icon"></i> Thêm dữ liệu lô
       </a>
 
       <div class="nav-section-label">Người dùng & Phân quyền</div>
-      <a href="/quan-ly-nguoi-dung" class="nav-item <%= path === '/quan-ly-nguoi-dung' ? 'active' : '' %>">
+      <a href="/quan-ly-nguoi-dung" class="nav-item">
         <i class="fas fa-users nav-icon"></i> Quản lý người dùng
       </a>
 
       <div class="nav-section-label">Phân tích</div>
-      <a href="/thong-ke" class="nav-item <%= path === '/thong-ke' ? 'active' : '' %>">
+      <a href="/thong-ke" class="nav-item">
         <i class="fas fa-chart-bar nav-icon"></i> Thống kê
       </a>
 
@@ -783,7 +765,7 @@ td.mono{font-family:monospace;font-size:11px;color:var(--muted)}
       <button class="map-chip" id="mview-nhiet_do_cao" onclick="switchMapView('nhiet_do_cao', this)">Nhịp độ cạo</button>
       <button class="map-chip" id="mview-quy_hoach_tai_canh" onclick="switchMapView('quy_hoach_tai_canh', this)">QH tái canh</button>
       <div style="margin-left:auto;display:flex;gap:6px;align-items:center">
-        <span id="selCountTop" style="font-size:11px;color:var(--muted)">425 lô hiển thị</span>
+        <span id="selCountTop" style="font-size:11px;color:var(--muted)">0 lô hiển thị</span>
         <button class="map-chip" onclick="exportMapToPDF()">📄 PDF</button>
         <button class="map-chip" onclick="exportMapToJPEG()">🖼️ JPEG</button>
       </div>
@@ -1090,14 +1072,12 @@ td.mono{font-family:monospace;font-size:11px;color:var(--muted)}
   </div>
 
   <div class="grid-2">
-
-<!-- TOAST -->
-<div class="toast" id="toast">
-  <span class="toast-icon" id="toastIcon">✅</span>
-  <span id="toastMsg">Thao tác thành công</span>
+  </div>
 </div>
-<!-- DATA -->
-<!-- TOAST -->
+</div>
+</div>
+
+<!-- TOAST (chỉ một) -->
 <div class="toast" id="toast">
   <span class="toast-icon" id="toastIcon">✅</span>
   <span id="toastMsg">Thao tác thành công</span>
@@ -1112,7 +1092,7 @@ let mapViewMode = 'nt';
 let selectedIdx = new Set();
 let currentTool = 'pointer';
 let filterNT = new Set(), filterNam = new Set(), filterGiong = new Set(), filterPhienCao = new Set(), filterNhipDo = new Set(), filterQuyHoach = new Set();
-let filterKhuVuc = new Set(), filterTuoiCao = new Set(), filterCheDoCao = new Set();  // BỔ SUNG 3 FILTER
+let filterKhuVuc = new Set(), filterTuoiCao = new Set(), filterCheDoCao = new Set();
 let caosuFeatures = [];
 let userLocationMarker = null;
 let userLocationCircle = null;
@@ -1139,7 +1119,7 @@ const nhipDoCaoPalette = {
   '2 ngày/1 lần': '#00d68f', '3 ngày/1 lần': '#00b4ff', '4 ngày/1 lần': '#f59e0b'
 };
 const taiCanhPalette = {
-  '2026': '#00b4ff', '2027': '#f59e0b', '2028': '#a78bfa', '2029': '#f4656a', '2030': '#34d399'
+  '2025': '#00d68f', '2026': '#00b4ff', '2027': '#f59e0b', '2028': '#a78bfa'
 };
 
 /* ==================== LẤY DỮ LIỆU TỪ API ==================== */
@@ -1150,7 +1130,7 @@ async function fetchAPI(url) {
 }
 
 let fullNT = new Set(), fullNam = new Set(), fullGiong = new Set(), fullPhienCao = new Set(), fullNhipDo = new Set(), fullQuyHoach = new Set();
-let fullKhuVuc = new Set(), fullTuoiCao = new Set(), fullCheDoCao = new Set();  // Bộ lọc mới
+let fullKhuVuc = new Set(), fullTuoiCao = new Set(), fullCheDoCao = new Set();
 
 async function loadCaosuData() {
   try {
@@ -1164,24 +1144,29 @@ async function loadCaosuData() {
     }
     fullNT.clear(); fullNam.clear(); fullGiong.clear();
     fullPhienCao.clear(); fullNhipDo.clear(); fullQuyHoach.clear();
-    fullKhuVuc.clear(); fullTuoiCao.clear(); fullCheDoCao.clear();  // Xóa dữ liệu cũ
+    fullKhuVuc.clear(); fullTuoiCao.clear(); fullCheDoCao.clear();
 
     caosuFeatures.forEach(f => {
-  const p = f.properties;
-  if (p.doi) fullNT.add(p.doi);
-  if (p.nam_trong) fullNam.add(String(p.nam_trong));
-  if (p.giong) fullGiong.add(p.giong);
-  if (p.phien_cao) fullPhienCao.add(p.phien_cao);
-  if (p.nhip_do_cao) fullNhipDo.add(p.nhip_do_cao);
-  if (p.tai_canh_nam) fullQuyHoach.add(p.tai_canh_nam);
-  if (p.khu_vuc) fullKhuVuc.add(p.khu_vuc);
-  if (p.tuoi_cao) fullTuoiCao.add(String(p.tuoi_cao));
-  if (p.che_do_cao) fullCheDoCao.add(p.che_do_cao);
-});
-// Thêm giá trị null để khi lọc "Tất cả" vẫn hiển thị lô không có năm quy hoạch
-fullQuyHoach.add(null);
-// Thêm các năm mặc định 2026-2030 (chỉ để xuất hiện trong dropdown)
-['2026','2027','2028','2029','2030'].forEach(y => fullQuyHoach.add(y));
+      const p = f.properties;
+      if (p.doi) fullNT.add(p.doi);
+      else fullNT.add(''); 
+      if (p.nam_trong) fullNam.add(String(p.nam_trong));
+      else fullNam.add(''); 
+      if (p.giong) fullGiong.add(p.giong);
+      else fullGiong.add(''); 
+      if (p.phien_cao) fullPhienCao.add(p.phien_cao);
+      else fullPhienCao.add('');
+      if (p.nhip_do_cao) fullNhipDo.add(p.nhip_do_cao);
+      else fullNhipDo.add(''); 
+      if (p.tai_canh_nam) fullQuyHoach.add(p.tai_canh_nam);
+      else fullQuyHoach.add(''); 
+      if (p.khu_vuc) fullKhuVuc.add(p.khu_vuc);
+      else fullKhuVuc.add(''); 
+      if (p.tuoi_cao) fullTuoiCao.add(String(p.tuoi_cao));
+      else fullTuoiCao.add(''); 
+      if (p.che_do_cao) fullCheDoCao.add(p.che_do_cao);
+      else fullCheDoCao.add(''); 
+    });
 
     // Khởi tạo filter mặc định là tất cả
     filterNT = new Set(fullNT);
@@ -1239,7 +1224,7 @@ async function buildFilterUI() {
   const phienCaoEl = document.getElementById('filter-phien_cao');
   if (phienCaoEl) {
     phienCaoEl.innerHTML = '<option value="all">Tất cả</option>';
-    Array.from(fullPhienCao).sort().forEach(v => {
+    Array.from(fullPhienCao).filter(v => v !== '').sort().forEach(v => {
       const opt = document.createElement('option');
       opt.value = v;
       opt.textContent = v;
@@ -1250,7 +1235,7 @@ async function buildFilterUI() {
   const nhipDoEl = document.getElementById('filter-Nhip_do_cao');
   if (nhipDoEl) {
     nhipDoEl.innerHTML = '<option value="all">Tất cả</option>';
-    Array.from(fullNhipDo).sort().forEach(v => {
+    Array.from(fullNhipDo).filter(v => v !== '').sort().forEach(v => {
       const opt = document.createElement('option');
       opt.value = v;
       opt.textContent = v;
@@ -1259,29 +1244,20 @@ async function buildFilterUI() {
   }
 
   const quyHoachEl = document.getElementById('filter-quy_hoach_tai_canh');
-if (quyHoachEl) {
-  // Tạo một Set chứa các năm có sẵn từ dữ liệu
-  let quyHoachSet = new Set(fullQuyHoach);
-  // Thêm các năm mới (2026-2030) vào Set
-  const futureYears = ['2026', '2027', '2028', '2029', '2030'];
-  futureYears.forEach(y => quyHoachSet.add(y));
-  
-  // Sắp xếp và tạo options
-  const sortedYears = Array.from(quyHoachSet).sort();
-  quyHoachEl.innerHTML = '<option value="all">Tất cả</option>';
-  sortedYears.forEach(v => {
-    const opt = document.createElement('option');
-    opt.value = v;
-    opt.textContent = v;
-    quyHoachEl.appendChild(opt);
-  });
-}
+  if (quyHoachEl) {
+    quyHoachEl.innerHTML = '<option value="all">Tất cả</option>';
+    Array.from(fullQuyHoach).filter(v => v !== '').sort().forEach(v => {
+      const opt = document.createElement('option');
+      opt.value = v;
+      opt.textContent = v;
+      quyHoachEl.appendChild(opt);
+    });
+  }
 
-  // === BỔ SUNG 3 BỘ LỌC MỚI ===
   const khuVucEl = document.getElementById('filter-khu-vuc');
   if (khuVucEl) {
     khuVucEl.innerHTML = '<option value="all">Tất cả</option>';
-    Array.from(fullKhuVuc).sort().forEach(v => {
+    Array.from(fullKhuVuc).filter(v => v !== '').sort().forEach(v => {
       const opt = document.createElement('option');
       opt.value = v;
       opt.textContent = v;
@@ -1292,7 +1268,7 @@ if (quyHoachEl) {
   const tuoiCaoEl = document.getElementById('filter-tuoi-cao');
   if (tuoiCaoEl) {
     tuoiCaoEl.innerHTML = '<option value="all">Tất cả</option>';
-    Array.from(fullTuoiCao).sort((a,b) => Number(a) - Number(b)).forEach(v => {
+    Array.from(fullTuoiCao).filter(v => v !== '').sort((a,b) => Number(a) - Number(b)).forEach(v => {
       const opt = document.createElement('option');
       opt.value = v;
       opt.textContent = v;
@@ -1303,7 +1279,7 @@ if (quyHoachEl) {
   const cheDoCaoEl = document.getElementById('filter-che-do-cao');
   if (cheDoCaoEl) {
     cheDoCaoEl.innerHTML = '<option value="all">Tất cả</option>';
-    Array.from(fullCheDoCao).sort().forEach(v => {
+    Array.from(fullCheDoCao).filter(v => v !== '').sort().forEach(v => {
       const opt = document.createElement('option');
       opt.value = v;
       opt.textContent = v;
@@ -1313,7 +1289,6 @@ if (quyHoachEl) {
 }
 
 function featureVisible(p) {
-  // Tạm thời bỏ qua kiểm tra ten_lo để debug
   if (!p.ten_lo) return false;
   const nt = p.doi || '';
   const nam = String(p.nam_trong || '');
@@ -1380,78 +1355,74 @@ function renderRealLots() {
 
   let count = 0;
   caosuFeatures.forEach((feat, idx) => {
-  const p = feat.properties;
-  if (!featureVisible(p)) return;
-  const isSel = selectedIdx.has(idx);
-  const col = getLotColorReal(p, mapViewMode);
+    const p = feat.properties;
+    if (!featureVisible(p)) return;
+    const isSel = selectedIdx.has(idx);
+    const col = getLotColorReal(p, mapViewMode);
 
-  // Vẽ polygon lô (luôn vẽ nếu lotsVis = true)
-  if (lotsVis) {
-  const layer = L.geoJSON(feat, {
-    style: {
-      color: isSel ? '#ffffff' : col,
-      weight: isSel ? 2.5 : 1,
-      fillColor: col,
-      fillOpacity: isSel ? 0.65 : 0.52
-    },
-    interactive: !msrActive   // Khi đo thì vô hiệu hóa hoàn toàn tương tác
-  });
-  
-  // Chỉ bind popup và các sự kiện khi không ở chế độ đo
-  if (!msrActive) {
-    const bs = `background:${col}22;color:${col};border:1px solid ${col}55`;
-    layer.bindPopup(`
-      <div class="lo-popup-title">
-        <span class="lo-popup-badge" style="${bs}">${p.giong || '—'}</span>
-        ${p.ten_lo || p.id_lo || '—'}
-      </div>
-      <div class="lo-popup-grid">
-        <span class="lo-popup-label">Mã lô</span><span class="lo-popup-val">${p.id_lo || '—'}</span>
-        <span class="lo-popup-label">Đội</span><span class="lo-popup-val">${p.doi || '—'}</span>
-        <span class="lo-popup-label">Năm trồng</span><span class="lo-popup-val">${p.nam_trong || '—'}</span>
-        <span class="lo-popup-label">Giống cây</span><span class="lo-popup-val">${p.giong || '—'}</span>
-        <span class="lo-popup-label">Diện tích</span><span class="lo-popup-val">${p.dien_tich_map ? p.dien_tich_map + ' ha' : '—'}</span>
-      </div>
-      <div class="lo-popup-actions">
-        <div class="lo-popup-btn" onclick="showToast('Chi tiết: ${(p.ten_lo || '').replace(/'/g, '')}','📋')">Chi tiết</div>
-        <div class="lo-popup-btn" onclick="showToast('Sửa lô: ${(p.ten_lo || '').replace(/'/g, '')}','✏️')">Sửa</div>
-      </div>`, { maxWidth: 260 });
+    if (lotsVis) {
+      const layer = L.geoJSON(feat, {
+        style: {
+          color: isSel ? '#ffffff' : col,
+          weight: isSel ? 2.5 : 1,
+          fillColor: col,
+          fillOpacity: isSel ? 0.65 : 0.52
+        },
+        interactive: !msrActive
+      });
+      
+      if (!msrActive) {
+        const bs = `background:${col}22;color:${col};border:1px solid ${col}55`;
+        layer.bindPopup(`
+          <div class="lo-popup-title">
+            <span class="lo-popup-badge" style="${bs}">${p.giong || '—'}</span>
+            ${p.ten_lo || p.id_lo || '—'}
+          </div>
+          <div class="lo-popup-grid">
+            <span class="lo-popup-label">Mã lô</span><span class="lo-popup-val">${p.id_lo || '—'}</span>
+            <span class="lo-popup-label">Đội</span><span class="lo-popup-val">${p.doi || '—'}</span>
+            <span class="lo-popup-label">Năm trồng</span><span class="lo-popup-val">${p.nam_trong || '—'}</span>
+            <span class="lo-popup-label">Giống cây</span><span class="lo-popup-val">${p.giong || '—'}</span>
+            <span class="lo-popup-label">Diện tích</span><span class="lo-popup-val">${p.dien_tich_map ? p.dien_tich_map + ' ha' : '—'}</span>
+          </div>
+          <div class="lo-popup-actions">
+            <div class="lo-popup-btn" onclick="showToast('Chi tiết: ${(p.ten_lo || '').replace(/'/g, '')}','📋')">Chi tiết</div>
+            <div class="lo-popup-btn" onclick="showToast('Sửa lô: ${(p.ten_lo || '').replace(/'/g, '')}','✏️')">Sửa</div>
+          </div>`, { maxWidth: 260 });
 
-    layer.on('mouseover', () => layer.setStyle({ fillOpacity: 0.7, weight: 2 }));
-    layer.on('mouseout', () => { if (!selectedIdx.has(idx)) layer.setStyle({ fillOpacity: 0.52, weight: 1 }); });
-    layer.on('click', e => {
-      if (currentTool === 'pointer') {
-        selectedIdx.has(idx) ? selectedIdx.delete(idx) : selectedIdx.add(idx);
-        updateSelBar();
-        renderRealLots();
-        L.DomEvent.stopPropagation(e);
+        layer.on('mouseover', () => layer.setStyle({ fillOpacity: 0.7, weight: 2 }));
+        layer.on('mouseout', () => { if (!selectedIdx.has(idx)) layer.setStyle({ fillOpacity: 0.52, weight: 1 }); });
+        layer.on('click', e => {
+          if (currentTool === 'pointer') {
+            selectedIdx.has(idx) ? selectedIdx.delete(idx) : selectedIdx.add(idx);
+            updateSelBar();
+            renderRealLots();
+            L.DomEvent.stopPropagation(e);
+          }
+        });
       }
-    });
-  }
-  
-  layer.addTo(dashMap);
-  lotLayers.push({ layer, p, idx });
-}
+      
+      layer.addTo(dashMap);
+      lotLayers.push({ layer, p, idx });
+      count++;
+    }
 
-  // Nhãn tên lô - CHỈ HIỂN THỊ KHI ZOOM <= 13
-  if (labelsVis && p.ten_lo) {
-    const z = dashMap.getZoom();
-    if (13 < z) {                     // <--- Điều kiện mới
-      const fs = Math.max(2, (z - 3) * 0.75);
-      if (fs > 0) {
-        const center = L.geoJSON(feat).getBounds().getCenter();
-        const col = getLotColorReal(p, mapViewMode);
-        const cleanName = p.ten_lo.replace(/\s*-\s*KV\s*\d+\s*$/i, '');
-        const namCuoi = p.nam_trong ? String(p.nam_trong).slice(-2) : '';
-        const line1 = namCuoi ? `${cleanName} - ${namCuoi}` : cleanName;
-        const html = `<div style="background:transparent; color:#fff; font-size:${fs}px; padding:${Math.max(2, fs * 0.4)}px ${Math.max(4, fs * 0.7)}px; border-radius:4px; border-left:${Math.max(2, fs * 0.25)}px solid ${col}; white-space:nowrap; pointer-events:none; font-family:'Be Vietnam Pro',sans-serif; line-height:1.6; font-weight:700; text-shadow:0 1px 3px rgba(0,0,0,0.5); transform:scale(${z / 16}); transform-origin:top left; text-align:center;"><strong style="display:block">${line1}</strong>${p.giong ? `<span style="display:block; margin-top:2px">${p.giong}</span>` : ''}</div>`;
-        const lbl = L.marker(center, { icon: L.divIcon({ html, className: '', iconAnchor: [0, 0] }) }).addTo(dashMap);
-        labelLayers.push(lbl);
+    if (labelsVis && p.ten_lo) {
+      const z = dashMap.getZoom();
+      if (z > 13) {
+        const fs = Math.max(2, (z - 3) * 0.75);
+        if (fs > 0) {
+          const center = L.geoJSON(feat).getBounds().getCenter();
+          const col = getLotColorReal(p, mapViewMode);
+          const cleanName = p.ten_lo.replace(/\s*-\s*KV\s*\d+\s*$/i, '');
+          const namCuoi = p.nam_trong ? String(p.nam_trong).slice(-2) : '';
+          const line1 = namCuoi ? `${cleanName} - ${namCuoi}` : cleanName;
+          const html = `<div style="background:transparent; color:#fff; font-size:${fs}px; padding:${Math.max(2, fs * 0.4)}px ${Math.max(4, fs * 0.7)}px; border-radius:4px; border-left:${Math.max(2, fs * 0.25)}px solid ${col}; white-space:nowrap; pointer-events:none; font-family:'Be Vietnam Pro',sans-serif; line-height:1.6; font-weight:700; text-shadow:0 1px 3px rgba(0,0,0,0.5); transform:scale(${z / 16}); transform-origin:top left; text-align:center;"><strong style="display:block">${line1}</strong>${p.giong ? `<span style="display:block; margin-top:2px">${p.giong}</span>` : ''}</div>`;
+          const lbl = L.marker(center, { icon: L.divIcon({ html, className: '', iconAnchor: [0, 0] }) }).addTo(dashMap);
+          labelLayers.push(lbl);
+        }
       }
     }
-  }
-
-    count++;   // Tăng biến đếm cho mỗi lô hiển thị (đã qua featureVisible)
   });
 
   renderMapLegend();
@@ -1513,7 +1484,6 @@ function updateMapFilters(type, selectEl) {
     else if (type === 'phien_cao') filterPhienCao = new Set(fullPhienCao);
     else if (type === 'nhip_do_cao') filterNhipDo = new Set(fullNhipDo);
     else if (type === 'quy_hoach_tai_canh') filterQuyHoach = new Set(fullQuyHoach);
-    // === THÊM 3 CASE MỚI ===
     else if (type === 'khu_vuc') filterKhuVuc = new Set(fullKhuVuc);
     else if (type === 'tuoi_cao') filterTuoiCao = new Set(fullTuoiCao);
     else if (type === 'che_do_cao') filterCheDoCao = new Set(fullCheDoCao);
@@ -1524,7 +1494,6 @@ function updateMapFilters(type, selectEl) {
     else if (type === 'phien_cao') filterPhienCao = new Set([val]);
     else if (type === 'nhip_do_cao') filterNhipDo = new Set([val]);
     else if (type === 'quy_hoach_tai_canh') filterQuyHoach = new Set([val]);
-    // === THÊM 3 CASE MỚI ===
     else if (type === 'khu_vuc') filterKhuVuc = new Set([val]);
     else if (type === 'tuoi_cao') filterTuoiCao = new Set([val]);
     else if (type === 'che_do_cao') filterCheDoCao = new Set([val]);
@@ -1569,13 +1538,11 @@ function goHome() {
 }
 
 function setMapTool(tool, btn) {
-  // Nếu đang mở measure panel thì đóng nó
   if (document.getElementById('measure-panel').classList.contains('show')) {
     closeMeasure();
   }
   
-  currentTool = tool;   // chỉ gán một lần
-  // Xóa active class của các nút công cụ
+  currentTool = tool;
   ['tool-pan', 'tool-pointer', 'tool-rect'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.classList.remove('active');
@@ -1651,9 +1618,6 @@ function toggleLayer(el, type) {
     toggleBoundary(document.getElementById('btn-boundary'));
   } else if (type === 'label') {
     toggleLotLabels(document.getElementById('btn-label'));
-  // else if (type === 'satellite') {
-//   on ? satelliteTile.addTo(dashMap) : dashMap.removeLayer(satelliteTile);
-// }
   }
 }
 
@@ -1689,7 +1653,6 @@ function locateUser() {
     fillOpacity: 0.1
   }).addTo(dashMap);
 
-  // Hiển thị popup thông tin
   userLocationMarker.bindPopup(`
     <b>📍 Vị trí </b><br>
     ${fixedLat.toFixed(6)}, ${fixedLng.toFixed(6)}<br>
@@ -1824,7 +1787,7 @@ function openMeasure(mode) {
   dashMap.on('mousemove', onMsrMove);
   dashMap.on('dblclick', onMsrDblClick);
   clearSelection();
-  renderRealLots();   // <-- THÊM DÒNG NÀY
+  renderRealLots();
 }
 function closeMeasure() {
   document.getElementById('measure-panel').classList.remove('show');
@@ -1845,7 +1808,7 @@ function closeMeasure() {
   resetMeasure();
   document.getElementById('btn-measure-dist').classList.remove('active');
   document.getElementById('btn-measure-area').classList.remove('active');
-  renderRealLots();   // <-- THÊM DÒNG NÀY
+  renderRealLots();
 }
 function switchMeasureTab(mode) {
   msrMode = mode;
@@ -1992,13 +1955,11 @@ async function initDashMap() {
   dashMap = L.map('dashMap', { zoomControl: false, attributionControl: false })
     .setView([12.524, 105.452], 12);
 
-  // Lưu layer nền hiện tại
-window.currentBaseLayer = L.tileLayer(
-  'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-  { maxZoom: 19, attribution: 'Esri' }
-).addTo(dashMap);
+  window.currentBaseLayer = L.tileLayer(
+    'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    { maxZoom: 19, attribution: 'Esri' }
+  ).addTo(dashMap);
 
-  // Lớp ranh giới xã (bỏ qua nếu lỗi)
   try {
     const xaRes = await fetch('/data/xa_cambodia.geojson');
     if (xaRes.ok) {
@@ -2042,21 +2003,20 @@ window.currentBaseLayer = L.tileLayer(
     if (e.key === '-' || e.key === '_') mapZoomOut();
     if (e.key === 'h' || e.key === 'H') goHome();
   });
-// ========== FOCUS LÔ TỪ TRANG QUẢN LÝ ==========
-const focusLotId = localStorage.getItem('focus_lot_id');
-if (focusLotId) {
-  localStorage.removeItem('focus_lot_id'); // Xóa ngay sau khi đọc
-  // Tìm index của lô trong mảng caosuFeatures
-  const idx = caosuFeatures.findIndex(f => f.properties.id_lo === focusLotId);
-  if (idx !== -1) {
-    setTimeout(() => {
-      flyToFeature(idx);
-      showToast(` Đã chuyển đến lô: ${caosuFeatures[idx].properties.ten_lo || focusLotId}`, '📍');
-    }, 500);
-  } else {
-    showToast(`⚠️ Không tìm thấy lô với ID: ${focusLotId}`, '⚠️');
+
+  const focusLotId = localStorage.getItem('focus_lot_id');
+  if (focusLotId) {
+    localStorage.removeItem('focus_lot_id');
+    const idx = caosuFeatures.findIndex(f => f.properties.id_lo === focusLotId);
+    if (idx !== -1) {
+      setTimeout(() => {
+        flyToFeature(idx);
+        showToast(` Đã chuyển đến lô: ${caosuFeatures[idx].properties.ten_lo || focusLotId}`, '📍');
+      }, 500);
+    } else {
+      showToast(`⚠️ Không tìm thấy lô với ID: ${focusLotId}`, '⚠️');
+    }
   }
-}
 }
 
 /* ==================== TOAST ==================== */
@@ -2078,11 +2038,9 @@ function goTo(id, el) {
   if (id === 'dashboard') setTimeout(() => dashMap && dashMap.invalidateSize(), 120);
 }
 
-// ==================== XUẤT BẢN ĐỒ (GIỮ NHÃN LÔ) ====================
+/* ==================== XUẤT BẢN ĐỒ ==================== */
 async function waitForMapStable() {
-  // Đảm bảo map đã được invalidate size (fix hiển thị)
   if (dashMap) dashMap.invalidateSize();
-  // Đợi 500ms để các layer ổn định
   return new Promise(resolve => setTimeout(resolve, 800));
 }
 
@@ -2098,7 +2056,6 @@ async function exportMapToPDF() {
   showToast('Đang xuất PDF (giữ nhãn lô)...', '⏳');
 
   try {
-    // Ẩn các thanh công cụ, panel để ảnh sạch
     const leftToolbar = document.querySelector('.map-ctrl-left');
     const rightToolbar = document.querySelector('.map-ctrl-right');
     const coordBar = document.querySelector('.map-coord-bar');
@@ -2111,10 +2068,8 @@ async function exportMapToPDF() {
     if (selBar) selBar.style.visibility = 'hidden';
     if (measurePanel) measurePanel.style.visibility = 'hidden';
 
-    // Đợi map ổn định
     await waitForMapStable();
 
-    // Chụp bản đồ với độ phân giải cao (scale=4)
     const mapCanvas = await html2canvas(mapContainer, {
       scale: 4,
       backgroundColor: '#0a0e1a',
@@ -2124,24 +2079,21 @@ async function exportMapToPDF() {
       imageTimeout: 0
     });
 
-    // Chụp legend
     let legendCanvas = null;
     if (legend) {
       legendCanvas = await html2canvas(legend, { scale: 3, backgroundColor: '#0a0e1a' });
     }
 
-    // Khôi phục hiển thị
     if (leftToolbar) leftToolbar.style.visibility = 'visible';
     if (rightToolbar) rightToolbar.style.visibility = 'visible';
     if (coordBar) coordBar.style.visibility = 'visible';
     if (selBar) selBar.style.visibility = 'visible';
     if (measurePanel) measurePanel.style.visibility = 'visible';
 
-    // Tạo PDF A4 ngang
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
-    const pdfWidth = pdf.internal.pageSize.getWidth();   // 297mm
-    const pdfHeight = pdf.internal.pageSize.getHeight(); // 210mm
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = pdf.internal.pageSize.getHeight();
 
     const mapImgData = mapCanvas.toDataURL('image/jpeg', 1.0);
     const mapImgWidth = pdfWidth;
@@ -2150,7 +2102,6 @@ async function exportMapToPDF() {
     let yOffset = 0;
     pdf.addImage(mapImgData, 'JPEG', 0, yOffset, mapImgWidth, mapImgHeight);
 
-    // Thêm legend (nếu có)
     if (legendCanvas) {
       const legendWidth = pdfWidth * 0.7;
       const legendHeight = (legendCanvas.height * legendWidth) / legendCanvas.width;
@@ -2162,7 +2113,6 @@ async function exportMapToPDF() {
       pdf.addImage(legendCanvas, 'JPEG', (pdfWidth - legendWidth) / 2, yOffset, legendWidth, legendHeight);
     }
 
-    // Tiêu đề và ngày tháng
     const title = 'BÁO CÁO BẢN ĐỒ VƯỜN CÂY CAO SU';
     const date = new Date().toLocaleString('vi-VN');
     pdf.setFontSize(12);
@@ -2176,7 +2126,6 @@ async function exportMapToPDF() {
   } catch (err) {
     console.error(err);
     showToast('Lỗi xuất PDF: ' + err.message, '❌');
-    // Khôi phục UI nếu lỗi
     const leftToolbar = document.querySelector('.map-ctrl-left');
     const rightToolbar = document.querySelector('.map-ctrl-right');
     const coordBar = document.querySelector('.map-coord-bar');
@@ -2202,7 +2151,6 @@ async function exportMapToJPEG() {
   showToast('Đang xuất JPEG (giữ nhãn lô)...', '⏳');
 
   try {
-    // Ẩn control
     const leftToolbar = document.querySelector('.map-ctrl-left');
     const rightToolbar = document.querySelector('.map-ctrl-right');
     const coordBar = document.querySelector('.map-coord-bar');
@@ -2217,7 +2165,6 @@ async function exportMapToJPEG() {
 
     await waitForMapStable();
 
-    // Chụp bản đồ (scale=3 đủ cho JPEG)
     const mapCanvas = await html2canvas(mapContainer, {
       scale: 3,
       backgroundColor: '#0a0e1a',
@@ -2231,14 +2178,12 @@ async function exportMapToJPEG() {
       legendCanvas = await html2canvas(legend, { scale: 2, backgroundColor: '#0a0e1a' });
     }
 
-    // Khôi phục
     if (leftToolbar) leftToolbar.style.visibility = 'visible';
     if (rightToolbar) rightToolbar.style.visibility = 'visible';
     if (coordBar) coordBar.style.visibility = 'visible';
     if (selBar) selBar.style.visibility = 'visible';
     if (measurePanel) measurePanel.style.visibility = 'visible';
 
-    // Tạo canvas tổng hợp (map + legend + tiêu đề)
     const finalCanvas = document.createElement('canvas');
     const mapWidth = mapCanvas.width;
     const mapHeight = mapCanvas.height;
@@ -2250,7 +2195,6 @@ async function exportMapToJPEG() {
     ctx.fillStyle = '#0a0e1a';
     ctx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
     
-    // Tiêu đề
     ctx.font = 'bold 32px "Be Vietnam Pro", "Syne", sans-serif';
     ctx.fillStyle = '#e8eeff';
     ctx.fillText('BÁO CÁO BẢN ĐỒ VƯỜN CÂY CAO SU', 20, 55);
@@ -2259,17 +2203,14 @@ async function exportMapToJPEG() {
     const dateStr = `Xuất ngày: ${new Date().toLocaleString('vi-VN')}`;
     ctx.fillText(dateStr, finalCanvas.width - ctx.measureText(dateStr).width - 20, 55);
     
-    // Bản đồ
     ctx.drawImage(mapCanvas, 0, 85);
     
-    // Legend căn giữa
     if (legendCanvas) {
       const legendX = (mapWidth - legendCanvas.width) / 2;
       const legendY = 85 + mapHeight + 15;
       ctx.drawImage(legendCanvas, legendX, legendY);
     }
     
-    // Watermark nhẹ
     ctx.font = '12px "Be Vietnam Pro"';
     ctx.fillStyle = '#5a6a8a';
     ctx.fillText('WebGIS Cao Su - Hệ thống quản lý vườn cây thông minh', finalCanvas.width - 280, finalCanvas.height - 12);
@@ -2288,34 +2229,10 @@ async function exportMapToJPEG() {
     showToast('Lỗi xuất JPEG: ' + err.message, '❌');
   }
 }
-/* ==================== KHỞI CHẠY ==================== */
-setTimeout(initDashMap, 200);
 
-// Các sự kiện cho menu sidebar
-document.querySelectorAll('.nav-item').forEach(item => {
-  item.addEventListener('click', function (e) {
-    if (this.getAttribute('href') === '/logout') return;
-    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-    this.classList.add('active');
-  });
-});
-window.addEventListener('load', () => {
-  const currentPath = window.location.pathname;
-  document.querySelectorAll('.nav-item').forEach(item => {
-    const href = item.getAttribute('href');
-    if (href && (currentPath === href || (currentPath === '/dashboard' && href === '/'))) {
-      item.classList.add('active');
-    }
-  });
-});
-function logout() {
-  if (confirm('Bạn có chắc muốn đăng xuất?')) window.location.href = '/logout';
-}
-// ==================== CHUYỂN ĐỔI BẢN ĐỒ NỀN ====================
 function changeBaseMap(type) {
   if (!dashMap) return;
   
-  // Xóa layer nền cũ
   if (window.currentBaseLayer) {
     dashMap.removeLayer(window.currentBaseLayer);
   }
@@ -2340,7 +2257,7 @@ function changeBaseMap(type) {
         attribution: 'Esri, DeLorme'
       });
       break;
-    default: // satellite
+    default:
       newLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
         maxZoom: 19,
         attribution: 'Esri, Maxar, Earthstar'
@@ -2352,6 +2269,84 @@ function changeBaseMap(type) {
   
   showToast(`Đã chuyển sang nền: ${type}`, '🖼️');
 }
+
+async function loadRealUserInfo() {
+  try {
+    const res = await fetch('/api/me', { credentials: 'same-origin' });
+    const data = await res.json();
+    if (data.success) {
+      const user = data.data;
+      document.getElementById('userFullName').innerText = user.fullname;
+      document.getElementById('userRole').innerText = user.role === 'admin' ? 'Quản trị viên' : 'Người dùng';
+      document.getElementById('userAvatar').innerText = user.fullname.charAt(0).toUpperCase();
+    } else {
+      console.warn('Không lấy được thông tin user');
+    }
+  } catch (err) {
+    console.error('Lỗi /api/me:', err);
+  }
+}
+
+async function loadRealStats() {
+  try {
+    const res = await fetch('/api/lo-cay', { credentials: 'same-origin' });
+    const data = await res.json();
+    const loCayList = data.data || [];
+    const totalLots = loCayList.length;
+    const totalArea = loCayList.reduce((sum, lo) => sum + (parseFloat(lo.dien_tich_map) || 0), 0);
+    
+    document.getElementById('totalLots').innerText = totalLots;
+    document.getElementById('totalArea').innerHTML = totalArea.toFixed(3) + ' ha';
+  } catch (err) {
+    console.error('Lỗi tải thống kê:', err);
+    document.getElementById('totalLots').innerText = '0';
+    document.getElementById('totalArea').innerHTML = '0 ha';
+  }
+}
+
+async function loadUserInfo() {
+  try {
+    const res = await fetch('/api/me', { credentials: 'same-origin' });
+    const data = await res.json();
+    if (data.success) {
+      const user = data.data;
+      document.getElementById('userFullName').innerText = user.fullname;
+      document.getElementById('userRole').innerText = user.role === 'admin' ? 'Quản trị viên' : 'Người dùng';
+      document.getElementById('userAvatar').innerText = user.fullname.charAt(0).toUpperCase();
+    } else {
+      console.warn('Không lấy được thông tin user');
+    }
+  } catch (err) {
+    console.error('Lỗi /api/me:', err);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadUserInfo();
+  loadRealStats();
+});
+
+setTimeout(initDashMap, 200);
+
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', function (e) {
+    if (this.getAttribute('href') === '/logout') return;
+    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+window.addEventListener('load', () => {
+  const currentPath = window.location.pathname;
+  document.querySelectorAll('.nav-item').forEach(item => {
+    const href = item.getAttribute('href');
+    if (href && (currentPath === href || (currentPath === '/dashboard' && href === '/'))) {
+      item.classList.add('active');
+    }
+  });
+});
+function logout() {
+  if (confirm('Bạn có chắc muốn đăng xuất?')) window.location.href = '/logout';
+}
 </script>
 </body>
-</html>"
+</html>
