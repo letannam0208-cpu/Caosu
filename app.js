@@ -14,7 +14,7 @@ const port = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser(process.env.JWT_SECRET)); // Dùng để ký/verify cookie (không bắt buộc nhưng tốt)
+app.use(cookieParser(process.env.JWT_SECRET));
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.set('view engine', 'ejs');
@@ -40,7 +40,6 @@ pool.on('error', (err) => console.error('❌ Lỗi kết nối Pool:', err.messa
 const authenticateToken = (req, res, next) => {
   const token = req.cookies.token;
   if (!token) {
-    // Nếu là request API -> trả về 401, nếu là request trang -> redirect về login
     if (req.path.startsWith('/api/')) {
       return res.status(401).json({ success: false, error: 'Chưa đăng nhập' });
     }
@@ -61,7 +60,6 @@ const authenticateToken = (req, res, next) => {
   }
 };
 
-// Middleware kiểm tra quyền admin
 const requireAdmin = (req, res, next) => {
   if (req.user && req.user.role === 'admin') {
     next();
@@ -391,7 +389,6 @@ app.get('/api/me', authenticateToken, (req, res) => {
 });
 
 // ====================== QUẢN LÝ LÔ CÂY ======================
-// API lấy danh sách lô cây (full thông tin)
 app.get('/api/lo-cay', authenticateToken, async (req, res) => {
   try {
     const result = await pool.query(`
@@ -421,7 +418,6 @@ app.get('/api/lo-cay', authenticateToken, async (req, res) => {
   }
 });
 
-// API chi tiết lô cây theo id
 app.get('/api/lo-cay/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
@@ -452,7 +448,6 @@ app.get('/api/lo-cay/:id', authenticateToken, async (req, res) => {
   }
 });
 
-// API thêm mới lô cây (transaction)
 app.post('/api/lo-cay', authenticateToken, async (req, res) => {
   const client = await pool.connect();
   try {
@@ -474,31 +469,31 @@ app.post('/api/lo-cay', authenticateToken, async (req, res) => {
       VALUES ($1, $2, $3, $4, $5, $6, $7)
     `, [id_lo, ten_lo, nam_trong, giong, cao_trinh_tb, id_don_vi, id_hc]);
 
-    if (dien_tich_map) {
+    if (dien_tich_map !== undefined && dien_tich_map !== null && dien_tich_map !== '') {
       await client.query(`
         INSERT INTO dien_tich (id_dien_tich, id_lo, dien_tich_map, dien_tich_010125, dien_tich_010126)
         VALUES ('DT_' || $1, $1, $2, $3, $4)
       `, [id_lo, dien_tich_map, dien_tich_010125, dien_tich_010126]);
     }
-    if (tong_ho_kk !== undefined) {
+    if (tong_ho_kk !== undefined && tong_ho_kk !== null && tong_ho_kk !== '') {
       await client.query(`
         INSERT INTO hien_trang_cay (id_htc, id_lo, tong_ho_kk, cay_cao, cay_chua_cao, cay_kho_mu, cay_khong_pt, ho_trong, mat_do_cc)
         VALUES ('HTC_' || $1, $1, $2, $3, $4, $5, $6, $7, $8)
       `, [id_lo, tong_ho_kk, cay_cao, cay_chua_cao, cay_kho_mu, cay_khong_pt, ho_trong, mat_do_cc]);
     }
-    if (che_do_cao) {
+    if (che_do_cao && che_do_cao !== '') {
       await client.query(`
         INSERT INTO khai_thac (id_kt, id_lo, che_do_cao, phien_cao, nhip_do_cao, nam_mc, tuoi_cao, nam_cao_up, tinh_trang_mc)
         VALUES ('KT_' || $1, $1, $2, $3, $4, $5, $6, $7, $8)
       `, [id_lo, che_do_cao, phien_cao, nhip_do_cao, nam_mc, tuoi_cao, nam_cao_up, tinh_trang_mc]);
     }
-    if (san_luong !== undefined) {
+    if (san_luong !== undefined && san_luong !== null && san_luong !== '') {
       await client.query(`
         INSERT INTO san_luong (id_sl, id_lo, ns25_kg_ha, ns25_kg_cay, ns26_kg_ha, ns26_kg_cay, tong_lat_cao, san_luong, phan_loai, doi_tuong, tai_canh_nam)
         VALUES ('SL_' || $1, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
       `, [id_lo, ns25_kg_ha, ns25_kg_cay, ns26_kg_ha, ns26_kg_cay, tong_lat_cao, san_luong, phan_loai, doi_tuong, tai_canh_nam]);
     }
-    if (hang_dat) {
+    if (hang_dat && hang_dat !== '') {
       await client.query(`
         INSERT INTO thong_tin_trong (id_ttt, id_lo, hang_dat, phuong_phap_trong, khoang_cach_trong, mat_do_tk)
         VALUES ('TTT_' || $1, $1, $2, $3, $4, $5)
@@ -516,7 +511,7 @@ app.post('/api/lo-cay', authenticateToken, async (req, res) => {
   }
 });
 
-// API cập nhật lô cây (transaction)
+// ====================== API CẬP NHẬT LÔ CÂY (ĐÃ SỬA) ======================
 app.put('/api/lo-cay/:id', authenticateToken, async (req, res) => {
   const client = await pool.connect();
   const id_lo = req.params.id;
@@ -532,6 +527,7 @@ app.put('/api/lo-cay/:id', authenticateToken, async (req, res) => {
       hang_dat, phuong_phap_trong, khoang_cach_trong, mat_do_tk
     } = req.body;
 
+    // Cập nhật bảng lo
     await client.query(`
       UPDATE lo SET
         ten_lo = $1, nam_trong = $2, giong = $3, cao_trinh_tb = $4,
@@ -544,17 +540,18 @@ app.put('/api/lo-cay/:id', authenticateToken, async (req, res) => {
       await client.query(`
         INSERT INTO dien_tich (id_dien_tich, id_lo, dien_tich_map, dien_tich_010125, dien_tich_010126)
         VALUES ('DT_' || $1, $1, $2, $3, $4)
-        ON CONFLICT (id_dien_tich) DO UPDATE SET
+        ON CONFLICT (id_lo) DO UPDATE SET
           dien_tich_map = EXCLUDED.dien_tich_map,
           dien_tich_010125 = EXCLUDED.dien_tich_010125,
           dien_tich_010126 = EXCLUDED.dien_tich_010126
       `, [id_lo, dien_tich_map, dien_tich_010125, dien_tich_010126]);
     }
+    // Upsert hien_trang_cay
     if (tong_ho_kk !== undefined) {
       await client.query(`
         INSERT INTO hien_trang_cay (id_htc, id_lo, tong_ho_kk, cay_cao, cay_chua_cao, cay_kho_mu, cay_khong_pt, ho_trong, mat_do_cc)
         VALUES ('HTC_' || $1, $1, $2, $3, $4, $5, $6, $7, $8)
-        ON CONFLICT (id_htc) DO UPDATE SET
+        ON CONFLICT (id_lo) DO UPDATE SET
           tong_ho_kk = EXCLUDED.tong_ho_kk,
           cay_cao = EXCLUDED.cay_cao,
           cay_chua_cao = EXCLUDED.cay_chua_cao,
@@ -564,11 +561,12 @@ app.put('/api/lo-cay/:id', authenticateToken, async (req, res) => {
           mat_do_cc = EXCLUDED.mat_do_cc
       `, [id_lo, tong_ho_kk, cay_cao, cay_chua_cao, cay_kho_mu, cay_khong_pt, ho_trong, mat_do_cc]);
     }
-    if (che_do_cao) {
+    // Upsert khai_thac
+    if (che_do_cao !== undefined) {
       await client.query(`
         INSERT INTO khai_thac (id_kt, id_lo, che_do_cao, phien_cao, nhip_do_cao, nam_mc, tuoi_cao, nam_cao_up, tinh_trang_mc)
         VALUES ('KT_' || $1, $1, $2, $3, $4, $5, $6, $7, $8)
-        ON CONFLICT (id_kt) DO UPDATE SET
+        ON CONFLICT (id_lo) DO UPDATE SET
           che_do_cao = EXCLUDED.che_do_cao,
           phien_cao = EXCLUDED.phien_cao,
           nhip_do_cao = EXCLUDED.nhip_do_cao,
@@ -578,11 +576,12 @@ app.put('/api/lo-cay/:id', authenticateToken, async (req, res) => {
           tinh_trang_mc = EXCLUDED.tinh_trang_mc
       `, [id_lo, che_do_cao, phien_cao, nhip_do_cao, nam_mc, tuoi_cao, nam_cao_up, tinh_trang_mc]);
     }
+    // Upsert san_luong (quan trọng: dùng id_lo làm conflict)
     if (san_luong !== undefined) {
       await client.query(`
         INSERT INTO san_luong (id_sl, id_lo, ns25_kg_ha, ns25_kg_cay, ns26_kg_ha, ns26_kg_cay, tong_lat_cao, san_luong, phan_loai, doi_tuong, tai_canh_nam)
         VALUES ('SL_' || $1, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-        ON CONFLICT (id_sl) DO UPDATE SET
+        ON CONFLICT (id_lo) DO UPDATE SET
           ns25_kg_ha = EXCLUDED.ns25_kg_ha,
           ns25_kg_cay = EXCLUDED.ns25_kg_cay,
           ns26_kg_ha = EXCLUDED.ns26_kg_ha,
@@ -594,11 +593,12 @@ app.put('/api/lo-cay/:id', authenticateToken, async (req, res) => {
           tai_canh_nam = EXCLUDED.tai_canh_nam
       `, [id_lo, ns25_kg_ha, ns25_kg_cay, ns26_kg_ha, ns26_kg_cay, tong_lat_cao, san_luong, phan_loai, doi_tuong, tai_canh_nam]);
     }
-    if (hang_dat) {
+    // Upsert thong_tin_trong
+    if (hang_dat !== undefined) {
       await client.query(`
         INSERT INTO thong_tin_trong (id_ttt, id_lo, hang_dat, phuong_phap_trong, khoang_cach_trong, mat_do_tk)
         VALUES ('TTT_' || $1, $1, $2, $3, $4, $5)
-        ON CONFLICT (id_ttt) DO UPDATE SET
+        ON CONFLICT (id_lo) DO UPDATE SET
           hang_dat = EXCLUDED.hang_dat,
           phuong_phap_trong = EXCLUDED.phuong_phap_trong,
           khoang_cach_trong = EXCLUDED.khoang_cach_trong,
@@ -617,7 +617,7 @@ app.put('/api/lo-cay/:id', authenticateToken, async (req, res) => {
   }
 });
 
-// API xóa lô cây (xóa cascade)
+// ====================== API XÓA LÔ CÂY ======================
 app.delete('/api/lo-cay/:id', authenticateToken, async (req, res) => {
   const client = await pool.connect();
   const id_lo = req.params.id;
@@ -717,7 +717,7 @@ app.post('/api/lo-cay/upsert', authenticateToken, async (req, res) => {
   }
 });
 
-// UPSERT cho bảng đơn vị
+// UPSERT cho bảng đơn vị (giữ nguyên)
 app.post('/api/don-vi/upsert', authenticateToken, async (req, res) => {
   const client = await pool.connect();
   const importMode = req.headers['x-import-mode'] || 'upsert';
@@ -844,6 +844,8 @@ app.post('/api/dien-tich/upsert', authenticateToken, async (req, res) => {
     const finalId = id_dien_tich || `DT_${id_lo}`;
     
     await client.query('BEGIN');
+    
+    // Kiểm tra tồn tại theo id_lo
     const existing = await client.query('SELECT * FROM dien_tich WHERE id_lo = $1', [id_lo]);
     
     if (existing.rows.length > 0) {
@@ -852,6 +854,7 @@ app.post('/api/dien-tich/upsert', authenticateToken, async (req, res) => {
         return res.json({ success: true, action: 'skip', message: `Bỏ qua (diện tích lô ${id_lo} đã tồn tại)` });
       }
       
+      // Cập nhật theo id_lo
       const updateFields = [];
       const updateValues = [];
       let paramIndex = 1;
@@ -871,11 +874,10 @@ app.post('/api/dien-tich/upsert', authenticateToken, async (req, res) => {
       await client.query('COMMIT');
       res.json({ success: true, action: 'update', message: `Cập nhật diện tích cho lô ${id_lo} thành công` });
     } else {
-      await client.query(
-        `INSERT INTO dien_tich (id_dien_tich, id_lo, dien_tich_map, dien_tich_010125, dien_tich_010126)
-         VALUES ($1, $2, $3, $4, $5)`,
-        [finalId, id_lo, dien_tich_map, dien_tich_010125, dien_tich_010126]
-      );
+      await client.query(`
+        INSERT INTO dien_tich (id_dien_tich, id_lo, dien_tich_map, dien_tich_010125, dien_tich_010126)
+        VALUES ($1, $2, $3, $4, $5)
+      `, [finalId, id_lo, dien_tich_map, dien_tich_010125, dien_tich_010126]);
       await client.query('COMMIT');
       res.json({ success: true, action: 'insert', message: `Thêm mới diện tích cho lô ${id_lo} thành công` });
     }
@@ -934,11 +936,10 @@ app.post('/api/hien-trang-cay/upsert', authenticateToken, async (req, res) => {
       await client.query('COMMIT');
       res.json({ success: true, action: 'update', message: `Cập nhật hiện trạng cho lô ${id_lo} thành công` });
     } else {
-      await client.query(
-        `INSERT INTO hien_trang_cay (id_htc, id_lo, tong_ho_kk, cay_cao, cay_chua_cao, cay_kho_mu, cay_khong_pt, ho_trong, mat_do_cc)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-        [finalId, id_lo, tong_ho_kk, cay_cao, cay_chua_cao, cay_kho_mu, cay_khong_pt, ho_trong, mat_do_cc]
-      );
+      await client.query(`
+        INSERT INTO hien_trang_cay (id_htc, id_lo, tong_ho_kk, cay_cao, cay_chua_cao, cay_kho_mu, cay_khong_pt, ho_trong, mat_do_cc)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      `, [finalId, id_lo, tong_ho_kk, cay_cao, cay_chua_cao, cay_kho_mu, cay_khong_pt, ho_trong, mat_do_cc]);
       await client.query('COMMIT');
       res.json({ success: true, action: 'insert', message: `Thêm mới hiện trạng cho lô ${id_lo} thành công` });
     }
@@ -997,11 +998,10 @@ app.post('/api/khai-thac/upsert', authenticateToken, async (req, res) => {
       await client.query('COMMIT');
       res.json({ success: true, action: 'update', message: `Cập nhật khai thác cho lô ${id_lo} thành công` });
     } else {
-      await client.query(
-        `INSERT INTO khai_thac (id_kt, id_lo, che_do_cao, phien_cao, nhip_do_cao, nam_mc, tuoi_cao, nam_cao_up, tinh_trang_mc)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-        [finalId, id_lo, che_do_cao, phien_cao, nhip_do_cao, nam_mc, tuoi_cao, nam_cao_up, tinh_trang_mc]
-      );
+      await client.query(`
+        INSERT INTO khai_thac (id_kt, id_lo, che_do_cao, phien_cao, nhip_do_cao, nam_mc, tuoi_cao, nam_cao_up, tinh_trang_mc)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      `, [finalId, id_lo, che_do_cao, phien_cao, nhip_do_cao, nam_mc, tuoi_cao, nam_cao_up, tinh_trang_mc]);
       await client.query('COMMIT');
       res.json({ success: true, action: 'insert', message: `Thêm mới khai thác cho lô ${id_lo} thành công` });
     }
@@ -1062,11 +1062,10 @@ app.post('/api/san-luong/upsert', authenticateToken, async (req, res) => {
       await client.query('COMMIT');
       res.json({ success: true, action: 'update', message: `Cập nhật sản lượng cho lô ${id_lo} thành công` });
     } else {
-      await client.query(
-        `INSERT INTO san_luong (id_sl, id_lo, ns25_kg_ha, ns25_kg_cay, ns26_kg_ha, ns26_kg_cay, tong_lat_cao, san_luong, phan_loai, doi_tuong, tai_canh_nam)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
-        [finalId, id_lo, ns25_kg_ha, ns25_kg_cay, ns26_kg_ha, ns26_kg_cay, tong_lat_cao, san_luong, phan_loai, doi_tuong, tai_canh_nam]
-      );
+      await client.query(`
+        INSERT INTO san_luong (id_sl, id_lo, ns25_kg_ha, ns25_kg_cay, ns26_kg_ha, ns26_kg_cay, tong_lat_cao, san_luong, phan_loai, doi_tuong, tai_canh_nam)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+      `, [finalId, id_lo, ns25_kg_ha, ns25_kg_cay, ns26_kg_ha, ns26_kg_cay, tong_lat_cao, san_luong, phan_loai, doi_tuong, tai_canh_nam]);
       await client.query('COMMIT');
       res.json({ success: true, action: 'insert', message: `Thêm mới sản lượng cho lô ${id_lo} thành công` });
     }
@@ -1122,11 +1121,10 @@ app.post('/api/thong-tin-trong/upsert', authenticateToken, async (req, res) => {
       await client.query('COMMIT');
       res.json({ success: true, action: 'update', message: `Cập nhật thông tin trồng cho lô ${id_lo} thành công` });
     } else {
-      await client.query(
-        `INSERT INTO thong_tin_trong (id_ttt, id_lo, hang_dat, phuong_phap_trong, khoang_cach_trong, mat_do_tk)
-         VALUES ($1, $2, $3, $4, $5, $6)`,
-        [finalId, id_lo, hang_dat, phuong_phap_trong, khoang_cach_trong, mat_do_tk]
-      );
+      await client.query(`
+        INSERT INTO thong_tin_trong (id_ttt, id_lo, hang_dat, phuong_phap_trong, khoang_cach_trong, mat_do_tk)
+        VALUES ($1, $2, $3, $4, $5, $6)
+      `, [finalId, id_lo, hang_dat, phuong_phap_trong, khoang_cach_trong, mat_do_tk]);
       await client.query('COMMIT');
       res.json({ success: true, action: 'insert', message: `Thêm mới thông tin trồng cho lô ${id_lo} thành công` });
     }
@@ -1640,11 +1638,7 @@ app.get('/quan-ly-nguoi-dung', authenticateToken, (req, res) => {
 
 // 404 Handler
 app.use((req, res) => {
-    res.status(404).render('404', {
-        title: 'Không tìm thấy trang',
-        user: req.user || null,
-        path: req.path
-    });
+  res.status(404).render('404', { title: 'Không tìm thấy trang', user: req.user || null, path: req.path });
 });
 
 // ====================== START SERVER ======================
