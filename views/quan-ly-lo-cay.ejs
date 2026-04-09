@@ -522,50 +522,58 @@ function attachHorizontalScroll() {
 
 function showForm(l = null) {
   const isEdit = !!l;
+  
+  // Hàm helper lấy giá trị an toàn (trả về '' nếu null/undefined)
+  const val = (obj, field) => {
+    if (!obj) return '';
+    const v = obj[field];
+    return (v !== null && v !== undefined) ? v : '';
+  };
+  
   const formHtml = `
-    <input type="hidden" id="id_lo" name="id_lo" value="${l ? l.id_lo : ''}">
+    <input type="hidden" id="id_lo" name="id_lo" value="${val(l, 'id_lo')}">
     <div class="form-grid">
-      <div class="form-field"><label>Dự án</label><input type="text" name="du_an" value="${l ? (l.du_an || '') : ''}"></div>
-      <div class="form-field"><label>Khu vực</label><input type="text" name="khu_vuc" value="${l ? (l.khu_vuc || '') : ''}"></div>
-      <div class="form-field"><label>Tên lô *</label><input type="text" name="ten_lo" value="${l ? l.ten_lo : ''}" required></div>
-      <div class="form-field"><label>Năm trồng</label><input type="number" name="nam_trong" value="${l ? l.nam_trong : ''}"></div>
-      <div class="form-field"><label>Giống</label><input type="text" name="giong" value="${l ? l.giong : ''}"></div>
-      <div class="form-field"><label>Cao trình TB (m)</label><input type="number" step="0.1" name="cao_trinh_tb" value="${l ? l.cao_trinh_tb : ''}"></div>
+      <div class="form-field"><label>Dự án</label><input type="text" name="du_an" value="${val(l, 'du_an')}"></div>
+      <div class="form-field"><label>Khu vực</label><input type="text" name="khu_vuc" value="${val(l, 'khu_vuc')}"></div>
+      <div class="form-field"><label>Tên lô *</label><input type="text" name="ten_lo" value="${val(l, 'ten_lo')}" required></div>
+      <div class="form-field"><label>Năm trồng</label><input type="number" name="nam_trong" value="${val(l, 'nam_trong')}"></div>
+      <div class="form-field"><label>Giống</label><input type="text" name="giong" value="${val(l, 'giong')}"></div>
+      <div class="form-field"><label>Cao trình TB (m)</label><input type="number" step="0.1" name="cao_trinh_tb" value="${val(l, 'cao_trinh_tb')}"></div>
       <div class="form-field"><label>Đội *</label><select name="id_don_vi" id="id_don_vi" required></select></div>
       <div class="form-field"><label>Hành chính (ID)</label><select name="id_hc" id="id_hc"></select></div>
-      <div class="form-field"><label>Xã</label><input type="text" name="xa" value="${l ? (l.xa || '') : ''}"></div>
-      <div class="form-field"><label>Huyện</label><input type="text" name="huyen" value="${l ? (l.huyen || '') : ''}"></div>
-      <div class="form-field"><label>Tỉnh</label><input type="text" name="tinh" value="${l ? (l.tinh || '') : ''}"></div>
-      <div class="form-field"><label>Hạng đất</label><input type="text" name="hang_dat" value="${l ? l.hang_dat : ''}"></div>
-      <div class="form-field"><label>Phương pháp trồng</label><input type="text" name="phuong_phap_trong" value="${l ? l.phuong_phap_trong : ''}"></div>
-      <div class="form-field"><label>Khoảng cách trồng</label><input type="text" name="khoang_cach_trong" value="${l ? l.khoang_cach_trong : ''}"></div>
-      <div class="form-field"><label>Mật độ TK</label><input type="number" name="mat_do_tk" value="${l ? l.mat_do_tk : ''}"></div>
-      <div class="form-field"><label>Diện tích map (ha)</label><input type="number" step="0.001" name="dien_tich_map" value="${l ? l.dien_tich_map : ''}"></div>
-      <div class="form-field"><label>Diện tích 01/01/25</label><input type="number" step="0.001" name="dien_tich_010125" value="${l ? l.dien_tich_010125 : ''}"></div>
-      <div class="form-field"><label>Diện tích 01/01/26</label><input type="number" step="0.001" name="dien_tich_010126" value="${l ? l.dien_tich_010126 : ''}"></div>
-      <div class="form-field"><label>Tổng hộ KK</label><input type="number" name="tong_ho_kk" value="${l ? l.tong_ho_kk : ''}"></div>
-      <div class="form-field"><label>Cây cao</label><input type="number" name="cay_cao" value="${l ? l.cay_cao : ''}"></div>
-      <div class="form-field"><label>Cây chưa cao</label><input type="number" name="cay_chua_cao" value="${l ? l.cay_chua_cao : ''}"></div>
-      <div class="form-field"><label>Cây khô mủ</label><input type="number" name="cay_kho_mu" value="${l ? l.cay_kho_mu : ''}"></div>
-      <div class="form-field"><label>Cây không PT</label><input type="number" name="cay_khong_pt" value="${l ? l.cay_khong_pt : ''}"></div>
-      <div class="form-field"><label>Hố trống</label><input type="number" name="ho_trong" value="${l ? l.ho_trong : ''}"></div>
-      <div class="form-field"><label>Mật độ (cây/ha)</label><input type="number" step="0.1" name="mat_do_cc" value="${l ? l.mat_do_cc : ''}"></div>
-      <div class="form-field"><label>Chế độ cạo</label><input type="text" name="che_do_cao" value="${l ? l.che_do_cao : ''}"></div>
-      <div class="form-field"><label>Phiên cạo</label><input type="text" name="phien_cao" value="${l ? l.phien_cao : ''}"></div>
-      <div class="form-field"><label>Nhịp độ cạo</label><input type="text" name="nhip_do_cao" value="${l ? l.nhip_do_cao : ''}"></div>
-      <div class="form-field"><label>Năm MC</label><input type="number" name="nam_mc" value="${l ? l.nam_mc : ''}"></div>
-      <div class="form-field"><label>Tuổi cạo</label><input type="number" name="tuoi_cao" value="${l ? l.tuoi_cao : ''}"></div>
-      <div class="form-field"><label>Năm cạo up</label><input type="number" name="nam_cao_up" value="${l ? l.nam_cao_up : ''}"></div>
-      <div class="form-field"><label>Tình trạng mủ</label><input type="text" name="tinh_trang_mc" value="${l ? l.tinh_trang_mc : ''}"></div>
-      <div class="form-field"><label>NS25 kg/ha</label><input type="number" step="0.01" name="ns25_kg_ha" value="${l ? l.ns25_kg_ha : ''}"></div>
-      <div class="form-field"><label>NS25 kg/cây</label><input type="number" step="0.01" name="ns25_kg_cay" value="${l ? l.ns25_kg_cay : ''}"></div>
-      <div class="form-field"><label>NS26 kg/ha</label><input type="number" step="0.01" name="ns26_kg_ha" value="${l ? l.ns26_kg_ha : ''}"></div>
-      <div class="form-field"><label>NS26 kg/cây</label><input type="number" step="0.01" name="ns26_kg_cay" value="${l ? l.ns26_kg_cay : ''}"></div>
-      <div class="form-field"><label>Tổng lát cạo</label><input type="number" step="0.01" name="tong_lat_cao" value="${l ? l.tong_lat_cao : ''}"></div>
-      <div class="form-field"><label>Sản lượng</label><input type="number" step="0.01" name="san_luong" value="${l ? l.san_luong : ''}"></div>
-      <div class="form-field"><label>Phân loại</label><input type="text" name="phan_loai" value="${l ? l.phan_loai : ''}"></div>
-      <div class="form-field"><label>Đối tượng</label><input type="text" name="doi_tuong" value="${l ? l.doi_tuong : ''}"></div>
-      <div class="form-field"><label>Tái canh năm</label><input type="number" name="tai_canh_nam" value="${l ? l.tai_canh_nam : ''}"></div>
+      <div class="form-field"><label>Xã</label><input type="text" name="xa" value="${val(l, 'xa')}"></div>
+      <div class="form-field"><label>Huyện</label><input type="text" name="huyen" value="${val(l, 'huyen')}"></div>
+      <div class="form-field"><label>Tỉnh</label><input type="text" name="tinh" value="${val(l, 'tinh')}"></div>
+      <div class="form-field"><label>Hạng đất</label><input type="text" name="hang_dat" value="${val(l, 'hang_dat')}"></div>
+      <div class="form-field"><label>Phương pháp trồng</label><input type="text" name="phuong_phap_trong" value="${val(l, 'phuong_phap_trong')}"></div>
+      <div class="form-field"><label>Khoảng cách trồng</label><input type="text" name="khoang_cach_trong" value="${val(l, 'khoang_cach_trong')}"></div>
+      <div class="form-field"><label>Mật độ TK</label><input type="number" name="mat_do_tk" value="${val(l, 'mat_do_tk')}"></div>
+      <div class="form-field"><label>Diện tích map (ha)</label><input type="number" step="0.001" name="dien_tich_map" value="${val(l, 'dien_tich_map')}"></div>
+      <div class="form-field"><label>Diện tích 01/01/25</label><input type="number" step="0.001" name="dien_tich_010125" value="${val(l, 'dien_tich_010125')}"></div>
+      <div class="form-field"><label>Diện tích 01/01/26</label><input type="number" step="0.001" name="dien_tich_010126" value="${val(l, 'dien_tich_010126')}"></div>
+      <div class="form-field"><label>Tổng hộ KK</label><input type="number" name="tong_ho_kk" value="${val(l, 'tong_ho_kk')}"></div>
+      <div class="form-field"><label>Cây cao</label><input type="number" name="cay_cao" value="${val(l, 'cay_cao')}"></div>
+      <div class="form-field"><label>Cây chưa cao</label><input type="number" name="cay_chua_cao" value="${val(l, 'cay_chua_cao')}"></div>
+      <div class="form-field"><label>Cây khô mủ</label><input type="number" name="cay_kho_mu" value="${val(l, 'cay_kho_mu')}"></div>
+      <div class="form-field"><label>Cây không PT</label><input type="number" name="cay_khong_pt" value="${val(l, 'cay_khong_pt')}"></div>
+      <div class="form-field"><label>Hố trống</label><input type="number" name="ho_trong" value="${val(l, 'ho_trong')}"></div>
+      <div class="form-field"><label>Mật độ (cây/ha)</label><input type="number" step="0.1" name="mat_do_cc" value="${val(l, 'mat_do_cc')}"></div>
+      <div class="form-field"><label>Chế độ cạo</label><input type="text" name="che_do_cao" value="${val(l, 'che_do_cao')}"></div>
+      <div class="form-field"><label>Phiên cạo</label><input type="text" name="phien_cao" value="${val(l, 'phien_cao')}"></div>
+      <div class="form-field"><label>Nhịp độ cạo</label><input type="text" name="nhip_do_cao" value="${val(l, 'nhip_do_cao')}"></div>
+      <div class="form-field"><label>Năm MC</label><input type="number" name="nam_mc" value="${val(l, 'nam_mc')}"></div>
+      <div class="form-field"><label>Tuổi cạo</label><input type="number" name="tuoi_cao" value="${val(l, 'tuoi_cao')}"></div>
+      <div class="form-field"><label>Năm cạo up</label><input type="number" name="nam_cao_up" value="${val(l, 'nam_cao_up')}"></div>
+      <div class="form-field"><label>Tình trạng mủ</label><input type="text" name="tinh_trang_mc" value="${val(l, 'tinh_trang_mc')}"></div>
+      <div class="form-field"><label>NS25 kg/ha</label><input type="number" step="0.01" name="ns25_kg_ha" value="${val(l, 'ns25_kg_ha')}"></div>
+      <div class="form-field"><label>NS25 kg/cây</label><input type="number" step="0.01" name="ns25_kg_cay" value="${val(l, 'ns25_kg_cay')}"></div>
+      <div class="form-field"><label>NS26 kg/ha</label><input type="number" step="0.01" name="ns26_kg_ha" value="${val(l, 'ns26_kg_ha')}"></div>
+      <div class="form-field"><label>NS26 kg/cây</label><input type="number" step="0.01" name="ns26_kg_cay" value="${val(l, 'ns26_kg_cay')}"></div>
+      <div class="form-field"><label>Tổng lát cạo</label><input type="number" step="0.01" name="tong_lat_cao" value="${val(l, 'tong_lat_cao')}"></div>
+      <div class="form-field"><label>Sản lượng</label><input type="number" step="0.01" name="san_luong" value="${val(l, 'san_luong')}"></div>
+      <div class="form-field"><label>Phân loại</label><input type="text" name="phan_loai" value="${val(l, 'phan_loai')}"></div>
+      <div class="form-field"><label>Đối tượng</label><input type="text" name="doi_tuong" value="${val(l, 'doi_tuong')}"></div>
+      <div class="form-field"><label>Tái canh năm</label><input type="number" name="tai_canh_nam" value="${val(l, 'tai_canh_nam')}"></div>
     </div>
     <div class="modal-actions">
       <button type="button" id="cancelModalBtn" class="btn-dash">Hủy</button>
@@ -581,25 +589,44 @@ function showForm(l = null) {
   
   document.getElementById('cancelModalBtn').onclick = () => closeModal();
   document.getElementById('modalForm').onsubmit = async (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const data = Object.fromEntries(formData);
-    const id_lo = document.getElementById('id_lo').value;
-    if(!data.id_don_vi) { alert('Vui lòng chọn đội'); return; }
-    const url = id_lo ? `/api/lo-cay/${id_lo}` : '/api/lo-cay';
-    const method = id_lo ? 'PUT' : 'POST';
-    try {
-      const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
-      const result = await res.json();
-      if(result.success) {
-        alert(id_lo ? 'Cập nhật thành công' : 'Thêm thành công');
-        closeModal();
-        loadLoCay();
-      } else alert('Lỗi: ' + result.error);
-    } catch(err) {
-      alert('Lỗi kết nối khi lưu dữ liệu');
+  e.preventDefault();
+  const formData = new FormData(e.target);
+  const rawData = Object.fromEntries(formData);
+  
+  // Chuyển đổi: với mọi trường, nếu giá trị là chuỗi rỗng thì gán null
+  const data = {};
+  for (const [key, value] of Object.entries(rawData)) {
+    if (value === '') {
+      data[key] = null;
+    } else {
+      // Giữ nguyên (số, chuỗi)
+      data[key] = value;
     }
-  };
+  }
+  
+  const id_lo = document.getElementById('id_lo').value;
+  if (!data.id_don_vi) { alert('Vui lòng chọn đội'); return; }
+  
+  const url = id_lo ? `/api/lo-cay/${id_lo}` : '/api/lo-cay';
+  const method = id_lo ? 'PUT' : 'POST';
+  try {
+    const res = await fetch(url, { 
+      method, 
+      headers: { 'Content-Type': 'application/json' }, 
+      body: JSON.stringify(data) 
+    });
+    const result = await res.json();
+    if (result.success) {
+      alert(id_lo ? 'Cập nhật thành công' : 'Thêm thành công');
+      closeModal();
+      loadLoCay();
+    } else {
+      alert('Lỗi: ' + result.error);
+    }
+  } catch(err) {
+    alert('Lỗi kết nối khi lưu dữ liệu');
+  }
+};
 }
 
 async function loadDonViList(selectedId) {
