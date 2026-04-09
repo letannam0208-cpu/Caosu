@@ -1400,7 +1400,7 @@ function renderRealLots() {
 
     if (labelsVis && p.ten_lo) {
       const z = dashMap.getZoom();
-      if (13 < z) {
+      if (13 > z) {
         const fs = Math.max(2, (z - 3) * 0.75);
         if (fs > 0) {
           const center = L.geoJSON(feat).getBounds().getCenter();
