@@ -2275,29 +2275,7 @@ async function exportMapToJPEG() {
     showToast('Lỗi xuất JPEG: ' + err.message, '❌');
   }
 }
-/* ==================== KHỞI CHẠY ==================== */
-setTimeout(initDashMap, 200);
 
-// Các sự kiện cho menu sidebar
-document.querySelectorAll('.nav-item').forEach(item => {
-  item.addEventListener('click', function (e) {
-    if (this.getAttribute('href') === '/logout') return;
-    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-    this.classList.add('active');
-  });
-});
-window.addEventListener('load', () => {
-  const currentPath = window.location.pathname;
-  document.querySelectorAll('.nav-item').forEach(item => {
-    const href = item.getAttribute('href');
-    if (href && (currentPath === href || (currentPath === '/dashboard' && href === '/'))) {
-      item.classList.add('active');
-    }
-  });
-});
-function logout() {
-  if (confirm('Bạn có chắc muốn đăng xuất?')) window.location.href = '/logout';
-}
 // ==================== CHUYỂN ĐỔI BẢN ĐỒ NỀN ====================
 function changeBaseMap(type) {
   if (!dashMap) return;
@@ -2374,6 +2352,30 @@ async function loadRealStats() {
     document.getElementById('totalLots').innerText = '0';
     document.getElementById('totalArea').innerHTML = '0 ha';
   }
+}
+
+/* ==================== KHỞI CHẠY ==================== */
+setTimeout(initDashMap, 200);
+
+// Các sự kiện cho menu sidebar
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', function (e) {
+    if (this.getAttribute('href') === '/logout') return;
+    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+window.addEventListener('load', () => {
+  const currentPath = window.location.pathname;
+  document.querySelectorAll('.nav-item').forEach(item => {
+    const href = item.getAttribute('href');
+    if (href && (currentPath === href || (currentPath === '/dashboard' && href === '/'))) {
+      item.classList.add('active');
+    }
+  });
+});
+function logout() {
+  if (confirm('Bạn có chắc muốn đăng xuất?')) window.location.href = '/logout';
 }
 </script>
 </body>
