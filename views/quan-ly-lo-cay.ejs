@@ -568,21 +568,59 @@ function showForm(l = null) {
   
   document.getElementById('cancelModalBtn').onclick = () => closeModal();
   document.getElementById('modalForm').onsubmit = async (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const data = Object.fromEntries(formData);
-    const id_lo = document.getElementById('id_lo').value;
-    if(!data.id_don_vi) { alert('Vui lòng chọn đội'); return; }
-    const url = id_lo ? `/api/lo-cay/${id_lo}` : '/api/lo-cay';
-    const method = id_lo ? 'PUT' : 'POST';
-    const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
-    const result = await res.json();
-    if(result.success) {
-      alert(id_lo ? 'Cập nhật thành công' : 'Thêm thành công');
-      closeModal();
-      loadLoCay();
-    } else alert('Lỗi: ' + result.error);
-  };
+  e.preventDefault();
+
+  const formData = new FormData(e.target);
+  const rawData = Object.fromEntries(formData);
+
+  const data = {};
+
+  for (const key in rawData) {
+    let value = rawData[key];
+
+    // 🔥 FIX 1: rỗng -> null (quan trọng nhất)
+    if (value === '') {
+      data[key] = null;
+      continue;
+    }
+
+    // 🔥 FIX 2: nếu là số thì convert sang Number (tránh gửi string)
+    if (!isNaN(value)) {
+      data[key] = Number(value);
+      continue;
+    }
+
+    // giữ nguyên các field text
+    data[key] = value;
+  }
+
+  const id_lo = document.getElementById('id_lo').value;
+
+  // giữ nguyên validation
+  if (!data.id_don_vi) { 
+    alert('Vui lòng chọn đội'); 
+    return; 
+  }
+
+  const url = id_lo ? `/api/lo-cay/${id_lo}` : '/api/lo-cay';
+  const method = id_lo ? 'PUT' : 'POST';
+
+  const res = await fetch(url, {
+    method,
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+
+  const result = await res.json();
+
+  if (result.success) {
+    alert(id_lo ? 'Cập nhật thành công' : 'Thêm thành công');
+    closeModal();
+    loadLoCay();
+  } else {
+    alert('Lỗi: ' + result.error);
+  }
+};
 }
 
 async function loadDonViList(selectedId) {
