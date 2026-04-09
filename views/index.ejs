@@ -2354,6 +2354,29 @@ async function loadRealStats() {
   }
 }
 
+// ==================== LẤY THÔNG TIN NGƯỜI DÙNG THẬT ====================
+async function loadUserInfo() {
+  try {
+    const res = await fetch('/api/me', { credentials: 'same-origin' });
+    const data = await res.json();
+    if (data.success) {
+      const user = data.data;
+      document.getElementById('userFullName').innerText = user.fullname;
+      document.getElementById('userRole').innerText = user.role === 'admin' ? 'Quản trị viên' : 'Người dùng';
+      document.getElementById('userAvatar').innerText = user.fullname.charAt(0).toUpperCase();
+    } else {
+      console.warn('Không lấy được thông tin user');
+    }
+  } catch (err) {
+    console.error('Lỗi /api/me:', err);
+  }
+}
+
+// Gọi khi trang tải xong (nếu chưa có DOMContentLoaded thì thêm)
+document.addEventListener('DOMContentLoaded', () => {
+  loadUserInfo();
+});
+
 /* ==================== KHỞI CHẠY ==================== */
 setTimeout(initDashMap, 200);
 
