@@ -679,24 +679,22 @@ td.mono{font-family:monospace;font-size:11px;color:var(--muted)}
 
 <!-- TOP BAR -->
 <div id="topbar">
-  <a class="tb-logo" href="/">
-    <div class="tb-icon">🌿</div>
+  <a class="tb-logo" href="#">
+    <div class="tb-icon">✓</div>
     <div><div class="tb-title">GIS_TBKRUCO</div></div>
   </a>
-  <div style="display:flex;align-items:center;gap:4px">
-    <div class="tb-pill"><span class="live-dot"></span><span>Trực tuyến</span></div>
-    <div class="tb-pill"><strong>Người dùng</strong> <span id="totalUsers">0</span></div>
+  <div class="tb-pills-group">
+    <div class="tb-pill tb-pill-live"><span class="live-dot"></span><span>Trực tuyến</span></div>
+    <div class="tb-pill"><span class="pill-label">Lô vườn</span><span class="pill-value" id="totalLots">0</span></div>
+    <div class="tb-pill"><span class="pill-label">Diện tích</span><span class="pill-value" id="totalArea">0</span></div>
   </div>
   <div class="tb-right">
-    <button class="icon-btn" title="Thông báo"><i class="fas fa-bell"></i></button>
-    <button class="icon-btn" title="Bản đồ"><i class="fas fa-globe"></i></button>
-    <button class="icon-btn" title="Cài đặt"><i class="fas fa-cog"></i></button>
+    <button class="icon-btn"><i class="fas fa-bell"></i></button>
+    <button class="icon-btn"><i class="fas fa-globe"></i></button>
+    <button class="icon-btn"><i class="fas fa-cog"></i></button>
     <div style="display:flex;align-items:center;gap:10px;border-left:1px solid var(--border);padding-left:16px">
-      <div style="text-align:right;font-size:12px">
-        <div style="font-weight:600;color:var(--text)" id="currentUserName"><%= user ? user.fullname : 'Người dùng' %></div>
-        <div style="font-size:11px;color:var(--muted);margin-top:2px" id="currentUserRole"><%= user ? user.role : '' %></div>
-      </div>
-      <div class="tb-avatar" id="currentUserAvatar" style="background:<%= user ? user.avatar_color : '#10b981' %>;"><%= user ? user.fullname.charAt(0).toUpperCase() : 'U' %></div>
+      <div style="text-align:right"><div style="font-weight:600"><%= user.fullname %></div><div style="font-size:10px;color:var(--muted)"><%= user.role === 'admin' ? 'Quản trị viên' : 'Người dùng' %></div></div>
+      <div class="tb-avatar"><%= user.fullname.charAt(0) %></div>
     </div>
   </div>
 </div>
