@@ -1139,7 +1139,7 @@ const nhipDoCaoPalette = {
   '2 ngày/1 lần': '#00d68f', '3 ngày/1 lần': '#00b4ff', '4 ngày/1 lần': '#f59e0b'
 };
 const taiCanhPalette = {
-  '2025': '#00d68f', '2026': '#00b4ff', '2027': '#f59e0b', '2028': '#a78bfa'
+  '2026': '#00b4ff', '2027': '#f59e0b', '2028': '#a78bfa', '2029': '#f4656a', '2030': '#34d399'    // xanh mint
 };
 
 /* ==================== LẤY DỮ LIỆU TỪ API ==================== */
@@ -1174,6 +1174,7 @@ async function loadCaosuData() {
       if (p.phien_cao) fullPhienCao.add(p.phien_cao);
       if (p.nhip_do_cao) fullNhipDo.add(p.nhip_do_cao);
       if (p.tai_canh_nam) fullQuyHoach.add(p.tai_canh_nam);
+['2026','2027','2028','2029','2030'].forEach(y => fullQuyHoach.add(y));
       if (p.khu_vuc) fullKhuVuc.add(p.khu_vuc);
       if (p.tuoi_cao) fullTuoiCao.add(String(p.tuoi_cao));
       if (p.che_do_cao) fullCheDoCao.add(p.che_do_cao);
@@ -1255,15 +1256,23 @@ async function buildFilterUI() {
   }
 
   const quyHoachEl = document.getElementById('filter-quy_hoach_tai_canh');
-  if (quyHoachEl) {
-    quyHoachEl.innerHTML = '<option value="all">Tất cả</option>';
-    Array.from(fullQuyHoach).sort().forEach(v => {
-      const opt = document.createElement('option');
-      opt.value = v;
-      opt.textContent = v;
-      quyHoachEl.appendChild(opt);
-    });
-  }
+if (quyHoachEl) {
+  // Tạo một Set chứa các năm có sẵn từ dữ liệu
+  let quyHoachSet = new Set(fullQuyHoach);
+  // Thêm các năm mới (2026-2030) vào Set
+  const futureYears = ['2026', '2027', '2028', '2029', '2030'];
+  futureYears.forEach(y => quyHoachSet.add(y));
+  
+  // Sắp xếp và tạo options
+  const sortedYears = Array.from(quyHoachSet).sort();
+  quyHoachEl.innerHTML = '<option value="all">Tất cả</option>';
+  sortedYears.forEach(v => {
+    const opt = document.createElement('option');
+    opt.value = v;
+    opt.textContent = v;
+    quyHoachEl.appendChild(opt);
+  });
+}
 
   // === BỔ SUNG 3 BỘ LỌC MỚI ===
   const khuVucEl = document.getElementById('filter-khu-vuc');
