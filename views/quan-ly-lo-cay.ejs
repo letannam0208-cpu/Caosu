@@ -130,22 +130,20 @@ body{
   box-shadow: var(--shadow-sm);
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 280px); /* chiều cao vừa đủ, có thể điều chỉnh */
+  height: calc(100vh - 280px);
   min-height: 400px;
 }
-/* Vùng chứa bảng - chỉ cuộn dọc, ẩn cuộn ngang */
 .table-container {
   flex: 1;
   overflow-y: auto;
-  overflow-x: hidden;  /* tắt cuộn ngang gốc */
+  overflow-x: hidden;
   position: relative;
 }
-/* Bảng có chiều rộng lớn, nhưng bị cắt ngang bởi overflow-x: hidden */
 table {
   width: 100%;
   border-collapse: collapse;
   font-size: 12px;
-  min-width: 2400px;   /* đủ rộng để kích hoạt thanh cuộn ngang bên ngoài */
+  min-width: 2400px;
 }
 thead {
   background: linear-gradient(180deg, var(--s2), var(--s1));
@@ -167,7 +165,6 @@ th {
   border-bottom: 1px solid var(--border2);
 }
 tbody tr:hover { background: rgba(16,185,129,0.04); }
-/* Thanh cuộn ngang riêng, nằm cố định dưới đáy wrapper */
 .horizontal-scrollbar {
   overflow-x: auto;
   overflow-y: hidden;
@@ -190,7 +187,7 @@ tbody tr:hover { background: rgba(16,185,129,0.04); }
 }
 .scroll-spacer {
   height: 1px;
-  width: 2400px; /* phải khớp với min-width của table */
+  width: 2400px;
 }
 .btn-dash{
   background:rgba(16,185,129,0.2);border:1px solid rgba(16,185,129,0.4);color:var(--accent);padding:5px 10px;border-radius:var(--r);font-size:11px;cursor:pointer;font-weight:600;
@@ -200,7 +197,6 @@ tbody tr:hover { background: rgba(16,185,129,0.04); }
   background:rgba(239,68,68,0.2);border:1px solid rgba(239,68,68,0.4);color:#fca5a5;padding:5px 10px;border-radius:var(--r);font-size:11px;cursor:pointer;font-weight:600;
 }
 .btn-view:hover{background:rgba(239,68,68,0.3);transform:translateY(-1px);}
-/* Nút vị trí bản đồ */
 .btn-location{
   background:rgba(6,182,212,0.2);border:1px solid rgba(6,182,212,0.4);color:var(--accentB);padding:5px 10px;border-radius:var(--r);font-size:11px;cursor:pointer;font-weight:600;
   margin-right:6px;
@@ -337,17 +333,24 @@ tbody tr:hover { background: rgba(16,185,129,0.04); }
 let loCayData = [];
 
 async function loadLoCay() {
-  const res = await fetch('/api/lo-cay');
-  const data = await res.json();
-  if(data.success) {
-    loCayData = data.data;
-    renderTable(loCayData);
-    updateFilters(loCayData);
-    document.getElementById('total-lots').innerText = loCayData.length;
-    const totalArea = loCayData.reduce((sum, l) => sum + (parseFloat(l.dien_tich_map) || 0), 0);
-    document.getElementById('total-area').innerText = totalArea.toFixed(2);
-    syncScrollbarWidth();
-    attachHorizontalScroll();
+  try {
+    const res = await fetch('/api/lo-cay');
+    const data = await res.json();
+    if(data.success) {
+      loCayData = data.data;
+      renderTable(loCayData);
+      updateFilters(loCayData);
+      document.getElementById('total-lots').innerText = loCayData.length;
+      const totalArea = loCayData.reduce((sum, l) => sum + (parseFloat(l.dien_tich_map) || 0), 0);
+      document.getElementById('total-area').innerText = totalArea.toFixed(2);
+      syncScrollbarWidth();
+      attachHorizontalScroll();
+    } else {
+      alert('Lỗi tải dữ liệu: ' + (data.error || 'Không xác định'));
+    }
+  } catch(err) {
+    console.error(err);
+    alert('Không thể kết nối đến server');
   }
 }
 
@@ -398,7 +401,6 @@ function renderTable(data) {
     row.insertCell(39).innerText = l.tai_canh_nam || '';
     row.insertCell(40).innerText = l.doi_tuong || '';
     const actionCell = row.insertCell(41);
-    // Thêm nút 📍 để xem vị trí trên bản đồ
     actionCell.innerHTML = `
       <button class="btn-location location-lo" data-id="${l.id_lo}" title="Xem vị trí trên bản đồ"><i class="fas fa-map-marker-alt"></i> 📍</button>
       <button class="btn-dash edit-lo" data-id="${l.id_lo}"><i class="fas fa-edit"></i> Sửa</button>
@@ -416,26 +418,32 @@ function attachEvents() {
   document.querySelectorAll('.location-lo').forEach(btn => btn.addEventListener('click', () => showLocation(btn.dataset.id)));
 }
 
-// Hàm xem vị trí trên Google Maps dựa vào địa chỉ (xã, huyện, tỉnh)
 function showLocation(id) {
-  // Lưu ID lô cần focus vào localStorage
   localStorage.setItem('focus_lot_id', id);
-  // Chuyển hướng về trang dashboard (bản đồ)
   window.location.href = '/';
 }
 
 async function editLo(id) {
-  const res = await fetch(`/api/lo-cay/${id}`);
-  const data = await res.json();
-  if(data.success) showForm(data.data);
+  try {
+    const res = await fetch(`/api/lo-cay/${id}`);
+    const data = await res.json();
+    if(data.success) showForm(data.data);
+    else alert('Không tìm thấy dữ liệu lô cây');
+  } catch(err) {
+    alert('Lỗi kết nối khi sửa');
+  }
 }
 
 async function deleteLo(id) {
   if(confirm('Xóa lô cây này sẽ xóa tất cả dữ liệu liên quan. Bạn có chắc?')) {
-    const res = await fetch(`/api/lo-cay/${id}`, { method: 'DELETE' });
-    const data = await res.json();
-    if(data.success) { alert('✅ Xóa thành công'); loadLoCay(); }
-    else alert('❌ Lỗi: ' + data.error);
+    try {
+      const res = await fetch(`/api/lo-cay/${id}`, { method: 'DELETE' });
+      const data = await res.json();
+      if(data.success) { alert('✅ Xóa thành công'); loadLoCay(); }
+      else alert('❌ Lỗi: ' + data.error);
+    } catch(err) {
+      alert('Lỗi kết nối khi xóa');
+    }
   }
 }
 
@@ -517,12 +525,17 @@ function showForm(l = null) {
   const formHtml = `
     <input type="hidden" id="id_lo" name="id_lo" value="${l ? l.id_lo : ''}">
     <div class="form-grid">
+      <div class="form-field"><label>Dự án</label><input type="text" name="du_an" value="${l ? (l.du_an || '') : ''}"></div>
+      <div class="form-field"><label>Khu vực</label><input type="text" name="khu_vuc" value="${l ? (l.khu_vuc || '') : ''}"></div>
       <div class="form-field"><label>Tên lô *</label><input type="text" name="ten_lo" value="${l ? l.ten_lo : ''}" required></div>
       <div class="form-field"><label>Năm trồng</label><input type="number" name="nam_trong" value="${l ? l.nam_trong : ''}"></div>
       <div class="form-field"><label>Giống</label><input type="text" name="giong" value="${l ? l.giong : ''}"></div>
       <div class="form-field"><label>Cao trình TB (m)</label><input type="number" step="0.1" name="cao_trinh_tb" value="${l ? l.cao_trinh_tb : ''}"></div>
       <div class="form-field"><label>Đội *</label><select name="id_don_vi" id="id_don_vi" required></select></div>
-      <div class="form-field"><label>Hành chính</label><select name="id_hc" id="id_hc"></select></div>
+      <div class="form-field"><label>Hành chính (ID)</label><select name="id_hc" id="id_hc"></select></div>
+      <div class="form-field"><label>Xã</label><input type="text" name="xa" value="${l ? (l.xa || '') : ''}"></div>
+      <div class="form-field"><label>Huyện</label><input type="text" name="huyen" value="${l ? (l.huyen || '') : ''}"></div>
+      <div class="form-field"><label>Tỉnh</label><input type="text" name="tinh" value="${l ? (l.tinh || '') : ''}"></div>
       <div class="form-field"><label>Hạng đất</label><input type="text" name="hang_dat" value="${l ? l.hang_dat : ''}"></div>
       <div class="form-field"><label>Phương pháp trồng</label><input type="text" name="phuong_phap_trong" value="${l ? l.phuong_phap_trong : ''}"></div>
       <div class="form-field"><label>Khoảng cách trồng</label><input type="text" name="khoang_cach_trong" value="${l ? l.khoang_cach_trong : ''}"></div>
@@ -575,47 +588,55 @@ function showForm(l = null) {
     if(!data.id_don_vi) { alert('Vui lòng chọn đội'); return; }
     const url = id_lo ? `/api/lo-cay/${id_lo}` : '/api/lo-cay';
     const method = id_lo ? 'PUT' : 'POST';
-    const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
-    const result = await res.json();
-    if(result.success) {
-      alert(id_lo ? 'Cập nhật thành công' : 'Thêm thành công');
-      closeModal();
-      loadLoCay();
-    } else alert('Lỗi: ' + result.error);
+    try {
+      const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+      const result = await res.json();
+      if(result.success) {
+        alert(id_lo ? 'Cập nhật thành công' : 'Thêm thành công');
+        closeModal();
+        loadLoCay();
+      } else alert('Lỗi: ' + result.error);
+    } catch(err) {
+      alert('Lỗi kết nối khi lưu dữ liệu');
+    }
   };
 }
 
 async function loadDonViList(selectedId) {
-  const res = await fetch('/api/don-vi-list');
-  const data = await res.json();
-  if(data.success) {
-    const select = document.getElementById('id_don_vi');
-    select.innerHTML = '<option value="">-- Chọn đơn vị --</option>';
-    data.data.forEach(dv => {
-      const opt = document.createElement('option');
-      opt.value = dv.id_don_vi;
-      opt.textContent = dv.doi;
-      if(selectedId && selectedId === dv.id_don_vi) opt.selected = true;
-      select.appendChild(opt);
-    });
-  }
+  try {
+    const res = await fetch('/api/don-vi-list');
+    const data = await res.json();
+    if(data.success) {
+      const select = document.getElementById('id_don_vi');
+      select.innerHTML = '<option value="">-- Chọn đơn vị --</option>';
+      data.data.forEach(dv => {
+        const opt = document.createElement('option');
+        opt.value = dv.id_don_vi;
+        opt.textContent = dv.doi;
+        if(selectedId && selectedId == dv.id_don_vi) opt.selected = true;
+        select.appendChild(opt);
+      });
+    }
+  } catch(err) { console.error(err); }
 }
 async function loadHanhChinhList(selectedId) {
-  const res = await fetch('/api/hanh-chinh');
-  const data = await res.json();
-  if(data.success) {
-    const select = document.getElementById('id_hc');
-    select.innerHTML = '<option value="">-- Chọn xã/huyện --</option>';
-    data.data.forEach(hc => {
-      const opt = document.createElement('option');
-      opt.value = hc.id_hc;
-      opt.textContent = `${hc.xa}, ${hc.huyen}`;
-      if(selectedId && selectedId === hc.id_hc) opt.selected = true;
-      select.appendChild(opt);
-    });
-  }
+  try {
+    const res = await fetch('/api/hanh-chinh');
+    const data = await res.json();
+    if(data.success) {
+      const select = document.getElementById('id_hc');
+      select.innerHTML = '<option value="">-- Chọn xã/huyện --</option>';
+      data.data.forEach(hc => {
+        const opt = document.createElement('option');
+        opt.value = hc.id_hc;
+        opt.textContent = `${hc.xa}, ${hc.huyen}`;
+        if(selectedId && selectedId == hc.id_hc) opt.selected = true;
+        select.appendChild(opt);
+      });
+    }
+  } catch(err) { console.error(err); }
 }
-// ==================== LẤY THÔNG TIN NGƯỜI DÙNG THẬT ====================
+
 async function loadUserInfo() {
   try {
     const res = await fetch('/api/me', { credentials: 'same-origin' });
@@ -625,21 +646,15 @@ async function loadUserInfo() {
       document.getElementById('userFullName').innerText = user.fullname;
       document.getElementById('userRole').innerText = user.role === 'admin' ? 'Quản trị viên' : 'Người dùng';
       document.getElementById('userAvatar').innerText = user.fullname.charAt(0).toUpperCase();
-    } else {
-      console.warn('Không lấy được thông tin user');
     }
   } catch (err) {
     console.error('Lỗi /api/me:', err);
   }
 }
 
-// Gọi khi trang tải xong (nếu chưa có DOMContentLoaded thì thêm)
-document.addEventListener('DOMContentLoaded', () => {
-  loadUserInfo();
-});
-
 function closeModal() { document.getElementById('modal').style.display = 'none'; }
 
+window.addEventListener('resize', () => syncScrollbarWidth());
 document.getElementById('closeModal').addEventListener('click', closeModal);
 document.getElementById('btnAddLo').addEventListener('click', () => showForm());
 document.getElementById('searchInput').addEventListener('input', filterRows);
@@ -649,7 +664,10 @@ document.getElementById('namFilter').addEventListener('change', filterRows);
 document.getElementById('huyenFilter').addEventListener('change', filterRows);
 document.getElementById('phanLoaiFilter').addEventListener('change', filterRows);
 
-loadLoCay();
+document.addEventListener('DOMContentLoaded', () => {
+  loadUserInfo();
+  loadLoCay();
+});
 </script>
 </body>
 </html>
