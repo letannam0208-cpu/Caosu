@@ -1043,12 +1043,6 @@ td.mono{font-family:monospace;font-size:11px;color:var(--muted)}
           <div class="mlp-dot" style="background:#00b4ff"></div>
           Nhãn tên lô (zoom ≥ 12)
         </div>
-        <div class="mlp-item" onclick="toggleLayer(this,'satellite')">
-          <div class="mlp-check on" id="lc-satellite">✓</div>
-          <div class="mlp-dot" style="background:#888"></div>
-          Ảnh vệ tinh Esri
-        </div>
-      </div>
 
       <!-- SEARCH PANEL -->
       <div class="map-search-panel" id="map-search-panel">
@@ -1111,7 +1105,7 @@ td.mono{font-family:monospace;font-size:11px;color:var(--muted)}
 
 <script>
 /* ==================== KHỞI TẠO BẢN ĐỒ & DASHBOARD ==================== */
-let dashMap, xaLayer, satelliteTile;
+let dashMap, xaLayer;
 let lotLayers = [], backgroundLotLayers = [], labelLayers = [];
 let boundaryVis = true, lotsVis = true, labelsVis = true;
 let mapViewMode = 'nt';
@@ -1381,14 +1375,18 @@ function renderRealLots() {
 
   // Vẽ polygon lô (luôn vẽ nếu lotsVis = true)
   if (lotsVis) {
-    const layer = L.geoJSON(feat, {
-      style: {
-        color: isSel ? '#ffffff' : col,
-        weight: isSel ? 2.5 : 1,
-        fillColor: col,
-        fillOpacity: isSel ? 0.65 : 0.52
-      }
-    });
+  const layer = L.geoJSON(feat, {
+    style: {
+      color: isSel ? '#ffffff' : col,
+      weight: isSel ? 2.5 : 1,
+      fillColor: col,
+      fillOpacity: isSel ? 0.65 : 0.52
+    },
+    interactive: !msrActive   // Khi đo thì vô hiệu hóa hoàn toàn tương tác
+  });
+  
+  // Chỉ bind popup và các sự kiện khi không ở chế độ đo
+  if (!msrActive) {
     const bs = `background:${col}22;color:${col};border:1px solid ${col}55`;
     layer.bindPopup(`
       <div class="lo-popup-title">
@@ -1410,10 +1408,6 @@ function renderRealLots() {
     layer.on('mouseover', () => layer.setStyle({ fillOpacity: 0.7, weight: 2 }));
     layer.on('mouseout', () => { if (!selectedIdx.has(idx)) layer.setStyle({ fillOpacity: 0.52, weight: 1 }); });
     layer.on('click', e => {
-
-      if (msrActive) {
-        return;
-      }
       if (currentTool === 'pointer') {
         selectedIdx.has(idx) ? selectedIdx.delete(idx) : selectedIdx.add(idx);
         updateSelBar();
@@ -1421,9 +1415,11 @@ function renderRealLots() {
         L.DomEvent.stopPropagation(e);
       }
     });
-    layer.addTo(dashMap);
-    lotLayers.push({ layer, p, idx });
   }
+  
+  layer.addTo(dashMap);
+  lotLayers.push({ layer, p, idx });
+}
 
   // Nhãn tên lô - CHỈ HIỂN THỊ KHI ZOOM <= 13
   if (labelsVis && p.ten_lo) {
@@ -1800,62 +1796,43 @@ function fmtAreaSub(m2) {
 }
 
 function openMeasure(mode) {
-  // Lưu lại tool hiện tại để khôi phục sau
   window.previousTool = currentTool;
-  
-  // Chuyển sang chế độ đo, vô hiệu hóa chọn lô
   currentTool = 'measure';
   msrMode = mode;
-  msrActive = true;   // đặt cờ đo hoạt động
-  
+  msrActive = true;
   document.getElementById('measure-panel').classList.add('show');
   document.getElementById('map-layer-panel').classList.remove('show');
   document.getElementById('map-search-panel').classList.remove('show');
   switchMeasureTab(mode);
-  
-  // Thay đổi con trỏ và vô hiệu hóa kéo thả (tùy chọn)
   dashMap.getContainer().style.cursor = 'crosshair';
-  dashMap.dragging.disable();   // tránh xung đột khi đo
+  dashMap.dragging.disable();
   dashMap.doubleClickZoom.disable();
-  
-  // Bắt sự kiện click, mousemove, dblclick
   dashMap.on('click', onMsrClick);
   dashMap.on('mousemove', onMsrMove);
   dashMap.on('dblclick', onMsrDblClick);
-  
-  // Xóa highlight các lô đã chọn nếu có (tùy chọn)
   clearSelection();
+  renderRealLots();   // <-- THÊM DÒNG NÀY
 }
 function closeMeasure() {
   document.getElementById('measure-panel').classList.remove('show');
-  
-  // Dừng capture sự kiện
   msrActive = false;
   dashMap.getContainer().style.cursor = '';
   dashMap.off('click', onMsrClick);
   dashMap.off('mousemove', onMsrMove);
   dashMap.off('dblclick', onMsrDblClick);
-  
-  // Khôi phục kéo thả và double click zoom
   dashMap.dragging.enable();
   dashMap.doubleClickZoom.enable();
-  
-  // Khôi phục tool trước đó (pan hoặc pointer)
   if (window.previousTool === 'pan') {
     setMapTool('pan', document.getElementById('tool-pan'));
   } else if (window.previousTool === 'pointer') {
     setMapTool('pointer', document.getElementById('tool-pointer'));
   } else {
-    // Mặc định về pan
     setMapTool('pan', document.getElementById('tool-pan'));
   }
-  
-  // Xóa các điểm đo, line, polygon
   resetMeasure();
-  
-  // Xóa active class trên nút đo
   document.getElementById('btn-measure-dist').classList.remove('active');
   document.getElementById('btn-measure-area').classList.remove('active');
+  renderRealLots();   // <-- THÊM DÒNG NÀY
 }
 function switchMeasureTab(mode) {
   msrMode = mode;
