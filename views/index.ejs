@@ -1139,7 +1139,7 @@ const nhipDoCaoPalette = {
   '2 ngày/1 lần': '#00d68f', '3 ngày/1 lần': '#00b4ff', '4 ngày/1 lần': '#f59e0b'
 };
 const taiCanhPalette = {
-  '2026': '#00b4ff', '2027': '#f59e0b', '2028': '#a78bfa', '2029': '#f4656a', '2030': '#34d399'    // xanh mint
+  '2026': '#00b4ff', '2027': '#f59e0b', '2028': '#a78bfa', '2029': '#f4656a', '2030': '#34d399'
 };
 
 /* ==================== LẤY DỮ LIỆU TỪ API ==================== */
@@ -1174,7 +1174,7 @@ async function loadCaosuData() {
       if (p.phien_cao) fullPhienCao.add(p.phien_cao);
       if (p.nhip_do_cao) fullNhipDo.add(p.nhip_do_cao);
       if (p.tai_canh_nam) fullQuyHoach.add(p.tai_canh_nam);
-['2026','2027','2028','2029','2030'].forEach(y => fullQuyHoach.add(y));
+      ['2026','2027','2028','2029','2030'].forEach(y => fullQuyHoach.add(y));
       if (p.khu_vuc) fullKhuVuc.add(p.khu_vuc);
       if (p.tuoi_cao) fullTuoiCao.add(String(p.tuoi_cao));
       if (p.che_do_cao) fullCheDoCao.add(p.che_do_cao);
@@ -1648,9 +1648,9 @@ function toggleLayer(el, type) {
     toggleBoundary(document.getElementById('btn-boundary'));
   } else if (type === 'label') {
     toggleLotLabels(document.getElementById('btn-label'));
-  } else if (type === 'satellite') {
-    on ? satelliteTile.addTo(dashMap) : dashMap.removeLayer(satelliteTile);
-  }
+  // else if (type === 'satellite') {
+//   on ? satelliteTile.addTo(dashMap) : dashMap.removeLayer(satelliteTile);
+// }
 }
 
 function locateUser() {
