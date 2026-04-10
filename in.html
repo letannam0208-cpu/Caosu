@@ -644,6 +644,117 @@ td.mono{font-family:monospace;font-size:11px;color:var(--muted)}
 .msp-result:hover{background:rgba(255,255,255,0.05);color:var(--text)}
 .msp-result strong{color:var(--text);display:block;margin-bottom:1px}
 
+/* ===== LÀM CHO RIGHT TOOLBAR GIỐNG LEFT TOOLBAR ===== */
+
+/* Các nhóm bên phải cũng có background giống left */
+.map-ctrl-right .map-ctrl-group {
+  background: rgba(10, 15, 26, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+  padding: 4px 0;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+}
+
+/* Group label cho right toolbar (nếu có) */
+.map-ctrl-right .mc-group-label {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 6px 12px 4px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* Nút trong right toolbar – biến thành dạng wide (có chữ) */
+.map-ctrl-right .mc-btn {
+  width: auto;
+  min-width: 40px;
+  height: 38px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 0;
+  font-family: var(--font-b);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted2);
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+  position: relative;
+}
+
+.map-ctrl-right .mc-btn:last-child {
+  border-bottom: none;
+}
+
+/* Hover giống left toolbar */
+.map-ctrl-right .mc-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text);
+}
+
+/* Active state */
+.map-ctrl-right .mc-btn.active {
+  background: rgba(0, 214, 143, 0.18);
+  color: var(--accent);
+}
+
+/* SVG trong nút */
+.map-ctrl-right .mc-btn svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  stroke: currentColor;
+  transition: transform 0.15s;
+}
+
+.map-ctrl-right .mc-btn:active svg {
+  transform: scale(0.88);
+}
+
+/* Ẩn cái span chứa text cũ (vì bây giờ text nằm trực tiếp trong button) */
+.map-ctrl-right .mc-btn span:not(.mc-tooltip) {
+  display: inline; /* Cho phép hiện text nếu có */
+}
+
+/* Tooltip cho right toolbar – hiện bên trái nút */
+.map-ctrl-right .mc-tooltip {
+  position: absolute;
+  right: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(15, 23, 41, 0.95);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 4px 10px;
+  font-size: 11px;
+  color: var(--text);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: 0.15s;
+  backdrop-filter: blur(6px);
+  font-weight: normal;
+}
+
+.map-ctrl-right .mc-btn:hover .mc-tooltip {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}
+
+/* Điều chỉnh lại vị trí tooltip mặc định nếu có class right */
+.map-ctrl-right .mc-tooltip-right {
+  right: auto;
+  left: calc(100% + 8px);
+}
+
 /* Legend bar */
 .map-legend{
   padding:10px 16px;border-top:1px solid var(--border);
@@ -916,55 +1027,65 @@ td.mono{font-family:monospace;font-size:11px;color:var(--muted)}
 
       </div>
 
-      <!-- RIGHT TOOLBAR -->
-      <div class="map-ctrl-right">
-        <!-- Search -->
-        <div class="map-ctrl-group">
-          <button class="mc-btn" onclick="togglePanel('map-search-panel')" title="">
-            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-            <span class="mc-tooltip mc-tooltip-right">Tìm kiếm lô</span> Tìm kiếm lô
-          </button>
-        </div>
-        <!-- Layers -->
-        <div class="map-ctrl-group">
-          <button class="mc-btn" onclick="togglePanel('map-layer-panel')" title="">
-            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
-            <span class="mc-tooltip mc-tooltip-right">Lớp bản đồ</span> Lớp bản đồ
-          </button>
-        </div>
-        <!-- Grid/label -->
-        <div class="map-ctrl-group">
-          <button class="mc-btn" id="btn-label" onclick="toggleLotLabels(this)" title="">
-            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 12h6M9 15h4"/></svg>
-            <span class="mc-tooltip mc-tooltip-right">Nhãn lô</span> Nhãn lô
-          </button>
-          <button class="mc-btn" id="btn-boundary" onclick="toggleBoundary(this)" title="">
-            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 3h18v18H3zM3 9h18M3 15h18M9 3v18M15 3v18" stroke-dasharray="2 2"/></svg>
-            <span class="mc-tooltip mc-tooltip-right">Ranh giới đội</span>
-          </button>
-        </div>
-        <!-- Measure / fullscreen -->
-        <div class="map-ctrl-group">
-          <button class="mc-btn" id="btn-measure-dist" onclick="openMeasure('distance')" title="">
-            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <line x1="2" y1="12" x2="22" y2="12"/>
-              <polyline points="8 8 2 12 8 16"/>
-              <polyline points="16 8 22 12 16 16"/>
-            </svg>
-            <span class="mc-tooltip mc-tooltip-right">Đo khoảng cách</span>
-          </button>
-          <button class="mc-btn" id="btn-measure-area" onclick="openMeasure('area')" title="">
-            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <polygon points="3 6 12 3 21 6 21 18 12 21 3 18"/>
-            </svg>
-            <span class="mc-tooltip mc-tooltip-right">Đo diện tích</span>
-          </button>
-          <button class="mc-btn" onclick="toggleFullscreen()" title="">
-            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
-            <span class="mc-tooltip mc-tooltip-right">Toàn màn hình</span>
-          </button>
-        </div>
-      </div>
+      <!-- RIGHT TOOLBAR-->
+<div class="map-ctrl-right">
+  
+  <!-- Tìm kiếm -->
+  <div class="map-ctrl-group">
+    <div class="mc-group-label">🔍 Tra cứu</div>
+    <button class="mc-btn-wide" onclick="togglePanel('map-search-panel')">
+      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8" />
+        <path d="M21 21l-4.35-4.35" />
+      </svg>
+      Tìm kiếm lô
+      <span class="mc-tooltip mc-tooltip-right">Tìm lô theo tên, mã, giống, năm</span>
+    </button>
+  </div>
+
+  <!-- Lớp bản đồ -->
+  <div class="map-ctrl-group">
+    <div class="mc-group-label">🗺️ Hiển thị</div>
+    <button class="mc-btn-wide" onclick="togglePanel('map-layer-panel')">
+      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <polygon points="12 2 2 7 12 12 22 7 12 2" />
+        <polyline points="2 17 12 22 22 17" />
+        <polyline points="2 12 12 17 22 12" />
+      </svg>
+      Lớp bản đồ
+      <span class="mc-tooltip mc-tooltip-right">Bật/tắt các lớp chuyên đề</span>
+    </button>
+  </div>
+
+  <!-- Đo đạc & Toàn màn hình -->
+  <div class="map-ctrl-group">
+    <div class="mc-group-label">📐 Đo đạc</div>
+    <button class="mc-btn-wide" id="btn-measure-dist" onclick="openMeasure('distance')">
+      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <line x1="2" y1="12" x2="22" y2="12" />
+        <polyline points="8 8 2 12 8 16" />
+        <polyline points="16 8 22 12 16 16" />
+      </svg>
+      Đo khoảng cách
+      <span class="mc-tooltip mc-tooltip-right">Click chuột để đo đường gấp khúc</span>
+    </button>
+    <button class="mc-btn-wide" id="btn-measure-area" onclick="openMeasure('area')">
+      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <polygon points="3 6 12 3 21 6 21 18 12 21 3 18" />
+      </svg>
+      Đo diện tích
+      <span class="mc-tooltip mc-tooltip-right">Vẽ đa giác để tính diện tích</span>
+    </button>
+    <button class="mc-btn-wide" onclick="toggleFullscreen()">
+      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3" />
+      </svg>
+      Toàn màn hình
+      <span class="mc-tooltip mc-tooltip-right">Phóng to bản đồ toàn màn hình (ESC để thoát)</span>
+    </button>
+  </div>
+
+</div>
 
       <!-- MEASURE PANEL -->
       <div class="measure-panel" id="measure-panel">
