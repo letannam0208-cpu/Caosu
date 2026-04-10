@@ -508,7 +508,7 @@ app.delete('/api/lo-cay/:id', authenticateToken, async (req, res) => {
   }
 });
 
-// ====================== IMPORT EXCEL & LƯU LỊCH SỬ (BATCH VERSION) ======================
+// ====================== IMPORT EXCEL & LƯU LỊCH SỬ (BATCH VERSION WITH ERROR HANDLING) ======================
 const multer = require('multer');
 const XLSX = require('xlsx');
 
@@ -538,17 +538,29 @@ app.post('/api/import-excel', authenticateToken, upload.single('file'), async (r
         return res.status(400).json({ success: false, error: 'Chưa chọn file Excel' });
     }
     try {
-        // Đọc file Excel
+        console.log('🚀 Bắt đầu import file Excel');
         const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
         const sheetName = workbook.SheetNames[0];
         const sheet = workbook.Sheets[sheetName];
         const rows = XLSX.utils.sheet_to_json(sheet);
         if (rows.length === 0) throw new Error('File Excel không có dữ liệu');
+        console.log(`📊 Số dòng cần xử lý: ${rows.length}`);
 
         const client = await pool.connect();
         await client.query('BEGIN');
 
-        // 1. Tạo bảng tạm thời
+        // 1. Kiểm tra bảng lo_history tồn tại
+        const checkHistory = await client.query(`
+            SELECT EXISTS (
+                SELECT FROM information_schema.tables 
+                WHERE table_name = 'lo_history'
+            );
+        `);
+        if (!checkHistory.rows[0].exists) {
+            throw new Error('Bảng lo_history chưa được tạo. Vui lòng chạy script tạo bảng trước.');
+        }
+
+        // 2. Tạo bảng tạm thời
         await client.query(`
             CREATE TEMP TABLE temp_import (
                 id_lo VARCHAR(50) PRIMARY KEY,
@@ -594,8 +606,9 @@ app.post('/api/import-excel', authenticateToken, upload.single('file'), async (r
                 doi_tuong VARCHAR(100)
             )
         `);
+        console.log('✅ Đã tạo bảng tạm');
 
-        // 2. Chèn dữ liệu vào bảng tạm (dùng INSERT ... ON CONFLICT để ghi đè)
+        // 3. Chèn dữ liệu vào bảng tạm
         for (const row of rows) {
             const id_lo = row.ID_lo || row.id_lo;
             if (!id_lo) continue;
@@ -605,14 +618,16 @@ app.post('/api/import-excel', authenticateToken, upload.single('file'), async (r
             const insertSql = `INSERT INTO temp_import (id_lo, ${columns.join(',')}) VALUES ($1, ${placeholders}) ON CONFLICT (id_lo) DO UPDATE SET ${columns.map(c => `${c}=EXCLUDED.${c}`).join(',')}`;
             await client.query(insertSql, [id_lo, ...values]);
         }
+        console.log('✅ Đã chèn dữ liệu vào bảng tạm');
 
-        // 3. Lấy danh sách id_lo đã tồn tại
+        // 4. Lấy danh sách id_lo đã tồn tại
         const existingIdsRes = await client.query(`
             SELECT id_lo FROM lo WHERE id_lo IN (SELECT id_lo FROM temp_import)
         `);
         const existingIds = existingIdsRes.rows.map(r => r.id_lo);
+        console.log(`📌 Số lô đã tồn tại: ${existingIds.length}`);
 
-        // 4. Lưu lịch sử cho các lô đã tồn tại (chép toàn bộ bản ghi cũ sang lo_history)
+        // 5. Lưu lịch sử
         if (existingIds.length > 0) {
             await client.query(`
                 INSERT INTO lo_history (
@@ -635,9 +650,10 @@ app.post('/api/import-excel', authenticateToken, upload.single('file'), async (r
                 FROM lo l
                 WHERE l.id_lo = ANY($1::text[])
             `, [existingIds]);
+            console.log('✅ Đã lưu lịch sử');
         }
 
-        // 5. Cập nhật hàng loạt các lô đã tồn tại (chỉ cập nhật các cột có trong bảng tạm và thuộc updatableCols)
+        // 6. Cập nhật hàng loạt các lô đã tồn tại
         const updatableColsSet = new Set(updatableCols);
         const tempColumns = await client.query(`
             SELECT column_name FROM information_schema.columns WHERE table_name='temp_import' AND column_name != 'id_lo'
@@ -654,9 +670,10 @@ app.post('/api/import-excel', authenticateToken, upload.single('file'), async (r
                 FROM temp_import temp
                 WHERE lo.id_lo = temp.id_lo AND lo.id_lo = ANY($2::text[])
             `, [parseInt(nam_cap_nhat), existingIds]);
+            console.log('✅ Đã cập nhật các lô tồn tại');
         }
 
-        // 6. Thêm mới các lô chưa tồn tại
+        // 7. Thêm mới các lô chưa tồn tại
         const newIdsRes = await client.query(`
             SELECT t.* FROM temp_import t
             WHERE NOT EXISTS (SELECT 1 FROM lo l WHERE l.id_lo = t.id_lo)
@@ -680,6 +697,7 @@ app.post('/api/import-excel', authenticateToken, upload.single('file'), async (r
                 INSERT INTO lo (${insertCols.join(',')})
                 VALUES ${valuesPlaceholders}
             `, flatValues);
+            console.log(`✅ Đã thêm mới ${newRows.length} lô`);
         }
 
         await client.query('COMMIT');
@@ -688,9 +706,20 @@ app.post('/api/import-excel', authenticateToken, upload.single('file'), async (r
             message: `Import thành công! Thêm mới: ${newRows.length}, Cập nhật: ${existingIds.length}, Tổng số dòng xử lý: ${rows.length}`
         });
     } catch (err) {
-        await client.query('ROLLBACK');
-        console.error('Lỗi import Excel:', err);
-        res.status(500).json({ success: false, error: err.message });
+        console.error('❌ Lỗi import Excel chi tiết:', err);
+        // Rollback nếu có lỗi
+        try {
+            await pool.query('ROLLBACK');
+        } catch (rollbackErr) {
+            console.error('Lỗi rollback:', rollbackErr);
+        }
+        // Gửi lỗi chi tiết về client
+        res.status(500).json({ 
+            success: false, 
+            error: err.message,
+            stack: err.stack,
+            hint: 'Kiểm tra log server để biết thêm chi tiết'
+        });
     }
 });
 
