@@ -32,6 +32,8 @@ const pool = new Pool({
   max: 20,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,
+  statement_timeout: 60000, // 60 giây
+  query_timeout: 60000,     // 60 giây
 });
 
 pool.on('connect', () => console.log('✅ Kết nối PostgreSQL (Neon) thành công!'));
