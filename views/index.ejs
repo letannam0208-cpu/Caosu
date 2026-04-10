@@ -1402,25 +1402,25 @@ async function buildFilterUI() {
 
 function featureVisible(p) {
   if (!p.ten_lo) return false;
-  const nt = p.doi || '';
-  const nam = String(p.nam_trong || '');
-  const g = p.giong || '';
-  const pc = p.phien_cao || '';
-  const nd = p.nhip_do_cao || '';
-  const qh = String(p.tai_canh_nam || '');
-  const kv = p.khu_vuc || '';
-  const tc = String(p.tuoi_cao || '');
-  const cdc = p.che_do_cao || '';
+  const nt = p.doi ?? '';
+  const nam = p.nam_trong != null ? String(p.nam_trong) : '';
+  const g = p.giong ?? '';
+  const pc = p.phien_cao != null ? String(p.phien_cao) : '';
+  const nd = p.nhip_do_cao != null ? String(p.nhip_do_cao) : '';
+  const qh = p.tai_canh_nam != null ? String(p.tai_canh_nam) : '';
+  const kv = p.khu_vuc ?? '';
+  const tc = p.tuoi_cao != null ? String(p.tuoi_cao) : '';
+  const cdc = p.che_do_cao ?? '';
 
-  const okNT = filterNT.size === 0 || filterNT.has(nt);
-  const okNam = filterNam.size === 0 || filterNam.has(nam);
-  const okGiong = filterGiong.size === 0 || filterGiong.has(g);
-  const okPC = filterPhienCao.size === 0 || filterPhienCao.has(pc);
-  const okND = filterNhipDo.size === 0 || filterNhipDo.has(nd);
-  const okQH = filterQuyHoach.size === 0 || filterQuyHoach.has(qh);
-  const okKV = filterKhuVuc.size === 0 || filterKhuVuc.has(kv);
-  const okTC = filterTuoiCao.size === 0 || filterTuoiCao.has(tc);
-  const okCDC = filterCheDoCao.size === 0 || filterCheDoCao.has(cdc);
+  const okNT   = filterNT.size === 0 || filterNT.has(nt);
+  const okNam  = filterNam.size === 0 || filterNam.has(nam);
+  const okGiong= filterGiong.size === 0 || filterGiong.has(g);
+  const okPC   = filterPhienCao.size === 0 || filterPhienCao.has(pc);
+  const okND   = filterNhipDo.size === 0 || filterNhipDo.has(nd);
+  const okQH   = filterQuyHoach.size === 0 || filterQuyHoach.has(qh);
+  const okKV   = filterKhuVuc.size === 0 || filterKhuVuc.has(kv);
+  const okTC   = filterTuoiCao.size === 0 || filterTuoiCao.has(tc);
+  const okCDC  = filterCheDoCao.size === 0 || filterCheDoCao.has(cdc);
 
   return okNT && okNam && okGiong && okPC && okND && okQH && okKV && okTC && okCDC;
 }
@@ -1677,6 +1677,7 @@ function setMapTool(tool, btn) {
     dashMap.doubleClickZoom.disable();
     if (mapEl) mapEl.style.cursor = 'default';
     wrap.classList.remove('pan-mode', 'measuring-distance', 'measuring-area');
+}
 }
 
 function togglePanel(id) {
