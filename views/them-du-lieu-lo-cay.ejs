@@ -166,7 +166,10 @@
         <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display:none;">
       </div>
       
-      <button class="btn-reset" id="downloadSample" style="margin-bottom:16px;"><i class="fas fa-download"></i> Tải file mẫu (bảng lo)</button>
+      <!-- Link tải file mẫu từ thư mục public -->
+      <a href="/lo.xlsx" download class="btn-reset" style="display:inline-flex; align-items:center; gap:8px; text-decoration:none; margin-bottom:16px;">
+        <i class="fas fa-download"></i> Tải file mẫu (bảng lo)
+      </a>
       
       <!-- Preview area -->
       <div id="previewArea" style="display:none;">
@@ -288,38 +291,6 @@
     fileInput.value = '';
     clearLog();
     document.getElementById('importLog').style.display = 'none';
-  });
-
-  // Tải file mẫu
-  document.getElementById('downloadSample').addEventListener('click', () => {
-    const sampleData = [
-      {
-        id_lo: 'LO001',
-        ten_lo: 'Lô A',
-        nam_trong: 2020,
-        giong: 'PB 260',
-        cao_trinh_tb: 12.5,
-        du_an: 'Dự án 1',
-        doi: 'Đội 1',
-        khu_vuc: 'Khu vực 1',
-        xa: 'Xã A',
-        huyen: 'Huyện B',
-        tinh: 'Tỉnh C',
-        dien_tich_map: 10.5,
-        dien_tich_010125: 10.5,
-        dien_tich_010126: 10.5,
-        che_do_cao: 'S/2',
-        phien_cao: '1/2S',
-        nhip_do_cao: '3 ngày/1 lần',
-        tuoi_cao: 5,
-        san_luong: 18.5
-      }
-    ];
-    const ws = XLSX.utils.json_to_sheet(sampleData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'lo_cao_su');
-    XLSX.writeFile(wb, 'mau_nhap_lo_cao_su.xlsx');
-    addLog(`📥 Đã tải file mẫu (bảng lo)`, 'info');
   });
 
   // Gửi import lên server
