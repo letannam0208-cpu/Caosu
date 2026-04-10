@@ -508,17 +508,29 @@ app.delete('/api/lo-cay/:id', authenticateToken, async (req, res) => {
   }
 });
 
-// ====================== IMPORT EXCEL & LƯU LỊCH SỬ ======================
+// ====================== IMPORT EXCEL & LƯU LỊCH SỬ (SỬA THEO YÊU CẦU) ======================
 const multer = require('multer');
 const XLSX = require('xlsx');
 const fs = require('fs');
 
-// Cấu hình multer để lưu file tạm
 const upload = multer({ dest: 'uploads/' });
 
-// API import file Excel (có lưu lịch sử)
+// Các cột cố định (không bao giờ cập nhật khi lô đã tồn tại)
+const fixedColumns = ['id_lo', 'ten_lo', 'geometry', 'xa', 'huyen', 'tinh'];
+
+// Các cột có thể cập nhật (tất cả các cột còn lại, trừ fixedColumns và nam_cap_nhat)
+const updatableCols = [
+    'nam_trong', 'cao_trinh_tb', 'giong', 'du_an', 'doi', 'khu_vuc',
+    'hang_dat', 'phuong_phap_trong', 'khoang_cach_trong', 'mat_do_tk',
+    'dien_tich_010125', 'dien_tich_010126', 'dien_tich_map', 'tong_ho_kk',
+    'cay_cao', 'cay_chua_cao', 'cay_kho_mu', 'cay_khong_pt', 'ho_trong', 'mat_do_cc',
+    'che_do_cao', 'nam_mc', 'tuoi_cao', 'nam_cao_up', 'tinh_trang_mc',
+    'ns25_kg_ha', 'ns25_kg_cay', 'tong_lat_cao', 'ns26_kg_cay', 'phan_loai',
+    'ns26_kg_ha', 'san_luong', 'phien_cao', 'nhip_do_cao', 'tai_canh_nam', 'doi_tuong'
+];
+
 app.post('/api/import-excel', authenticateToken, upload.single('file'), async (req, res) => {
-    const { nam_cap_nhat } = req.body; // năm của dữ liệu mới (ví dụ 2027)
+    const { nam_cap_nhat } = req.body;
     if (!nam_cap_nhat) {
         return res.status(400).json({ success: false, error: 'Vui lòng cung cấp năm cập nhật' });
     }
@@ -527,7 +539,6 @@ app.post('/api/import-excel', authenticateToken, upload.single('file'), async (r
     }
     const filePath = req.file.path;
     try {
-        // Đọc file Excel
         const workbook = XLSX.readFile(filePath);
         const sheetName = workbook.SheetNames[0];
         const sheet = workbook.Sheets[sheetName];
@@ -544,19 +555,17 @@ app.post('/api/import-excel', authenticateToken, upload.single('file'), async (r
         let updatedCount = 0;
 
         for (const row of rows) {
-            // Lấy id_lo (có thể là cột 'ID_lo' hoặc 'id_lo')
             const id_lo = row.ID_lo || row.id_lo;
             if (!id_lo) {
                 console.warn('Bỏ qua dòng không có ID_lo:', row);
                 continue;
             }
 
-            // Kiểm tra xem lô đã tồn tại trong bảng lo chưa
             const existing = await client.query('SELECT * FROM lo WHERE id_lo = $1', [id_lo]);
 
             if (existing.rows.length > 0) {
                 const oldRecord = existing.rows[0];
-                // Lưu bản ghi cũ vào lo_history với nam_cap_nhat_history = oldRecord.nam_cap_nhat
+                // Lưu bản ghi cũ vào lo_history
                 await client.query(`
                     INSERT INTO lo_history (
                         id_lo, ten_lo, nam_trong, cao_trinh_tb, giong, geometry,
@@ -585,28 +594,23 @@ app.post('/api/import-excel', authenticateToken, upload.single('file'), async (r
                     oldRecord.tai_canh_nam, oldRecord.doi_tuong, oldRecord.nam_cap_nhat
                 ]);
 
-                // Cập nhật bảng lo với dữ liệu mới (chỉ các cột có trong file)
+                // Cập nhật bảng lo: chỉ các cột có thể cập nhật và có mặt trong file
                 const updateFields = [];
                 const updateValues = [];
                 let idx = 1;
-                // Danh sách các cột có thể cập nhật (trừ geometry và các cột cố định nếu không muốn thay đổi)
-                const updatableCols = [
-                    'ten_lo', 'nam_trong', 'cao_trinh_tb', 'giong', 'du_an', 'doi', 'khu_vuc',
-                    'hang_dat', 'phuong_phap_trong', 'khoang_cach_trong', 'mat_do_tk',
-                    'dien_tich_010125', 'dien_tich_010126', 'dien_tich_map', 'tong_ho_kk',
-                    'cay_cao', 'cay_chua_cao', 'cay_kho_mu', 'cay_khong_pt', 'ho_trong', 'mat_do_cc',
-                    'che_do_cao', 'nam_mc', 'tuoi_cao', 'nam_cao_up', 'tinh_trang_mc',
-                    'ns25_kg_ha', 'ns25_kg_cay', 'tong_lat_cao', 'ns26_kg_cay', 'phan_loai',
-                    'xa', 'huyen', 'tinh', 'ns26_kg_ha', 'san_luong', 'phien_cao', 'nhip_do_cao',
-                    'tai_canh_nam', 'doi_tuong'
-                ];
+
                 for (const col of updatableCols) {
-                    if (row[col] !== undefined && row[col] !== null && row[col] !== '') {
+                    if (row.hasOwnProperty(col)) {
+                        let value = row[col];
+                        // Nếu giá trị là rỗng (chuỗi rỗng, null, undefined) thì set NULL
+                        if (value === undefined || value === null || value === '') {
+                            value = null;
+                        }
                         updateFields.push(`${col} = $${idx++}`);
-                        updateValues.push(row[col]);
+                        updateValues.push(value);
                     }
                 }
-                // Luôn cập nhật nam_cap_nhat thành năm mới
+                // Luôn cập nhật nam_cap_nhat
                 updateFields.push(`nam_cap_nhat = $${idx++}`);
                 updateValues.push(parseInt(nam_cap_nhat));
                 updateValues.push(id_lo);
@@ -619,30 +623,37 @@ app.post('/api/import-excel', authenticateToken, upload.single('file'), async (r
                     updatedCount++;
                 }
             } else {
-                // Insert mới
+                // Insert mới: cho phép nhập các cột cố định lần đầu
                 const insertCols = ['id_lo', 'nam_cap_nhat'];
                 const insertValues = [id_lo, parseInt(nam_cap_nhat)];
-                const updatableCols = [
-                    'ten_lo', 'nam_trong', 'cao_trinh_tb', 'giong', 'du_an', 'doi', 'khu_vuc',
-                    'hang_dat', 'phuong_phap_trong', 'khoang_cach_trong', 'mat_do_tk',
-                    'dien_tich_010125', 'dien_tich_010126', 'dien_tich_map', 'tong_ho_kk',
-                    'cay_cao', 'cay_chua_cao', 'cay_kho_mu', 'cay_khong_pt', 'ho_trong', 'mat_do_cc',
-                    'che_do_cao', 'nam_mc', 'tuoi_cao', 'nam_cao_up', 'tinh_trang_mc',
-                    'ns25_kg_ha', 'ns25_kg_cay', 'tong_lat_cao', 'ns26_kg_cay', 'phan_loai',
-                    'xa', 'huyen', 'tinh', 'ns26_kg_ha', 'san_luong', 'phien_cao', 'nhip_do_cao',
-                    'tai_canh_nam', 'doi_tuong'
-                ];
+
+                // Thêm các cột có thể cập nhật nếu có trong file
                 for (const col of updatableCols) {
-                    if (row[col] !== undefined && row[col] !== null && row[col] !== '') {
+                    if (row.hasOwnProperty(col)) {
+                        let value = row[col];
+                        if (value === undefined || value === null || value === '') {
+                            value = null;
+                        }
                         insertCols.push(col);
-                        insertValues.push(row[col]);
+                        insertValues.push(value);
                     }
                 }
-                // Nếu file có cột geometry (dạng WKT), có thể xử lý riêng
-                if (row.geometry && typeof row.geometry === 'string') {
-                    insertCols.push('geometry');
-                    insertValues.push(`ST_GeomFromText('${row.geometry}', 32648)`); // cần escape cẩn thận
+                // Thêm các cột cố định nếu có trong file (chỉ khi insert mới)
+                for (const col of fixedColumns) {
+                    if (col !== 'id_lo' && row.hasOwnProperty(col)) {
+                        let value = row[col];
+                        if (value !== undefined && value !== null && value !== '') {
+                            insertCols.push(col);
+                            insertValues.push(value);
+                        }
+                    }
                 }
+                // Xử lý geometry riêng (nếu có)
+                if (row.geometry && typeof row.geometry === 'string' && row.geometry.trim() !== '') {
+                    insertCols.push('geometry');
+                    insertValues.push(`ST_GeomFromText('${row.geometry}', 32648)`);
+                }
+
                 const placeholders = insertValues.map((_, i) => `$${i+1}`).join(',');
                 await client.query(
                     `INSERT INTO lo (${insertCols.join(',')}) VALUES (${placeholders})`,
@@ -662,14 +673,13 @@ app.post('/api/import-excel', authenticateToken, upload.single('file'), async (r
         console.error('Lỗi import Excel:', err);
         res.status(500).json({ success: false, error: err.message });
     } finally {
-        // Xóa file tạm
         if (fs.existsSync(filePath)) {
             fs.unlinkSync(filePath);
         }
     }
 });
 
-// (Tuỳ chọn) API lấy lịch sử của một lô
+// API lấy lịch sử của một lô
 app.get('/api/lo-history/:id_lo', authenticateToken, async (req, res) => {
     const { id_lo } = req.params;
     try {
@@ -685,16 +695,13 @@ app.get('/api/lo-history/:id_lo', authenticateToken, async (req, res) => {
 });
 
 // ====================== CÁC TRANG (VIEW) ======================
-// Trang đăng nhập (không cần xác thực)
 app.get('/login', (req, res) => {
     if (req.cookies.token) {
-        // Nếu đã có token thì chuyển về trang chủ
         return res.redirect('/');
     }
     res.render('login', { title: 'Đăng nhập' });
 });
 
-// Trang chủ và các trang khác đều yêu cầu đăng nhập
 app.get('/', authenticateToken, (req, res) => {
     res.render('index', {
         title: 'WebGIS · Vườn Cây Cao Su',
