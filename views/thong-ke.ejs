@@ -223,9 +223,6 @@ body{font-family:var(--font-b);background:var(--bg);color:var(--text);height:100
   <div class="tb-pill"><strong>Lô vườn</strong> <span id="total-lots">0</span></div>
   <div class="tb-pill"><strong>Diện tích</strong> <span id="total-area">0</span> ha</div>
   <div class="tb-right">
-    <!-- <button class="icon-btn"><i class="fas fa-bell"></i></button>
-    <button class="icon-btn"><i class="fas fa-globe"></i></button>
-    <button class="icon-btn"><i class="fas fa-cog"></i></button> -->
     <div style="display:flex;align-items:center;gap:8px">
       <div class="tb-user-info">
       <div class="tb-user-name" id="userFullName">Nguyễn Văn An</div>
@@ -281,32 +278,20 @@ body{font-family:var(--font-b);background:var(--bg);color:var(--text);height:100
 
 <script>
 // ====================== LẤY DỮ LIỆU TỪ API ======================
-let loData = [];      // bảng lo (chính)
-let donViData = [];   // bảng don_vi
-let sanLuongData = [];// bảng san_luong (chứa tai_canh_nam)
+let loData = [];      // bảng lo duy nhất (đã gộp tất cả)
 
 async function fetchData() {
   try {
-    const [loRes, donViRes, sanLuongRes] = await Promise.all([
-      fetch('/api/lo-cay'),
-      fetch('/api/don-vi'),
-      fetch('/api/san-luong')
-    ]);
+    const loRes = await fetch('/api/lo-cay');
     const loJson = await loRes.json();
-    const donViJson = await donViRes.json();
-    const sanLuongJson = await sanLuongRes.json();
-
-    loData = loJson.data || (loJson.features ? loJson.features.map(f => f.properties) : []);
-    donViData = donViJson.data || [];
-    sanLuongData = sanLuongJson.data || [];
-
+    loData = loJson.data || [];
     // Cập nhật thông tin tổng quan trên topbar
     const totalLots = loData.length;
     const totalArea = loData.reduce((sum, lo) => sum + (parseFloat(lo.dien_tich_map) || 0), 0);
     document.getElementById('total-lots').innerText = totalLots;
     document.getElementById('total-area').innerText = totalArea.toFixed(3);
 
-    console.log(`✅ Đã tải: ${loData.length} lô, ${donViData.length} đơn vị, ${sanLuongData.length} sản lượng`);
+    console.log(`✅ Đã tải: ${loData.length} lô`);
     return true;
   } catch (err) {
     console.error('❌ Lỗi tải dữ liệu:', err);
@@ -317,14 +302,14 @@ async function fetchData() {
   }
 }
 
-// Helper: lấy diện tích từ lô (ưu tiên dien_tich_map, nếu không có thì 0)
+// Helper: lấy diện tích từ lô (ưu tiên dien_tich_map)
 function getArea(lo) {
   return parseFloat(lo.dien_tich_map) || 0;
 }
 
 // ====================== 1. BIỂU ĐỒ TRÒN: CƠ CẤU GIỐNG ======================
 function renderGiongPie() {
-  const giongMap = new Map(); // key: tên giống, value: tổng diện tích
+  const giongMap = new Map();
   loData.forEach(lo => {
     const giong = lo.giong || 'Khác';
     const area = getArea(lo);
@@ -332,7 +317,6 @@ function renderGiongPie() {
       giongMap.set(giong, (giongMap.get(giong) || 0) + area);
     }
   });
-  // Sắp xếp giảm dần theo diện tích, lấy top 5 còn lại gộp vào "Khác"
   const sorted = Array.from(giongMap.entries()).sort((a,b) => b[1] - a[1]);
   const top5 = sorted.slice(0,5);
   const otherSum = sorted.slice(5).reduce((sum, item) => sum + item[1], 0);
@@ -344,7 +328,6 @@ function renderGiongPie() {
   }
 
   const ctx = document.getElementById('chartGiongPie').getContext('2d');
-  // Hủy chart cũ nếu có
   if (window.giongChart) window.giongChart.destroy();
   window.giongChart = new Chart(ctx, {
     type: 'pie',
@@ -369,22 +352,14 @@ function renderGiongPie() {
 
 // ====================== 2. BIỂU ĐỒ CỘT: DIỆN TÍCH THEO ĐỘI ======================
 function renderDienTichDoi() {
-  // Tạo map id_don_vi -> tên đội (doi)
-  const doiMap = new Map();
-  donViData.forEach(dv => {
-    doiMap.set(dv.id_don_vi, dv.doi || 'Không tên');
-  });
-  // Tổng diện tích theo đội (dùng id_don_vi)
   const teamArea = new Map();
   loData.forEach(lo => {
-    const idDonVi = lo.id_don_vi;
+    const doi = lo.doi || 'Không xác định';
     const area = getArea(lo);
-    if (idDonVi && area > 0) {
-      const teamName = doiMap.get(idDonVi) || `Đội ${idDonVi}`;
-      teamArea.set(teamName, (teamArea.get(teamName) || 0) + area);
+    if (area > 0) {
+      teamArea.set(doi, (teamArea.get(doi) || 0) + area);
     }
   });
-  // Sắp xếp theo diện tích giảm dần
   const sorted = Array.from(teamArea.entries()).sort((a,b) => b[1] - a[1]);
   const labels = sorted.map(item => item[0]);
   const data = sorted.map(item => item[1]);
@@ -419,22 +394,15 @@ function renderDienTichDoi() {
 
 // ====================== 3. BIỂU ĐỒ CỘT: DIỆN TÍCH QH TÁI CANH THEO NĂM ======================
 function renderTaiCanh() {
-  // Tạo map id_lo -> diện tích (từ lo)
-  const loAreaMap = new Map();
-  loData.forEach(lo => {
-    loAreaMap.set(lo.id_lo, getArea(lo));
-  });
-  // Tổng hợp theo tai_canh_nam
   const yearArea = new Map();
-  sanLuongData.forEach(sl => {
-    const year = sl.tai_canh_nam;
+  loData.forEach(lo => {
+    const year = lo.tai_canh_nam;
     if (!year) return;
-    const area = loAreaMap.get(sl.id_lo) || 0;
+    const area = getArea(lo);
     if (area > 0) {
       yearArea.set(year, (yearArea.get(year) || 0) + area);
     }
   });
-  // Sắp xếp theo năm tăng dần
   const sorted = Array.from(yearArea.entries()).sort((a,b) => a[0] - b[0]);
   const labels = sorted.map(item => item[0]);
   const data = sorted.map(item => item[1]);
@@ -467,23 +435,19 @@ function renderTaiCanh() {
 }
 
 // ====================== XUẤT EXCEL ======================
-async function exportToExcel() {
+function exportToExcel() {
   try {
     const XLSX = window.XLSX;
     const wb = XLSX.utils.book_new();
     const wsLo = XLSX.utils.json_to_sheet(loData);
-    const wsDonVi = XLSX.utils.json_to_sheet(donViData);
-    const wsSanLuong = XLSX.utils.json_to_sheet(sanLuongData);
     XLSX.utils.book_append_sheet(wb, wsLo, 'Lô cây');
-    XLSX.utils.book_append_sheet(wb, wsDonVi, 'Đơn vị');
-    XLSX.utils.book_append_sheet(wb, wsSanLuong, 'Sản lượng');
     XLSX.writeFile(wb, `ThongKe_CaoSu_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.xlsx`);
   } catch(err) {
     alert('Xuất Excel thất bại: ' + err.message);
   }
 }
 
-// ==================== LẤY THÔNG TIN NGƯỜI DÙNG THẬT ====================
+// ==================== LẤY THÔNG TIN NGƯỜI DÙNG ====================
 async function loadUserInfo() {
   try {
     const res = await fetch('/api/me', { credentials: 'same-origin' });
@@ -501,10 +465,10 @@ async function loadUserInfo() {
   }
 }
 
-// Gọi khi trang tải xong (nếu chưa có DOMContentLoaded thì thêm)
 document.addEventListener('DOMContentLoaded', () => {
   loadUserInfo();
 });
+
 // ====================== KHỞI CHẠY ======================
 async function init() {
   const success = await fetchData();
