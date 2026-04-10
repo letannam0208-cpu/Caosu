@@ -81,46 +81,33 @@
   .page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;}
   .page-title{font-family:var(--font-d);font-size:28px;font-weight:800;color:var(--text);letter-spacing:-0.02em;}
   .page-subtitle{font-size:12px;color:var(--muted);margin-top:4px;}
-  .tab-bar{display:flex;gap:8px;border-bottom:1px solid var(--border);margin-bottom:24px;overflow-x:auto;}
-  .tab-btn{background:none;border:none;padding:10px 20px;color:var(--muted2);cursor:pointer;font-weight:500;transition:0.2s;border-bottom:2px solid transparent;white-space:nowrap;}
-  .tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);}
-  .tab-content{display:none;}
-  .tab-content.active{display:block;}
   .form-container{background:var(--s1);border:1px solid var(--border);border-radius:var(--r-lg);padding:24px;box-shadow:0 4px 12px rgba(0,0,0,0.2);}
   .form-section-title{font-size:14px;font-weight:700;color:var(--text);margin:0 0 16px 0;padding-bottom:8px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
-  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;}
-  .form-group{display:flex;flex-direction:column;}
-  .form-group label{font-size:12px;font-weight:600;color:var(--muted2);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em;}
-  .form-group input,.form-group select,.form-group textarea{padding:10px 12px;border-radius:var(--r);background:var(--s2);border:1px solid var(--border);color:var(--text);font-size:12px;transition:0.2s;}
-  .form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:none;border-color:var(--accent);background:var(--s3);box-shadow:0 0 12px rgba(16,185,129,0.15);}
-  .form-group textarea{resize:vertical;min-height:80px;}
-  .btn-submit,.btn-reset,.btn-upload-batch{padding:10px 20px;border-radius:var(--r);font-weight:600;cursor:pointer;transition:0.2s;border:none;display:inline-flex;align-items:center;gap:8px;}
-  .btn-submit{background:linear-gradient(135deg,var(--accent),#059669);color:#fff;}
-  .btn-submit:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(16,185,129,0.3);}
-  .btn-reset{background:rgba(255,255,255,0.05);color:var(--muted2);border:1px solid var(--border);}
-  .btn-reset:hover{background:rgba(255,255,255,0.08);color:var(--text);}
-  .btn-upload-batch{background:linear-gradient(135deg,var(--accentB),#0891b2);color:#fff;margin-top:16px;}
-  .upload-zone{border:2px dashed var(--border2);border-radius:var(--r-lg);padding:30px;text-align:center;cursor:pointer;transition:0.2s;background:rgba(16,185,129,0.03);}
+  .upload-zone{border:2px dashed var(--border2);border-radius:var(--r-lg);padding:30px;text-align:center;cursor:pointer;transition:0.2s;background:rgba(16,185,129,0.03);margin-bottom:20px;}
   .upload-zone:hover{border-color:var(--accent);background:rgba(16,185,129,0.08);}
   .upload-icon{font-size:40px;display:block;margin-bottom:12px;}
+  .upload-hint{font-size:11px;color:var(--muted);margin-top:8px;}
   .preview-table{overflow-x:auto;margin-top:20px;max-height:400px;overflow-y:auto;}
   .preview-table table{width:100%;border-collapse:collapse;font-size:11px;}
   .preview-table th,.preview-table td{border:1px solid var(--border);padding:6px;text-align:left;}
   .preview-table th{background:var(--s2);color:var(--accent);position:sticky;top:0;}
   .status-msg{padding:10px;border-radius:var(--r);margin-top:16px;}
-  .table-selector{margin-bottom:20px;}
-  .table-selector select{padding:10px;border-radius:var(--r);background:var(--s2);border:1px solid var(--border);color:var(--text);font-size:14px;width:100%;max-width:300px;}
-  .import-options{background:var(--s2);border-radius:var(--r);padding:16px;margin-bottom:20px;}
   .import-log{background:var(--s2);border-radius:var(--r);padding:12px;margin-top:16px;max-height:300px;overflow-y:auto;font-family:monospace;font-size:11px;display:none;}
-  .log-entry{padding:4px 0;border-bottom:1px solid var(--border);font-family:monospace;}
+  .log-entry{padding:4px 0;border-bottom:1px solid var(--border);}
   .log-time{color:var(--muted);margin-right:8px;}
   .log-update{color:var(--warn);}
   .log-insert{color:var(--accent);}
   .log-error{color:var(--danger);}
   .log-info{color:var(--muted2);}
-  .mode-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;margin-left:8px;}
-  .mode-upsert{background:rgba(16,185,129,0.2);color:var(--accent);}
-  .mode-insert{background:rgba(6,182,212,0.2);color:var(--accentB);}
+  .btn-submit,.btn-reset{padding:10px 20px;border-radius:var(--r);font-weight:600;cursor:pointer;transition:0.2s;border:none;display:inline-flex;align-items:center;gap:8px;}
+  .btn-submit{background:linear-gradient(135deg,var(--accent),#059669);color:#fff;}
+  .btn-submit:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(16,185,129,0.3);}
+  .btn-reset{background:rgba(255,255,255,0.05);color:var(--muted2);border:1px solid var(--border);}
+  .btn-reset:hover{background:rgba(255,255,255,0.08);color:var(--text);}
+  .form-group{display:flex;flex-direction:column;margin-bottom:16px;}
+  .form-group label{font-size:12px;font-weight:600;color:var(--muted2);margin-bottom:6px;}
+  .form-group input{padding:10px 12px;border-radius:var(--r);background:var(--s2);border:1px solid var(--border);color:var(--text);font-size:12px;}
+  .form-group input:focus{outline:none;border-color:var(--accent);}
 </style>
 </head>
 <body>
@@ -135,9 +122,6 @@
     <div class="tb-pill"><span class="pill-label">Diện tích</span><span class="pill-value" id="totalArea">0</span></div>
   </div>
   <div class="tb-right">
-    <!-- <button class="icon-btn"><i class="fas fa-bell"></i></button>
-    <button class="icon-btn"><i class="fas fa-globe"></i></button>
-    <button class="icon-btn"><i class="fas fa-cog"></i></button> -->
     <div style="display:flex;align-items:center;gap:10px;border-left:1px solid var(--border);padding-left:16px">
       <div style="text-align:right"><div style="font-weight:600"><%= user.fullname %></div><div style="font-size:10px;color:var(--muted)"><%= user.role === 'admin' ? 'Quản trị viên' : 'Người dùng' %></div></div>
       <div class="tb-avatar"><%= user.fullname.charAt(0) %></div>
@@ -161,113 +145,46 @@
 
   <div id="content">
     <div class="page-header">
-      <div><h1 class="page-title">Thêm Dữ Liệu</h1><p class="page-subtitle">Nhập dữ liệu bằng tay hoặc upload file Excel</p></div>
+      <div><h1 class="page-title">Nhập dữ liệu từ Excel</h1><p class="page-subtitle">Cập nhật thông tin lô cây hàng loạt, tự động lưu lịch sử theo năm</p></div>
     </div>
 
-    <div class="tab-bar">
-      <button class="tab-btn active" data-tab="manual">📝 Nhập tay</button>
-      <button class="tab-btn" data-tab="upload">📁 Nhập file Excel/CSV</button>
-    </div>
-
-    <!-- TAB NHẬP TAY -->
-    <div id="tab-manual" class="tab-content active">
-      <div class="form-container">
-        <div class="table-selector">
-          <label style="display:block; margin-bottom:8px;">Chọn bảng dữ liệu:</label>
-          <select id="tableSelect">
-            <option value="lo">📋 Lô cây</option>
-            <option value="don_vi">🏢 Đơn vị</option>
-            <option value="hanh_chinh">🗺️ Hành chính</option>
-            <option value="dien_tich">📐 Diện tích</option>
-            <option value="hien_trang_cay">🌱 Hiện trạng cây</option>
-            <option value="khai_thac">🪓 Khai thác</option>
-            <option value="san_luong">📊 Sản lượng</option>
-            <option value="thong_tin_trong">📝 Thông tin trồng</option>
-          </select>
-        </div>
-        <div id="dynamicForm"></div>
-        <div class="form-actions" style="display:flex; gap:12px; margin-top:24px; padding-top:16px; border-top:1px solid var(--border);">
-          <button type="button" id="submitDynamic" class="btn-submit"><i class="fas fa-check"></i> Lưu</button>
-          <button type="button" id="resetDynamic" class="btn-reset"><i class="fas fa-undo"></i> Đặt lại</button>
-        </div>
+    <div class="form-container">
+      <div class="form-section-title"><i class="fas fa-file-excel"></i> Nhập file Excel cho bảng Lô cây</div>
+      
+      <!-- Nhập năm cập nhật -->
+      <div class="form-group">
+        <label><i class="fas fa-calendar-alt"></i> Năm cập nhật (bắt buộc)</label>
+        <input type="number" id="namCapNhat" placeholder="Ví dụ: 2027" required>
+        <div class="upload-hint">Dữ liệu hiện tại sẽ được lưu vào bảng lịch sử với năm tương ứng</div>
       </div>
-    </div>
 
-    <!-- TAB NHẬP FILE VỚI DROPDOWN 8 BẢNG -->
-    <div id="tab-upload" class="tab-content">
-      <div class="form-container">
-        <div class="form-section-title"><i class="fas fa-file-excel"></i> Nhập file Excel/CSV</div>
-        
-        <!-- Chọn bảng dữ liệu -->
-        <div class="table-selector">
-          <label style="display:block; margin-bottom:8px; font-weight:600;">📌 Chọn bảng dữ liệu cần nhập:</label>
-          <select id="uploadTableSelect" style="width:100%; max-width:100%; padding:12px; border-radius:var(--r); background:var(--s2); border:1px solid var(--border); color:var(--text); font-size:14px;">
-            <option value="lo">📋 Lô cây</option>
-            <option value="don_vi">🏢 Đơn vị</option>
-            <option value="hanh_chinh">🗺️ Hành chính</option>
-            <option value="dien_tich">📐 Diện tích</option>
-            <option value="hien_trang_cay">🌱 Hiện trạng cây</option>
-            <option value="khai_thac">🪓 Khai thác</option>
-            <option value="san_luong">📊 Sản lượng</option>
-            <option value="thong_tin_trong">📝 Thông tin trồng</option>
-          </select>
-          <div style="font-size:11px; color:var(--muted); margin-top:6px;">
-            <i class="fas fa-info-circle"></i> Chọn bảng tương ứng với dữ liệu trong file Excel
-          </div>
+      <!-- Upload zone -->
+      <div class="upload-zone" id="uploadZone">
+        <span class="upload-icon">📁</span>
+        <div class="upload-text">Kéo thả hoặc click để chọn file Excel/CSV</div>
+        <div class="upload-hint">Hỗ trợ .xlsx, .xls, .csv - Các cột phải khớp với cấu trúc bảng lo</div>
+        <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display:none;">
+      </div>
+      
+      <button class="btn-reset" id="downloadSample" style="margin-bottom:16px;"><i class="fas fa-download"></i> Tải file mẫu (bảng lo)</button>
+      
+      <!-- Preview area -->
+      <div id="previewArea" style="display:none;">
+        <div class="form-section-title"><i class="fas fa-table"></i> Xem trước dữ liệu</div>
+        <div class="preview-table" id="previewTable"></div>
+        <div style="display:flex; gap:12px; margin-top:16px;">
+          <button class="btn-submit" id="submitImport"><i class="fas fa-upload"></i> Gửi dữ liệu</button>
+          <button class="btn-reset" id="clearPreview"><i class="fas fa-times"></i> Xóa preview</button>
         </div>
+        <div id="importStatus" class="status-msg"></div>
+      </div>
 
-        <!-- Tùy chọn nhập liệu -->
-        <div class="import-options">
-          <div style="font-size:12px; font-weight:600; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
-            <i class="fas fa-cog"></i> Tùy chọn xử lý dữ liệu
-            <span class="mode-badge mode-upsert" id="currentModeBadge">UPSERT (Khuyến nghị)</span>
-          </div>
-          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:12px;">
-            <label style="display:flex; align-items:center; gap:12px; padding:8px; border-radius:var(--r); background:rgba(16,185,129,0.1); cursor:pointer;">
-              <input type="radio" name="importMode" value="upsert" checked>
-              <div>
-                <div style="font-weight:600; color:var(--accent);">🔄 UPSERT (Khuyến nghị)</div>
-                <div style="font-size:11px; color:var(--muted);">Cập nhật nếu ID tồn tại, thêm mới nếu chưa có - Giữ nguyên dữ liệu cũ</div>
-              </div>
-            </label>
-            <label style="display:flex; align-items:center; gap:12px; padding:8px; border-radius:var(--r); cursor:pointer;">
-              <input type="radio" name="importMode" value="insert">
-              <div>
-                <div style="font-weight:600;">📥 Chỉ thêm mới</div>
-                <div style="font-size:11px; color:var(--muted);">Bỏ qua nếu ID đã tồn tại, không ảnh hưởng dữ liệu cũ</div>
-              </div>
-            </label>
-          </div>
+      <!-- Import log -->
+      <div id="importLog" class="import-log">
+        <div style="font-weight:600; margin-bottom:8px; color:var(--accent);">
+          <i class="fas fa-list"></i> Nhật ký xử lý
         </div>
-
-        <!-- Upload zone -->
-        <div class="upload-zone" id="uploadZone">
-          <span class="upload-icon">📁</span>
-          <div class="upload-text">Kéo thả hoặc click để chọn file Excel/CSV</div>
-          <div class="upload-hint">Hỗ trợ .xlsx, .xls, .csv</div>
-          <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display:none;">
-        </div>
-        
-        <button class="btn-upload-batch" id="downloadSample"><i class="fas fa-download"></i> Tải file mẫu cho bảng đã chọn</button>
-        
-        <!-- Preview area -->
-        <div id="previewArea" style="margin-top:24px; display:none;">
-          <div class="form-section-title"><i class="fas fa-table"></i> Xem trước dữ liệu</div>
-          <div class="preview-table" id="previewTable"></div>
-          <div style="display:flex; gap:12px; margin-top:16px;">
-            <button class="btn-submit" id="submitBatch"><i class="fas fa-upload"></i> Gửi dữ liệu</button>
-            <button class="btn-reset" id="clearPreview"><i class="fas fa-times"></i> Xóa preview</button>
-          </div>
-          <div id="batchStatus" class="status-msg"></div>
-        </div>
-
-        <!-- Import log -->
-        <div id="importLog" class="import-log">
-          <div style="font-weight:600; margin-bottom:8px; color:var(--accent);">
-            <i class="fas fa-list"></i> Nhật ký xử lý
-          </div>
-          <div id="logContent"></div>
-        </div>
+        <div id="logContent"></div>
       </div>
     </div>
   </div>
@@ -275,11 +192,6 @@
 
 <script>
   // ==================== UTILITIES ====================
-  async function fetchAPI(url, options) {
-    const res = await fetch(url, options);
-    return res.json();
-  }
-
   function addLog(message, type = 'info') {
     const logDiv = document.getElementById('logContent');
     const time = new Date().toLocaleTimeString();
@@ -295,137 +207,24 @@
     document.getElementById('logContent').innerHTML = '';
   }
 
-  // ==================== ĐỊNH NGHĨA CÁC FORM NHẬP TAY ====================
-  const forms = {
-    lo: `
-      <div class="form-row"><div class="form-group"><label>ID lô *</label><input type="text" name="id_lo" required placeholder="VD: LO001"></div><div class="form-group"><label>Tên lô *</label><input type="text" name="ten_lo" required></div></div>
-      <div class="form-row"><div class="form-group"><label>Năm trồng</label><input type="number" name="nam_trong"></div><div class="form-group"><label>Giống</label><input type="text" name="giong"></div></div>
-      <div class="form-row"><div class="form-group"><label>Cao trình TB (m)</label><input type="number" step="0.1" name="cao_trinh_tb"></div><div class="form-group"><label>Đơn vị</label><select name="id_don_vi" id="lo_donvi"></select></div></div>
-      <div class="form-row"><div class="form-group"><label>Hành chính</label><select name="id_hc" id="lo_hc"></select></div></div>
-    `,
-    don_vi: `
-      <div class="form-row"><div class="form-group"><label>ID đơn vị *</label><input type="text" name="id_don_vi" required placeholder="VD: DV001"></div><div class="form-group"><label>Dự án</label><input type="text" name="du_an"></div></div>
-      <div class="form-row"><div class="form-group"><label>Đội</label><input type="text" name="doi"></div><div class="form-group"><label>Khu vực</label><input type="text" name="khu_vuc"></div></div>
-    `,
-    hanh_chinh: `
-      <div class="form-row"><div class="form-group"><label>ID hành chính *</label><input type="text" name="id_hc" required placeholder="VD: HC001"></div><div class="form-group"><label>Xã</label><input type="text" name="xa"></div></div>
-      <div class="form-row"><div class="form-group"><label>Huyện</label><input type="text" name="huyen"></div><div class="form-group"><label>Tỉnh</label><input type="text" name="tinh"></div></div>
-    `,
-    dien_tich: `
-      <div class="form-row"><div class="form-group"><label>ID lô *</label><select name="id_lo" id="dt_lolo"></select></div><div class="form-group"><label>ID diện tích *</label><input type="text" name="id_dien_tich" required placeholder="VD: DT_LO001"></div></div>
-      <div class="form-row"><div class="form-group"><label>DT map (ha)</label><input type="number" step="0.001" name="dien_tich_map"></div><div class="form-group"><label>DT 01/01/25</label><input type="number" step="0.001" name="dien_tich_010125"></div></div>
-      <div class="form-row"><div class="form-group"><label>DT 01/01/26</label><input type="number" step="0.001" name="dien_tich_010126"></div></div>
-    `,
-    hien_trang_cay: `
-      <div class="form-row"><div class="form-group"><label>ID lô *</label><select name="id_lo" id="ht_lolo"></select></div><div class="form-group"><label>ID hiện trạng *</label><input type="text" name="id_htc" required placeholder="VD: HTC_LO001"></div></div>
-      <div class="form-row"><div class="form-group"><label>Tổng hộ KK</label><input type="number" name="tong_ho_kk"></div><div class="form-group"><label>Cây cao</label><input type="number" name="cay_cao"></div></div>
-      <div class="form-row"><div class="form-group"><label>Cây chưa cao</label><input type="number" name="cay_chua_cao"></div><div class="form-group"><label>Cây khô mủ</label><input type="number" name="cay_kho_mu"></div></div>
-      <div class="form-row"><div class="form-group"><label>Cây không PT</label><input type="number" name="cay_khong_pt"></div><div class="form-group"><label>Hố trống</label><input type="number" name="ho_trong"></div></div>
-      <div class="form-row"><div class="form-group"><label>Mật độ (cây/ha)</label><input type="number" step="0.1" name="mat_do_cc"></div></div>
-    `,
-    khai_thac: `
-      <div class="form-row"><div class="form-group"><label>ID lô *</label><select name="id_lo" id="kt_lolo"></select></div><div class="form-group"><label>ID khai thác *</label><input type="text" name="id_kt" required placeholder="VD: KT_LO001"></div></div>
-      <div class="form-row"><div class="form-group"><label>Chế độ cạo</label><input type="text" name="che_do_cao"></div><div class="form-group"><label>Phiên cạo</label><input type="text" name="phien_cao"></div></div>
-      <div class="form-row"><div class="form-group"><label>Nhịp độ</label><input type="text" name="nhip_do_cao"></div><div class="form-group"><label>Năm MC</label><input type="number" name="nam_mc"></div></div>
-      <div class="form-row"><div class="form-group"><label>Tuổi cạo</label><input type="number" name="tuoi_cao"></div><div class="form-group"><label>Năm cạo up</label><input type="number" name="nam_cao_up"></div></div>
-      <div class="form-row"><div class="form-group"><label>Tình trạng mủ</label><input type="text" name="tinh_trang_mc"></div></div>
-    `,
-    san_luong: `
-      <div class="form-row"><div class="form-group"><label>ID lô *</label><select name="id_lo" id="sl_lolo"></select></div><div class="form-group"><label>ID sản lượng *</label><input type="text" name="id_sl" required placeholder="VD: SL_LO001"></div></div>
-      <div class="form-row"><div class="form-group"><label>NS25 kg/ha</label><input type="number" step="0.01" name="ns25_kg_ha"></div><div class="form-group"><label>NS25 kg/cây</label><input type="number" step="0.01" name="ns25_kg_cay"></div></div>
-      <div class="form-row"><div class="form-group"><label>NS26 kg/ha</label><input type="number" step="0.01" name="ns26_kg_ha"></div><div class="form-group"><label>NS26 kg/cây</label><input type="number" step="0.01" name="ns26_kg_cay"></div></div>
-      <div class="form-row"><div class="form-group"><label>Tổng lát cạo</label><input type="number" step="0.01" name="tong_lat_cao"></div><div class="form-group"><label>Sản lượng</label><input type="number" step="0.01" name="san_luong"></div></div>
-      <div class="form-row"><div class="form-group"><label>Phân loại</label><input type="text" name="phan_loai"></div><div class="form-group"><label>Đối tượng</label><input type="text" name="doi_tuong"></div></div>
-      <div class="form-row"><div class="form-group"><label>Tái canh năm</label><input type="number" name="tai_canh_nam"></div></div>
-    `,
-    thong_tin_trong: `
-      <div class="form-row"><div class="form-group"><label>ID lô *</label><select name="id_lo" id="tt_lolo"></select></div><div class="form-group"><label>ID thông tin trồng *</label><input type="text" name="id_ttt" required placeholder="VD: TTT_LO001"></div></div>
-      <div class="form-row"><div class="form-group"><label>Hạng đất</label><input type="text" name="hang_dat"></div><div class="form-group"><label>Phương pháp trồng</label><input type="text" name="phuong_phap_trong"></div></div>
-      <div class="form-row"><div class="form-group"><label>Khoảng cách trồng</label><input type="text" name="khoang_cach_trong"></div><div class="form-group"><label>Mật độ TK</label><input type="number" name="mat_do_tk"></div></div>
-    `
-  };
-
-  // ==================== TẢI DỮ LIỆU CHO DROPDOWN ====================
-  async function loadLoOptions(selectId) {
+  // Cập nhật thống kê
+  async function updateStats() {
     try {
       const res = await fetch('/api/lo-cay');
       const data = await res.json();
-      if(data.success && data.data) {
-        const select = document.getElementById(selectId);
-        if(select) {
-          select.innerHTML = '<option value="">-- Chọn lô --</option>';
-          data.data.forEach(lo => {
-            const opt = document.createElement('option');
-            opt.value = lo.id_lo;
-            opt.textContent = `${lo.ten_lo || lo.id_lo} (${lo.id_lo})`;
-            select.appendChild(opt);
-          });
-        }
+      if(data.success) {
+        const totalLots = data.data.length;
+        const totalArea = data.data.reduce((s, l) => s + (parseFloat(l.dien_tich_map) || 0), 0);
+        document.getElementById('totalLots').innerText = totalLots;
+        document.getElementById('totalArea').innerText = totalArea.toFixed(3) + ' ha';
       }
-    } catch(e) {
-      console.error('Lỗi tải lô:', e);
-    }
+    } catch(e) {}
   }
 
-  async function loadDonViOptions(selectId) {
-    try {
-      const res = await fetch('/api/don-vi');
-      const data = await res.json();
-      if(data.success && data.data) {
-        const select = document.getElementById(selectId);
-        if(select) {
-          select.innerHTML = '<option value="">-- Chọn đơn vị --</option>';
-          data.data.forEach(dv => {
-            const opt = document.createElement('option');
-            opt.value = dv.id_don_vi;
-            opt.textContent = `${dv.doi || dv.du_an || dv.id_don_vi} (${dv.id_don_vi})`;
-            select.appendChild(opt);
-          });
-        }
-      }
-    } catch(e) {
-      console.error('Lỗi tải đơn vị:', e);
-    }
-  }
-
-  async function loadHanhChinhOptions(selectId) {
-    try {
-      const res = await fetch('/api/hanh-chinh');
-      const data = await res.json();
-      if(data.success && data.data) {
-        const select = document.getElementById(selectId);
-        if(select) {
-          select.innerHTML = '<option value="">-- Chọn hành chính --</option>';
-          data.data.forEach(hc => {
-            const opt = document.createElement('option');
-            opt.value = hc.id_hc;
-            opt.textContent = `${hc.xa || ''}, ${hc.huyen || ''} (${hc.id_hc})`;
-            select.appendChild(opt);
-          });
-        }
-      }
-    } catch(e) {
-      console.error('Lỗi tải hành chính:', e);
-    }
-  }
-
-  function renderForm(table) {
-    const container = document.getElementById('dynamicForm');
-    container.innerHTML = forms[table] || '<p>Không có form cho bảng này</p>';
-    if(table === 'lo') {
-      loadDonViOptions('lo_donvi');
-      loadHanhChinhOptions('lo_hc');
-    } else if(['dien_tich', 'hien_trang_cay', 'khai_thac', 'san_luong', 'thong_tin_trong'].includes(table)) {
-      const prefix = table === 'dien_tich' ? 'dt' : (table === 'hien_trang_cay' ? 'ht' : (table === 'khai_thac' ? 'kt' : (table === 'san_luong' ? 'sl' : 'tt')));
-      loadLoOptions(`${prefix}_lolo`);
-    }
-  }
-
-  // ==================== XỬ LÝ NHẬP FILE VỚI DROPDOWN 8 BẢNG ====================
+  // ==================== XỬ LÝ UPLOAD FILE ====================
   const uploadZone = document.getElementById('uploadZone');
   const fileInput = document.getElementById('fileInput');
   let uploadedData = null;
-  let currentUploadTable = 'lo';
 
   uploadZone.addEventListener('click', () => fileInput.click());
   uploadZone.addEventListener('dragover', (e) => { e.preventDefault(); uploadZone.style.borderColor = 'var(--accent)'; });
@@ -440,28 +239,6 @@
     if(e.target.files.length) handleFile(e.target.files[0]);
   });
 
-  // Cập nhật mode badge khi chọn radio
-  document.querySelectorAll('input[name="importMode"]').forEach(radio => {
-    radio.addEventListener('change', (e) => {
-      const badge = document.getElementById('currentModeBadge');
-      if(e.target.value === 'upsert') {
-        badge.textContent = 'UPSERT (Khuyến nghị)';
-        badge.className = 'mode-badge mode-upsert';
-      } else {
-        badge.textContent = 'INSERT (Chỉ thêm mới)';
-        badge.className = 'mode-badge mode-insert';
-      }
-    });
-  });
-
-  // Theo dõi thay đổi bảng được chọn
-  document.getElementById('uploadTableSelect').addEventListener('change', (e) => {
-    currentUploadTable = e.target.value;
-    // Reset preview khi đổi bảng
-    uploadedData = null;
-    document.getElementById('previewArea').style.display = 'none';
-  });
-
   function handleFile(file) {
     const reader = new FileReader();
     reader.onload = function(e) {
@@ -469,20 +246,11 @@
       const workbook = XLSX.read(data, { type: 'array' });
       const sheet = workbook.Sheets[workbook.SheetNames[0]];
       const json = XLSX.utils.sheet_to_json(sheet);
-      uploadedData = { table: currentUploadTable, data: json };
+      uploadedData = json;
       showPreview(json);
-      addLog(`📁 Đã tải file: ${file.name} - Bảng: ${getTableName(currentUploadTable)} - Số dòng: ${json.length}`, 'info');
+      addLog(`📁 Đã tải file: ${file.name} - Số dòng: ${json.length}`, 'info');
     };
     reader.readAsArrayBuffer(file);
-  }
-
-  function getTableName(tableValue) {
-    const names = {
-      lo: 'Lô cây', don_vi: 'Đơn vị', hanh_chinh: 'Hành chính',
-      dien_tich: 'Diện tích', hien_trang_cay: 'Hiện trạng cây',
-      khai_thac: 'Khai thác', san_luong: 'Sản lượng', thong_tin_trong: 'Thông tin trồng'
-    };
-    return names[tableValue] || tableValue;
   }
 
   function showPreview(data) {
@@ -522,248 +290,104 @@
     document.getElementById('importLog').style.display = 'none';
   });
 
-  // Xử lý UPSERT cho từng bảng
-  async function upsertData(table, row) {
-    const importMode = document.querySelector('input[name="importMode"]:checked').value;
-    let url = '';
-    let data = { ...row };
-    
-    // Xác định URL và xử lý ID
-    switch(table) {
-      case 'lo':
-        url = '/api/lo-cay/upsert';
-        if(!data.id_lo && data.ten_lo) data.id_lo = 'LO_' + Date.now();
-        break;
-      case 'don_vi':
-        url = '/api/don-vi/upsert';
-        if(!data.id_don_vi) data.id_don_vi = 'DV_' + Date.now();
-        break;
-      case 'hanh_chinh':
-        url = '/api/hanh-chinh/upsert';
-        if(!data.id_hc) data.id_hc = 'HC_' + Date.now();
-        break;
-      case 'dien_tich':
-        url = '/api/dien-tich/upsert';
-        if(!data.id_dien_tich && data.id_lo) data.id_dien_tich = 'DT_' + data.id_lo;
-        break;
-      case 'hien_trang_cay':
-        url = '/api/hien-trang-cay/upsert';
-        if(!data.id_htc && data.id_lo) data.id_htc = 'HTC_' + data.id_lo;
-        break;
-      case 'khai_thac':
-        url = '/api/khai-thac/upsert';
-        if(!data.id_kt && data.id_lo) data.id_kt = 'KT_' + data.id_lo;
-        break;
-      case 'san_luong':
-        url = '/api/san-luong/upsert';
-        if(!data.id_sl && data.id_lo) data.id_sl = 'SL_' + data.id_lo;
-        break;
-      case 'thong_tin_trong':
-        url = '/api/thong-tin-trong/upsert';
-        if(!data.id_ttt && data.id_lo) data.id_ttt = 'TTT_' + data.id_lo;
-        break;
-      default:
-        throw new Error('Bảng không hợp lệ');
-    }
-    
-    // Thêm mode vào headers
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'X-Import-Mode': importMode
-      },
-      body: JSON.stringify(data)
-    });
-    const result = await res.json();
-    return result;
-  }
-
-  // Xử lý submit batch
-  document.getElementById('submitBatch').addEventListener('click', async () => {
-    if(!uploadedData || !uploadedData.data || uploadedData.data.length === 0) {
-      alert('Không có dữ liệu để nhập');
-      return;
-    }
-    
-    const importMode = document.querySelector('input[name="importMode"]:checked').value;
-    const modeText = importMode === 'upsert' ? 'UPSERT (Cập nhật nếu có, thêm nếu chưa)' : 'INSERT (Chỉ thêm mới)';
-    const tableName = getTableName(uploadedData.table);
-    const totalRecords = uploadedData.data.length;
-    
-    const confirmMsg = `📊 XÁC NHẬN NHẬP DỮ LIỆU\n\n` +
-      `• Bảng: ${tableName}\n` +
-      `• Số dòng: ${totalRecords}\n` +
-      `• Chế độ: ${modeText}\n` +
-      `• Dữ liệu cũ sẽ được GIỮ NGUYÊN (không bị xóa)\n\n` +
-      `Bạn có chắc chắn muốn tiếp tục?`;
-    
-    if(!confirm(confirmMsg)) return;
-    
-    clearLog();
-    addLog(`🚀 BẮT ĐẦU NHẬP LIỆU - Bảng: ${tableName} - Chế độ: ${modeText}`, 'info');
-    addLog(`📊 Tổng số dòng cần xử lý: ${totalRecords}`, 'info');
-    
-    let success = 0, fail = 0, update = 0, insert = 0;
-    const statusDiv = document.getElementById('batchStatus');
-    statusDiv.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Đang xử lý...';
-    
-    for(let i = 0; i < uploadedData.data.length; i++) {
-      const row = uploadedData.data[i];
-      try {
-        const result = await upsertData(uploadedData.table, row);
-        if(result.success) {
-          success++;
-          if(result.action === 'update') {
-            update++;
-            addLog(`🔄 [Dòng ${i+1}] CẬP NHẬT: ${result.message || 'Thành công'}`, 'update');
-          } else if(result.action === 'insert') {
-            insert++;
-            addLog(`✨ [Dòng ${i+1}] THÊM MỚI: ${result.message || 'Thành công'}`, 'insert');
-          } else {
-            addLog(`✅ [Dòng ${i+1}] Thành công: ${result.message}`, 'insert');
-          }
-        } else {
-          fail++;
-          addLog(`❌ [Dòng ${i+1}] LỖI: ${result.error || 'Không xác định'}`, 'error');
-        }
-      } catch(err) {
-        fail++;
-        addLog(`❌ [Dòng ${i+1}] LỖI KẾT NỐI: ${err.message}`, 'error');
-      }
-    }
-    
-    statusDiv.innerHTML = `
-      <div style="display:flex; gap:16px; flex-wrap:wrap;">
-        <span style="color:var(--accent)">✅ Thành công: ${success}</span>
-        ${update > 0 ? `<span style="color:var(--warn)">🔄 Cập nhật: ${update}</span>` : ''}
-        ${insert > 0 ? `<span style="color:var(--accentB)">✨ Thêm mới: ${insert}</span>` : ''}
-        <span style="color:var(--danger)">❌ Thất bại: ${fail}</span>
-      </div>
-    `;
-    
-    addLog(`🏁 KẾT THÚC NHẬP LIỆU - Thành công: ${success}, Cập nhật: ${update}, Thêm mới: ${insert}, Thất bại: ${fail}`, 'info');
-    addLog(`💾 Dữ liệu cũ được giữ nguyên, chỉ cập nhật/thêm mới theo yêu cầu`, 'info');
-    
-    updateStats();
-    
-    // Reset preview
-    uploadedData = null;
-    document.getElementById('previewArea').style.display = 'none';
-    fileInput.value = '';
-  });
-
-  // Tải file mẫu theo bảng đã chọn
+  // Tải file mẫu
   document.getElementById('downloadSample').addEventListener('click', () => {
-    const table = document.getElementById('uploadTableSelect').value;
-    let sampleData = [];
-    
-    switch(table) {
-      case 'lo':
-        sampleData = [{ id_lo: 'LO001', ten_lo: 'Lô A', nam_trong: 2020, giong: 'PB 260', cao_trinh_tb: 12.5 }];
-        break;
-      case 'don_vi':
-        sampleData = [{ id_don_vi: 'DV001', du_an: 'Dự án A', doi: 'Đội 1', khu_vuc: 'Khu vực 1' }];
-        break;
-      case 'hanh_chinh':
-        sampleData = [{ id_hc: 'HC001', xa: 'Xã A', huyen: 'Huyện B', tinh: 'Tỉnh C' }];
-        break;
-      case 'dien_tich':
-        sampleData = [{ id_lo: 'LO001', id_dien_tich: 'DT_LO001', dien_tich_map: 10.5, dien_tich_010125: 10.5, dien_tich_010126: 10.5 }];
-        break;
-      case 'hien_trang_cay':
-        sampleData = [{ id_lo: 'LO001', id_htc: 'HTC_LO001', tong_ho_kk: 150, cay_cao: 120, cay_chua_cao: 25, mat_do_cc: 450 }];
-        break;
-      case 'khai_thac':
-        sampleData = [{ id_lo: 'LO001', id_kt: 'KT_LO001', che_do_cao: 'S/2', phien_cao: '1', nhip_do_cao: '3 ngày', nam_mc: 2023 }];
-        break;
-      case 'san_luong':
-        sampleData = [{ id_lo: 'LO001', id_sl: 'SL_LO001', ns25_kg_ha: 1800, ns26_kg_ha: 1850, san_luong: 18.5 }];
-        break;
-      case 'thong_tin_trong':
-        sampleData = [{ id_lo: 'LO001', id_ttt: 'TTT_LO001', hang_dat: 'Đất đỏ', phuong_phap_trong: 'Hàng kép', khoang_cach_trong: '3x6' }];
-        break;
-    }
-    
+    const sampleData = [
+      {
+        id_lo: 'LO001',
+        ten_lo: 'Lô A',
+        nam_trong: 2020,
+        giong: 'PB 260',
+        cao_trinh_tb: 12.5,
+        du_an: 'Dự án 1',
+        doi: 'Đội 1',
+        khu_vuc: 'Khu vực 1',
+        xa: 'Xã A',
+        huyen: 'Huyện B',
+        tinh: 'Tỉnh C',
+        dien_tich_map: 10.5,
+        dien_tich_010125: 10.5,
+        dien_tich_010126: 10.5,
+        che_do_cao: 'S/2',
+        phien_cao: '1/2S',
+        nhip_do_cao: '3 ngày/1 lần',
+        tuoi_cao: 5,
+        san_luong: 18.5
+      }
+    ];
     const ws = XLSX.utils.json_to_sheet(sampleData);
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, getTableName(table));
-    XLSX.writeFile(wb, `mau_nhap_${table}.xlsx`);
-    addLog(`📥 Đã tải file mẫu cho bảng ${getTableName(table)}`, 'info');
+    XLSX.utils.book_append_sheet(wb, ws, 'lo_cao_su');
+    XLSX.writeFile(wb, 'mau_nhap_lo_cao_su.xlsx');
+    addLog(`📥 Đã tải file mẫu (bảng lo)`, 'info');
   });
 
-  // ==================== CÁC HÀM KHÁC ====================
-  async function submitDynamicForm() {
-    const table = document.getElementById('tableSelect').value;
-    const form = document.getElementById('dynamicForm');
-    const inputs = form.querySelectorAll('input, select, textarea');
-    const data = {};
-    inputs.forEach(input => {
-      if(input.name && input.value) data[input.name] = input.value;
-    });
-    
-    let url = '';
-    switch(table) {
-      case 'lo': url = '/api/lo-cay/upsert'; break;
-      case 'don_vi': url = '/api/don-vi/upsert'; break;
-      case 'hanh_chinh': url = '/api/hanh-chinh/upsert'; break;
-      case 'dien_tich': url = '/api/dien-tich/upsert'; break;
-      case 'hien_trang_cay': url = '/api/hien-trang-cay/upsert'; break;
-      case 'khai_thac': url = '/api/khai-thac/upsert'; break;
-      case 'san_luong': url = '/api/san-luong/upsert'; break;
-      case 'thong_tin_trong': url = '/api/thong-tin-trong/upsert'; break;
-      default: alert('Bảng không hợp lệ'); return;
+  // Gửi import lên server
+  document.getElementById('submitImport').addEventListener('click', async () => {
+    if(!uploadedData || uploadedData.length === 0) {
+      alert('Chưa có dữ liệu để nhập. Hãy chọn file Excel trước.');
+      return;
     }
+    const namCapNhat = document.getElementById('namCapNhat').value;
+    if(!namCapNhat || isNaN(namCapNhat)) {
+      alert('Vui lòng nhập năm cập nhật (ví dụ: 2027)');
+      return;
+    }
+
+    const confirmMsg = `📊 XÁC NHẬN NHẬP DỮ LIỆU\n\n` +
+      `• Bảng: Lô cây\n` +
+      `• Số dòng: ${uploadedData.length}\n` +
+      `• Năm cập nhật: ${namCapNhat}\n` +
+      `• Dữ liệu cũ sẽ được tự động lưu vào bảng lịch sử\n\n` +
+      `Bạn có chắc chắn muốn tiếp tục?`;
+    if(!confirm(confirmMsg)) return;
+
+    clearLog();
+    addLog(`🚀 BẮT ĐẦU NHẬP LIỆU - Năm: ${namCapNhat}`, 'info');
+    addLog(`📊 Tổng số dòng cần xử lý: ${uploadedData.length}`, 'info');
+
+    // Tạo FormData để gửi file
+    const formData = new FormData();
+    // Chuyển đổi uploadedData (mảng JSON) thành file Blob
+    const ws = XLSX.utils.json_to_sheet(uploadedData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+    const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const file = new File([blob], 'import_data.xlsx', { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    formData.append('file', file);
+    formData.append('nam_cap_nhat', namCapNhat);
+
+    const statusDiv = document.getElementById('importStatus');
+    statusDiv.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Đang xử lý, vui lòng chờ...';
     
     try {
-      const res = await fetch(url, {
+      const res = await fetch('/api/import-excel', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-Import-Mode': 'upsert' },
-        body: JSON.stringify(data)
+        body: formData
       });
       const result = await res.json();
       if(result.success) {
-        const actionMsg = result.action === 'update' ? 'cập nhật' : 'thêm mới';
-        alert(`✅ ${result.action === 'update' ? 'Cập nhật' : 'Thêm mới'} thành công vào bảng ${table}`);
-        renderForm(table);
-        if(table === 'lo') updateStats();
+        statusDiv.innerHTML = `<span style="color:var(--accent)">✅ ${result.message}</span>`;
+        addLog(`✅ ${result.message}`, 'insert');
+        addLog(`💾 Dữ liệu cũ đã được lưu vào bảng lịch sử (lo_history)`, 'info');
+        updateStats();
+        // Reset sau khi thành công
+        uploadedData = null;
+        document.getElementById('previewArea').style.display = 'none';
+        fileInput.value = '';
+        document.getElementById('namCapNhat').value = '';
       } else {
-        alert(`❌ Lỗi: ${result.error}`);
+        statusDiv.innerHTML = `<span style="color:var(--danger)">❌ Lỗi: ${result.error}</span>`;
+        addLog(`❌ Lỗi: ${result.error}`, 'error');
       }
     } catch(err) {
-      alert('Lỗi kết nối: ' + err.message);
+      statusDiv.innerHTML = `<span style="color:var(--danger)">❌ Lỗi kết nối: ${err.message}</span>`;
+      addLog(`❌ Lỗi kết nối: ${err.message}`, 'error');
     }
-  }
-
-  async function updateStats() {
-    try {
-      const res = await fetch('/api/lo-cay');
-      const data = await res.json();
-      if(data.success) {
-        const totalLots = data.data.length;
-        const totalArea = data.data.reduce((s, l) => s + (parseFloat(l.dien_tich_map) || 0), 0);
-        document.getElementById('totalLots').innerText = totalLots;
-        document.getElementById('totalArea').innerText = totalArea.toFixed(3) + ' ha';
-      }
-    } catch(e) {}
-  }
-
-  // ==================== KHỞI TẠO ====================
-  document.getElementById('tableSelect').addEventListener('change', (e) => renderForm(e.target.value));
-  document.getElementById('submitDynamic').addEventListener('click', submitDynamicForm);
-  document.getElementById('resetDynamic').addEventListener('click', () => renderForm(document.getElementById('tableSelect').value));
-  
-  document.querySelectorAll('.tab-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const tabId = btn.dataset.tab;
-      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      document.getElementById(`tab-${tabId}`).classList.add('active');
-      btn.classList.add('active');
-    });
   });
-  
-  renderForm('lo');
+
+  // Khởi tạo thống kê
   updateStats();
 </script>
 </body>
