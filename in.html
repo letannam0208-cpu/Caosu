@@ -1231,7 +1231,7 @@ const namPalette = {
   '2010':'#00d68f','2011':'#f59e0b','2012':'#f4656a'
 };
 const ntPalette = {
-  '1': '#00d68f','2': '#00b4ff','3': '#f59e0b','NT 1': '#00d68f','NT 2': '#00b4ff','NT 3': '#f59e0b'
+  '1': '#00d68f','2': '#00b4ff','3': '#f59e0b'
 };
 const phienCaoPalette = {
   '1/2S': '#00d68f', '1/3S': '#00b4ff', '1/4S': '#f59e0b', '1/2S d3': '#a78bfa', '1/3S d3': '#f4656a'
@@ -1240,7 +1240,7 @@ const nhipDoCaoPalette = {
   '2 ngày/1 lần': '#00d68f', '3 ngày/1 lần': '#00b4ff', '4 ngày/1 lần': '#f59e0b'
 };
 const taiCanhPalette = {
-  '2025': '#00d68f', '2026': '#00b4ff', '2027': '#f59e0b', '2028': '#a78bfa'
+  '2026': '#00d68f', '2027': '#00b4ff', '2028': '#f59e0b', '2029': '#a78bfa', '2030': '#f4656a'
 };
 
 /* ==================== LẤY DỮ LIỆU TỪ API ==================== */
@@ -1730,15 +1730,26 @@ function toggleLayer(el, type) {
   const chk = el.querySelector('.mlp-check');
   const on = chk.classList.toggle('on');
   chk.textContent = on ? '✓' : '';
+  
   if (type === 'lots') {
     lotsVis = on;
     renderRealLots();
-  } else if (type === 'background-layer') {
+  } 
+  else if (type === 'background-layer') {
     backgroundLotLayers.forEach(o => on ? o.layer.addTo(dashMap) : dashMap.removeLayer(o.layer));
-  } else if (type === 'boundary') {
-    toggleBoundary(document.getElementById('btn-boundary'));
-  } else if (type === 'label') {
-    toggleLotLabels(document.getElementById('btn-label'));
+  } 
+  else if (type === 'boundary') {
+    boundaryVis = on;
+    // Cập nhật trực tiếp ranh giới xã
+    if (boundaryVis && xaLayer) xaLayer.addTo(dashMap);
+    else if (xaLayer) dashMap.removeLayer(xaLayer);
+    showToast(boundaryVis ? 'Hiện ranh giới xã' : 'Ẩn ranh giới xã', '🗂');
+  } 
+  else if (type === 'label') {
+    labelsVis = on;
+    // Cập nhật trực tiếp nhãn lô
+    renderRealLots();
+    showToast(labelsVis ? 'Đã bật nhãn tên lô' : 'Đã tắt nhãn lô', '🏷');
   }
 }
 
