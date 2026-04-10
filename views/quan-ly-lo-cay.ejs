@@ -520,10 +520,10 @@ function attachHorizontalScroll() {
   tableContainer.addEventListener('scroll', syncScrollFromTable);
 }
 
+// Hiển thị form thêm/sửa (không dùng id_don_vi, id_hc nữa)
 function showForm(l = null) {
   const isEdit = !!l;
   
-  // Hàm helper lấy giá trị an toàn (trả về '' nếu null/undefined)
   const val = (obj, field) => {
     if (!obj) return '';
     const v = obj[field];
@@ -534,13 +534,12 @@ function showForm(l = null) {
     <input type="hidden" id="id_lo" name="id_lo" value="${val(l, 'id_lo')}">
     <div class="form-grid">
       <div class="form-field"><label>Dự án</label><input type="text" name="du_an" value="${val(l, 'du_an')}"></div>
+      <div class="form-field"><label>Đội *</label><input type="text" name="doi" value="${val(l, 'doi')}" required></div>
       <div class="form-field"><label>Khu vực</label><input type="text" name="khu_vuc" value="${val(l, 'khu_vuc')}"></div>
       <div class="form-field"><label>Tên lô *</label><input type="text" name="ten_lo" value="${val(l, 'ten_lo')}" required></div>
       <div class="form-field"><label>Năm trồng</label><input type="number" name="nam_trong" value="${val(l, 'nam_trong')}"></div>
       <div class="form-field"><label>Giống</label><input type="text" name="giong" value="${val(l, 'giong')}"></div>
       <div class="form-field"><label>Cao trình TB (m)</label><input type="number" step="0.1" name="cao_trinh_tb" value="${val(l, 'cao_trinh_tb')}"></div>
-      <div class="form-field"><label>Đội *</label><select name="id_don_vi" id="id_don_vi" required></select></div>
-      <div class="form-field"><label>Hành chính (ID)</label><select name="id_hc" id="id_hc"></select></div>
       <div class="form-field"><label>Xã</label><input type="text" name="xa" value="${val(l, 'xa')}"></div>
       <div class="form-field"><label>Huyện</label><input type="text" name="huyen" value="${val(l, 'huyen')}"></div>
       <div class="form-field"><label>Tỉnh</label><input type="text" name="tinh" value="${val(l, 'tinh')}"></div>
@@ -584,84 +583,40 @@ function showForm(l = null) {
   document.getElementById('modalTitle').innerHTML = isEdit ? '✏️ Sửa lô cây' : '➕ Thêm lô cây mới';
   document.getElementById('modal').style.display = 'flex';
   
-  loadDonViList(l ? l.id_don_vi : null);
-  loadHanhChinhList(l ? l.id_hc : null);
-  
   document.getElementById('cancelModalBtn').onclick = () => closeModal();
   document.getElementById('modalForm').onsubmit = async (e) => {
-  e.preventDefault();
-  const formData = new FormData(e.target);
-  const rawData = Object.fromEntries(formData);
-  
-  // Chuyển đổi: với mọi trường, nếu giá trị là chuỗi rỗng thì gán null
-  const data = {};
-  for (const [key, value] of Object.entries(rawData)) {
-    if (value === '') {
-      data[key] = null;
-    } else {
-      // Giữ nguyên (số, chuỗi)
-      data[key] = value;
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const rawData = Object.fromEntries(formData);
+    const data = {};
+    for (const [key, value] of Object.entries(rawData)) {
+      data[key] = (value === '') ? null : value;
     }
-  }
-  
-  const id_lo = document.getElementById('id_lo').value;
-  if (!data.id_don_vi) { alert('Vui lòng chọn đội'); return; }
-  
-  const url = id_lo ? `/api/lo-cay/${id_lo}` : '/api/lo-cay';
-  const method = id_lo ? 'PUT' : 'POST';
-  try {
-    const res = await fetch(url, { 
-      method, 
-      headers: { 'Content-Type': 'application/json' }, 
-      body: JSON.stringify(data) 
-    });
-    const result = await res.json();
-    if (result.success) {
-      alert(id_lo ? 'Cập nhật thành công' : 'Thêm thành công');
-      closeModal();
-      loadLoCay();
-    } else {
-      alert('Lỗi: ' + result.error);
-    }
-  } catch(err) {
-    alert('Lỗi kết nối khi lưu dữ liệu');
-  }
-};
-}
-
-async function loadDonViList(selectedId) {
-  try {
-    const res = await fetch('/api/don-vi-list');
-    const data = await res.json();
-    if(data.success) {
-      const select = document.getElementById('id_don_vi');
-      select.innerHTML = '<option value="">-- Chọn đơn vị --</option>';
-      data.data.forEach(dv => {
-        const opt = document.createElement('option');
-        opt.value = dv.id_don_vi;
-        opt.textContent = dv.doi;
-        if(selectedId && selectedId == dv.id_don_vi) opt.selected = true;
-        select.appendChild(opt);
+    const id_lo = document.getElementById('id_lo').value;
+    // Kiểm tra bắt buộc: tên lô và đội (có thể bỏ bắt buộc đội nếu không muốn)
+    if (!data.ten_lo) { alert('Vui lòng nhập tên lô'); return; }
+    if (!data.doi) { alert('Vui lòng nhập đội'); return; }
+    
+    const url = id_lo ? `/api/lo-cay/${id_lo}` : '/api/lo-cay';
+    const method = id_lo ? 'PUT' : 'POST';
+    try {
+      const res = await fetch(url, { 
+        method, 
+        headers: { 'Content-Type': 'application/json' }, 
+        body: JSON.stringify(data) 
       });
+      const result = await res.json();
+      if (result.success) {
+        alert(id_lo ? 'Cập nhật thành công' : 'Thêm thành công');
+        closeModal();
+        loadLoCay();
+      } else {
+        alert('Lỗi: ' + result.error);
+      }
+    } catch(err) {
+      alert('Lỗi kết nối khi lưu dữ liệu');
     }
-  } catch(err) { console.error(err); }
-}
-async function loadHanhChinhList(selectedId) {
-  try {
-    const res = await fetch('/api/hanh-chinh');
-    const data = await res.json();
-    if(data.success) {
-      const select = document.getElementById('id_hc');
-      select.innerHTML = '<option value="">-- Chọn xã/huyện --</option>';
-      data.data.forEach(hc => {
-        const opt = document.createElement('option');
-        opt.value = hc.id_hc;
-        opt.textContent = `${hc.xa}, ${hc.huyen}`;
-        if(selectedId && selectedId == hc.id_hc) opt.selected = true;
-        select.appendChild(opt);
-      });
-    }
-  } catch(err) { console.error(err); }
+  };
 }
 
 async function loadUserInfo() {
