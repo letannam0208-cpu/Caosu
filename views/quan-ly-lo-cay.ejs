@@ -284,7 +284,10 @@ tbody tr:hover { background: rgba(16,185,129,0.04); }
   <div id="content">
     <div class="page-header">
       <div><h1 class="page-title">Quản Lý Lô Cây Cao Su</h1><p class="page-subtitle">Toàn bộ thông tin chi tiết của từng lô cây</p></div>
-      <button id="btnAddLo" class="btn-add"><i class="fas fa-plus"></i> Thêm lô cây</button>
+      <!-- Sửa nút: chuyển sang trang import Excel -->
+      <button id="btnAddLo" class="btn-add" onclick="window.location.href='/them-du-lieu-lo-cay'">
+        <i class="fas fa-upload"></i> Import từ Excel
+      </button>
     </div>
     <div class="filter-bar">
       <input type="text" id="searchInput" class="search-box" placeholder="🔍 Tìm kiếm (ID, tên lô, đội, xã, huyện...)">
@@ -322,7 +325,7 @@ tbody tr:hover { background: rgba(16,185,129,0.04); }
 <div id="modal" class="modal">
   <div class="modal-content">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-      <h3 id="modalTitle" style="font-family:var(--font-d); font-size:22px;">➕ Thêm lô cây</h3>
+      <h3 id="modalTitle" style="font-family:var(--font-d); font-size:22px;">✏️ Sửa lô cây</h3>
       <button class="icon-btn" id="closeModal" style="background:rgba(255,255,255,0.05);"><i class="fas fa-times"></i></button>
     </div>
     <form id="modalForm"></form>
@@ -520,10 +523,13 @@ function attachHorizontalScroll() {
   tableContainer.addEventListener('scroll', syncScrollFromTable);
 }
 
-// Hiển thị form thêm/sửa (không dùng id_don_vi, id_hc nữa)
+// Hiển thị form sửa lô (không còn form thêm mới)
 function showForm(l = null) {
-  const isEdit = !!l;
-  
+  if (!l) {
+    alert('Chức năng thêm mới đã được chuyển sang import file Excel. Vui lòng sử dụng trang "Thêm dữ liệu lô" để nhập hàng loạt.');
+    return;
+  }
+  const isEdit = true;
   const val = (obj, field) => {
     if (!obj) return '';
     const v = obj[field];
@@ -580,7 +586,7 @@ function showForm(l = null) {
     </div>
   `;
   document.getElementById('modalForm').innerHTML = formHtml;
-  document.getElementById('modalTitle').innerHTML = isEdit ? '✏️ Sửa lô cây' : '➕ Thêm lô cây mới';
+  document.getElementById('modalTitle').innerHTML = '✏️ Sửa lô cây';
   document.getElementById('modal').style.display = 'flex';
   
   document.getElementById('cancelModalBtn').onclick = () => closeModal();
@@ -593,12 +599,11 @@ function showForm(l = null) {
       data[key] = (value === '') ? null : value;
     }
     const id_lo = document.getElementById('id_lo').value;
-    // Kiểm tra bắt buộc: tên lô và đội (có thể bỏ bắt buộc đội nếu không muốn)
     if (!data.ten_lo) { alert('Vui lòng nhập tên lô'); return; }
     if (!data.doi) { alert('Vui lòng nhập đội'); return; }
     
-    const url = id_lo ? `/api/lo-cay/${id_lo}` : '/api/lo-cay';
-    const method = id_lo ? 'PUT' : 'POST';
+    const url = `/api/lo-cay/${id_lo}`;
+    const method = 'PUT';
     try {
       const res = await fetch(url, { 
         method, 
@@ -607,7 +612,7 @@ function showForm(l = null) {
       });
       const result = await res.json();
       if (result.success) {
-        alert(id_lo ? 'Cập nhật thành công' : 'Thêm thành công');
+        alert('Cập nhật thành công');
         closeModal();
         loadLoCay();
       } else {
@@ -638,7 +643,8 @@ function closeModal() { document.getElementById('modal').style.display = 'none';
 
 window.addEventListener('resize', () => syncScrollbarWidth());
 document.getElementById('closeModal').addEventListener('click', closeModal);
-document.getElementById('btnAddLo').addEventListener('click', () => showForm());
+// Xóa sự kiện cũ của btnAddLo (vì đã dùng onclick trên HTML)
+// document.getElementById('btnAddLo').addEventListener('click', () => showForm()); // Đã xóa
 document.getElementById('searchInput').addEventListener('input', filterRows);
 document.getElementById('doiFilter').addEventListener('change', filterRows);
 document.getElementById('giongFilter').addEventListener('change', filterRows);
