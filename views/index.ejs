@@ -1730,15 +1730,26 @@ function toggleLayer(el, type) {
   const chk = el.querySelector('.mlp-check');
   const on = chk.classList.toggle('on');
   chk.textContent = on ? '✓' : '';
+  
   if (type === 'lots') {
     lotsVis = on;
     renderRealLots();
-  } else if (type === 'background-layer') {
+  } 
+  else if (type === 'background-layer') {
     backgroundLotLayers.forEach(o => on ? o.layer.addTo(dashMap) : dashMap.removeLayer(o.layer));
-  } else if (type === 'boundary') {
-    toggleBoundary(document.getElementById('btn-boundary'));
-  } else if (type === 'label') {
-    toggleLotLabels(document.getElementById('btn-label'));
+  } 
+  else if (type === 'boundary') {
+    boundaryVis = on;
+    // Cập nhật trực tiếp ranh giới xã
+    if (boundaryVis && xaLayer) xaLayer.addTo(dashMap);
+    else if (xaLayer) dashMap.removeLayer(xaLayer);
+    showToast(boundaryVis ? 'Hiện ranh giới xã' : 'Ẩn ranh giới xã', '🗂');
+  } 
+  else if (type === 'label') {
+    labelsVis = on;
+    // Cập nhật trực tiếp nhãn lô
+    renderRealLots();
+    showToast(labelsVis ? 'Đã bật nhãn tên lô' : 'Đã tắt nhãn lô', '🏷');
   }
 }
 
