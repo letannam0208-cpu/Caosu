@@ -10,6 +10,7 @@ const cookieParser = require('cookie-parser');
 const app = express();
 const port = process.env.PORT || 3000;
 
+
 // ====================== MIDDLEWARE ======================
 app.use(cors());
 app.use(express.json());
@@ -507,6 +508,181 @@ app.delete('/api/lo-cay/:id', authenticateToken, async (req, res) => {
   }
 });
 
+// ====================== IMPORT EXCEL & LƯU LỊCH SỬ ======================
+const multer = require('multer');
+const XLSX = require('xlsx');
+const fs = require('fs');
+
+// Cấu hình multer để lưu file tạm
+const upload = multer({ dest: 'uploads/' });
+
+// API import file Excel (có lưu lịch sử)
+app.post('/api/import-excel', authenticateToken, upload.single('file'), async (req, res) => {
+    const { nam_cap_nhat } = req.body; // năm của dữ liệu mới (ví dụ 2027)
+    if (!nam_cap_nhat) {
+        return res.status(400).json({ success: false, error: 'Vui lòng cung cấp năm cập nhật' });
+    }
+    if (!req.file) {
+        return res.status(400).json({ success: false, error: 'Chưa chọn file Excel' });
+    }
+    const filePath = req.file.path;
+    try {
+        // Đọc file Excel
+        const workbook = XLSX.readFile(filePath);
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+        const rows = XLSX.utils.sheet_to_json(sheet);
+        
+        if (rows.length === 0) {
+            throw new Error('File Excel không có dữ liệu');
+        }
+
+        const client = await pool.connect();
+        await client.query('BEGIN');
+
+        let insertedCount = 0;
+        let updatedCount = 0;
+
+        for (const row of rows) {
+            // Lấy id_lo (có thể là cột 'ID_lo' hoặc 'id_lo')
+            const id_lo = row.ID_lo || row.id_lo;
+            if (!id_lo) {
+                console.warn('Bỏ qua dòng không có ID_lo:', row);
+                continue;
+            }
+
+            // Kiểm tra xem lô đã tồn tại trong bảng lo chưa
+            const existing = await client.query('SELECT * FROM lo WHERE id_lo = $1', [id_lo]);
+
+            if (existing.rows.length > 0) {
+                const oldRecord = existing.rows[0];
+                // Lưu bản ghi cũ vào lo_history với nam_cap_nhat_history = oldRecord.nam_cap_nhat
+                await client.query(`
+                    INSERT INTO lo_history (
+                        id_lo, ten_lo, nam_trong, cao_trinh_tb, giong, geometry,
+                        du_an, doi, khu_vuc, hang_dat, phuong_phap_trong, khoang_cach_trong, mat_do_tk,
+                        dien_tich_010125, dien_tich_010126, dien_tich_map, tong_ho_kk, cay_cao, cay_chua_cao,
+                        cay_kho_mu, cay_khong_pt, ho_trong, mat_do_cc, che_do_cao, nam_mc, tuoi_cao,
+                        nam_cao_up, tinh_trang_mc, ns25_kg_ha, ns25_kg_cay, tong_lat_cao, ns26_kg_cay,
+                        phan_loai, xa, huyen, tinh, ns26_kg_ha, san_luong, phien_cao, nhip_do_cao,
+                        tai_canh_nam, doi_tuong, nam_cap_nhat_history
+                    ) VALUES (
+                        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17,
+                        $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33,
+                        $34, $35, $36, $37, $38, $39, $40, $41, $42
+                    )
+                `, [
+                    oldRecord.id_lo, oldRecord.ten_lo, oldRecord.nam_trong, oldRecord.cao_trinh_tb,
+                    oldRecord.giong, oldRecord.geometry, oldRecord.du_an, oldRecord.doi, oldRecord.khu_vuc,
+                    oldRecord.hang_dat, oldRecord.phuong_phap_trong, oldRecord.khoang_cach_trong,
+                    oldRecord.mat_do_tk, oldRecord.dien_tich_010125, oldRecord.dien_tich_010126,
+                    oldRecord.dien_tich_map, oldRecord.tong_ho_kk, oldRecord.cay_cao, oldRecord.cay_chua_cao,
+                    oldRecord.cay_kho_mu, oldRecord.cay_khong_pt, oldRecord.ho_trong, oldRecord.mat_do_cc,
+                    oldRecord.che_do_cao, oldRecord.nam_mc, oldRecord.tuoi_cao, oldRecord.nam_cao_up,
+                    oldRecord.tinh_trang_mc, oldRecord.ns25_kg_ha, oldRecord.ns25_kg_cay, oldRecord.tong_lat_cao,
+                    oldRecord.ns26_kg_cay, oldRecord.phan_loai, oldRecord.xa, oldRecord.huyen, oldRecord.tinh,
+                    oldRecord.ns26_kg_ha, oldRecord.san_luong, oldRecord.phien_cao, oldRecord.nhip_do_cao,
+                    oldRecord.tai_canh_nam, oldRecord.doi_tuong, oldRecord.nam_cap_nhat
+                ]);
+
+                // Cập nhật bảng lo với dữ liệu mới (chỉ các cột có trong file)
+                const updateFields = [];
+                const updateValues = [];
+                let idx = 1;
+                // Danh sách các cột có thể cập nhật (trừ geometry và các cột cố định nếu không muốn thay đổi)
+                const updatableCols = [
+                    'ten_lo', 'nam_trong', 'cao_trinh_tb', 'giong', 'du_an', 'doi', 'khu_vuc',
+                    'hang_dat', 'phuong_phap_trong', 'khoang_cach_trong', 'mat_do_tk',
+                    'dien_tich_010125', 'dien_tich_010126', 'dien_tich_map', 'tong_ho_kk',
+                    'cay_cao', 'cay_chua_cao', 'cay_kho_mu', 'cay_khong_pt', 'ho_trong', 'mat_do_cc',
+                    'che_do_cao', 'nam_mc', 'tuoi_cao', 'nam_cao_up', 'tinh_trang_mc',
+                    'ns25_kg_ha', 'ns25_kg_cay', 'tong_lat_cao', 'ns26_kg_cay', 'phan_loai',
+                    'xa', 'huyen', 'tinh', 'ns26_kg_ha', 'san_luong', 'phien_cao', 'nhip_do_cao',
+                    'tai_canh_nam', 'doi_tuong'
+                ];
+                for (const col of updatableCols) {
+                    if (row[col] !== undefined && row[col] !== null && row[col] !== '') {
+                        updateFields.push(`${col} = $${idx++}`);
+                        updateValues.push(row[col]);
+                    }
+                }
+                // Luôn cập nhật nam_cap_nhat thành năm mới
+                updateFields.push(`nam_cap_nhat = $${idx++}`);
+                updateValues.push(parseInt(nam_cap_nhat));
+                updateValues.push(id_lo);
+
+                if (updateFields.length > 0) {
+                    await client.query(
+                        `UPDATE lo SET ${updateFields.join(', ')} WHERE id_lo = $${idx}`,
+                        updateValues
+                    );
+                    updatedCount++;
+                }
+            } else {
+                // Insert mới
+                const insertCols = ['id_lo', 'nam_cap_nhat'];
+                const insertValues = [id_lo, parseInt(nam_cap_nhat)];
+                const updatableCols = [
+                    'ten_lo', 'nam_trong', 'cao_trinh_tb', 'giong', 'du_an', 'doi', 'khu_vuc',
+                    'hang_dat', 'phuong_phap_trong', 'khoang_cach_trong', 'mat_do_tk',
+                    'dien_tich_010125', 'dien_tich_010126', 'dien_tich_map', 'tong_ho_kk',
+                    'cay_cao', 'cay_chua_cao', 'cay_kho_mu', 'cay_khong_pt', 'ho_trong', 'mat_do_cc',
+                    'che_do_cao', 'nam_mc', 'tuoi_cao', 'nam_cao_up', 'tinh_trang_mc',
+                    'ns25_kg_ha', 'ns25_kg_cay', 'tong_lat_cao', 'ns26_kg_cay', 'phan_loai',
+                    'xa', 'huyen', 'tinh', 'ns26_kg_ha', 'san_luong', 'phien_cao', 'nhip_do_cao',
+                    'tai_canh_nam', 'doi_tuong'
+                ];
+                for (const col of updatableCols) {
+                    if (row[col] !== undefined && row[col] !== null && row[col] !== '') {
+                        insertCols.push(col);
+                        insertValues.push(row[col]);
+                    }
+                }
+                // Nếu file có cột geometry (dạng WKT), có thể xử lý riêng
+                if (row.geometry && typeof row.geometry === 'string') {
+                    insertCols.push('geometry');
+                    insertValues.push(`ST_GeomFromText('${row.geometry}', 32648)`); // cần escape cẩn thận
+                }
+                const placeholders = insertValues.map((_, i) => `$${i+1}`).join(',');
+                await client.query(
+                    `INSERT INTO lo (${insertCols.join(',')}) VALUES (${placeholders})`,
+                    insertValues
+                );
+                insertedCount++;
+            }
+        }
+
+        await client.query('COMMIT');
+        res.json({
+            success: true,
+            message: `Import thành công! Thêm mới: ${insertedCount}, Cập nhật: ${updatedCount}, Tổng số dòng xử lý: ${rows.length}`
+        });
+    } catch (err) {
+        await client.query('ROLLBACK');
+        console.error('Lỗi import Excel:', err);
+        res.status(500).json({ success: false, error: err.message });
+    } finally {
+        // Xóa file tạm
+        if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+        }
+    }
+});
+
+// (Tuỳ chọn) API lấy lịch sử của một lô
+app.get('/api/lo-history/:id_lo', authenticateToken, async (req, res) => {
+    const { id_lo } = req.params;
+    try {
+        const result = await pool.query(`
+            SELECT * FROM lo_history
+            WHERE id_lo = $1
+            ORDER BY nam_cap_nhat_history DESC, ngay_luu DESC
+        `, [id_lo]);
+        res.json({ success: true, data: result.rows });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
 
 // ====================== CÁC TRANG (VIEW) ======================
 // Trang đăng nhập (không cần xác thực)
