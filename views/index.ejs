@@ -180,9 +180,6 @@ body{font-family:var(--font-b);background:var(--bg);color:var(--text);height:100
   font-weight:600;
   box-shadow:inset 0 0 8px rgba(16,185,129,0.1);
 }
-.nav-item.active::before{
-  display:none;
-}
 .nav-icon{
   width:16px;
   height:16px;
@@ -1188,12 +1185,6 @@ td.mono{font-family:monospace;font-size:11px;color:var(--muted)}
     <!-- Legend bar -->
     <div class="map-legend" id="mapLegend"></div>
   </div>
-
-  <div class="grid-2" style="margin-bottom:18px">
-  </div>
-
-  <div class="grid-2">
-  </div>
 </div>
 </div>
 </div>
@@ -1686,37 +1677,6 @@ function setMapTool(tool, btn) {
     dashMap.doubleClickZoom.disable();
     if (mapEl) mapEl.style.cursor = 'default';
     wrap.classList.remove('pan-mode', 'measuring-distance', 'measuring-area');
-  } else if (tool === 'rect') {
-    dashMap.dragging.disable();
-    dashMap.scrollWheelZoom.disable();
-    if (mapEl) mapEl.style.cursor = 'crosshair';
-    wrap.classList.remove('pan-mode');
-  }
-}
-
-function toggleLotLabels(btn) {
-  labelsVis = !labelsVis;
-  btn.classList.toggle('active', labelsVis);
-  const labelCheck = document.getElementById('lc-label');
-  if (labelCheck) {
-    labelCheck.classList.toggle('on', labelsVis);
-    labelCheck.textContent = labelsVis ? '✓' : '';
-  }
-  renderRealLots();
-  showToast(labelsVis ? 'Đã bật nhãn tên lô' : 'Đã tắt nhãn lô', '🏷');
-}
-
-function toggleBoundary(btn) {
-  boundaryVis = !boundaryVis;
-  btn.classList.toggle('active', boundaryVis);
-  const boundaryCheck = document.getElementById('lc-boundary');
-  if (boundaryCheck) {
-    boundaryCheck.classList.toggle('on', boundaryVis);
-    boundaryCheck.textContent = boundaryVis ? '✓' : '';
-  }
-  if (boundaryVis && xaLayer) xaLayer.addTo(dashMap);
-  else if (xaLayer) dashMap.removeLayer(xaLayer);
-  showToast(boundaryVis ? 'Hiện ranh giới xã' : 'Ẩn ranh giới xã', '🗂');
 }
 
 function togglePanel(id) {
@@ -1957,21 +1917,7 @@ function switchMeasureTab(mode) {
   document.getElementById('btn-measure-area').classList.toggle('active', mode === 'area');
   resetMeasure();
 }
-function startMeasureCapture() {
-  msrActive = true;
-  dashMap.getContainer().style.cursor = 'crosshair';
-  dashMap.on('click', onMsrClick);
-  dashMap.on('mousemove', onMsrMove);
-  dashMap.on('dblclick', onMsrDblClick);
-  dashMap.dragging.enable();
-}
-function stopMeasureCapture() {
-  msrActive = false;
-  dashMap.getContainer().style.cursor = '';
-  dashMap.off('click', onMsrClick);
-  dashMap.off('mousemove', onMsrMove);
-  dashMap.off('dblclick', onMsrDblClick);
-}
+
 function onMsrClick(e) {
   if (!msrActive) return;
   const pt = { lat: e.latlng.lat, lng: e.latlng.lng };
@@ -2400,23 +2346,6 @@ function changeBaseMap(type) {
   window.currentBaseLayer = newLayer;
   
   showToast(`Đã chuyển sang nền: ${type}`, '🖼️');
-}
-
-async function loadRealUserInfo() {
-  try {
-    const res = await fetch('/api/me', { credentials: 'same-origin' });
-    const data = await res.json();
-    if (data.success) {
-      const user = data.data;
-      document.getElementById('userFullName').innerText = user.fullname;
-      document.getElementById('userRole').innerText = user.role === 'admin' ? 'Quản trị viên' : 'Người dùng';
-      document.getElementById('userAvatar').innerText = user.fullname.charAt(0).toUpperCase();
-    } else {
-      console.warn('Không lấy được thông tin user');
-    }
-  } catch (err) {
-    console.error('Lỗi /api/me:', err);
-  }
 }
 
 async function loadRealStats() {
