@@ -508,18 +508,17 @@ app.delete('/api/lo-cay/:id', authenticateToken, async (req, res) => {
   }
 });
 
-// ====================== IMPORT EXCEL & LƯU LỊCH SỬ (SỬA LẠI) ======================
+// ====================== IMPORT EXCEL & LƯU LỊCH SỬ (BATCH VERSION) ======================
 const multer = require('multer');
 const XLSX = require('xlsx');
 
-// Cấu hình multer dùng memory storage (không ghi file xuống đĩa, phù hợp với serverless)
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 // Các cột cố định (không bao giờ cập nhật khi lô đã tồn tại)
 const fixedColumns = ['id_lo', 'ten_lo', 'geometry', 'xa', 'huyen', 'tinh'];
 
-// Các cột có thể cập nhật (tất cả các cột còn lại, trừ fixedColumns và nam_cap_nhat)
+// Các cột có thể cập nhật
 const updatableCols = [
     'nam_trong', 'cao_trinh_tb', 'giong', 'du_an', 'doi', 'khu_vuc',
     'hang_dat', 'phuong_phap_trong', 'khoang_cach_trong', 'mat_do_tk',
@@ -539,135 +538,154 @@ app.post('/api/import-excel', authenticateToken, upload.single('file'), async (r
         return res.status(400).json({ success: false, error: 'Chưa chọn file Excel' });
     }
     try {
-        // Đọc file Excel từ buffer (không cần file tạm)
+        // Đọc file Excel
         const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
         const sheetName = workbook.SheetNames[0];
         const sheet = workbook.Sheets[sheetName];
         const rows = XLSX.utils.sheet_to_json(sheet);
-        
-        if (rows.length === 0) {
-            throw new Error('File Excel không có dữ liệu');
-        }
+        if (rows.length === 0) throw new Error('File Excel không có dữ liệu');
 
         const client = await pool.connect();
         await client.query('BEGIN');
 
-        let insertedCount = 0;
-        let updatedCount = 0;
+        // 1. Tạo bảng tạm thời
+        await client.query(`
+            CREATE TEMP TABLE temp_import (
+                id_lo VARCHAR(50) PRIMARY KEY,
+                ten_lo VARCHAR(255),
+                nam_trong INTEGER,
+                cao_trinh_tb DOUBLE PRECISION,
+                giong VARCHAR(100),
+                du_an VARCHAR(255),
+                doi VARCHAR(100),
+                khu_vuc VARCHAR(100),
+                hang_dat VARCHAR(100),
+                phuong_phap_trong VARCHAR(100),
+                khoang_cach_trong VARCHAR(50),
+                mat_do_tk INTEGER,
+                dien_tich_010125 DOUBLE PRECISION,
+                dien_tich_010126 DOUBLE PRECISION,
+                dien_tich_map DOUBLE PRECISION,
+                tong_ho_kk INTEGER,
+                cay_cao INTEGER,
+                cay_chua_cao INTEGER,
+                cay_kho_mu INTEGER,
+                cay_khong_pt INTEGER,
+                ho_trong INTEGER,
+                mat_do_cc DOUBLE PRECISION,
+                che_do_cao VARCHAR(100),
+                nam_mc INTEGER,
+                tuoi_cao INTEGER,
+                nam_cao_up INTEGER,
+                tinh_trang_mc VARCHAR(100),
+                ns25_kg_ha DOUBLE PRECISION,
+                ns25_kg_cay DOUBLE PRECISION,
+                tong_lat_cao DOUBLE PRECISION,
+                ns26_kg_cay DOUBLE PRECISION,
+                phan_loai VARCHAR(100),
+                xa VARCHAR(100),
+                huyen VARCHAR(100),
+                tinh VARCHAR(100),
+                ns26_kg_ha DOUBLE PRECISION,
+                san_luong DOUBLE PRECISION,
+                phien_cao VARCHAR(50),
+                nhip_do_cao VARCHAR(50),
+                tai_canh_nam INTEGER,
+                doi_tuong VARCHAR(100)
+            )
+        `);
 
+        // 2. Chèn dữ liệu vào bảng tạm (dùng INSERT ... ON CONFLICT để ghi đè)
         for (const row of rows) {
             const id_lo = row.ID_lo || row.id_lo;
-            if (!id_lo) {
-                console.warn('Bỏ qua dòng không có ID_lo:', row);
-                continue;
+            if (!id_lo) continue;
+            const columns = Object.keys(row).filter(k => k !== 'ID_lo' && k !== 'id_lo');
+            const values = columns.map(c => row[c]);
+            const placeholders = columns.map((_, i) => `$${i+2}`).join(',');
+            const insertSql = `INSERT INTO temp_import (id_lo, ${columns.join(',')}) VALUES ($1, ${placeholders}) ON CONFLICT (id_lo) DO UPDATE SET ${columns.map(c => `${c}=EXCLUDED.${c}`).join(',')}`;
+            await client.query(insertSql, [id_lo, ...values]);
+        }
+
+        // 3. Lấy danh sách id_lo đã tồn tại
+        const existingIdsRes = await client.query(`
+            SELECT id_lo FROM lo WHERE id_lo IN (SELECT id_lo FROM temp_import)
+        `);
+        const existingIds = existingIdsRes.rows.map(r => r.id_lo);
+
+        // 4. Lưu lịch sử cho các lô đã tồn tại (chép toàn bộ bản ghi cũ sang lo_history)
+        if (existingIds.length > 0) {
+            await client.query(`
+                INSERT INTO lo_history (
+                    id_lo, ten_lo, nam_trong, cao_trinh_tb, giong, geometry,
+                    du_an, doi, khu_vuc, hang_dat, phuong_phap_trong, khoang_cach_trong, mat_do_tk,
+                    dien_tich_010125, dien_tich_010126, dien_tich_map, tong_ho_kk, cay_cao, cay_chua_cao,
+                    cay_kho_mu, cay_khong_pt, ho_trong, mat_do_cc, che_do_cao, nam_mc, tuoi_cao,
+                    nam_cao_up, tinh_trang_mc, ns25_kg_ha, ns25_kg_cay, tong_lat_cao, ns26_kg_cay,
+                    phan_loai, xa, huyen, tinh, ns26_kg_ha, san_luong, phien_cao, nhip_do_cao,
+                    tai_canh_nam, doi_tuong, nam_cap_nhat_history
+                )
+                SELECT 
+                    l.id_lo, l.ten_lo, l.nam_trong, l.cao_trinh_tb, l.giong, l.geometry,
+                    l.du_an, l.doi, l.khu_vuc, l.hang_dat, l.phuong_phap_trong, l.khoang_cach_trong, l.mat_do_tk,
+                    l.dien_tich_010125, l.dien_tich_010126, l.dien_tich_map, l.tong_ho_kk, l.cay_cao, l.cay_chua_cao,
+                    l.cay_kho_mu, l.cay_khong_pt, l.ho_trong, l.mat_do_cc, l.che_do_cao, l.nam_mc, l.tuoi_cao,
+                    l.nam_cao_up, l.tinh_trang_mc, l.ns25_kg_ha, l.ns25_kg_cay, l.tong_lat_cao, l.ns26_kg_cay,
+                    l.phan_loai, l.xa, l.huyen, l.tinh, l.ns26_kg_ha, l.san_luong, l.phien_cao, l.nhip_do_cao,
+                    l.tai_canh_nam, l.doi_tuong, l.nam_cap_nhat
+                FROM lo l
+                WHERE l.id_lo = ANY($1::text[])
+            `, [existingIds]);
+        }
+
+        // 5. Cập nhật hàng loạt các lô đã tồn tại (chỉ cập nhật các cột có trong bảng tạm và thuộc updatableCols)
+        const updatableColsSet = new Set(updatableCols);
+        const tempColumns = await client.query(`
+            SELECT column_name FROM information_schema.columns WHERE table_name='temp_import' AND column_name != 'id_lo'
+        `);
+        const updateCols = tempColumns.rows
+            .map(r => r.column_name)
+            .filter(col => updatableColsSet.has(col));
+        
+        if (updateCols.length > 0 && existingIds.length > 0) {
+            const setClause = updateCols.map(col => `${col} = temp.${col}`).join(', ');
+            await client.query(`
+                UPDATE lo
+                SET ${setClause}, nam_cap_nhat = $1
+                FROM temp_import temp
+                WHERE lo.id_lo = temp.id_lo AND lo.id_lo = ANY($2::text[])
+            `, [parseInt(nam_cap_nhat), existingIds]);
+        }
+
+        // 6. Thêm mới các lô chưa tồn tại
+        const newIdsRes = await client.query(`
+            SELECT t.* FROM temp_import t
+            WHERE NOT EXISTS (SELECT 1 FROM lo l WHERE l.id_lo = t.id_lo)
+        `);
+        const newRows = newIdsRes.rows;
+        if (newRows.length > 0) {
+            const allColumns = tempColumns.rows.map(r => r.column_name);
+            const insertCols = ['id_lo', 'nam_cap_nhat', ...allColumns];
+            const valuesPlaceholders = newRows.map((_, idx) => {
+                const base = idx * (insertCols.length);
+                return `($${base+1}, $${base+2}, ${allColumns.map((_, i) => `$${base+3+i}`).join(', ')})`;
+            }).join(',');
+            const flatValues = [];
+            for (const row of newRows) {
+                flatValues.push(row.id_lo, parseInt(nam_cap_nhat));
+                for (const col of allColumns) {
+                    flatValues.push(row[col]);
+                }
             }
-
-            const existing = await client.query('SELECT * FROM lo WHERE id_lo = $1', [id_lo]);
-
-            if (existing.rows.length > 0) {
-                const oldRecord = existing.rows[0];
-                // Lưu bản ghi cũ vào lo_history
-                await client.query(`
-                    INSERT INTO lo_history (
-                        id_lo, ten_lo, nam_trong, cao_trinh_tb, giong, geometry,
-                        du_an, doi, khu_vuc, hang_dat, phuong_phap_trong, khoang_cach_trong, mat_do_tk,
-                        dien_tich_010125, dien_tich_010126, dien_tich_map, tong_ho_kk, cay_cao, cay_chua_cao,
-                        cay_kho_mu, cay_khong_pt, ho_trong, mat_do_cc, che_do_cao, nam_mc, tuoi_cao,
-                        nam_cao_up, tinh_trang_mc, ns25_kg_ha, ns25_kg_cay, tong_lat_cao, ns26_kg_cay,
-                        phan_loai, xa, huyen, tinh, ns26_kg_ha, san_luong, phien_cao, nhip_do_cao,
-                        tai_canh_nam, doi_tuong, nam_cap_nhat_history
-                    ) VALUES (
-                        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17,
-                        $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33,
-                        $34, $35, $36, $37, $38, $39, $40, $41, $42
-                    )
-                `, [
-                    oldRecord.id_lo, oldRecord.ten_lo, oldRecord.nam_trong, oldRecord.cao_trinh_tb,
-                    oldRecord.giong, oldRecord.geometry, oldRecord.du_an, oldRecord.doi, oldRecord.khu_vuc,
-                    oldRecord.hang_dat, oldRecord.phuong_phap_trong, oldRecord.khoang_cach_trong,
-                    oldRecord.mat_do_tk, oldRecord.dien_tich_010125, oldRecord.dien_tich_010126,
-                    oldRecord.dien_tich_map, oldRecord.tong_ho_kk, oldRecord.cay_cao, oldRecord.cay_chua_cao,
-                    oldRecord.cay_kho_mu, oldRecord.cay_khong_pt, oldRecord.ho_trong, oldRecord.mat_do_cc,
-                    oldRecord.che_do_cao, oldRecord.nam_mc, oldRecord.tuoi_cao, oldRecord.nam_cao_up,
-                    oldRecord.tinh_trang_mc, oldRecord.ns25_kg_ha, oldRecord.ns25_kg_cay, oldRecord.tong_lat_cao,
-                    oldRecord.ns26_kg_cay, oldRecord.phan_loai, oldRecord.xa, oldRecord.huyen, oldRecord.tinh,
-                    oldRecord.ns26_kg_ha, oldRecord.san_luong, oldRecord.phien_cao, oldRecord.nhip_do_cao,
-                    oldRecord.tai_canh_nam, oldRecord.doi_tuong, oldRecord.nam_cap_nhat
-                ]);
-
-                // Cập nhật bảng lo: chỉ các cột có thể cập nhật và có mặt trong file
-                const updateFields = [];
-                const updateValues = [];
-                let idx = 1;
-
-                for (const col of updatableCols) {
-                    if (row.hasOwnProperty(col)) {
-                        let value = row[col];
-                        // Nếu giá trị là rỗng (chuỗi rỗng, null, undefined) thì set NULL
-                        if (value === undefined || value === null || value === '') {
-                            value = null;
-                        }
-                        updateFields.push(`${col} = $${idx++}`);
-                        updateValues.push(value);
-                    }
-                }
-                // Luôn cập nhật nam_cap_nhat
-                updateFields.push(`nam_cap_nhat = $${idx++}`);
-                updateValues.push(parseInt(nam_cap_nhat));
-                updateValues.push(id_lo);
-
-                if (updateFields.length > 0) {
-                    await client.query(
-                        `UPDATE lo SET ${updateFields.join(', ')} WHERE id_lo = $${idx}`,
-                        updateValues
-                    );
-                    updatedCount++;
-                }
-            } else {
-                // Insert mới: cho phép nhập các cột cố định lần đầu
-                const insertCols = ['id_lo', 'nam_cap_nhat'];
-                const insertValues = [id_lo, parseInt(nam_cap_nhat)];
-
-                // Thêm các cột có thể cập nhật nếu có trong file
-                for (const col of updatableCols) {
-                    if (row.hasOwnProperty(col)) {
-                        let value = row[col];
-                        if (value === undefined || value === null || value === '') {
-                            value = null;
-                        }
-                        insertCols.push(col);
-                        insertValues.push(value);
-                    }
-                }
-                // Thêm các cột cố định nếu có trong file (chỉ khi insert mới)
-                for (const col of fixedColumns) {
-                    if (col !== 'id_lo' && row.hasOwnProperty(col)) {
-                        let value = row[col];
-                        if (value !== undefined && value !== null && value !== '') {
-                            insertCols.push(col);
-                            insertValues.push(value);
-                        }
-                    }
-                }
-                // Xử lý geometry riêng (nếu có)
-                if (row.geometry && typeof row.geometry === 'string' && row.geometry.trim() !== '') {
-                    insertCols.push('geometry');
-                    insertValues.push(`ST_GeomFromText('${row.geometry}', 32648)`);
-                }
-
-                const placeholders = insertValues.map((_, i) => `$${i+1}`).join(',');
-                await client.query(
-                    `INSERT INTO lo (${insertCols.join(',')}) VALUES (${placeholders})`,
-                    insertValues
-                );
-                insertedCount++;
-            }
+            await client.query(`
+                INSERT INTO lo (${insertCols.join(',')})
+                VALUES ${valuesPlaceholders}
+            `, flatValues);
         }
 
         await client.query('COMMIT');
         res.json({
             success: true,
-            message: `Import thành công! Thêm mới: ${insertedCount}, Cập nhật: ${updatedCount}, Tổng số dòng xử lý: ${rows.length}`
+            message: `Import thành công! Thêm mới: ${newRows.length}, Cập nhật: ${existingIds.length}, Tổng số dòng xử lý: ${rows.length}`
         });
     } catch (err) {
         await client.query('ROLLBACK');
