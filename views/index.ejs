@@ -2043,7 +2043,7 @@ async function initDashMap() {
       xaLayer = L.geoJSON(xaGeojson, {
         style: { color: '#ffffff', weight: 2.5, fillColor: 'transparent', fillOpacity: 0, dashArray: '6,4', opacity: 0.6 }
       }).addTo(dashMap);
-      xaLayer.bindTooltip('Xã Kraya · Huyện Santuk · Kampong Thom', { sticky: true });
+      xaLayer.bindTooltip('Xã Kraya · Huyện Santuk · Kampong Thom', { sticky: false });
     } else {
       console.warn('Không tìm thấy file ranh giới xã, bỏ qua');
       xaLayer = L.geoJSON({ type: "FeatureCollection", features: [] }).addTo(dashMap);
