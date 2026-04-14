@@ -565,6 +565,11 @@ td.mono{font-family:monospace;font-size:11px;color:var(--muted)}
 }
 .msr-result-label{font-size:10px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.08em}
 .msr-result-value{font-size:20px;font-weight:700;color:var(--accent);font-family:var(--font-d)}
+
+.msr-result-sub {
+  display: none !important;
+}
+
 /* Ẩn hoàn toàn dòng phụ */
 .msr-result-sub { display: none; }
 .msr-points{font-size:10px;color:var(--muted);margin-bottom:8px}
@@ -1106,7 +1111,7 @@ td.mono{font-family:monospace;font-size:11px;color:var(--muted)}
           <div class="msr-result">
             <div class="msr-result-label" id="msr-result-label">Khoảng cách</div>
             <div class="msr-result-value" id="msr-result-value">—</div>
-            <div class="msr-result-sub" id="msr-result-sub">Chưa có điểm nào</div>
+            <div class="msr-result-sub" id="msr-result-sub" style="display: none !important;">Chưa có điểm nào</div>
           </div>
           <div class="msr-points" id="msr-points-count">0 điểm</div>
           <div class="msr-btns">
