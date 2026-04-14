@@ -1989,7 +1989,7 @@ function updateMeasureResult() {
     let total = 0;
     for (let i = 1; i < cnt; i++) total += haversine(msrPoints[i - 1], msrPoints[i]);
     document.getElementById('msr-result-value').textContent = fmtDistance(total);
-    document.getElementById('msr-result-sub').textContent = `${Math.round(total).toLocaleString('vi')} m  ·  ${cnt - 1} đoạn`;
+    document.getElementById('msr-result-sub').textContent = `${Math.round(total)} m · ${cnt - 1} đoạn`;
   } else {
     if (cnt < 3) {
       document.getElementById('msr-result-value').textContent = '—';
