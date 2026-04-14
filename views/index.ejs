@@ -565,7 +565,7 @@ td.mono{font-family:monospace;font-size:11px;color:var(--muted)}
 }
 .msr-result-label{font-size:10px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.08em}
 .msr-result-value{font-size:20px;font-weight:700;color:var(--accent);font-family:var(--font-d)}
-
+.msr-result-sub{font-size:11px;color:var(--muted2);margin-top:2px}
 .msr-points{font-size:10px;color:var(--muted);margin-bottom:8px}
 .msr-btns{display:flex;gap:6px}
 .msr-btn{
@@ -1105,6 +1105,7 @@ td.mono{font-family:monospace;font-size:11px;color:var(--muted)}
           <div class="msr-result">
             <div class="msr-result-label" id="msr-result-label">Khoảng cách</div>
             <div class="msr-result-value" id="msr-result-value">—</div>
+            <div class="msr-result-sub" id="msr-result-sub">Chưa có điểm nào</div>
           </div>
           <div class="msr-points" id="msr-points-count">0 điểm</div>
           <div class="msr-btns">
@@ -1849,13 +1850,18 @@ function polygonArea(pts) {
   return Math.abs(area / 2);
 }
 
-// Sửa: chỉ hiển thị km
 function fmtDistance(m) {
-  return (m / 1000).toFixed(3) + ' km';
+  if (m >= 1000) return (m / 1000).toFixed(3) + ' km';
+  return Math.round(m) + ' m';
 }
-// Sửa: chỉ hiển thị ha
 function fmtArea(m2) {
-  return (m2 / 10000).toFixed(4) + ' ha';
+  const ha = m2 / 10000;
+  if (ha >= 1) return ha.toFixed(4) + ' ha';
+  return Math.round(m2).toLocaleString('vi') + ' m²';
+}
+function fmtAreaSub(m2) {
+  const ha = m2 / 10000;
+  return `${Math.round(m2).toLocaleString('vi')} m²  ·  ${ha.toFixed(4)} ha`;
 }
 
 function openMeasure(mode) {
@@ -1977,20 +1983,22 @@ function updateMeasureResult() {
   if (msrMode === 'distance') {
     if (cnt < 2) {
       document.getElementById('msr-result-value').textContent = '—';
-      // Dòng phụ đã ẩn, không cần
+      document.getElementById('msr-result-sub').textContent = 'Cần ít nhất 2 điểm';
       return;
     }
     let total = 0;
     for (let i = 1; i < cnt; i++) total += haversine(msrPoints[i - 1], msrPoints[i]);
     document.getElementById('msr-result-value').textContent = fmtDistance(total);
-    // Không set dòng phụ nữa
+    document.getElementById('msr-result-sub').textContent = `${Math.round(total)} m · ${cnt - 1} đoạn`;
   } else {
     if (cnt < 3) {
       document.getElementById('msr-result-value').textContent = '—';
+      document.getElementById('msr-result-sub').textContent = 'Cần ít nhất 3 điểm';
       return;
     }
     const area = polygonArea(msrPoints);
     document.getElementById('msr-result-value').textContent = fmtArea(area);
+    document.getElementById('msr-result-sub').textContent = fmtAreaSub(area);
   }
 }
 function finishMeasure() {
@@ -2017,6 +2025,7 @@ function resetMeasure() {
   if (msrPolygon) { dashMap.removeLayer(msrPolygon); msrPolygon = null; }
   if (msrTempLine) { dashMap.removeLayer(msrTempLine); msrTempLine = null; }
   document.getElementById('msr-result-value').textContent = '—';
+  document.getElementById('msr-result-sub').textContent = 'Chưa có điểm nào';
   document.getElementById('msr-points-count').textContent = '0 điểm';
 }
 
@@ -2037,6 +2046,7 @@ async function initDashMap() {
       xaLayer = L.geoJSON(xaGeojson, {
         style: { color: '#ffffff', weight: 2.5, fillColor: 'transparent', fillOpacity: 0, dashArray: '6,4', opacity: 0.6 }
       }).addTo(dashMap);
+      xaLayer.bindTooltip('Xã Kraya · Huyện Santuk · Kampong Thom', { sticky: true });
     } else {
       console.warn('Không tìm thấy file ranh giới xã, bỏ qua');
       xaLayer = L.geoJSON({ type: "FeatureCollection", features: [] }).addTo(dashMap);
