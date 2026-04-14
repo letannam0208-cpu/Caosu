@@ -566,12 +566,6 @@ td.mono{font-family:monospace;font-size:11px;color:var(--muted)}
 .msr-result-label{font-size:10px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.08em}
 .msr-result-value{font-size:20px;font-weight:700;color:var(--accent);font-family:var(--font-d)}
 
-.msr-result-sub {
-  display: none !important;
-}
-
-/* Ẩn hoàn toàn dòng phụ */
-.msr-result-sub { display: none; }
 .msr-points{font-size:10px;color:var(--muted);margin-bottom:8px}
 .msr-btns{display:flex;gap:6px}
 .msr-btn{
@@ -1111,7 +1105,6 @@ td.mono{font-family:monospace;font-size:11px;color:var(--muted)}
           <div class="msr-result">
             <div class="msr-result-label" id="msr-result-label">Khoảng cách</div>
             <div class="msr-result-value" id="msr-result-value">—</div>
-            <div class="msr-result-sub" id="msr-result-sub" style="display: none !important;">Chưa có điểm nào</div>
           </div>
           <div class="msr-points" id="msr-points-count">0 điểm</div>
           <div class="msr-btns">
@@ -1864,10 +1857,6 @@ function fmtDistance(m) {
 function fmtArea(m2) {
   return (m2 / 10000).toFixed(4) + ' ha';
 }
-// Dòng phụ đã bị ẩn bằng CSS nên không cần dùng nữa
-function fmtAreaSub(m2) {
-  return fmtArea(m2);
-}
 
 function openMeasure(mode) {
   window.previousTool = currentTool;
@@ -2048,7 +2037,6 @@ async function initDashMap() {
       xaLayer = L.geoJSON(xaGeojson, {
         style: { color: '#ffffff', weight: 2.5, fillColor: 'transparent', fillOpacity: 0, dashArray: '6,4', opacity: 0.6 }
       }).addTo(dashMap);
-      xaLayer.bindTooltip('Xã Kraya · Huyện Santuk · Kampong Thom', { sticky: false });
     } else {
       console.warn('Không tìm thấy file ranh giới xã, bỏ qua');
       xaLayer = L.geoJSON({ type: "FeatureCollection", features: [] }).addTo(dashMap);
