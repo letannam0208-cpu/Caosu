@@ -28,10 +28,10 @@ const pool = new Pool({
   database: process.env.DB_NAME,
   password: process.env.DB_PASSWORD,
   port: parseInt(process.env.DB_PORT) || 5432,
-  ssl: { rejectUnauthorized: false },
+  ssl: { rejectUnauthorized: true },
   max: 20,
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
+  connectionTimeoutMillis: 10000,
   statement_timeout: 60000, // 60 giây
   query_timeout: 60000,     // 60 giây
 });
