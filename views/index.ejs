@@ -1510,7 +1510,6 @@ function renderRealLots() {
             <div class="lo-popup-btn" onclick="editLot('${p.id_lo}')">Sửa</div>
           </div>
         `, { maxWidth: 320 });
-      }
 
         layer.on('mouseover', () => layer.setStyle({ fillOpacity: 0.7, weight: 2 }));
         layer.on('mouseout', () => { if (!selectedIdx.has(idx)) layer.setStyle({ fillOpacity: 0.52, weight: 1 }); });
