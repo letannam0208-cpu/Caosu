@@ -141,9 +141,10 @@ app.get('/api/nam-trong-stats', authenticateToken, async (req, res) => {
 app.get('/api/lo-cao-su', authenticateToken, async (req, res) => {
   try {
     const { doi, nam_trong, giong, phien_cao, nhip_do_cao, tai_canh_nam, khu_vuc, tuoi_cao, che_do_cao } = req.query;
-    let whereClause = 'WHERE geometry IS NOT NULL';
+    let whereClause = 'WHERE geojson IS NOT NULL';
     const params = [];
     let paramIndex = 1;
+
     if (doi) { params.push(doi); whereClause += ` AND doi = $${paramIndex++}`; }
     if (nam_trong) { params.push(parseInt(nam_trong)); whereClause += ` AND nam_trong = $${paramIndex++}`; }
     if (giong) { params.push(giong); whereClause += ` AND giong = $${paramIndex++}`; }
@@ -159,30 +160,52 @@ app.get('/api/lo-cao-su', authenticateToken, async (req, res) => {
         id_lo, ten_lo, giong, nam_trong, doi, du_an, khu_vuc,
         dien_tich_map, che_do_cao, phien_cao, nhip_do_cao, tuoi_cao,
         cay_cao, tai_canh_nam,
-        ST_AsGeoJSON(ST_Transform(geometry, 4326)) AS geometry
+        geojson
       FROM lo
       ${whereClause}
     `, params);
 
-    const features = result.rows.filter(row => row.geometry).map(row => ({
-      type: "Feature",
-      geometry: JSON.parse(row.geometry),
-      properties: {
-        id_lo: row.id_lo,
-        ten_lo: row.ten_lo,
-        giong: row.giong,
-        nam_trong: row.nam_trong,
-        doi: row.doi,
-        dien_tich_map: row.dien_tich_map,
-        che_do_cao: row.che_do_cao,
-        cay_cao: row.cay_cao,
-        phien_cao: row.phien_cao,
-        nhip_do_cao: row.nhip_do_cao,
-        tai_canh_nam: row.tai_canh_nam,
-        khu_vuc: row.khu_vuc,
-        tuoi_cao: row.tuoi_cao
-      }
-    }));
+    const features = result.rows
+      .filter(row => row.geojson)
+      .map(row => {
+        let geojsonObj;
+        try {
+          geojsonObj = typeof row.geojson === 'string' ? JSON.parse(row.geojson) : row.geojson;
+        } catch (e) {
+          console.error(`Lỗi parse geojson cho lô ${row.id_lo}:`, e.message);
+          return null;
+        }
+
+        let feature;
+        if (geojsonObj.type === 'Feature') {
+          feature = geojsonObj;
+        } else {
+          feature = {
+            type: "Feature",
+            geometry: geojsonObj,
+            properties: {}
+          };
+        }
+
+        feature.properties = {
+          id_lo: row.id_lo,
+          ten_lo: row.ten_lo,
+          giong: row.giong,
+          nam_trong: row.nam_trong,
+          doi: row.doi,
+          dien_tich_map: row.dien_tich_map,
+          che_do_cao: row.che_do_cao,
+          cay_cao: row.cay_cao,
+          phien_cao: row.phien_cao,
+          nhip_do_cao: row.nhip_do_cao,
+          tai_canh_nam: row.tai_canh_nam,
+          khu_vuc: row.khu_vuc,
+          tuoi_cao: row.tuoi_cao
+        };
+        return feature;
+      })
+      .filter(f => f !== null);
+
     res.json({ type: "FeatureCollection", features });
   } catch (err) {
     console.error('❌ Lỗi /api/lo-cao-su:', err.message);
@@ -194,7 +217,7 @@ app.get('/api/lo-cao-su', authenticateToken, async (req, res) => {
 app.get('/api/boundary', authenticateToken, async (req, res) => {
   try {
     const { doi } = req.query;
-    let whereClause = 'WHERE geometry IS NOT NULL';
+    let whereClause = 'WHERE geojson IS NOT NULL';
     const params = [];
     let paramIndex = 1;
     if (doi) { params.push(doi); whereClause += ` AND doi = $${paramIndex++}`; }
@@ -204,23 +227,40 @@ app.get('/api/boundary', authenticateToken, async (req, res) => {
         doi,
         du_an,
         khu_vuc,
-        ST_AsGeoJSON(ST_Transform(ST_Union(geometry), 4326)) as geometry
+        geojson
       FROM lo
       ${whereClause}
-      GROUP BY doi, du_an, khu_vuc
-      ORDER BY doi
     `, params);
 
-    const features = result.rows.filter(row => row.geometry).map(row => ({
-      type: "Feature",
-      geometry: JSON.parse(row.geometry),
-      properties: {
-        doi: row.doi || 'Toàn vùng',
-        du_an: row.du_an,
-        khu_vuc: row.khu_vuc,
-        type: 'boundary'
-      }
-    }));
+    const features = result.rows
+      .filter(row => row.geojson)
+      .map(row => {
+        let geojsonObj;
+        try {
+          geojsonObj = typeof row.geojson === 'string' ? JSON.parse(row.geojson) : row.geojson;
+        } catch (e) {
+          return null;
+        }
+        let feature;
+        if (geojsonObj.type === 'Feature') {
+          feature = geojsonObj;
+        } else {
+          feature = {
+            type: "Feature",
+            geometry: geojsonObj,
+            properties: {}
+          };
+        }
+        feature.properties = {
+          doi: row.doi || 'Toàn vùng',
+          du_an: row.du_an,
+          khu_vuc: row.khu_vuc,
+          type: 'boundary'
+        };
+        return feature;
+      })
+      .filter(f => f !== null);
+
     res.json({ type: "FeatureCollection", features });
   } catch (err) {
     console.error('Lỗi /api/boundary:', err.message);
