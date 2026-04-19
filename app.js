@@ -157,9 +157,14 @@ app.get('/api/lo-cao-su', authenticateToken, async (req, res) => {
 
     const result = await pool.query(`
       SELECT
-        id_lo, ten_lo, giong, nam_trong, doi, du_an, khu_vuc,
-        dien_tich_map, che_do_cao, phien_cao, nhip_do_cao, tuoi_cao,
-        cay_cao, tai_canh_nam,
+        id_lo, ten_lo, nam_trong, cao_trinh_tb, giong, du_an, doi, khu_vuc,
+        hang_dat, phuong_phap_trong, khoang_cach_trong, mat_do_tk,
+        dien_tich_010125, dien_tich_010126, dien_tich_map, tong_ho_kk,
+        cay_cao, cay_chua_cao, cay_kho_mu, cay_khong_pt, ho_trong, mat_do_cc,
+        che_do_cao, nam_mc, tuoi_cao, nam_cao_up, tinh_trang_mc,
+        ns25_kg_ha, ns25_kg_cay, tong_lat_cao, ns26_kg_cay, phan_loai,
+        xa, huyen, tinh, ns26_kg_ha, san_luong, phien_cao, nhip_do_cao,
+        tai_canh_nam, doi_tuong, nam_cap_nhat,
         geojson
       FROM lo
       ${whereClause}
@@ -187,20 +192,50 @@ app.get('/api/lo-cao-su', authenticateToken, async (req, res) => {
           };
         }
 
+        // Gán toàn bộ các trường từ database vào properties
         feature.properties = {
           id_lo: row.id_lo,
           ten_lo: row.ten_lo,
-          giong: row.giong,
           nam_trong: row.nam_trong,
+          cao_trinh_tb: row.cao_trinh_tb,
+          giong: row.giong,
+          du_an: row.du_an,
           doi: row.doi,
+          khu_vuc: row.khu_vuc,
+          hang_dat: row.hang_dat,
+          phuong_phap_trong: row.phuong_phap_trong,
+          khoang_cach_trong: row.khoang_cach_trong,
+          mat_do_tk: row.mat_do_tk,
+          dien_tich_010125: row.dien_tich_010125,
+          dien_tich_010126: row.dien_tich_010126,
           dien_tich_map: row.dien_tich_map,
-          che_do_cao: row.che_do_cao,
+          tong_ho_kk: row.tong_ho_kk,
           cay_cao: row.cay_cao,
+          cay_chua_cao: row.cay_chua_cao,
+          cay_kho_mu: row.cay_kho_mu,
+          cay_khong_pt: row.cay_khong_pt,
+          ho_trong: row.ho_trong,
+          mat_do_cc: row.mat_do_cc,
+          che_do_cao: row.che_do_cao,
+          nam_mc: row.nam_mc,
+          tuoi_cao: row.tuoi_cao,
+          nam_cao_up: row.nam_cao_up,
+          tinh_trang_mc: row.tinh_trang_mc,
+          ns25_kg_ha: row.ns25_kg_ha,
+          ns25_kg_cay: row.ns25_kg_cay,
+          tong_lat_cao: row.tong_lat_cao,
+          ns26_kg_cay: row.ns26_kg_cay,
+          phan_loai: row.phan_loai,
+          xa: row.xa,
+          huyen: row.huyen,
+          tinh: row.tinh,
+          ns26_kg_ha: row.ns26_kg_ha,
+          san_luong: row.san_luong,
           phien_cao: row.phien_cao,
           nhip_do_cao: row.nhip_do_cao,
           tai_canh_nam: row.tai_canh_nam,
-          khu_vuc: row.khu_vuc,
-          tuoi_cao: row.tuoi_cao
+          doi_tuong: row.doi_tuong,
+          nam_cap_nhat: row.nam_cap_nhat
         };
         return feature;
       })
