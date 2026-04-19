@@ -1,190 +1,222 @@
 <!DOCTYPE html>
 <html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Đăng nhập · WebGIS Cao Su</title>
-    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link
+      <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+      <link href="/assets/css/style.css" rel="stylesheet" />
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Be Vietnam Pro', sans-serif;
-            background: linear-gradient(135deg, #0a0e1a 0%, #0f172a 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-        .login-container {
-            max-width: 440px;
-            width: 100%;
-        }
-        .login-card {
-            background: rgba(17, 24, 39, 0.9);
-            backdrop-filter: blur(10px);
-            border-radius: 24px;
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            padding: 40px 32px;
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
-        }
-        .logo {
-            text-align: center;
-            margin-bottom: 32px;
-        }
-        .logo-icon {
-            width: 56px;
-            height: 56px;
-            background: linear-gradient(135deg, #10b981, #059669);
-            border-radius: 16px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
-            margin-bottom: 16px;
-        }
-        .logo h1 {
-            font-family: 'Syne', sans-serif;
-            font-size: 24px;
-            font-weight: 800;
-            letter-spacing: -0.02em;
-            color: #f0f4f9;
-        }
-        .logo p {
-            color: #6b7c9d;
-            font-size: 13px;
-            margin-top: 6px;
-        }
-        .input-group {
-            margin-bottom: 20px;
-        }
-        .input-group label {
-            display: block;
-            font-size: 12px;
-            font-weight: 600;
-            color: #8fa3bd;
-            margin-bottom: 6px;
-        }
-        .input-wrapper {
-            display: flex;
-            align-items: center;
-            background: #1a2332;
-            border: 1px solid #242e42;
-            border-radius: 12px;
-            transition: all 0.2s;
-        }
-        .input-wrapper:focus-within {
-            border-color: #10b981;
-            box-shadow: 0 0 0 2px rgba(16,185,129,0.2);
-        }
-        .input-wrapper i {
-            padding: 0 14px;
-            color: #6b7c9d;
-            font-size: 14px;
-        }
-        input {
-            width: 100%;
-            background: transparent;
-            border: none;
-            padding: 14px 14px 14px 0;
-            color: #f0f4f9;
-            font-size: 14px;
-            outline: none;
-        }
-        input::placeholder {
-            color: #4a5a7a;
-        }
-        .btn-login {
-            width: 100%;
-            background: linear-gradient(135deg, #10b981, #059669);
-            border: none;
-            padding: 14px;
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 14px;
-            color: white;
-            cursor: pointer;
-            transition: all 0.2s;
-            margin-top: 8px;
-        }
-        .btn-login:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(16,185,129,0.3);
-        }
-        .error-message {
-            background: rgba(239,68,68,0.15);
-            border: 1px solid rgba(239,68,68,0.3);
-            border-radius: 10px;
-            padding: 12px;
-            font-size: 12px;
-            color: #fca5a5;
-            margin-bottom: 20px;
-            display: none;
-        }
-        .info-text {
-            text-align: center;
-            margin-top: 24px;
-            font-size: 11px;
-            color: #4a5a7a;
-        }
+      
+      body {
+        font-family: "Inter", sans-serif;
+        background: linear-gradient(135deg, #0a0e1a 0%, #0f172a 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+      .login-container {
+        max-width: 440px;
+        width: 100%;
+      }
+      .login-card {
+        background: rgba(17, 24, 39, 0.9);
+        backdrop-filter: blur(10px);
+        border-radius: 24px;
+        border: 1px solid rgba(16, 185, 129, 0.3);
+        padding: 40px 32px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      }
+      .logo {
+        text-align: center;
+        margin-bottom: 32px;
+      }
+      .logo-icon {
+        width: 56px;
+        height: 56px;
+        background: linear-gradient(135deg, #10b981, #059669);
+        border-radius: 16px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        margin-bottom: 16px;
+      }
+      .logo h1 {
+        font-family: "Syne", sans-serif;
+        font-size: 24px;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        color: #f0f4f9;
+      }
+      .logo p {
+        color: #6b7c9d;
+        font-size: 13px;
+        margin-top: 6px;
+      }
+      .input-group {
+        margin-bottom: 20px;
+      }
+      .input-group label {
+        display: block;
+        font-size: 12px;
+        font-weight: 600;
+        color: #8fa3bd;
+        margin-bottom: 6px;
+      }
+      .input-wrapper {
+        display: flex;
+        align-items: center;
+        background: #1a2332;
+        border: 1px solid #242e42;
+        border-radius: 12px;
+        transition: all 0.2s;
+      }
+      .input-wrapper:focus-within {
+        border-color: #10b981;
+        box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+      }
+      .input-wrapper i {
+        padding: 0 14px;
+        color: #6b7c9d;
+        font-size: 14px;
+      }
+      input {
+        width: 100%;
+        background: transparent;
+        border: none;
+        padding: 14px 14px 14px 0;
+        color: #f0f4f9;
+        font-size: 14px;
+        outline: none;
+      }
+      input::placeholder {
+        color: #4a5a7a;
+      }
+      input:-webkit-autofill,
+      input:-webkit-autofill:focus,
+      input:-webkit-autofill:hover,
+      input:-webkit-autofill:active {
+        -webkit-box-shadow: 0 0 0 1000px #1a2332 inset !important;
+        box-shadow: 0 0 0 1000px #1a2332 inset !important;
+        -webkit-text-fill-color: #f0f4f9 !important;
+        color: #f0f4f9 !important;
+        transition: background-color 9999s ease-in-out 0s;
+      }
+      .btn-login {
+        width: 100%;
+        background: linear-gradient(135deg, #10b981, #059669);
+        border: none;
+        padding: 14px;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 14px;
+        color: white;
+        cursor: pointer;
+        transition: all 0.2s;
+        margin-top: 8px;
+      }
+      .btn-login:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+      }
+      .error-message {
+        background: rgba(239, 68, 68, 0.15);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        border-radius: 10px;
+        padding: 12px;
+        font-size: 12px;
+        color: #fca5a5;
+        margin-bottom: 20px;
+        display: none;
+      }
+      .info-text {
+        text-align: center;
+        margin-top: 24px;
+        font-size: 11px;
+        color: #4a5a7a;
+      }
     </style>
-</head>
-<body>
-<div class="login-container">
-    <div class="login-card">
+  </head>
+  <body>
+    <div class="login-container">
+      <div class="login-card">
         <div class="logo">
-            <div class="logo-icon">🌿</div>
-            <h1>WEBGIS CAO SU</h1>
-            <p>Quản lý vườn cây thông minh</p>
+          <div class="">
+          <img
+            src="/assets/image/logoTBK.jpg"
+            alt="Logo"
+            style="width: 100px; height: 100px" />
+        </div>
+          <h1>GIS TBKRUCO</h1>
+          <p>Quản lý vườn cây thông minh</p>
         </div>
         <div class="error-message" id="errorMsg"></div>
         <form id="loginForm">
-            <div class="input-group">
-                <label>Tên đăng nhập</label>
-                <div class="input-wrapper">
-                    <i class="fas fa-user"></i>
-                    <input type="text" id="username" placeholder="admin" required autofocus>
-                </div>
+          <div class="input-group">
+            <label>Tên đăng nhập</label>
+            <div class="input-wrapper">
+              <i class="fas fa-user"></i>
+              <input
+                type="text"
+                id="username"
+                placeholder="admin"
+                required
+                autofocus />
             </div>
-            <div class="input-group">
-                <label>Mật khẩu</label>
-                <div class="input-wrapper">
-                    <i class="fas fa-lock"></i>
-                    <input type="password" id="password" placeholder="••••••••" required>
-                </div>
+          </div>
+          <div class="input-group">
+            <label>Mật khẩu</label>
+            <div class="input-wrapper">
+              <i class="fas fa-lock"></i>
+              <input
+                type="password"
+                id="password"
+                placeholder="••••••••"
+                required />
             </div>
-            <button type="submit" class="btn-login"><i class="fas fa-arrow-right-to-bracket"></i> Đăng nhập</button>
+          </div>
+          <button type="submit" class="btn-login">
+            <i class="fas fa-arrow-right-to-bracket"></i> Đăng nhập
+          </button>
         </form>
-        <div class="info-text">© 2026 WebGIS Cao Su - Bản quyền thuộc Công ty</div>
+        <div class="info-text">
+          © 2026 GIS TBKRUCO - Bản quyền thuộc TBKRUCO
+        </div>
+      </div>
     </div>
-</div>
-<script>
-    const form = document.getElementById('loginForm');
-    const errorDiv = document.getElementById('errorMsg');
-    form.addEventListener('submit', async (e) => {
+    <script>
+      const form = document.getElementById("loginForm");
+      const errorDiv = document.getElementById("errorMsg");
+      form.addEventListener("submit", async (e) => {
         e.preventDefault();
-        errorDiv.style.display = 'none';
-        const username = document.getElementById('username').value.trim();
-        const password = document.getElementById('password').value;
+        errorDiv.style.display = "none";
+        const username = document.getElementById("username").value.trim();
+        const password = document.getElementById("password").value;
         try {
-            const res = await fetch('/api/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password })
-            });
-            const data = await res.json();
-            if (data.success) {
-                window.location.href = data.redirect;
-            } else {
-                errorDiv.textContent = data.error || 'Đăng nhập thất bại';
-                errorDiv.style.display = 'block';
-            }
+          const res = await fetch("/api/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, password }),
+          });
+          const data = await res.json();
+          if (data.success) {
+            window.location.href = data.redirect;
+          } else {
+            errorDiv.textContent = data.error || "Đăng nhập thất bại";
+            errorDiv.style.display = "block";
+          }
         } catch (err) {
-            errorDiv.textContent = 'Lỗi kết nối đến server';
-            errorDiv.style.display = 'block';
+          errorDiv.textContent = "Lỗi kết nối đến server";
+          errorDiv.style.display = "block";
         }
-    });
-</script>
-</body>
+      });
+    </script>
+  </body>
 </html>

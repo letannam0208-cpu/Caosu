@@ -1,386 +1,546 @@
 <!DOCTYPE html>
 <html lang="vi">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title><%= title %></title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
-<style>
-  :root {
-    --bg: #0a0e1a;
-    --s1: #111827;
-    --s2: #1a2332;
-    --s3: #242e42;
-    --border: rgba(255,255,255,0.08);
-    --border2: rgba(255,255,255,0.14);
-    --text: #f0f4f9;
-    --muted: #6b7c9d;
-    --muted2: #8fa3bd;
-    --accent: #00d68f;
-    --accentB: #00b4ff;
-    --warn: #f59e0b;
-    --danger: #ef4444;
-    --font: 'Inter', sans-serif;
-    --nav-w: 200px;
-    --top-h: 64px;
-    --r: 8px;
-    --r-lg: 12px;
-  }
-  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-  html{scroll-behavior:smooth}
-  body{
-    font-family:var(--font);
-    background:var(--bg);
-    color:var(--text);
-    height:100vh;
-    overflow:hidden;
-    display:flex;
-    flex-direction:column;
-  }
-  ::-webkit-scrollbar{width:6px;height:6px}
-  ::-webkit-scrollbar-track{background:transparent}
-  ::-webkit-scrollbar-thumb{background:var(--s3);border-radius:3px}
-  
-  /* ===== TOP BAR GIỐNG INDEX ===== */
-  #topbar{
-    height:var(--top-h);flex-shrink:0;
-    background:var(--s1);border-bottom:1px solid var(--border);
-    display:flex;align-items:center;padding:0 20px;gap:16px;
-    position:relative;z-index:100;
-  }
-  #topbar::after{
-    content:'';position:absolute;bottom:0;left:0;right:0;height:1px;
-    background:linear-gradient(90deg,transparent,rgba(0,214,143,0.3),transparent);
-  }
-  .tb-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
-  .tb-icon{
-    width:34px;height:34px;border-radius:9px;
-    background:linear-gradient(135deg,var(--accent),var(--accentB));
-    display:flex;align-items:center;justify-content:center;font-size:17px;
-    box-shadow:0 0 20px rgba(0,214,143,0.25);flex-shrink:0;
-  }
-  .tb-title{font-family:var(--font);font-size:14px;letter-spacing:.06em;color:var(--text);font-weight:600;}
-  .tb-sep{width:1px;height:28px;background:var(--border);margin:0 4px}
-  .tb-pill{
-    background:var(--s2);border:1px solid var(--border);border-radius:6px;
-    padding:5px 12px;font-size:11px;color:var(--muted2);display:flex;align-items:center;gap:6px;
-  }
-  .tb-pill strong{color:var(--text);font-size:13px}
-  .live-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 6px var(--accent);animation:blink 2s infinite}
-  @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
-  .tb-right{margin-left:auto;display:flex;align-items:center;gap:10px}
-  .tb-avatar{
-    width:32px;height:32px;border-radius:50%;
-    background:linear-gradient(135deg,#00b4ff,#a78bfa);
-    display:flex;align-items:center;justify-content:center;
-    font-size:12px;font-weight:600;color:#fff;cursor:pointer;
-    border:2px solid var(--border2);transition:.2s;
-  }
-  .tb-avatar:hover{border-color:var(--accent)}
-  .tb-user-info{text-align:right}
-  .tb-user-name{font-size:12px;font-weight:500;color:var(--text)}
-  .tb-user-role{font-size:10px;color:var(--muted)}
-  /* ===== KẾT THÚC TOP BAR ===== */
-
-  #body{display:flex;flex:1;overflow:hidden;}
-  #nav{width:var(--nav-w);flex-shrink:0;background:linear-gradient(180deg,var(--s1),var(--bg));border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;padding:16px 10px;gap:4px;}
-  .nav-section-label{font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);padding:8px 12px 6px;margin:8px 0 2px;}
-  .nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--r);cursor:pointer;transition:0.2s;color:var(--muted2);font-size:13px;font-weight:500;border:1px solid transparent;text-decoration:none;}
-  .nav-item:hover{background:rgba(255,255,255,0.05);color:var(--text);border-color:var(--border2);}
-  .nav-item.active{background:rgba(0,214,143,0.15);border-color:var(--accent);color:var(--accent);font-weight:600;}
-  .nav-icon{width:16px;height:16px;text-align:center;font-size:13px;}
-  .nav-logout{margin-top:auto;border-top:1px solid var(--border);padding-top:12px;}
-  .nav-logout .nav-item{color:#fca5a5;border:1px solid rgba(239,68,68,0.2);background:rgba(239,68,68,0.08);}
-  .nav-logout .nav-item:hover{background:rgba(239,68,68,0.15);border-color:rgba(239,68,68,0.4);color:#ff9999;}
-  #content{flex:1;overflow-y:auto;padding:20px 24px;background:linear-gradient(135deg,rgba(10,14,26,0),rgba(0,214,143,0.03));}
-  .page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;}
-  .page-title{font-family:var(--font);font-size:28px;font-weight:800;color:var(--text);letter-spacing:-0.02em;}
-  .page-subtitle{font-size:12px;color:var(--muted);margin-top:4px;}
-  .form-container{background:var(--s1);border:1px solid var(--border);border-radius:var(--r-lg);padding:24px;box-shadow:0 4px 12px rgba(0,0,0,0.2);}
-  .form-section-title{font-size:14px;font-weight:700;color:var(--text);margin:0 0 16px 0;padding-bottom:8px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
-  .upload-zone{border:2px dashed var(--border2);border-radius:var(--r-lg);padding:30px;text-align:center;cursor:pointer;transition:0.2s;background:rgba(0,214,143,0.03);margin-bottom:20px;}
-  .upload-zone:hover{border-color:var(--accent);background:rgba(0,214,143,0.08);}
-  .upload-icon{font-size:40px;display:block;margin-bottom:12px;}
-  .upload-hint{font-size:11px;color:var(--muted);margin-top:8px;}
-  .preview-table{overflow-x:auto;margin-top:20px;max-height:400px;overflow-y:auto;}
-  .preview-table table{width:100%;border-collapse:collapse;font-size:11px;}
-  .preview-table th,.preview-table td{border:1px solid var(--border);padding:6px;text-align:left;}
-  .preview-table th{background:var(--s2);color:var(--accent);position:sticky;top:0;}
-  .status-msg{padding:10px;border-radius:var(--r);margin-top:16px;}
-  .import-log{background:var(--s2);border-radius:var(--r);padding:12px;margin-top:16px;max-height:300px;overflow-y:auto;font-family:monospace;font-size:11px;display:none;}
-  .log-entry{padding:4px 0;border-bottom:1px solid var(--border);}
-  .log-time{color:var(--muted);margin-right:8px;}
-  .log-update{color:var(--warn);}
-  .log-insert{color:var(--accent);}
-  .log-error{color:var(--danger);}
-  .log-info{color:var(--muted2);}
-  .btn-submit,.btn-reset{padding:10px 20px;border-radius:var(--r);font-weight:600;cursor:pointer;transition:0.2s;border:none;display:inline-flex;align-items:center;gap:8px;font-family:var(--font);}
-  .btn-submit{background:linear-gradient(135deg,var(--accent),#059669);color:#fff;}
-  .btn-submit:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,214,143,0.3);}
-  .btn-reset{background:rgba(255,255,255,0.05);color:var(--muted2);border:1px solid var(--border);}
-  .btn-reset:hover{background:rgba(255,255,255,0.08);color:var(--text);}
-  .form-group{display:flex;flex-direction:column;margin-bottom:16px;}
-  .form-group label{font-size:12px;font-weight:600;color:var(--muted2);margin-bottom:6px;}
-  .form-group input{padding:10px 12px;border-radius:var(--r);background:var(--s2);border:1px solid var(--border);color:var(--text);font-size:12px;font-family:var(--font);}
-  .form-group input:focus{outline:none;border-color:var(--accent);}
-</style>
-</head>
-<body>
-<div id="topbar">
-  <div class="tb-logo">
-    <div class="tb-icon">🌿</div>
-    <div>
-      <div class="tb-title">GIS_TBKRUCO</div>
-    </div>
-  </div>
-  <div class="tb-sep"></div>
-  <div class="tb-pill"><div class="live-dot"></div><span>Trực tuyến</span></div>
-  <div class="tb-pill"><span>Số lô</span> <strong id="totalLots">0</strong></div>
-  <div class="tb-pill"><span>Diện tích</span> <strong id="totalArea">0 ha</strong></div>
-  <div class="tb-right">
-    <div class="tb-user-info">
-      <div class="tb-user-name"><%= user.fullname %></div>
-      <div class="tb-user-role"><%= user.role === 'admin' ? 'Quản trị viên' : 'Người dùng' %></div>
-    </div>
-    <div class="tb-avatar"><%= user.fullname.charAt(0) %></div>
-  </div>
-</div>
-
-<div id="body">
-  <nav id="nav">
-    <div class="nav-section-label">Tổng quan</div>
-    <a href="/" class="nav-item <%= path === '/' ? 'active' : '' %>"><i class="fas fa-home nav-icon"></i> Dashboard</a>
-    <div class="nav-section-label">Quản lý dữ liệu</div>
-    <a href="/quan-ly-lo-cay" class="nav-item <%= path === '/quan-ly-lo-cay' ? 'active' : '' %>"><i class="fas fa-tree nav-icon"></i> Quản lý lô cây</a>
-    <a href="/them-du-lieu-lo-cay" class="nav-item <%= path === '/them-du-lieu-lo-cay' ? 'active' : '' %>"><i class="fas fa-plus-circle nav-icon"></i> Thêm dữ liệu lô</a>
-    <div class="nav-section-label">Người dùng & Phân quyền</div>
-    <a href="/quan-ly-nguoi-dung" class="nav-item <%= path === '/quan-ly-nguoi-dung' ? 'active' : '' %>"><i class="fas fa-users nav-icon"></i> Quản lý người dùng</a>
-    <div class="nav-section-label">Phân tích</div>
-    <a href="/thong-ke" class="nav-item <%= path === '/thong-ke' ? 'active' : '' %>"><i class="fas fa-chart-bar nav-icon"></i> Thống kê</a>
-    <div class="nav-logout"><a href="/logout" class="nav-item"><i class="fas fa-sign-out-alt nav-icon"></i> Đăng xuất</a></div>
-  </nav>
-
-  <div id="content">
-    <div class="page-header">
-      <div><h1 class="page-title">Nhập dữ liệu từ Excel</h1><p class="page-subtitle">Cập nhật thông tin lô cây hàng loạt, tự động lưu lịch sử theo năm</p></div>
-    </div>
-
-    <div class="form-container">
-      <div class="form-section-title"><i class="fas fa-file-excel"></i> Nhập file Excel cho bảng Lô cây</div>
-      
-      <!-- Nhập năm cập nhật -->
-      <div class="form-group">
-        <label><i class="fas fa-calendar-alt"></i> Năm cập nhật (bắt buộc)</label>
-        <input type="number" id="namCapNhat" placeholder="Ví dụ: 2027" required>
-        <div class="upload-hint">Dữ liệu hiện tại sẽ được lưu vào bảng lịch sử với năm tương ứng</div>
-      </div>
-
-      <!-- Upload zone -->
-      <div class="upload-zone" id="uploadZone">
-        <span class="upload-icon">📁</span>
-        <div class="upload-text">Kéo thả hoặc click để chọn file Excel/CSV</div>
-        <div class="upload-hint">Hỗ trợ .xlsx, .xls, .csv - Các cột phải khớp với cấu trúc bảng lo</div>
-        <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display:none;">
-      </div>
-      
-      <!-- Link tải file mẫu từ thư mục public -->
-      <a href="/lo.xlsx" download class="btn-reset" style="display:inline-flex; align-items:center; gap:8px; text-decoration:none; margin-bottom:16px;">
-        <i class="fas fa-download"></i> Tải file mẫu (bảng lo)
-      </a>
-      
-      <!-- Preview area -->
-      <div id="previewArea" style="display:none;">
-        <div class="form-section-title"><i class="fas fa-table"></i> Xem trước dữ liệu</div>
-        <div class="preview-table" id="previewTable"></div>
-        <div style="display:flex; gap:12px; margin-top:16px;">
-          <button class="btn-submit" id="submitImport"><i class="fas fa-upload"></i> Gửi dữ liệu</button>
-          <button class="btn-reset" id="clearPreview"><i class="fas fa-times"></i> Xóa preview</button>
-        </div>
-        <div id="importStatus" class="status-msg"></div>
-      </div>
-
-      <!-- Import log -->
-      <div id="importLog" class="import-log">
-        <div style="font-weight:600; margin-bottom:8px; color:var(--accent);">
-          <i class="fas fa-list"></i> Nhật ký xử lý
-        </div>
-        <div id="logContent"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script>
-  // ==================== UTILITIES ====================
-  function addLog(message, type = 'info') {
-    const logDiv = document.getElementById('logContent');
-    const time = new Date().toLocaleTimeString();
-    const logEntry = document.createElement('div');
-    logEntry.className = 'log-entry';
-    logEntry.innerHTML = `<span class="log-time">[${time}]</span> <span class="log-${type}">${message}</span>`;
-    logDiv.appendChild(logEntry);
-    logDiv.scrollTop = logDiv.scrollHeight;
-    document.getElementById('importLog').style.display = 'block';
-  }
-
-  function clearLog() {
-    document.getElementById('logContent').innerHTML = '';
-  }
-
-  // Cập nhật thống kê
-  async function updateStats() {
-    try {
-      const res = await fetch('/api/lo-cay');
-      const data = await res.json();
-      if(data.success) {
-        const totalLots = data.data.length;
-        const totalArea = data.data.reduce((s, l) => s + (parseFloat(l.dien_tich_map) || 0), 0);
-        document.getElementById('totalLots').innerText = totalLots;
-        document.getElementById('totalArea').innerHTML = totalArea.toFixed(3) + ' ha';
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title %></title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap"
+      rel="stylesheet" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+    <link href="/assets/css/style.css" rel="stylesheet" />
+    <style>
+      .form-container {
+        background: var(--s1);
+        border: 1px solid var(--border);
+        border-radius: var(--r-lg);
+        padding: 24px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
       }
-    } catch(e) {}
-  }
+      .form-section-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--text);
+        margin: 0 0 16px 0;
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .upload-zone {
+        border: 2px dashed var(--border2);
+        border-radius: var(--r-lg);
+        padding: 30px;
+        text-align: center;
+        cursor: pointer;
+        transition: 0.2s;
+        background: rgba(0, 214, 143, 0.03);
+        margin-bottom: 20px;
+      }
+      .upload-zone:hover {
+        border-color: var(--accent);
+        background: rgba(0, 214, 143, 0.08);
+      }
+      .upload-icon {
+        font-size: 40px;
+        display: block;
+        margin-bottom: 12px;
+      }
+      .upload-hint {
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 8px;
+      }
+      .preview-table {
+        overflow-x: auto;
+        margin-top: 20px;
+        max-height: 400px;
+        overflow-y: auto;
+      }
+      .preview-table table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 11px;
+      }
+      .preview-table th,
+      .preview-table td {
+        border: 1px solid var(--border);
+        padding: 6px;
+        text-align: left;
+      }
+      .preview-table th {
+        background: var(--s2);
+        color: var(--accent);
+        position: sticky;
+        top: 0;
+      }
+      .status-msg {
+        padding: 10px;
+        border-radius: var(--r);
+        margin-top: 16px;
+      }
+      .import-log {
+        background: var(--s2);
+        border-radius: var(--r);
+        padding: 12px;
+        margin-top: 16px;
+        max-height: 300px;
+        overflow-y: auto;
+        font-family: monospace;
+        font-size: 11px;
+        display: none;
+      }
+      .log-entry {
+        padding: 4px 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .log-time {
+        color: var(--muted);
+        margin-right: 8px;
+      }
+      .log-update {
+        color: var(--warn);
+      }
+      .log-insert {
+        color: var(--accent);
+      }
+      .log-error {
+        color: var(--danger);
+      }
+      .log-info {
+        color: var(--muted2);
+      }
+      .btn-submit,
+      .btn-reset {
+        padding: 10px 20px;
+        border-radius: var(--r);
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.2s;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-family: var(--font);
+      }
+      .btn-submit {
+        background: linear-gradient(135deg, var(--accent), #059669);
+        color: #fff;
+      }
+      .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 214, 143, 0.3);
+      }
+      .btn-reset {
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--muted2);
+        border: 1px solid var(--border);
+      }
+      .btn-reset:hover {
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--text);
+      }
+      .form-group {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 16px;
+      }
+      .form-group label {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--muted2);
+        margin-bottom: 6px;
+      }
+      .form-group input {
+        padding: 10px 12px;
+        border-radius: var(--r);
+        background: var(--s2);
+        border: 1px solid var(--border);
+        color: var(--text);
+        font-size: 12px;
+        font-family: var(--font);
+      }
+      .form-group input:focus {
+        outline: none;
+        border-color: var(--accent);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="topbar">
+      <div class="tb-logo">
+        <div class="">
+          <img
+            src="/assets/image/logoTBK.jpg"
+            alt="Logo"
+            style="width: 32px; height: 32px" />
+        </div>
+        <div>
+          <div class="tb-title">GIS TBKRUCO</div>
+        </div>
+      </div>
+      <div class="tb-sep"></div>
+      <div class="tb-pill">
+        <div class="live-dot"></div>
+        <span>Trực tuyến</span>
+      </div>
+      <div class="tb-pill">
+        <span>Số lô</span> <strong id="totalLots">0</strong>
+      </div>
+      <div class="tb-pill">
+        <span>Diện tích</span> <strong id="totalArea">0 ha</strong>
+      </div>
+      <div class="tb-right">
+        <div class="tb-user-info">
+          <div class="tb-user-name"><%= user.fullname %></div>
+          <div class="tb-user-role">
+            <%= user.role === 'admin' ? 'Quản trị viên' : 'Người dùng' %>
+          </div>
+        </div>
+        <div class="tb-avatar"><%= user.fullname.charAt(0) %></div>
+      </div>
+    </div>
 
-  // ==================== XỬ LÝ UPLOAD FILE ====================
-  const uploadZone = document.getElementById('uploadZone');
-  const fileInput = document.getElementById('fileInput');
-  let uploadedData = null;
+    <div id="body">
+      <nav id="nav">
+        <div class="nav-section-label">Tổng quan</div>
+        <a href="/" class="nav-item <%= path === '/' ? 'active' : '' %>"
+          ><i class="fas fa-home nav-icon"></i> Dashboard</a
+        >
+        <div class="nav-section-label">Quản lý dữ liệu</div>
+        <a
+          href="/quan-ly-lo-cay"
+          class="nav-item <%= path === '/quan-ly-lo-cay' ? 'active' : '' %>"
+          ><i class="fas fa-tree nav-icon"></i> Quản lý lô cây</a
+        >
+        <a
+          href="/them-du-lieu-lo-cay"
+          class="nav-item <%= path === '/them-du-lieu-lo-cay' ? 'active' : '' %>"
+          ><i class="fas fa-plus-circle nav-icon"></i> Thêm dữ liệu lô</a
+        >
+        <div class="nav-section-label">Người dùng & Phân quyền</div>
+        <a
+          href="/quan-ly-nguoi-dung"
+          class="nav-item <%= path === '/quan-ly-nguoi-dung' ? 'active' : '' %>"
+          ><i class="fas fa-users nav-icon"></i> Quản lý người dùng</a
+        >
+        <div class="nav-section-label">Phân tích</div>
+        <a
+          href="/thong-ke"
+          class="nav-item <%= path === '/thong-ke' ? 'active' : '' %>"
+          ><i class="fas fa-chart-bar nav-icon"></i> Thống kê</a
+        >
+        <div class="nav-logout">
+          <a href="/logout" class="nav-item"
+            ><i class="fas fa-sign-out-alt nav-icon"></i> Đăng xuất</a
+          >
+        </div>
+      </nav>
 
-  uploadZone.addEventListener('click', () => fileInput.click());
-  uploadZone.addEventListener('dragover', (e) => { e.preventDefault(); uploadZone.style.borderColor = 'var(--accent)'; });
-  uploadZone.addEventListener('dragleave', () => uploadZone.style.borderColor = 'var(--border2)');
-  uploadZone.addEventListener('drop', (e) => {
-    e.preventDefault();
-    uploadZone.style.borderColor = 'var(--border2)';
-    const file = e.dataTransfer.files[0];
-    if(file) handleFile(file);
-  });
-  fileInput.addEventListener('change', (e) => {
-    if(e.target.files.length) handleFile(e.target.files[0]);
-  });
+      <div id="content">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Nhập dữ liệu từ Excel</h1>
+            <p class="page-subtitle">
+              Cập nhật thông tin lô cây hàng loạt, tự động lưu lịch sử theo năm
+            </p>
+          </div>
+        </div>
 
-  function handleFile(file) {
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      const data = new Uint8Array(e.target.result);
-      const workbook = XLSX.read(data, { type: 'array' });
-      const sheet = workbook.Sheets[workbook.SheetNames[0]];
-      const json = XLSX.utils.sheet_to_json(sheet);
-      uploadedData = json;
-      showPreview(json);
-      addLog(`📁 Đã tải file: ${file.name} - Số dòng: ${json.length}`, 'info');
-    };
-    reader.readAsArrayBuffer(file);
-  }
+        <div class="form-container">
+          <div class="form-section-title">
+            <i class="fas fa-file-excel"></i> Nhập file Excel cho bảng Lô cây
+          </div>
 
-  function showPreview(data) {
-    const previewDiv = document.getElementById('previewArea');
-    const previewTable = document.getElementById('previewTable');
-    if(!data || data.length === 0) {
-      previewDiv.style.display = 'none';
-      return;
-    }
-    if(data.length > 200) {
-      addLog(`⚠️ File có ${data.length} dòng, chỉ hiển thị 200 dòng đầu`, 'info');
-    }
-    const headers = Object.keys(data[0]);
-    let html = '<div style="margin-bottom:8px; color:var(--accent);">📊 ' + data.length + ' dòng dữ liệu</div>';
-    html += '<table><thead><tr>';
-    headers.forEach(h => html += `<th>${h}</th>`);
-    html += '</tr></thead><tbody>';
-    const displayData = data.slice(0, 200);
-    displayData.forEach(row => {
-      html += '<tr>';
-      headers.forEach(h => html += `<td>${row[h] !== undefined && row[h] !== null ? row[h] : ''}</td>`);
-      html += '</tr>';
-    });
-    if(data.length > 200) {
-      html += `<tr><td colspan="${headers.length}" style="text-align:center; color:var(--muted);">... và ${data.length - 200} dòng khác</td></tr>`;
-    }
-    html += '</tbody></table>';
-    previewTable.innerHTML = html;
-    previewDiv.style.display = 'block';
-  }
+          <!-- Nhập năm cập nhật -->
+          <div class="form-group">
+            <label
+              ><i class="fas fa-calendar-alt"></i> Năm cập nhật (bắt
+              buộc)</label
+            >
+            <input
+              type="number"
+              id="namCapNhat"
+              placeholder="Ví dụ: 2027"
+              required />
+            <div class="upload-hint">
+              Dữ liệu hiện tại sẽ được lưu vào bảng lịch sử với năm tương ứng
+            </div>
+          </div>
 
-  document.getElementById('clearPreview')?.addEventListener('click', () => {
-    uploadedData = null;
-    document.getElementById('previewArea').style.display = 'none';
-    fileInput.value = '';
-    clearLog();
-    document.getElementById('importLog').style.display = 'none';
-  });
+          <!-- Upload zone -->
+          <div class="upload-zone" id="uploadZone">
+            <span class="upload-icon">📁</span>
+            <div class="upload-text">
+              Kéo thả hoặc click để chọn file Excel/CSV
+            </div>
+            <div class="upload-hint">
+              Hỗ trợ .xlsx, .xls, .csv - Các cột phải khớp với cấu trúc bảng lo
+            </div>
+            <input
+              type="file"
+              id="fileInput"
+              accept=".xlsx,.xls,.csv"
+              style="display: none" />
+          </div>
 
-  // Gửi import lên server
-  document.getElementById('submitImport').addEventListener('click', async () => {
-    if(!uploadedData || uploadedData.length === 0) {
-      alert('Chưa có dữ liệu để nhập. Hãy chọn file Excel trước.');
-      return;
-    }
-    const namCapNhat = document.getElementById('namCapNhat').value;
-    if(!namCapNhat || isNaN(namCapNhat)) {
-      alert('Vui lòng nhập năm cập nhật (ví dụ: 2027)');
-      return;
-    }
+          <!-- Link tải file mẫu từ thư mục public -->
+          <a
+            href="/lo.xlsx"
+            download
+            class="btn-reset"
+            style="
+              display: inline-flex;
+              align-items: center;
+              gap: 8px;
+              text-decoration: none;
+              margin-bottom: 16px;
+            ">
+            <i class="fas fa-download"></i> Tải file mẫu (bảng lo)
+          </a>
 
-    const confirmMsg = `📊 XÁC NHẬN NHẬP DỮ LIỆU\n\n` +
-      `• Bảng: Lô cây\n` +
-      `• Số dòng: ${uploadedData.length}\n` +
-      `• Năm cập nhật: ${namCapNhat}\n` +
-      `• Dữ liệu cũ sẽ được tự động lưu vào bảng lịch sử\n\n` +
-      `Bạn có chắc chắn muốn tiếp tục?`;
-    if(!confirm(confirmMsg)) return;
+          <!-- Preview area -->
+          <div id="previewArea" style="display: none">
+            <div class="form-section-title">
+              <i class="fas fa-table"></i> Xem trước dữ liệu
+            </div>
+            <div class="preview-table" id="previewTable"></div>
+            <div style="display: flex; gap: 12px; margin-top: 16px">
+              <button class="btn-submit" id="submitImport">
+                <i class="fas fa-upload"></i> Gửi dữ liệu
+              </button>
+              <button class="btn-reset" id="clearPreview">
+                <i class="fas fa-times"></i> Xóa preview
+              </button>
+            </div>
+            <div id="importStatus" class="status-msg"></div>
+          </div>
 
-    clearLog();
-    addLog(`🚀 BẮT ĐẦU NHẬP LIỆU - Năm: ${namCapNhat}`, 'info');
-    addLog(`📊 Tổng số dòng cần xử lý: ${uploadedData.length}`, 'info');
+          <!-- Import log -->
+          <div id="importLog" class="import-log">
+            <div
+              style="
+                font-weight: 600;
+                margin-bottom: 8px;
+                color: var(--accent);
+              ">
+              <i class="fas fa-list"></i> Nhật ký xử lý
+            </div>
+            <div id="logContent"></div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-    // Tạo FormData để gửi file
-    const formData = new FormData();
-    // Chuyển đổi uploadedData (mảng JSON) thành file Blob
-    const ws = XLSX.utils.json_to_sheet(uploadedData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
-    const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-    const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    const file = new File([blob], 'import_data.xlsx', { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    formData.append('file', file);
-    formData.append('nam_cap_nhat', namCapNhat);
+    <script>
+      // ==================== UTILITIES ====================
+      function addLog(message, type = "info") {
+        const logDiv = document.getElementById("logContent");
+        const time = new Date().toLocaleTimeString();
+        const logEntry = document.createElement("div");
+        logEntry.className = "log-entry";
+        logEntry.innerHTML = `<span class="log-time">[${time}]</span> <span class="log-${type}">${message}</span>`;
+        logDiv.appendChild(logEntry);
+        logDiv.scrollTop = logDiv.scrollHeight;
+        document.getElementById("importLog").style.display = "block";
+      }
 
-    const statusDiv = document.getElementById('importStatus');
-    statusDiv.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Đang xử lý, vui lòng chờ...';
-    
-    try {
-      const res = await fetch('/api/import-excel', {
-        method: 'POST',
-        body: formData
+      function clearLog() {
+        document.getElementById("logContent").innerHTML = "";
+      }
+
+      // Cập nhật thống kê
+      async function updateStats() {
+        try {
+          const res = await fetch("/api/lo-cay");
+          const data = await res.json();
+          if (data.success) {
+            const totalLots = data.data.length;
+            const totalArea = data.data.reduce(
+              (s, l) => s + (parseFloat(l.dien_tich_map) || 0),
+              0,
+            );
+            document.getElementById("totalLots").innerText = totalLots;
+            document.getElementById("totalArea").innerHTML =
+              totalArea.toFixed(3) + " ha";
+          }
+        } catch (e) {}
+      }
+
+      // ==================== XỬ LÝ UPLOAD FILE ====================
+      const uploadZone = document.getElementById("uploadZone");
+      const fileInput = document.getElementById("fileInput");
+      let uploadedData = null;
+
+      uploadZone.addEventListener("click", () => fileInput.click());
+      uploadZone.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        uploadZone.style.borderColor = "var(--accent)";
       });
-      const result = await res.json();
-      if(result.success) {
-        statusDiv.innerHTML = `<span style="color:var(--accent)">✅ ${result.message}</span>`;
-        addLog(`✅ ${result.message}`, 'insert');
-        addLog(`💾 Dữ liệu cũ đã được lưu vào bảng lịch sử (lo_history)`, 'info');
-        updateStats();
-        // Reset sau khi thành công
-        uploadedData = null;
-        document.getElementById('previewArea').style.display = 'none';
-        fileInput.value = '';
-        document.getElementById('namCapNhat').value = '';
-      } else {
-        statusDiv.innerHTML = `<span style="color:var(--danger)">❌ Lỗi: ${result.error}</span>`;
-        addLog(`❌ Lỗi: ${result.error}`, 'error');
-      }
-    } catch(err) {
-      statusDiv.innerHTML = `<span style="color:var(--danger)">❌ Lỗi kết nối: ${err.message}</span>`;
-      addLog(`❌ Lỗi kết nối: ${err.message}`, 'error');
-    }
-  });
+      uploadZone.addEventListener(
+        "dragleave",
+        () => (uploadZone.style.borderColor = "var(--border2)"),
+      );
+      uploadZone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        uploadZone.style.borderColor = "var(--border2)";
+        const file = e.dataTransfer.files[0];
+        if (file) handleFile(file);
+      });
+      fileInput.addEventListener("change", (e) => {
+        if (e.target.files.length) handleFile(e.target.files[0]);
+      });
 
-  // Khởi tạo thống kê
-  updateStats();
-</script>
-</body>
+      function handleFile(file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: "array" });
+          const sheet = workbook.Sheets[workbook.SheetNames[0]];
+          const json = XLSX.utils.sheet_to_json(sheet);
+          uploadedData = json;
+          showPreview(json);
+          addLog(
+            `📁 Đã tải file: ${file.name} - Số dòng: ${json.length}`,
+            "info",
+          );
+        };
+        reader.readAsArrayBuffer(file);
+      }
+
+      function showPreview(data) {
+        const previewDiv = document.getElementById("previewArea");
+        const previewTable = document.getElementById("previewTable");
+        if (!data || data.length === 0) {
+          previewDiv.style.display = "none";
+          return;
+        }
+        if (data.length > 200) {
+          addLog(
+            `⚠️ File có ${data.length} dòng, chỉ hiển thị 200 dòng đầu`,
+            "info",
+          );
+        }
+        const headers = Object.keys(data[0]);
+        let html =
+          '<div style="margin-bottom:8px; color:var(--accent);">📊 ' +
+          data.length +
+          " dòng dữ liệu</div>";
+        html += "<table><thead><tr>";
+        headers.forEach((h) => (html += `<th>${h}</th>`));
+        html += "</tr></thead><tbody>";
+        const displayData = data.slice(0, 200);
+        displayData.forEach((row) => {
+          html += "<tr>";
+          headers.forEach(
+            (h) =>
+              (html += `<td>${row[h] !== undefined && row[h] !== null ? row[h] : ""}</td>`),
+          );
+          html += "</tr>";
+        });
+        if (data.length > 200) {
+          html += `<tr><td colspan="${headers.length}" style="text-align:center; color:var(--muted);">... và ${data.length - 200} dòng khác</td></tr>`;
+        }
+        html += "</tbody></table>";
+        previewTable.innerHTML = html;
+        previewDiv.style.display = "block";
+      }
+
+      document.getElementById("clearPreview")?.addEventListener("click", () => {
+        uploadedData = null;
+        document.getElementById("previewArea").style.display = "none";
+        fileInput.value = "";
+        clearLog();
+        document.getElementById("importLog").style.display = "none";
+      });
+
+      // Gửi import lên server
+      document
+        .getElementById("submitImport")
+        .addEventListener("click", async () => {
+          if (!uploadedData || uploadedData.length === 0) {
+            alert("Chưa có dữ liệu để nhập. Hãy chọn file Excel trước.");
+            return;
+          }
+          const namCapNhat = document.getElementById("namCapNhat").value;
+          if (!namCapNhat || isNaN(namCapNhat)) {
+            alert("Vui lòng nhập năm cập nhật (ví dụ: 2027)");
+            return;
+          }
+
+          const confirmMsg =
+            `📊 XÁC NHẬN NHẬP DỮ LIỆU\n\n` +
+            `• Bảng: Lô cây\n` +
+            `• Số dòng: ${uploadedData.length}\n` +
+            `• Năm cập nhật: ${namCapNhat}\n` +
+            `• Dữ liệu cũ sẽ được tự động lưu vào bảng lịch sử\n\n` +
+            `Bạn có chắc chắn muốn tiếp tục?`;
+          if (!confirm(confirmMsg)) return;
+
+          clearLog();
+          addLog(`🚀 BẮT ĐẦU NHẬP LIỆU - Năm: ${namCapNhat}`, "info");
+          addLog(`📊 Tổng số dòng cần xử lý: ${uploadedData.length}`, "info");
+
+          // Tạo FormData để gửi file
+          const formData = new FormData();
+          // Chuyển đổi uploadedData (mảng JSON) thành file Blob
+          const ws = XLSX.utils.json_to_sheet(uploadedData);
+          const wb = XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+          const excelBuffer = XLSX.write(wb, {
+            bookType: "xlsx",
+            type: "array",
+          });
+          const blob = new Blob([excelBuffer], {
+            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          });
+          const file = new File([blob], "import_data.xlsx", {
+            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          });
+          formData.append("file", file);
+          formData.append("nam_cap_nhat", namCapNhat);
+
+          const statusDiv = document.getElementById("importStatus");
+          statusDiv.innerHTML =
+            '<i class="fas fa-spinner fa-pulse"></i> Đang xử lý, vui lòng chờ...';
+
+          try {
+            const res = await fetch("/api/import-excel", {
+              method: "POST",
+              body: formData,
+            });
+            const result = await res.json();
+            if (result.success) {
+              statusDiv.innerHTML = `<span style="color:var(--accent)">✅ ${result.message}</span>`;
+              addLog(`✅ ${result.message}`, "insert");
+              addLog(
+                `💾 Dữ liệu cũ đã được lưu vào bảng lịch sử (lo_history)`,
+                "info",
+              );
+              updateStats();
+              // Reset sau khi thành công
+              uploadedData = null;
+              document.getElementById("previewArea").style.display = "none";
+              fileInput.value = "";
+              document.getElementById("namCapNhat").value = "";
+            } else {
+              statusDiv.innerHTML = `<span style="color:var(--danger)">❌ Lỗi: ${result.error}</span>`;
+              addLog(`❌ Lỗi: ${result.error}`, "error");
+            }
+          } catch (err) {
+            statusDiv.innerHTML = `<span style="color:var(--danger)">❌ Lỗi kết nối: ${err.message}</span>`;
+            addLog(`❌ Lỗi kết nối: ${err.message}`, "error");
+          }
+        });
+
+      // Khởi tạo thống kê
+      updateStats();
+    </script>
+  </body>
 </html>
