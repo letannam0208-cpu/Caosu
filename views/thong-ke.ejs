@@ -1,491 +1,467 @@
 <!DOCTYPE html>
 <html lang="vi">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Thống Kê - WebGIS CAO SU</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
-<style>
-:root {
-  --bg:       #080d18;
-  --s1:       #0f1729;
-  --s2:       #151f35;
-  --s3:       #1c2844;
-  --border:   rgba(255,255,255,0.07);
-  --border2:  rgba(255,255,255,0.12);
-  --text:     #e8eeff;
-  --muted:    #5a6a8a;
-  --muted2:   #8a9ab8;
-  --accent:   #00d68f;
-  --accentB:  #00b4ff;
-  --warn:     #f59e0b;
-  --danger:   #f4656a;
-  --purple:   #a78bfa;
-  --font:     'Inter', sans-serif;
-  --nav-w:    180px;
-  --top-h:    56px;
-  --r:        8px;
-  --r-lg:     12px;
-}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:var(--font);background:var(--bg);color:var(--text);height:100vh;overflow:hidden;display:flex;flex-direction:column}
-::-webkit-scrollbar{width:4px;height:4px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:var(--s3);border-radius:2px}
-
-/* ===== TOP BAR GIỐNG DASHBOARD ===== */
-#topbar{
-  height:var(--top-h);flex-shrink:0;
-  background:var(--s1);border-bottom:1px solid var(--border);
-  display:flex;align-items:center;padding:0 16px;gap:12px;
-  position:relative;z-index:100;
-}
-#topbar::after{
-  content:'';position:absolute;bottom:0;left:0;right:0;height:1px;
-  background:linear-gradient(90deg,transparent,rgba(0,214,143,0.3),transparent);
-}
-.tb-logo{display:flex;align-items:center;gap:8px;text-decoration:none;flex-shrink:0}
-.tb-icon{
-  width:32px;height:32px;border-radius:8px;
-  background:linear-gradient(135deg,var(--accent),var(--accentB));
-  display:flex;align-items:center;justify-content:center;font-size:16px;
-  box-shadow:0 0 16px rgba(0,214,143,0.3);flex-shrink:0;
-}
-.tb-title{font-family:var(--font);font-size:13px;letter-spacing:.08em;color:var(--text);font-weight:700}
-.tb-sub{font-size:9px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase}
-.tb-sep{width:1px;height:24px;background:var(--border);margin:0 2px}
-.tb-pill{
-  background:var(--s2);border:1px solid var(--border);border-radius:6px;
-  padding:4px 10px;font-size:11px;color:var(--muted2);display:flex;align-items:center;gap:6px;
-}
-.tb-pill strong{color:var(--text);font-weight:600;font-size:12px}
-.live-dot{width:5px;height:5px;border-radius:50%;background:var(--accent);box-shadow:0 0 6px var(--accent);animation:blink 2s infinite}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
-.tb-right{margin-left:auto;display:flex;align-items:center;gap:12px}
-.tb-avatar{
-  width:32px;height:32px;border-radius:50%;
-  background:linear-gradient(135deg,#00b4ff,#a78bfa);
-  display:flex;align-items:center;justify-content:center;
-  font-size:11px;font-weight:700;color:#fff;cursor:pointer;
-  border:2px solid var(--border2);
-}
-.tb-user-info{text-align:right;font-size:11px}
-.tb-user-name{font-weight:600;color:var(--text)}
-.tb-user-role{font-size:10px;color:var(--muted);margin-top:2px}
-/* ===== KẾT THÚC TOP BAR ===== */
-
-#body{display:flex;flex:1;overflow:hidden}
-#nav{
-  width:var(--nav-w);
-  flex-shrink:0;
-  background:linear-gradient(180deg,var(--s1),var(--bg));
-  border-right:1px solid var(--border);
-  display:flex;
-  flex-direction:column;
-  overflow-y:auto;
-  padding:16px 10px;
-  gap:4px;
-}
-.nav-section-label{
-  font-size:10px;
-  font-weight:700;
-  letter-spacing:0.15em;
-  text-transform:uppercase;
-  color:var(--muted);
-  padding:8px 12px 6px;
-  margin:8px 0 2px;
-}
-.nav-item{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  padding:10px 12px;
-  border-radius:var(--r);
-  cursor:pointer;
-  transition:all 0.2s;
-  color:var(--muted2);
-  font-size:13px;
-  font-weight:500;
-  border:1px solid transparent;
-  position:relative;
-  text-decoration:none;
-  white-space:nowrap;
-}
-.nav-item:hover{
-  background:rgba(255,255,255,0.05);
-  color:var(--text);
-  border-color:var(--border2);
-}
-.nav-item.active{
-  background:rgba(0,214,143,0.15);
-  border-color:var(--accent);
-  color:var(--accent);
-  font-weight:600;
-  box-shadow:inset 0 0 8px rgba(0,214,143,0.1);
-}
-.nav-item.active::before{
-  content:'';
-  position:absolute;
-  left:0;
-  top:20%;
-  bottom:20%;
-  width:3px;
-  border-radius:0 2px 2px 0;
-  background:var(--accent);
-}
-.nav-icon{
-  width:16px;
-  height:16px;
-  flex-shrink:0;
-  text-align:center;
-  font-size:13px;
-}
-.nav-badge{
-  margin-left:auto;
-  background:rgba(239,68,68,0.2);
-  color:#fca5a5;
-  font-size:10px;
-  font-weight:700;
-  padding:2px 6px;
-  border-radius:8px;
-  flex-shrink:0;
-}
-.nav-logout{
-  margin-top:auto;
-  border-top:1px solid var(--border);
-  padding-top:12px;
-}
-.nav-logout .nav-item{
-  color:#fca5a5;
-  border:1px solid rgba(239,68,68,0.2);
-  background:rgba(239,68,68,0.08);
-}
-.nav-logout .nav-item:hover{
-  background:rgba(239,68,68,0.15);
-  border-color:rgba(239,68,68,0.4);
-  color:#ff9999;
-}
-#content{flex:1;overflow-y:auto;padding:16px}
-.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;gap:12px}
-.page-title-group{flex:1}
-.page-title{font-family:var(--font);font-size:24px;font-weight:800;color:var(--text);letter-spacing:-.02em}
-.page-subtitle{font-size:11px;color:var(--muted);margin-top:3px}
-.btn-export{
-  background:transparent;border:1px solid var(--border2);color:var(--muted2);
-  padding:8px 14px;border-radius:var(--r);font-family:var(--font);
-  font-size:11px;font-weight:600;cursor:pointer;transition:.18s;
-  display:inline-flex;align-items:center;gap:6px;flex-shrink:0;
-  margin-top:2px;
-}
-.btn-export:hover{border-color:var(--accentB);color:var(--accentB);background:rgba(0,180,255,.08)}
-.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
-.grid-full{grid-column:1/-1;margin-top:16px}
-.card{
-  background:var(--s1);border:1px solid var(--border);
-  border-radius:var(--r-lg);padding:16px;transition:.2s;
-}
-.card:hover{border-color:var(--border2)}
-.card-title{
-  font-family:var(--font);font-size:14px;font-weight:700;color:var(--text);
-  margin-bottom:16px;display:flex;align-items:center;gap:8px;
-}
-.chart-box-lg{height:380px;position:relative}
-.loader{
-  text-align:center;padding:40px;color:var(--muted2);
-}
-@media(max-width:768px){
-  #nav{width:160px;padding:10px 6px}
-  #content{padding:12px}
-  .page-title{font-size:18px}
-  .grid-2{grid-template-columns:1fr}
-  .chart-box-lg{height:280px}
-}
-</style>
-</head>
-<body>
-
-<div id="topbar">
-  <div class="tb-logo">
-    <div class="tb-icon">🌿</div>
-    <div>
-      <div class="tb-title">GIS_TBKRUCO</div>
-    </div>
-  </div>
-  <div class="tb-sep"></div>
-  <div class="tb-pill"><span class="live-dot"></span><span>Trực tuyến</span></div>
-  <div class="tb-pill"><span>Số lô</span> <strong id="total-lots">0</strong></div>
-  <div class="tb-pill"><span>Diện tích</span> <strong id="total-area">0 ha</strong></div>
-  <div class="tb-right">
-    <div style="display:flex;align-items:center;gap:8px">
-      <div class="tb-user-info">
-      <div class="tb-user-name" id="userFullName">Nguyễn Văn An</div>
-      <div class="tb-user-role" id="userRole">Quản trị viên</div>
-    </div>
-    <div class="tb-avatar" id="userAvatar">NA</div>
-    </div>
-  </div>
-</div>
-
-<div id="body">
-  <nav id="nav">
-      <div class="nav-section-label">Tổng quan</div>
-      <a href="/" class="nav-item"><i class="fas fa-home nav-icon"></i> Dashboard</a>
-      <div class="nav-section-label">Quản lý dữ liệu</div>
-      <a href="/quan-ly-lo-cay" class="nav-item"><i class="fas fa-tree nav-icon"></i> Quản lý lô cây</a>
-      <a href="/them-du-lieu-lo-cay" class="nav-item"><i class="fas fa-plus-circle nav-icon"></i> Thêm dữ liệu lô</a>
-      <div class="nav-section-label">Người dùng & Phân quyền</div>
-      <a href="/quan-ly-nguoi-dung" class="nav-item"><i class="fas fa-users nav-icon"></i> Quản lý người dùng</a>
-      <div class="nav-section-label">Phân tích</div>
-      <a href="/thong-ke" class="nav-item active"><i class="fas fa-chart-bar nav-icon"></i> Thống kê</a>
-      <div class="nav-logout"><a href="/logout" class="nav-item"><i class="fas fa-sign-out-alt nav-icon"></i> Đăng xuất</a></div>
-  </nav>
-
-  <div id="content">
-    <div class="page-header">
-      <div class="page-title-group">
-        <div class="page-title">Thống Kê</div>
-        <div class="page-subtitle">Phân tích tổng hợp vườn cây cao su</div>
-      </div>
-      <button class="btn-export" id="exportExcel"><i class="fas fa-download"></i> Xuất Excel</button>
-    </div>
-
-    <!-- 3 biểu đồ chính -->
-    <div class="grid-2">
-      <div class="card">
-        <div class="card-title">🌱 Cơ cấu giống cây (theo diện tích)</div>
-        <div class="chart-box-lg"><canvas id="chartGiongPie"></canvas></div>
-      </div>
-      <div class="card">
-        <div class="card-title">🏭 Diện tích theo đội</div>
-        <div class="chart-box-lg"><canvas id="chartDienTichDoi"></canvas></div>
-      </div>
-    </div>
-    <div class="grid-full">
-      <div class="card">
-        <div class="card-title">📅 Diện tích quy hoạch tái canh theo năm</div>
-        <div class="chart-box-lg"><canvas id="chartTaiCanh"></canvas></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script>
-// ====================== LẤY DỮ LIỆU TỪ API ======================
-let loData = [];      // bảng lo duy nhất (đã gộp tất cả)
-
-async function fetchData() {
-  try {
-    const loRes = await fetch('/api/lo-cay');
-    const loJson = await loRes.json();
-    loData = loJson.data || [];
-    // Cập nhật thông tin tổng quan trên topbar
-    const totalLots = loData.length;
-    const totalArea = loData.reduce((sum, lo) => sum + (parseFloat(lo.dien_tich_map) || 0), 0);
-    document.getElementById('total-lots').innerText = totalLots;
-    document.getElementById('total-area').innerHTML = totalArea.toFixed(3) + ' ha';
-
-    console.log(`✅ Đã tải: ${loData.length} lô`);
-    return true;
-  } catch (err) {
-    console.error('❌ Lỗi tải dữ liệu:', err);
-    document.querySelectorAll('.card').forEach(card => {
-      card.innerHTML = `<div class="loader"><i class="fas fa-exclamation-triangle"></i> Lỗi tải dữ liệu: ${err.message}</div>`;
-    });
-    return false;
-  }
-}
-
-// Helper: lấy diện tích từ lô (ưu tiên dien_tich_map)
-function getArea(lo) {
-  return parseFloat(lo.dien_tich_map) || 0;
-}
-
-// ====================== 1. BIỂU ĐỒ TRÒN: CƠ CẤU GIỐNG ======================
-function renderGiongPie() {
-  const giongMap = new Map();
-  loData.forEach(lo => {
-    const giong = lo.giong || 'Khác';
-    const area = getArea(lo);
-    if (area > 0) {
-      giongMap.set(giong, (giongMap.get(giong) || 0) + area);
-    }
-  });
-  const sorted = Array.from(giongMap.entries()).sort((a,b) => b[1] - a[1]);
-  const top5 = sorted.slice(0,5);
-  const otherSum = sorted.slice(5).reduce((sum, item) => sum + item[1], 0);
-  const labels = top5.map(item => item[0]);
-  const data = top5.map(item => item[1]);
-  if (otherSum > 0) {
-    labels.push('Các giống khác');
-    data.push(otherSum);
-  }
-
-  const ctx = document.getElementById('chartGiongPie').getContext('2d');
-  if (window.giongChart) window.giongChart.destroy();
-  window.giongChart = new Chart(ctx, {
-    type: 'pie',
-    data: {
-      labels: labels,
-      datasets: [{
-        data: data,
-        backgroundColor: ['#00d68f', '#00b4ff', '#f59e0b', '#a78bfa', '#f87171', '#64748b'],
-        borderWidth: 0
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { position: 'right', labels: { color: '#e8eeff', font: { size: 11, family: 'Inter' } } },
-        tooltip: { callbacks: { label: (ctx) => `${ctx.label}: ${ctx.raw.toFixed(2)} ha (${(ctx.raw / data.reduce((a,b)=>a+b,0)*100).toFixed(1)}%)` } }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Thống Kê - WebGIS CAO SU</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap"
+      rel="stylesheet" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+    <link href="/assets/css/style.css" rel="stylesheet" />
+    <style>
+      .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-bottom: 20px;
       }
-    }
-  });
-}
-
-// ====================== 2. BIỂU ĐỒ CỘT: DIỆN TÍCH THEO ĐỘI ======================
-function renderDienTichDoi() {
-  const teamArea = new Map();
-  loData.forEach(lo => {
-    const doi = lo.doi || 'Không xác định';
-    const area = getArea(lo);
-    if (area > 0) {
-      teamArea.set(doi, (teamArea.get(doi) || 0) + area);
-    }
-  });
-  const sorted = Array.from(teamArea.entries()).sort((a,b) => b[1] - a[1]);
-  const labels = sorted.map(item => item[0]);
-  const data = sorted.map(item => item[1]);
-
-  const ctx = document.getElementById('chartDienTichDoi').getContext('2d');
-  if (window.doiChart) window.doiChart.destroy();
-  window.doiChart = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: labels,
-      datasets: [{
-        label: 'Diện tích (ha)',
-        data: data,
-        backgroundColor: '#00b4ff',
-        borderRadius: 6
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: { callbacks: { label: (ctx) => `${ctx.raw.toFixed(2)} ha` } }
-      },
-      scales: {
-        y: { title: { display: true, text: 'Diện tích (ha)', color: '#8a9ab8' }, ticks: { color: '#8a9ab8' } },
-        x: { ticks: { color: '#8a9ab8', maxRotation: 45, minRotation: 45, font: { family: 'Inter' } } }
+      .grid-full {
+        grid-column: 1/-1;
+        margin-top: 16px;
       }
-    }
-  });
-}
-
-// ====================== 3. BIỂU ĐỒ CỘT: DIỆN TÍCH QH TÁI CANH THEO NĂM ======================
-function renderTaiCanh() {
-  const yearArea = new Map();
-  loData.forEach(lo => {
-    const year = lo.tai_canh_nam;
-    if (!year) return;
-    const area = getArea(lo);
-    if (area > 0) {
-      yearArea.set(year, (yearArea.get(year) || 0) + area);
-    }
-  });
-  const sorted = Array.from(yearArea.entries()).sort((a,b) => a[0] - b[0]);
-  const labels = sorted.map(item => item[0]);
-  const data = sorted.map(item => item[1]);
-
-  const ctx = document.getElementById('chartTaiCanh').getContext('2d');
-  if (window.taiCanhChart) window.taiCanhChart.destroy();
-  window.taiCanhChart = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: labels,
-      datasets: [{
-        label: 'Diện tích quy hoạch tái canh (ha)',
-        data: data,
-        backgroundColor: '#f59e0b',
-        borderRadius: 6
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        tooltip: { callbacks: { label: (ctx) => `${ctx.raw.toFixed(2)} ha` } }
-      },
-      scales: {
-        y: { title: { display: true, text: 'Diện tích (ha)', color: '#8a9ab8' }, ticks: { color: '#8a9ab8' } },
-        x: { title: { display: true, text: 'Năm tái canh', color: '#8a9ab8' }, ticks: { color: '#8a9ab8', font: { family: 'Inter' } } }
+      .card {
+        background: var(--s1);
+        border: 1px solid var(--border);
+        border-radius: var(--r-lg);
+        padding: 16px;
+        transition: 0.2s;
       }
-    }
-  });
-}
+      .card:hover {
+        border-color: var(--border2);
+      }
+      .card-title {
+        font-family: var(--font);
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .chart-box-lg {
+        height: 380px;
+        position: relative;
+      }
+      .loader {
+        text-align: center;
+        padding: 40px;
+        color: var(--muted2);
+      }
+      @media (max-width: 768px) {
+        #nav {
+          width: 160px;
+          padding: 10px 6px;
+        }
+        #content {
+          padding: 12px;
+        }
+        .page-title {
+          font-size: 18px;
+        }
+        .grid-2 {
+          grid-template-columns: 1fr;
+        }
+        .chart-box-lg {
+          height: 280px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="topbar">
+      <div class="tb-logo">
+        <div class="">
+          <img
+            src="/assets/image/logoTBK.jpg"
+            alt="Logo"
+            style="width: 32px; height: 32px" />
+        </div>
+        <div>
+          <div class="tb-title">GIS TBKRUCO</div>
+        </div>
+      </div>
+      <div class="tb-sep"></div>
+      <div class="tb-pill">
+        <span class="live-dot"></span><span>Trực tuyến</span>
+      </div>
+      <div class="tb-pill">
+        <span>Số lô</span> <strong id="total-lots">0</strong>
+      </div>
+      <div class="tb-pill">
+        <span>Diện tích</span> <strong id="total-area">0 ha</strong>
+      </div>
+      <div class="tb-right">
+        <div style="display: flex; align-items: center; gap: 8px">
+          <div class="tb-user-info">
+            <div class="tb-user-name" id="userFullName">Nguyễn Văn An</div>
+            <div class="tb-user-role" id="userRole">Quản trị viên</div>
+          </div>
+          <div class="tb-avatar" id="userAvatar">NA</div>
+        </div>
+      </div>
+    </div>
 
-// ====================== XUẤT EXCEL ======================
-function exportToExcel() {
-  try {
-    const XLSX = window.XLSX;
-    const wb = XLSX.utils.book_new();
-    const wsLo = XLSX.utils.json_to_sheet(loData);
-    XLSX.utils.book_append_sheet(wb, wsLo, 'Lô cây');
-    XLSX.writeFile(wb, `ThongKe_CaoSu_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.xlsx`);
-  } catch(err) {
-    alert('Xuất Excel thất bại: ' + err.message);
-  }
-}
+    <div id="body">
+      <nav id="nav">
+        <div class="nav-section-label">Tổng quan</div>
+        <a href="/" class="nav-item"
+          ><i class="fas fa-home nav-icon"></i> Dashboard</a
+        >
+        <div class="nav-section-label">Quản lý dữ liệu</div>
+        <a href="/quan-ly-lo-cay" class="nav-item"
+          ><i class="fas fa-tree nav-icon"></i> Quản lý lô cây</a
+        >
+        <a href="/them-du-lieu-lo-cay" class="nav-item"
+          ><i class="fas fa-plus-circle nav-icon"></i> Thêm dữ liệu lô</a
+        >
+        <div class="nav-section-label">Người dùng & Phân quyền</div>
+        <a href="/quan-ly-nguoi-dung" class="nav-item"
+          ><i class="fas fa-users nav-icon"></i> Quản lý người dùng</a
+        >
+        <div class="nav-section-label">Phân tích</div>
+        <a href="/thong-ke" class="nav-item active"
+          ><i class="fas fa-chart-bar nav-icon"></i> Thống kê</a
+        >
+        <div class="nav-logout">
+          <a href="/logout" class="nav-item"
+            ><i class="fas fa-sign-out-alt nav-icon"></i> Đăng xuất</a
+          >
+        </div>
+      </nav>
 
-// ==================== LẤY THÔNG TIN NGƯỜI DÙNG ====================
-async function loadUserInfo() {
-  try {
-    const res = await fetch('/api/me', { credentials: 'same-origin' });
-    const data = await res.json();
-    if (data.success) {
-      const user = data.data;
-      document.getElementById('userFullName').innerText = user.fullname;
-      document.getElementById('userRole').innerText = user.role === 'admin' ? 'Quản trị viên' : 'Người dùng';
-      document.getElementById('userAvatar').innerText = user.fullname.charAt(0).toUpperCase();
-    } else {
-      console.warn('Không lấy được thông tin user');
-    }
-  } catch (err) {
-    console.error('Lỗi /api/me:', err);
-  }
-}
+      <div id="content">
+        <div class="page-header">
+          <div class="page-title-group">
+            <div class="page-title">Thống Kê</div>
+            <div class="page-subtitle">Phân tích tổng hợp vườn cây cao su</div>
+          </div>
+          <button class="btn-export" id="exportExcel">
+            <i class="fas fa-download"></i> Xuất Excel
+          </button>
+        </div>
 
-document.addEventListener('DOMContentLoaded', () => {
-  loadUserInfo();
-});
+        <!-- 3 biểu đồ chính -->
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">🌱 Cơ cấu giống cây (theo diện tích)</div>
+            <div class="chart-box-lg"><canvas id="chartGiongPie"></canvas></div>
+          </div>
+          <div class="card">
+            <div class="card-title">🏭 Diện tích theo đội</div>
+            <div class="chart-box-lg">
+              <canvas id="chartDienTichDoi"></canvas>
+            </div>
+          </div>
+        </div>
+        <div class="grid-full">
+          <div class="card">
+            <div class="card-title">
+              📅 Diện tích quy hoạch tái canh theo năm
+            </div>
+            <div class="chart-box-lg"><canvas id="chartTaiCanh"></canvas></div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-// ====================== KHỞI CHẠY ======================
-async function init() {
-  const success = await fetchData();
-  if (!success) return;
-  renderGiongPie();
-  renderDienTichDoi();
-  renderTaiCanh();
-}
-init();
+    <script>
+      // ====================== LẤY DỮ LIỆU TỪ API ======================
+      let loData = []; // bảng lo duy nhất (đã gộp tất cả)
 
-// Gán sự kiện xuất Excel
-document.getElementById('exportExcel').addEventListener('click', exportToExcel);
+      async function fetchData() {
+        try {
+          const loRes = await fetch("/api/lo-cay");
+          const loJson = await loRes.json();
+          loData = loJson.data || [];
+          // Cập nhật thông tin tổng quan trên topbar
+          const totalLots = loData.length;
+          const totalArea = loData.reduce(
+            (sum, lo) => sum + (parseFloat(lo.dien_tich_map) || 0),
+            0,
+          );
+          document.getElementById("total-lots").innerText = totalLots;
+          document.getElementById("total-area").innerHTML =
+            totalArea.toFixed(3) + " ha";
 
-// Đảm bảo chart responsive khi resize window
-window.addEventListener('resize', () => {
-  if (window.giongChart) window.giongChart.resize();
-  if (window.doiChart) window.doiChart.resize();
-  if (window.taiCanhChart) window.taiCanhChart.resize();
-});
-</script>
-</body>
+          console.log(`✅ Đã tải: ${loData.length} lô`);
+          return true;
+        } catch (err) {
+          console.error("❌ Lỗi tải dữ liệu:", err);
+          document.querySelectorAll(".card").forEach((card) => {
+            card.innerHTML = `<div class="loader"><i class="fas fa-exclamation-triangle"></i> Lỗi tải dữ liệu: ${err.message}</div>`;
+          });
+          return false;
+        }
+      }
+
+      // Helper: lấy diện tích từ lô (ưu tiên dien_tich_map)
+      function getArea(lo) {
+        return parseFloat(lo.dien_tich_map) || 0;
+      }
+
+      // ====================== 1. BIỂU ĐỒ TRÒN: CƠ CẤU GIỐNG ======================
+      function renderGiongPie() {
+        const giongMap = new Map();
+        loData.forEach((lo) => {
+          const giong = lo.giong || "Khác";
+          const area = getArea(lo);
+          if (area > 0) {
+            giongMap.set(giong, (giongMap.get(giong) || 0) + area);
+          }
+        });
+        const sorted = Array.from(giongMap.entries()).sort(
+          (a, b) => b[1] - a[1],
+        );
+        const top5 = sorted.slice(0, 5);
+        const otherSum = sorted
+          .slice(5)
+          .reduce((sum, item) => sum + item[1], 0);
+        const labels = top5.map((item) => item[0]);
+        const data = top5.map((item) => item[1]);
+        if (otherSum > 0) {
+          labels.push("Các giống khác");
+          data.push(otherSum);
+        }
+
+        const ctx = document.getElementById("chartGiongPie").getContext("2d");
+        if (window.giongChart) window.giongChart.destroy();
+        window.giongChart = new Chart(ctx, {
+          type: "pie",
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                data: data,
+                backgroundColor: [
+                  "#00d68f",
+                  "#00b4ff",
+                  "#f59e0b",
+                  "#a78bfa",
+                  "#f87171",
+                  "#64748b",
+                ],
+                borderWidth: 0,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: "right",
+                labels: {
+                  color: "#e8eeff",
+                  font: { size: 11, family: "Inter" },
+                },
+              },
+              tooltip: {
+                callbacks: {
+                  label: (ctx) =>
+                    `${ctx.label}: ${ctx.raw.toFixed(2)} ha (${((ctx.raw / data.reduce((a, b) => a + b, 0)) * 100).toFixed(1)}%)`,
+                },
+              },
+            },
+          },
+        });
+      }
+
+      // ====================== 2. BIỂU ĐỒ CỘT: DIỆN TÍCH THEO ĐỘI ======================
+      function renderDienTichDoi() {
+        const teamArea = new Map();
+        loData.forEach((lo) => {
+          const doi = lo.doi || "Không xác định";
+          const area = getArea(lo);
+          if (area > 0) {
+            teamArea.set(doi, (teamArea.get(doi) || 0) + area);
+          }
+        });
+        const sorted = Array.from(teamArea.entries()).sort(
+          (a, b) => b[1] - a[1],
+        );
+        const labels = sorted.map((item) => item[0]);
+        const data = sorted.map((item) => item[1]);
+
+        const ctx = document
+          .getElementById("chartDienTichDoi")
+          .getContext("2d");
+        if (window.doiChart) window.doiChart.destroy();
+        window.doiChart = new Chart(ctx, {
+          type: "bar",
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: "Diện tích (ha)",
+                data: data,
+                backgroundColor: "#00b4ff",
+                borderRadius: 6,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: { label: (ctx) => `${ctx.raw.toFixed(2)} ha` },
+              },
+            },
+            scales: {
+              y: {
+                title: {
+                  display: true,
+                  text: "Diện tích (ha)",
+                  color: "#8a9ab8",
+                },
+                ticks: { color: "#8a9ab8" },
+              },
+              x: {
+                ticks: {
+                  color: "#8a9ab8",
+                  maxRotation: 45,
+                  minRotation: 45,
+                  font: { family: "Inter" },
+                },
+              },
+            },
+          },
+        });
+      }
+
+      // ====================== 3. BIỂU ĐỒ CỘT: DIỆN TÍCH QH TÁI CANH THEO NĂM ======================
+      function renderTaiCanh() {
+        const yearArea = new Map();
+        loData.forEach((lo) => {
+          const year = lo.tai_canh_nam;
+          if (!year) return;
+          const area = getArea(lo);
+          if (area > 0) {
+            yearArea.set(year, (yearArea.get(year) || 0) + area);
+          }
+        });
+        const sorted = Array.from(yearArea.entries()).sort(
+          (a, b) => a[0] - b[0],
+        );
+        const labels = sorted.map((item) => item[0]);
+        const data = sorted.map((item) => item[1]);
+
+        const ctx = document.getElementById("chartTaiCanh").getContext("2d");
+        if (window.taiCanhChart) window.taiCanhChart.destroy();
+        window.taiCanhChart = new Chart(ctx, {
+          type: "bar",
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: "Diện tích quy hoạch tái canh (ha)",
+                data: data,
+                backgroundColor: "#f59e0b",
+                borderRadius: 6,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              tooltip: {
+                callbacks: { label: (ctx) => `${ctx.raw.toFixed(2)} ha` },
+              },
+            },
+            scales: {
+              y: {
+                title: {
+                  display: true,
+                  text: "Diện tích (ha)",
+                  color: "#8a9ab8",
+                },
+                ticks: { color: "#8a9ab8" },
+              },
+              x: {
+                title: {
+                  display: true,
+                  text: "Năm tái canh",
+                  color: "#8a9ab8",
+                },
+                ticks: { color: "#8a9ab8", font: { family: "Inter" } },
+              },
+            },
+          },
+        });
+      }
+
+      // ====================== XUẤT EXCEL ======================
+      function exportToExcel() {
+        try {
+          const XLSX = window.XLSX;
+          const wb = XLSX.utils.book_new();
+          const wsLo = XLSX.utils.json_to_sheet(loData);
+          XLSX.utils.book_append_sheet(wb, wsLo, "Lô cây");
+          XLSX.writeFile(
+            wb,
+            `ThongKe_CaoSu_${new Date().toISOString().slice(0, 19).replace(/:/g, "-")}.xlsx`,
+          );
+        } catch (err) {
+          alert("Xuất Excel thất bại: " + err.message);
+        }
+      }
+
+      // ==================== LẤY THÔNG TIN NGƯỜI DÙNG ====================
+      async function loadUserInfo() {
+        try {
+          const res = await fetch("/api/me", { credentials: "same-origin" });
+          const data = await res.json();
+          if (data.success) {
+            const user = data.data;
+            document.getElementById("userFullName").innerText = user.fullname;
+            document.getElementById("userRole").innerText =
+              user.role === "admin" ? "Quản trị viên" : "Người dùng";
+            document.getElementById("userAvatar").innerText = user.fullname
+              .charAt(0)
+              .toUpperCase();
+          } else {
+            console.warn("Không lấy được thông tin user");
+          }
+        } catch (err) {
+          console.error("Lỗi /api/me:", err);
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        loadUserInfo();
+      });
+
+      // ====================== KHỞI CHẠY ======================
+      async function init() {
+        const success = await fetchData();
+        if (!success) return;
+        renderGiongPie();
+        renderDienTichDoi();
+        renderTaiCanh();
+      }
+      init();
+
+      // Gán sự kiện xuất Excel
+      document
+        .getElementById("exportExcel")
+        .addEventListener("click", exportToExcel);
+
+      // Đảm bảo chart responsive khi resize window
+      window.addEventListener("resize", () => {
+        if (window.giongChart) window.giongChart.resize();
+        if (window.doiChart) window.doiChart.resize();
+        if (window.taiCanhChart) window.taiCanhChart.resize();
+      });
+    </script>
+  </body>
 </html>

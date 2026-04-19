@@ -841,7 +841,7 @@ app.get('/dashboard', authenticateToken, (req, res) => {
 
 app.get('/quan-ly-lo-cay', authenticateToken, (req, res) => {
     res.render('quan-ly-lo-cay', {
-        title: 'Quản lý lô cây cao su',
+        title: 'Quản lý lô cao su',
         user: req.user,
         path: '/quan-ly-lo-cay'
     });
