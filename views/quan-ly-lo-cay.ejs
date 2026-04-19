@@ -18,8 +18,8 @@
   --text: #f0f4f9;
   --muted: #6b7c9d;
   --muted2: #8fa3bd;
-  --accent: #10b981;
-  --accentB: #06b6d4;
+  --accent: #00d68f;        /* giống index */
+  --accentB: #00b4ff;       /* giống index */
   --font-d: 'Syne', sans-serif;
   --font-b: 'Be Vietnam Pro', sans-serif;
   --nav-w: 200px;
@@ -43,48 +43,49 @@ body{
 ::-webkit-scrollbar{width:6px;height:6px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--s3);border-radius:3px}
+
+/* ===== TOP BAR GIỐNG INDEX ===== */
 #topbar{
-  height:var(--top-h);
-  flex-shrink:0;
-  background:linear-gradient(180deg,var(--s1),rgba(17,24,39,0.8));
-  border-bottom:1px solid var(--border);
-  display:flex;
-  align-items:center;
-  padding:0 20px;
-  gap:16px;
-  position:relative;
-  z-index:100;
-  backdrop-filter:blur(10px);
+  height:var(--top-h);flex-shrink:0;
+  background:var(--s1);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 20px;gap:16px;
+  position:relative;z-index:100;
 }
-.tb-logo{display:flex;align-items:center;gap:12px;text-decoration:none;flex-shrink:0;}
+#topbar::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(0,214,143,0.3),transparent);
+}
+.tb-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
 .tb-icon{
-  width:40px;height:40px;border-radius:10px;
-  background:linear-gradient(135deg,#10b981,#059669);
-  display:flex;align-items:center;justify-content:center;font-size:20px;
-  box-shadow:0 4px 16px rgba(16,185,129,0.25);
+  width:34px;height:34px;border-radius:9px;
+  background:linear-gradient(135deg,var(--accent),var(--accentB));
+  display:flex;align-items:center;justify-content:center;font-size:17px;
+  box-shadow:0 0 20px rgba(0,214,143,0.25);flex-shrink:0;
 }
-.tb-title{font-family:var(--font-d);font-size:14px;letter-spacing:0.1em;font-weight:700;}
-.tb-sub{font-size:10px;color:var(--muted);text-transform:uppercase;}
-.tb-sep{width:1px;height:28px;background:var(--border);margin:0 4px;}
-.tb-pill{background:transparent;border:none;padding:6px 12px;font-size:12px;color:var(--muted2);display:flex;align-items:center;gap:8px;border-radius:6px;}
-.tb-pill strong{color:var(--accent);}
-.live-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent);animation:blink 2s infinite;}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:0.4}}
-.tb-right{margin-left:auto;display:flex;align-items:center;gap:16px;}
-.icon-btn{
-  width:36px;height:36px;border-radius:var(--r);background:rgba(255,255,255,0.05);
-  border:1px solid var(--border);color:var(--muted2);cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
+.tb-title{font-family:var(--font-d);font-size:14px;letter-spacing:.06em;color:var(--text)}
+.tb-sub{font-size:10px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase}
+.tb-sep{width:1px;height:28px;background:var(--border);margin:0 4px}
+.tb-pill{
+  background:var(--s2);border:1px solid var(--border);border-radius:6px;
+  padding:5px 12px;font-size:11px;color:var(--muted2);display:flex;align-items:center;gap:6px;
 }
-.icon-btn:hover{color:var(--accentB);background:rgba(6,182,212,0.1);}
+.tb-pill strong{color:var(--text);font-size:13px}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 6px var(--accent);animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.tb-right{margin-left:auto;display:flex;align-items:center;gap:10px}
 .tb-avatar{
-  width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#10b981,#06b6d4);
-  display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;
-  color:#fff;cursor:pointer;border:2px solid var(--border2);
+  width:32px;height:32px;border-radius:50%;
+  background:linear-gradient(135deg,#00b4ff,#a78bfa);
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:600;color:#fff;cursor:pointer;
+  border:2px solid var(--border2);transition:.2s;
 }
-.tb-user-info{text-align:right;font-size:12px;}
-.tb-user-name{font-weight:600;}
-.tb-user-role{font-size:11px;color:var(--muted);}
+.tb-avatar:hover{border-color:var(--accent)}
+.tb-user-info{text-align:right}
+.tb-user-name{font-size:12px;font-weight:500;color:var(--text)}
+.tb-user-role{font-size:10px;color:var(--muted)}
+/* ===== KẾT THÚC TOP BAR ===== */
+
 #body{display:flex;flex:1;overflow:hidden;}
 #nav{
   width:var(--nav-w);flex-shrink:0;background:linear-gradient(180deg,var(--s1),var(--bg));
@@ -165,6 +166,16 @@ th {
   border-bottom: 1px solid var(--border2);
 }
 tbody tr:hover { background: rgba(16,185,129,0.04); }
+.highlight-row {
+  background-color: rgba(0, 214, 143, 0.3) !important;
+  transition: background-color 0.5s ease;
+  animation: pulse 0.6s ease-in-out 2;
+}
+@keyframes pulse {
+  0% { background-color: rgba(0, 214, 143, 0.1); }
+  50% { background-color: rgba(0, 214, 143, 0.6); }
+  100% { background-color: rgba(0, 214, 143, 0.3); }
+}
 .horizontal-scrollbar {
   overflow-x: auto;
   overflow-y: hidden;
@@ -246,22 +257,22 @@ tbody tr:hover { background: rgba(16,185,129,0.04); }
 </head>
 <body>
 <div id="topbar">
-  <a class="tb-logo" href="#">
+  <div class="tb-logo">
     <div class="tb-icon">🌿</div>
-    <div><div class="tb-title">GIS_TBKRUCO</div></div>
-  </a>
+    <div>
+      <div class="tb-title">GIS_TBKRUCO</div>
+    </div>
+  </div>
   <div class="tb-sep"></div>
-  <div class="tb-pill"><span class="live-dot"></span><span>Trực tuyến</span></div>
-  <div class="tb-pill"><strong>Lô vườn</strong> <span id="total-lots">0</span></div>
-  <div class="tb-pill"><strong>Diện tích</strong> <span id="total-area">0</span> ha</div>
+  <div class="tb-pill"><div class="live-dot"></div><span>Trực tuyến</span></div>
+  <div class="tb-pill"><strong>Số lô</strong> <span id="total-lots">0</span></div>
+  <div class="tb-pill"><strong>Diện tích</strong> <span id="total-area">0 ha</span></div>
   <div class="tb-right">
-    <div style="display:flex;align-items:center;gap:10px;border-left:1px solid var(--border);padding-left:16px">
-      <div class="tb-user-info">
+    <div class="tb-user-info">
       <div class="tb-user-name" id="userFullName">Nguyễn Văn An</div>
       <div class="tb-user-role" id="userRole">Quản trị viên</div>
     </div>
     <div class="tb-avatar" id="userAvatar">NA</div>
-    </div>
   </div>
 </div>
 
@@ -341,7 +352,7 @@ async function loadLoCay() {
       updateFilters(loCayData);
       document.getElementById('total-lots').innerText = loCayData.length;
       const totalArea = loCayData.reduce((sum, l) => sum + (parseFloat(l.dien_tich_map) || 0), 0);
-      document.getElementById('total-area').innerText = totalArea.toFixed(2);
+      document.getElementById('total-area').innerText = totalArea.toFixed(2) + ' ha';
       syncScrollbarWidth();
       attachHorizontalScroll();
     } else {
@@ -358,6 +369,7 @@ function renderTable(data) {
   tbody.innerHTML = '';
   data.forEach(l => {
     const row = tbody.insertRow();
+    row.id = `row-${l.id_lo}`;
     row.insertCell(0).innerText = l.id_lo || '';
     row.insertCell(1).innerText = l.du_an || '';
     row.insertCell(2).innerText = l.doi || '';
@@ -519,13 +531,12 @@ function attachHorizontalScroll() {
   tableContainer.addEventListener('scroll', syncScrollFromTable);
 }
 
-// Hiển thị form sửa lô (không còn form thêm mới)
+// Hiển thị form sửa lô
 function showForm(l = null) {
   if (!l) {
     alert('Chức năng thêm mới đã được chuyển sang import file Excel. Vui lòng sử dụng trang "Thêm dữ liệu lô" để nhập hàng loạt.');
     return;
   }
-  const isEdit = true;
   const val = (obj, field) => {
     if (!obj) return '';
     const v = obj[field];
@@ -599,10 +610,9 @@ function showForm(l = null) {
     if (!data.doi) { alert('Vui lòng nhập đội'); return; }
     
     const url = `/api/lo-cay/${id_lo}`;
-    const method = 'PUT';
     try {
       const res = await fetch(url, { 
-        method, 
+        method: 'PUT', 
         headers: { 'Content-Type': 'application/json' }, 
         body: JSON.stringify(data) 
       });
@@ -637,41 +647,54 @@ async function loadUserInfo() {
 
 function closeModal() { document.getElementById('modal').style.display = 'none'; }
 
-// Xử lý chuyển hướng từ Dashboard (popup bản đồ)
+// Hàm cuộn đến hàng và làm nổi bật
+function scrollToRowAndHighlight(rowId) {
+  const row = document.getElementById(rowId);
+  if (row) {
+    row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    row.classList.add('highlight-row');
+    setTimeout(() => row.classList.remove('highlight-row'), 3000);
+    return true;
+  }
+  return false;
+}
+
+// Hàm hiển thị chi tiết lô (cuộn và highlight)
+function viewLotDetail(idLo) {
+  const rowId = `row-${idLo}`;
+  if (scrollToRowAndHighlight(rowId)) return;
+  // Nếu không tìm thấy, hỏi xóa bộ lọc
+  if (confirm(`Lô ${idLo} không hiển thị do bộ lọc. Bạn có muốn xóa bộ lọc để hiển thị không?`)) {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('doiFilter').value = '';
+    document.getElementById('giongFilter').value = '';
+    document.getElementById('namFilter').value = '';
+    document.getElementById('huyenFilter').value = '';
+    document.getElementById('phanLoaiFilter').value = '';
+    renderTable(loCayData);
+    setTimeout(() => {
+      if (!scrollToRowAndHighlight(rowId)) {
+        alert('Không thể tìm thấy lô. Có thể lô đã bị xóa.');
+      }
+    }, 100);
+  }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   loadUserInfo();
-  loadLoCay();
-  
-  // Xem chi tiết lô
-  const viewId = localStorage.getItem('view_lot_id');
-  if (viewId) {
-    localStorage.removeItem('view_lot_id');
-    viewLotDetail(viewId);
-  }
-  
-  // Sửa lô
-  const editId = localStorage.getItem('edit_lot_id');
-  if (editId) {
-    localStorage.removeItem('edit_lot_id');
-    // Dùng hàm editLo đã có sẵn trong trang
-    editLo(editId);
-  }
+  loadLoCay().then(() => {
+    const viewId = localStorage.getItem('view_lot_id');
+    if (viewId) {
+      localStorage.removeItem('view_lot_id');
+      viewLotDetail(viewId);
+    }
+    const editId = localStorage.getItem('edit_lot_id');
+    if (editId) {
+      localStorage.removeItem('edit_lot_id');
+      editLo(editId);
+    }
+  });
 });
-
-// Hàm hiển thị chi tiết lô (dùng alert tạm thời)
-function viewLotDetail(idLo) {
-  fetch(`/api/lo-cay/${idLo}`)
-    .then(res => res.json())
-    .then(data => {
-      if (data.success) {
-        const l = data.data;
-        alert(`📋 CHI TIẾT LÔ CÂY\n\nMã lô: ${l.id_lo}\nTên lô: ${l.ten_lo}\nĐội: ${l.doi}\nNăm trồng: ${l.nam_trong}\nGiống: ${l.giong}\nDiện tích: ${l.dien_tich_map} ha\nKhu vực: ${l.khu_vuc}\nXã: ${l.xa} - Huyện: ${l.huyen}`);
-      } else {
-        alert('Không tìm thấy thông tin lô');
-      }
-    })
-    .catch(err => alert('Lỗi tải dữ liệu: ' + err.message));
-}
 
 window.addEventListener('resize', () => syncScrollbarWidth());
 document.getElementById('closeModal').addEventListener('click', closeModal);
