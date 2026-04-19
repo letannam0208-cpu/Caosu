@@ -1486,7 +1486,9 @@ function renderRealLots() {
       if (!msrActive) {
         layer.bindPopup(`
           <div class="lo-popup-title">
-            <strong style="font-size:18px;">${p.ten_lo || p.id_lo || '—'}</strong>
+            <div class="lo-popup-title">
+              <strong style="font-size:18px;">${p.ten_lo || p.id_lo || '—'}</strong>
+            </div>
           </div>
           <div class="lo-popup-grid">
             <span class="lo-popup-label">Mã lô</span><span class="lo-popup-val">${p.id_lo || '—'}</span>
