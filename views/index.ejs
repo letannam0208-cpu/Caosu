@@ -1488,7 +1488,7 @@ function renderRealLots() {
   <div style="background: ${col}22; color: ${col}; border: 1px solid ${col}55; padding: 6px 12px; border-radius: 8px; margin-bottom: 12px; text-align: center; font-weight: bold; font-size: 18px;">
     ${p.ten_lo || p.id_lo || '—'}
   </div>
-  <div style="max-height: 220px; overflow-y: auto; padding-right: 6px; margin-bottom: 12px;">
+  <div style="max-height: 300px; overflow-y: auto; padding-right: 6px; margin-bottom: 12px;">
     <div class="lo-popup-grid">
       <span class="lo-popup-label">Mã lô</span><span class="lo-popup-val">${p.id_lo || '—'}</span>
       <span class="lo-popup-label">Đội</span><span class="lo-popup-val">${p.doi || '—'}</span>
@@ -1502,9 +1502,9 @@ function renderRealLots() {
       <span class="lo-popup-label">Mật độ thiết kế</span><span class="lo-popup-val">${p.mat_do_tk || '—'}</span>
       <span class="lo-popup-label">Nhịp độ cạo</span><span class="lo-popup-val">${p.nhip_do_cao || '—'}</span>
       <span class="lo-popup-label">Chế độ cạo</span><span class="lo-popup-val">${p.che_do_cao || '—'}</span>
-      <span class="lo-popup-label">Năng suất 2025 (kg/ha)</span><span class="lo-popup-val">${p.ns25_kg_ha || '—'}</span>
-      <span class="lo-popup-label">Năng suất 2026 (kg/ha)</span><span class="lo-popup-val">${p.ns26_kg_ha || '—'}</span>
-      <span class="lo-popup-label">Sản lượng</span><span class="lo-popup-val">${p.san_luong || '—'}</span>
+      <span class="lo-popup-label">NSBQ 2025(kg/ha)</span><span class="lo-popup-val">${p.ns25_kg_ha || '—'}</span>
+      <span class="lo-popup-label">NSBQ 2026(kg/ha)</span><span class="lo-popup-val">${p.ns26_kg_ha || '—'}</span>
+      <span class="lo-popup-label">Sản lượng 2026(kg)</span><span class="lo-popup-val">${p.san_luong || '—'}</span>
     </div>
   </div>
   <div class="lo-popup-actions">
