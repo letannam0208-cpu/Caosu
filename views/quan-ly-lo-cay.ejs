@@ -255,9 +255,6 @@ tbody tr:hover { background: rgba(16,185,129,0.04); }
   <div class="tb-pill"><strong>Lô vườn</strong> <span id="total-lots">0</span></div>
   <div class="tb-pill"><strong>Diện tích</strong> <span id="total-area">0</span> ha</div>
   <div class="tb-right">
-    <!--<button class="icon-btn"><i class="fas fa-bell"></i></button>
-    <button class="icon-btn"><i class="fas fa-globe"></i></button>
-    <button class="icon-btn"><i class="fas fa-cog"></i></button>-->
     <div style="display:flex;align-items:center;gap:10px;border-left:1px solid var(--border);padding-left:16px">
       <div class="tb-user-info">
       <div class="tb-user-name" id="userFullName">Nguyễn Văn An</div>
@@ -640,20 +637,50 @@ async function loadUserInfo() {
 
 function closeModal() { document.getElementById('modal').style.display = 'none'; }
 
+// Xử lý chuyển hướng từ Dashboard (popup bản đồ)
+document.addEventListener('DOMContentLoaded', function() {
+  loadUserInfo();
+  loadLoCay();
+  
+  // Xem chi tiết lô
+  const viewId = localStorage.getItem('view_lot_id');
+  if (viewId) {
+    localStorage.removeItem('view_lot_id');
+    viewLotDetail(viewId);
+  }
+  
+  // Sửa lô
+  const editId = localStorage.getItem('edit_lot_id');
+  if (editId) {
+    localStorage.removeItem('edit_lot_id');
+    // Dùng hàm editLo đã có sẵn trong trang
+    editLo(editId);
+  }
+});
+
+// Hàm hiển thị chi tiết lô (dùng alert tạm thời)
+function viewLotDetail(idLo) {
+  fetch(`/api/lo-cay/${idLo}`)
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        const l = data.data;
+        alert(`📋 CHI TIẾT LÔ CÂY\n\nMã lô: ${l.id_lo}\nTên lô: ${l.ten_lo}\nĐội: ${l.doi}\nNăm trồng: ${l.nam_trong}\nGiống: ${l.giong}\nDiện tích: ${l.dien_tich_map} ha\nKhu vực: ${l.khu_vuc}\nXã: ${l.xa} - Huyện: ${l.huyen}`);
+      } else {
+        alert('Không tìm thấy thông tin lô');
+      }
+    })
+    .catch(err => alert('Lỗi tải dữ liệu: ' + err.message));
+}
+
 window.addEventListener('resize', () => syncScrollbarWidth());
 document.getElementById('closeModal').addEventListener('click', closeModal);
-// document.getElementById
 document.getElementById('searchInput').addEventListener('input', filterRows);
 document.getElementById('doiFilter').addEventListener('change', filterRows);
 document.getElementById('giongFilter').addEventListener('change', filterRows);
 document.getElementById('namFilter').addEventListener('change', filterRows);
 document.getElementById('huyenFilter').addEventListener('change', filterRows);
 document.getElementById('phanLoaiFilter').addEventListener('change', filterRows);
-
-document.addEventListener('DOMContentLoaded', () => {
-  loadUserInfo();
-  loadLoCay();
-});
 </script>
 </body>
 </html>
