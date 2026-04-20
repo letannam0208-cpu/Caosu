@@ -593,7 +593,7 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 const fixedColumns = ['id_lo', 'geojson', 'xa', 'huyen', 'tinh'];
 
-// Các cột có thể cập nhật (đã thêm 'ten_lo')
+// Các cột có thể cập nhật
 const updatableCols = [
     'ten_lo',
     'nam_trong', 'cao_trinh_tb', 'giong', 'du_an', 'doi', 'khu_vuc',
