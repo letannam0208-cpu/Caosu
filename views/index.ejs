@@ -17,6 +17,7 @@
       rel="stylesheet"
       href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.9.0/proj4.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link
@@ -1536,7 +1537,8 @@
         font-weight: 600;
         color: var(--muted2);
       }
-      .form-field input, .form-field select {
+      .form-field input,
+      .form-field select {
         padding: 10px 12px;
         background: var(--s2);
         border: 1px solid var(--border);
@@ -1544,7 +1546,8 @@
         color: var(--text);
         font-size: 13px;
       }
-      .form-field input:focus, .form-field select:focus {
+      .form-field input:focus,
+      .form-field select:focus {
         outline: none;
         border-color: var(--accent);
         box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
@@ -1634,20 +1637,20 @@
 
         <div class="nav-section-label">Quản lý dữ liệu</div>
         <a href="/quan-ly-lo-cay" class="nav-item">
-          <i class="fas fa-tree nav-icon"></i> Quản lý lô cây
+          <i class="fas fa-tree nav-icon"></i>Quản lý lô
         </a>
         <a href="/them-du-lieu-lo-cay" class="nav-item">
-          <i class="fas fa-plus-circle nav-icon"></i> Thêm dữ liệu lô
+          <i class="fas fa-plus-circle nav-icon"></i>Thêm dữ liệu lô
         </a>
 
-        <div class="nav-section-label">Người dùng & Phân quyền</div>
+        <div class="nav-section-label">Người dùng</div>
         <a href="/quan-ly-nguoi-dung" class="nav-item">
-          <i class="fas fa-users nav-icon"></i> Quản lý người dùng
+          <i class="fas fa-users nav-icon"></i>Quản lý người dùng
         </a>
 
         <div class="nav-section-label">Phân tích</div>
         <a href="/thong-ke" class="nav-item">
-          <i class="fas fa-chart-bar nav-icon"></i> Thống kê
+          <i class="fas fa-chart-bar nav-icon"></i>Thống kê
         </a>
 
         <div
@@ -1802,19 +1805,8 @@
                 >Đội:</span
               >
               <select
-                id="filter-nt"
-                style="
-                  background: var(--s2);
-                  border: 1px solid var(--border);
-                  border-radius: var(--r);
-                  color: var(--muted2);
-                  padding: 6px 10px;
-                  font-size: 11px;
-                  font-family: var(--font);
-                  cursor: pointer;
-                  transition: 0.2s;
-                  max-width: 120px;
-                "
+                id="filter-Doi"
+                class="filterIndex"
                 onchange="updateMapFilters('NT', this)">
                 <option value="all" data-lang="all-farms">Tất cả</option>
               </select>
@@ -1828,18 +1820,7 @@
               >
               <select
                 id="filter-nam"
-                style="
-                  background: var(--s2);
-                  border: 1px solid var(--border);
-                  border-radius: var(--r);
-                  color: var(--muted2);
-                  padding: 6px 10px;
-                  font-size: 11px;
-                  font-family: var(--font);
-                  cursor: pointer;
-                  transition: 0.2s;
-                  max-width: 120px;
-                "
+                class="filterIndex"
                 onchange="updateMapFilters('nam', this)">
                 <option value="all" data-lang="all-years">Tất cả</option>
               </select>
@@ -1850,18 +1831,7 @@
               >
               <select
                 id="filter-giong"
-                style="
-                  background: var(--s2);
-                  border: 1px solid var(--border);
-                  border-radius: var(--r);
-                  color: var(--muted2);
-                  padding: 6px 10px;
-                  font-size: 11px;
-                  font-family: var(--font);
-                  cursor: pointer;
-                  transition: 0.2s;
-                  max-width: 120px;
-                "
+                class="filterIndex"
                 onchange="updateMapFilters('giong', this)">
                 <option value="all" data-lang="all-species">Tất cả</option>
               </select>
@@ -1870,18 +1840,7 @@
               <span class="map-label" style="flex-shrink: 0">Phiên cạo:</span>
               <select
                 id="filter-phien_cao"
-                style="
-                  background: var(--s2);
-                  border: 1px solid var(--border);
-                  border-radius: var(--r);
-                  color: var(--muted2);
-                  padding: 6px 10px;
-                  font-size: 11px;
-                  font-family: var(--font);
-                  cursor: pointer;
-                  transition: 0.2s;
-                  max-width: 120px;
-                "
+                class="filterIndex"
                 onchange="updateMapFilters('phien_cao', this)">
                 <option value="all">Tất cả</option>
               </select>
@@ -1890,18 +1849,7 @@
               <span class="map-label" style="flex-shrink: 0">Nhịp độ cạo:</span>
               <select
                 id="filter-Nhip_do_cao"
-                style="
-                  background: var(--s2);
-                  border: 1px solid var(--border);
-                  border-radius: var(--r);
-                  color: var(--muted2);
-                  padding: 6px 10px;
-                  font-size: 11px;
-                  font-family: var(--font);
-                  cursor: pointer;
-                  transition: 0.2s;
-                  max-width: 120px;
-                "
+                class="filterIndex"
                 onchange="updateMapFilters('nhip_do_cao', this)">
                 <option value="all">Tất cả</option>
               </select>
@@ -1910,18 +1858,7 @@
               <span class="map-label" style="flex-shrink: 0">QH tái canh:</span>
               <select
                 id="filter-quy_hoach_tai_canh"
-                style="
-                  background: var(--s2);
-                  border: 1px solid var(--border);
-                  border-radius: var(--r);
-                  color: var(--muted2);
-                  padding: 6px 10px;
-                  font-size: 11px;
-                  font-family: var(--font);
-                  cursor: pointer;
-                  transition: 0.2s;
-                  max-width: 120px;
-                "
+                class="filterIndex"
                 onchange="updateMapFilters('quy_hoach_tai_canh', this)">
                 <option value="all">Tất cả</option>
               </select>
@@ -1930,18 +1867,7 @@
               <span class="map-label" style="flex-shrink: 0">Khu vực:</span>
               <select
                 id="filter-khu-vuc"
-                style="
-                  background: var(--s2);
-                  border: 1px solid var(--border);
-                  border-radius: var(--r);
-                  color: var(--muted2);
-                  padding: 6px 10px;
-                  font-size: 11px;
-                  font-family: var(--font);
-                  cursor: pointer;
-                  transition: 0.2s;
-                  max-width: 120px;
-                "
+                class="filterIndex"
                 onchange="updateMapFilters('khu_vuc', this)">
                 <option value="all">Tất cả</option>
               </select>
@@ -1950,18 +1876,7 @@
               <span class="map-label" style="flex-shrink: 0">Tuổi cạo:</span>
               <select
                 id="filter-tuoi-cao"
-                style="
-                  background: var(--s2);
-                  border: 1px solid var(--border);
-                  border-radius: var(--r);
-                  color: var(--muted2);
-                  padding: 6px 10px;
-                  font-size: 11px;
-                  font-family: var(--font);
-                  cursor: pointer;
-                  transition: 0.2s;
-                  max-width: 120px;
-                "
+                class="filterIndex"
                 onchange="updateMapFilters('tuoi_cao', this)">
                 <option value="all">Tất cả</option>
               </select>
@@ -1970,18 +1885,7 @@
               <span class="map-label" style="flex-shrink: 0">Chế độ cạo:</span>
               <select
                 id="filter-che-do-cao"
-                style="
-                  background: var(--s2);
-                  border: 1px solid var(--border);
-                  border-radius: var(--r);
-                  color: var(--muted2);
-                  padding: 6px 10px;
-                  font-size: 11px;
-                  font-family: var(--font);
-                  cursor: pointer;
-                  transition: 0.2s;
-                  max-width: 140px;
-                "
+                class="filterIndex"
                 onchange="updateMapFilters('che_do_cao', this)">
                 <option value="all">Tất cả</option>
               </select>
@@ -2482,9 +2386,21 @@
     <!-- MODAL SỬA LÔ -->
     <div id="editModal" class="modal">
       <div class="modal-content">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-          <h3 id="modalTitle" style="font-family: var(--font-d); font-size: 22px;">✏️ Sửa thông tin lô</h3>
-          <button class="icon-btn" id="closeEditModal"><i class="fas fa-times" style="color: #fff; font-size: 18px;"></i></button>
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+          ">
+          <h3
+            id="modalTitle"
+            style="font-family: var(--font-d); font-size: 22px">
+            ✏️ Sửa thông tin lô
+          </h3>
+          <button class="icon-btn" id="closeEditModal">
+            <i class="fas fa-times" style="color: #fff; font-size: 18px"></i>
+          </button>
         </div>
         <form id="editForm"></form>
       </div>
@@ -2583,10 +2499,37 @@
         fullTuoiCao = new Set(),
         fullCheDoCao = new Set();
 
+      // Transform UTM to WGS84
+      function transformGeometry(geometry) {
+        if (!geometry || !geometry.coordinates) return geometry;
+        const utmProj = "+proj=utm +zone=48 +datum=WGS84 +units=m +no_defs";
+        const wgs84Proj = "+proj=longlat +datum=WGS84";
+
+        function transformCoords(coords) {
+          if (typeof coords[0] === "number") {
+            // Point
+            const [x, y] = proj4(utmProj, wgs84Proj, [coords[0], coords[1]]);
+            return [x, y];
+          } else {
+            // Array of coords
+            return coords.map(transformCoords);
+          }
+        }
+
+        return {
+          ...geometry,
+          coordinates: transformCoords(geometry.coordinates),
+        };
+      }
+
       async function loadCaosuData() {
         try {
           const data = await fetchAPI("/api/lo-cao-su");
           caosuFeatures = data.features || [];
+          // Transform geometries from UTM to WGS84
+          caosuFeatures.forEach((f) => {
+            f.geometry = transformGeometry(f.geometry);
+          });
           console.log("📦 Đã tải", caosuFeatures.length, "lô từ API");
           if (caosuFeatures.length === 0) {
             console.warn(
@@ -2653,38 +2596,44 @@
       }
 
       async function buildFilterUI() {
-        const ntEl = document.getElementById("filter-nt");
-        ntEl.innerHTML = '<option value="all">Tất cả</option>';
-        Array.from(fullNT)
-          .sort()
-          .forEach((nt) => {
-            const opt = document.createElement("option");
-            opt.value = nt;
-            opt.textContent = nt;
-            ntEl.appendChild(opt);
-          });
+        const ntEl = document.getElementById("filter-Doi");
+        if (ntEl) {
+          ntEl.innerHTML = '<option value="all">Tất cả</option>';
+          Array.from(fullNT)
+            .sort()
+            .forEach((nt) => {
+              const opt = document.createElement("option");
+              opt.value = nt;
+              opt.textContent = nt;
+              ntEl.appendChild(opt);
+            });
+        }
 
         const namEl = document.getElementById("filter-nam");
-        namEl.innerHTML = '<option value="all">Tất cả</option>';
-        Array.from(fullNam)
-          .sort()
-          .forEach((y) => {
-            const opt = document.createElement("option");
-            opt.value = y;
-            opt.textContent = y;
-            namEl.appendChild(opt);
-          });
+        if (namEl) {
+          namEl.innerHTML = '<option value="all">Tất cả</option>';
+          Array.from(fullNam)
+            .sort()
+            .forEach((y) => {
+              const opt = document.createElement("option");
+              opt.value = y;
+              opt.textContent = y;
+              namEl.appendChild(opt);
+            });
+        }
 
         const giongEl = document.getElementById("filter-giong");
-        giongEl.innerHTML = '<option value="all">Tất cả</option>';
-        Array.from(fullGiong)
-          .sort()
-          .forEach((g) => {
-            const opt = document.createElement("option");
-            opt.value = g;
-            opt.textContent = g;
-            giongEl.appendChild(opt);
-          });
+        if (giongEl) {
+          giongEl.innerHTML = '<option value="all">Tất cả</option>';
+          Array.from(fullGiong)
+            .sort()
+            .forEach((g) => {
+              const opt = document.createElement("option");
+              opt.value = g;
+              opt.textContent = g;
+              giongEl.appendChild(opt);
+            });
+        }
 
         const phienCaoEl = document.getElementById("filter-phien_cao");
         if (phienCaoEl) {
@@ -3600,8 +3549,8 @@
         }).setView([12.524, 105.452], 12);
 
         window.currentBaseLayer = L.tileLayer(
-          "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-          { maxZoom: 19, attribution: "Esri" },
+          "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+          { maxZoom: 19, attribution: "© OpenStreetMap contributors" },
         ).addTo(dashMap);
 
         try {
@@ -4004,9 +3953,13 @@
             0,
           );
 
-          document.getElementById("totalLots").innerText = totalLots.toLocaleString("vi-VN");
+          document.getElementById("totalLots").innerText =
+            totalLots.toLocaleString("vi-VN");
           document.getElementById("totalArea").innerHTML =
-            totalArea.toLocaleString("vi-VN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " ha";
+            totalArea.toLocaleString("vi-VN", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            }) + " ha";
         } catch (err) {
           console.error("Lỗi tải thống kê:", err);
           document.getElementById("totalLots").innerText = "0";
@@ -4094,8 +4047,9 @@
       }
 
       function showEditForm(l) {
-        const val = (obj, field) => (obj[field] !== null && obj[field] !== undefined ? obj[field] : "");
-        
+        const val = (obj, field) =>
+          obj[field] !== null && obj[field] !== undefined ? obj[field] : "";
+
         const formHtml = `
           <input type="hidden" id="edit_id_lo" name="id_lo" value="${val(l, "id_lo")}">
           <div class="form-grid">
@@ -4145,10 +4099,10 @@
             <button type="submit" class="btn-add">Lưu lại</button>
           </div>
         `;
-        
+
         document.getElementById("editForm").innerHTML = formHtml;
         document.getElementById("editModal").style.display = "flex";
-        
+
         document.getElementById("cancelEditBtn").onclick = closeEditModal;
         document.getElementById("editForm").onsubmit = submitEditForm;
       }
@@ -4166,7 +4120,7 @@
           showToast("Vui lòng nhập đủ tên lô và đội", "⚠️");
           return;
         }
-        
+
         try {
           const res = await fetch(`/api/lo-cay/${id_lo}`, {
             method: "PUT",
@@ -4192,7 +4146,9 @@
       }
 
       // Gắn sự kiện đóng modal
-      document.getElementById("closeEditModal").addEventListener("click", closeEditModal);
+      document
+        .getElementById("closeEditModal")
+        .addEventListener("click", closeEditModal);
       window.addEventListener("click", (e) => {
         const modal = document.getElementById("editModal");
         if (e.target === modal) closeEditModal();
