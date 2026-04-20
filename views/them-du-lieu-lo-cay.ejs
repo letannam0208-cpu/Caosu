@@ -3,7 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title><%= title %></title>
+    <title>GIS · TBKRUCO</title>
+    <link rel="icon" href="/assets/image/logoTBK.jpg" type="image/jpeg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -248,14 +249,14 @@
           <div>
             <h1 class="page-title">Nhập dữ liệu từ Excel</h1>
             <p class="page-subtitle">
-              Cập nhật thông tin lô cây hàng loạt, tự động lưu lịch sử theo năm
+              Cập nhật thông tin lô hàng loạt, tự động lưu lịch sử theo năm
             </p>
           </div>
         </div>
 
         <div class="form-container">
           <div class="form-section-title">
-            <i class="fas fa-file-excel"></i> Nhập file Excel cho bảng Lô cây
+            <i class="fas fa-file-excel"></i> Import file Excel/CSV
           </div>
 
           <!-- Nhập năm cập nhật -->
@@ -281,7 +282,7 @@
               Kéo thả hoặc click để chọn file Excel/CSV
             </div>
             <div class="upload-hint">
-              Hỗ trợ .xlsx, .xls, .csv - Các cột phải khớp với cấu trúc bảng lo
+              Hỗ trợ .xlsx, .xls, .csv - Các cột phải khớp với cấu trúc file mẫu
             </div>
             <input
               type="file"
@@ -302,7 +303,7 @@
               text-decoration: none;
               margin-bottom: 16px;
             ">
-            <i class="fas fa-download"></i> Tải file mẫu (bảng lo)
+            <i class="fas fa-download"></i> Tải file mẫu (.xlsx)
           </a>
 
           <!-- Preview area -->
@@ -366,9 +367,13 @@
               (s, l) => s + (parseFloat(l.dien_tich_map) || 0),
               0,
             );
-            document.getElementById("totalLots").innerText = totalLots;
+            document.getElementById("totalLots").innerText =
+              totalLots.toLocaleString("vi-VN");
             document.getElementById("totalArea").innerHTML =
-              totalArea.toFixed(3) + " ha";
+              totalArea.toLocaleString("vi-VN", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              }) + " ha";
           }
         } catch (e) {}
       }

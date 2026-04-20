@@ -3,7 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>WebGIS · Vườn Cây Cao Su</title>
+    <title>GIS · TBKRUCO</title>
+    <link rel="icon" href="/assets/image/logoTBK.jpg" type="image/jpeg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -23,6 +24,11 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+      crossorigin="anonymous" />
     <link rel="stylesheet" href="/assets/css/style.css" />
     <style>
       .icon-btn {
@@ -691,7 +697,7 @@
         width: 1px;
         height: 20px;
         background: var(--border);
-        margin: 0 2px;
+        margin: 0 1px;
         flex-shrink: 0;
       }
       .map-label {
@@ -1672,9 +1678,7 @@
           <div class="page-header">
             <div>
               <div class="page-title" data-lang="dashboard">Dashboard</div>
-              <div class="page-subtitle">
-                Tổng quan hoạt động vườn cây — cập nhật lúc 07:42, 16/03/2026
-              </div>
+              <div class="page-subtitle">Tổng quan vườn cây</div>
             </div>
             <div style="display: flex; gap: 8px; justify-content: flex-end">
               <button
@@ -1793,10 +1797,10 @@
                   max-width: 120px;
                 "
                 onchange="changeBaseMap(this.value)">
-                <option value="satellite">Vệ tinh (Esri)</option>
+                <option value="satellite">Vệ tinh (ESRI)</option>
                 <option value="osm">OpenStreetMap</option>
                 <option value="carto">CartoDB Positron</option>
-                <option value="gray">Esri Gray</option>
+                <option value="gray">ESRI Gray</option>
               </select>
               <div class="map-sep"></div>
 
@@ -1854,15 +1858,6 @@
               </select>
               <div class="map-sep"></div>
 
-              <span class="map-label" style="flex-shrink: 0">QH tái canh:</span>
-              <select
-                id="filter-quy_hoach_tai_canh"
-                class="filterIndex"
-                onchange="updateMapFilters('quy_hoach_tai_canh', this)">
-                <option value="all">Tất cả</option>
-              </select>
-              <div class="map-sep"></div>
-
               <span class="map-label" style="flex-shrink: 0">Khu vực:</span>
               <select
                 id="filter-khu-vuc"
@@ -1886,6 +1881,13 @@
                 id="filter-che-do-cao"
                 class="filterIndex"
                 onchange="updateMapFilters('che_do_cao', this)">
+                <option value="all">Tất cả</option>
+              </select>
+              <span class="map-label" style="flex-shrink: 0">QH tái canh:</span>
+              <select
+                id="filter-quy_hoach_tai_canh"
+                class="filterIndex"
+                onchange="updateMapFilters('quy_hoach_tai_canh', this)">
                 <option value="all">Tất cả</option>
               </select>
             </div>
@@ -2001,7 +2003,7 @@
                 <!-- HOME group -->
                 <div class="map-ctrl-group">
                   <div class="mc-group-label">Vị trí</div>
-                  <button
+                  <!-- <button
                     class="mc-btn-wide mc-btn-home"
                     id="btn-home"
                     onclick="goHome()">
@@ -2020,10 +2022,15 @@
                     <span class="mc-tooltip"
                       >Về vị trí mặc định &nbsp; [ H ]</span
                     >
-                  </button>
+                  </button> -->
                   <button
+                    type="button"
                     class="mc-btn-wide"
                     id="gps-btn"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="right"
+                    title="Xác định vị trí GPS của bạn"
+                    animation="true"
                     onclick="locateUser()">
                     <svg
                       width="14"
@@ -2036,14 +2043,14 @@
                       <path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
                       <circle cx="12" cy="12" r="7" stroke-dasharray="2 2" />
                     </svg>
-                    Vị trí tôi
+                    Vị trí của tôi
                     <span class="mc-tooltip">Xác định vị trí GPS của bạn</span>
                   </button>
                 </div>
 
                 <!-- COMPASS -->
-                <div class="map-ctrl-group">
-                  <button class="mc-btn mc-compass" style="width: 40px">
+                <!-- <div class="map-ctrl-group">
+                  <button class="mc-btn mc-compass" style="width: 40px" type="button">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                       <circle
                         cx="12"
@@ -2071,9 +2078,10 @@
                         N
                       </text>
                     </svg>
+
                     <span class="mc-tooltip">Hướng Bắc cố định</span>
                   </button>
-                </div>
+                </div> -->
               </div>
 
               <!-- RIGHT TOOLBAR-->
@@ -4126,5 +4134,9 @@
         if (e.target === modal) closeEditModal();
       });
     </script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+      crossorigin="anonymous"></script>
   </body>
 </html>
