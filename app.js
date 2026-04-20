@@ -105,7 +105,7 @@ app.get('/api/don-vi-list', authenticateToken, async (req, res) => {
   }
 });
 
-// Giống cây (cho filter)
+// Giống cây
 app.get('/api/giong-stats', authenticateToken, async (req, res) => {
   try {
     const result = await pool.query(`
