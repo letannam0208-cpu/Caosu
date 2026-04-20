@@ -585,18 +585,19 @@ app.delete('/api/lo-cay/:id', authenticateToken, async (req, res) => {
   }
 });
 
-// ====================== IMPORT EXCEL & LƯU LỊCH SỬ (BATCH VERSION WITH ERROR HANDLING) ======================
+// ====================== IMPORT EXCEL & LƯU LỊCH SỬ (FIXED VERSION) ======================
 const multer = require('multer');
 const XLSX = require('xlsx');
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
-// Các cột cố định (không bao giờ cập nhật khi lô đã tồn tại)
-const fixedColumns = ['id_lo', 'ten_lo', 'geometry', 'xa', 'huyen', 'tinh'];
+// Các cột cố định
+const fixedColumns = ['id_lo', 'geojson', 'xa', 'huyen', 'tinh'];
 
-// Các cột có thể cập nhật
+// Các cột có thể cập nhật (đã thêm 'ten_lo')
 const updatableCols = [
+    'ten_lo',
     'nam_trong', 'cao_trinh_tb', 'giong', 'du_an', 'doi', 'khu_vuc',
     'hang_dat', 'phuong_phap_trong', 'khoang_cach_trong', 'mat_do_tk',
     'dien_tich_010125', 'dien_tich_010126', 'dien_tich_map', 'tong_ho_kk',
@@ -619,9 +620,39 @@ app.post('/api/import-excel', authenticateToken, upload.single('file'), async (r
         const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
         const sheetName = workbook.SheetNames[0];
         const sheet = workbook.Sheets[sheetName];
-        const rows = XLSX.utils.sheet_to_json(sheet);
+        let rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+
         if (rows.length === 0) throw new Error('File Excel không có dữ liệu');
         console.log(`📊 Số dòng cần xử lý: ${rows.length}`);
+
+        // Chuyển đổi số thập phân dấu phẩy thành dấu chấm
+        const parseDecimal = (val) => {
+            if (val === undefined || val === null || val === "") return null;
+            if (typeof val === 'number') return val;
+            const str = String(val).trim().replace(',', '.');
+            const num = parseFloat(str);
+            return isNaN(num) ? null : num;
+        };
+
+        // Xử lý từng dòng: chuyển đổi các cột số
+        rows = rows.map(row => {
+            const newRow = {};
+            for (const [key, value] of Object.entries(row)) {
+                const numberCols = [
+                    'cao_trinh_tb', 'dien_tich_010125', 'dien_tich_010126', 'dien_tich_map',
+                    'mat_do_cc', 'ns25_kg_ha', 'ns25_kg_cay', 'tong_lat_cao', 'ns26_kg_cay',
+                    'ns26_kg_ha', 'san_luong', 'mat_do_tk', 'tong_ho_kk', 'cay_cao', 'cay_chua_cao',
+                    'cay_kho_mu', 'cay_khong_pt', 'ho_trong', 'nam_trong', 'tuoi_cao', 'nam_cao_up',
+                    'tai_canh_nam'
+                ];
+                if (numberCols.includes(key)) {
+                    newRow[key] = parseDecimal(value);
+                } else {
+                    newRow[key] = value === undefined || value === null ? null : String(value).trim();
+                }
+            }
+            return newRow;
+        });
 
         const client = await pool.connect();
         await client.query('BEGIN');
@@ -637,7 +668,7 @@ app.post('/api/import-excel', authenticateToken, upload.single('file'), async (r
             throw new Error('Bảng lo_history chưa được tạo. Vui lòng chạy script tạo bảng trước.');
         }
 
-        // 2. Tạo bảng tạm thời
+        // 2. Tạo bảng tạm (có cột geojson)
         await client.query(`
             CREATE TEMP TABLE temp_import (
                 id_lo VARCHAR(50) PRIMARY KEY,
@@ -680,19 +711,31 @@ app.post('/api/import-excel', authenticateToken, upload.single('file'), async (r
                 phien_cao VARCHAR(50),
                 nhip_do_cao VARCHAR(50),
                 tai_canh_nam INTEGER,
-                doi_tuong VARCHAR(100)
+                doi_tuong VARCHAR(100),
+                geojson JSONB
             )
         `);
         console.log('✅ Đã tạo bảng tạm');
 
-        // 3. Chèn dữ liệu vào bảng tạm
+        // Lấy danh sách cột của bảng tạm để lọc
+        const tempColsRes = await client.query(`
+            SELECT column_name FROM information_schema.columns WHERE table_name='temp_import'
+        `);
+        const tempColumnsSet = new Set(tempColsRes.rows.map(r => r.column_name));
+
+        // 3. Chèn dữ liệu vào bảng tạm (chỉ lấy cột tồn tại trong temp_import)
         for (const row of rows) {
             const id_lo = row.ID_lo || row.id_lo;
             if (!id_lo) continue;
-            const columns = Object.keys(row).filter(k => k !== 'ID_lo' && k !== 'id_lo');
+            const columns = Object.keys(row).filter(k => k !== 'ID_lo' && k !== 'id_lo' && tempColumnsSet.has(k));
             const values = columns.map(c => row[c]);
             const placeholders = columns.map((_, i) => `$${i+2}`).join(',');
-            const insertSql = `INSERT INTO temp_import (id_lo, ${columns.join(',')}) VALUES ($1, ${placeholders}) ON CONFLICT (id_lo) DO UPDATE SET ${columns.map(c => `${c}=EXCLUDED.${c}`).join(',')}`;
+            const insertSql = `
+                INSERT INTO temp_import (id_lo, ${columns.join(',')})
+                VALUES ($1, ${placeholders})
+                ON CONFLICT (id_lo) DO UPDATE SET
+                ${columns.map(c => `${c}=EXCLUDED.${c}`).join(',')}
+            `;
             await client.query(insertSql, [id_lo, ...values]);
         }
         console.log('✅ Đã chèn dữ liệu vào bảng tạm');
@@ -704,33 +747,33 @@ app.post('/api/import-excel', authenticateToken, upload.single('file'), async (r
         const existingIds = existingIdsRes.rows.map(r => r.id_lo);
         console.log(`📌 Số lô đã tồn tại: ${existingIds.length}`);
 
-        // 5. Lưu lịch sử
+        // 5. Lưu lịch sử (chỉ lô đã tồn tại)
         if (existingIds.length > 0) {
             await client.query(`
                 INSERT INTO lo_history (
-                    id_lo, ten_lo, nam_trong, cao_trinh_tb, giong, geometry,
+                    id_lo, ten_lo, nam_trong, cao_trinh_tb, giong,
                     du_an, doi, khu_vuc, hang_dat, phuong_phap_trong, khoang_cach_trong, mat_do_tk,
                     dien_tich_010125, dien_tich_010126, dien_tich_map, tong_ho_kk, cay_cao, cay_chua_cao,
                     cay_kho_mu, cay_khong_pt, ho_trong, mat_do_cc, che_do_cao, nam_mc, tuoi_cao,
                     nam_cao_up, tinh_trang_mc, ns25_kg_ha, ns25_kg_cay, tong_lat_cao, ns26_kg_cay,
                     phan_loai, xa, huyen, tinh, ns26_kg_ha, san_luong, phien_cao, nhip_do_cao,
-                    tai_canh_nam, doi_tuong, nam_cap_nhat_history
+                    tai_canh_nam, doi_tuong, geojson, nam_cap_nhat_history, ngay_luu
                 )
                 SELECT 
-                    l.id_lo, l.ten_lo, l.nam_trong, l.cao_trinh_tb, l.giong, l.geometry,
+                    l.id_lo, l.ten_lo, l.nam_trong, l.cao_trinh_tb, l.giong,
                     l.du_an, l.doi, l.khu_vuc, l.hang_dat, l.phuong_phap_trong, l.khoang_cach_trong, l.mat_do_tk,
                     l.dien_tich_010125, l.dien_tich_010126, l.dien_tich_map, l.tong_ho_kk, l.cay_cao, l.cay_chua_cao,
                     l.cay_kho_mu, l.cay_khong_pt, l.ho_trong, l.mat_do_cc, l.che_do_cao, l.nam_mc, l.tuoi_cao,
                     l.nam_cao_up, l.tinh_trang_mc, l.ns25_kg_ha, l.ns25_kg_cay, l.tong_lat_cao, l.ns26_kg_cay,
                     l.phan_loai, l.xa, l.huyen, l.tinh, l.ns26_kg_ha, l.san_luong, l.phien_cao, l.nhip_do_cao,
-                    l.tai_canh_nam, l.doi_tuong, l.nam_cap_nhat
+                    l.tai_canh_nam, l.doi_tuong, l.geojson, l.nam_cap_nhat, NOW()
                 FROM lo l
                 WHERE l.id_lo = ANY($1::text[])
             `, [existingIds]);
             console.log('✅ Đã lưu lịch sử');
         }
 
-        // 6. Cập nhật hàng loạt các lô đã tồn tại
+        // 6. Cập nhật các lô đã tồn tại (chỉ cột updatableCols)
         const updatableColsSet = new Set(updatableCols);
         const tempColumns = await client.query(`
             SELECT column_name FROM information_schema.columns WHERE table_name='temp_import' AND column_name != 'id_lo'
@@ -750,13 +793,14 @@ app.post('/api/import-excel', authenticateToken, upload.single('file'), async (r
             console.log('✅ Đã cập nhật các lô tồn tại');
         }
 
-        // 7. Thêm mới các lô chưa tồn tại
+        // 7. Thêm mới các lô chưa tồn tại (không bắt buộc geojson)
         const newIdsRes = await client.query(`
             SELECT t.* FROM temp_import t
             WHERE NOT EXISTS (SELECT 1 FROM lo l WHERE l.id_lo = t.id_lo)
         `);
         const newRows = newIdsRes.rows;
         if (newRows.length > 0) {
+            // Lấy tất cả cột từ bảng tạm (bao gồm geojson)
             const allColumns = tempColumns.rows.map(r => r.column_name);
             const insertCols = ['id_lo', 'nam_cap_nhat', ...allColumns];
             const valuesPlaceholders = newRows.map((_, idx) => {
@@ -767,7 +811,8 @@ app.post('/api/import-excel', authenticateToken, upload.single('file'), async (r
             for (const row of newRows) {
                 flatValues.push(row.id_lo, parseInt(nam_cap_nhat));
                 for (const col of allColumns) {
-                    flatValues.push(row[col]);
+                    // Nếu giá trị là undefined hoặc null, giữ nguyên null
+                    flatValues.push(row[col] !== undefined ? row[col] : null);
                 }
             }
             await client.query(`
@@ -784,13 +829,11 @@ app.post('/api/import-excel', authenticateToken, upload.single('file'), async (r
         });
     } catch (err) {
         console.error('❌ Lỗi import Excel chi tiết:', err);
-        // Rollback nếu có lỗi
         try {
             await pool.query('ROLLBACK');
         } catch (rollbackErr) {
             console.error('Lỗi rollback:', rollbackErr);
         }
-        // Gửi lỗi chi tiết về client
         res.status(500).json({ 
             success: false, 
             error: err.message,
@@ -799,7 +842,6 @@ app.post('/api/import-excel', authenticateToken, upload.single('file'), async (r
         });
     }
 });
-
 // API lấy lịch sử của một lô
 app.get('/api/lo-history/:id_lo', authenticateToken, async (req, res) => {
     const { id_lo } = req.params;
