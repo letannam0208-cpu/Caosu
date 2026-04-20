@@ -3,7 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title><%= title %></title>
+    <title>GIS · TBKRUCO</title>
+    <link rel="icon" href="/assets/image/logoTBK.jpg" type="image/jpeg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -211,34 +212,34 @@
       <nav id="nav">
         <div class="nav-section-label">Tổng quan</div>
         <a href="/" class="nav-item <%= path === '/' ? 'active' : '' %>"
-          ><i class="fas fa-home nav-icon"></i> Dashboard</a
+          ><i class="fas fa-home nav-icon"></i>Dashboard</a
         >
         <div class="nav-section-label">Quản lý dữ liệu</div>
         <a
           href="/quan-ly-lo-cay"
           class="nav-item <%= path === '/quan-ly-lo-cay' ? 'active' : '' %>"
-          ><i class="fas fa-tree nav-icon"></i> Quản lý lô cây</a
+          ><i class="fas fa-tree nav-icon"></i>Quản lý lô</a
         >
         <a
           href="/them-du-lieu-lo-cay"
           class="nav-item <%= path === '/them-du-lieu-lo-cay' ? 'active' : '' %>"
-          ><i class="fas fa-plus-circle nav-icon"></i> Thêm dữ liệu lô</a
+          ><i class="fas fa-plus-circle nav-icon"></i>Thêm dữ liệu lô</a
         >
-        <div class="nav-section-label">Người dùng & Phân quyền</div>
+        <div class="nav-section-label">Người dùng</div>
         <a
           href="/quan-ly-nguoi-dung"
           class="nav-item <%= path === '/quan-ly-nguoi-dung' ? 'active' : '' %>"
-          ><i class="fas fa-users nav-icon"></i> Quản lý người dùng</a
+          ><i class="fas fa-users nav-icon"></i>Quản lý người dùng</a
         >
         <div class="nav-section-label">Phân tích</div>
         <a
           href="/thong-ke"
           class="nav-item <%= path === '/thong-ke' ? 'active' : '' %>"
-          ><i class="fas fa-chart-bar nav-icon"></i> Thống kê</a
+          ><i class="fas fa-chart-bar nav-icon"></i>Thống kê</a
         >
         <div class="nav-logout">
           <a href="/logout" class="nav-item"
-            ><i class="fas fa-sign-out-alt nav-icon"></i> Đăng xuất</a
+            ><i class="fas fa-sign-out-alt nav-icon"></i>Đăng xuất</a
           >
         </div>
       </nav>
@@ -248,14 +249,14 @@
           <div>
             <h1 class="page-title">Nhập dữ liệu từ Excel</h1>
             <p class="page-subtitle">
-              Cập nhật thông tin lô cây hàng loạt, tự động lưu lịch sử theo năm
+              Cập nhật thông tin lô hàng loạt, tự động lưu lịch sử theo năm
             </p>
           </div>
         </div>
 
         <div class="form-container">
           <div class="form-section-title">
-            <i class="fas fa-file-excel"></i> Nhập file Excel cho bảng Lô cây
+            <i class="fas fa-file-excel"></i> Import file Excel/CSV
           </div>
 
           <!-- Nhập năm cập nhật -->
@@ -281,7 +282,7 @@
               Kéo thả hoặc click để chọn file Excel/CSV
             </div>
             <div class="upload-hint">
-              Hỗ trợ .xlsx, .xls, .csv - Các cột phải khớp với cấu trúc bảng lo
+              Hỗ trợ .xlsx, .xls, .csv - Các cột phải khớp với cấu trúc file mẫu
             </div>
             <input
               type="file"
@@ -302,7 +303,7 @@
               text-decoration: none;
               margin-bottom: 16px;
             ">
-            <i class="fas fa-download"></i> Tải file mẫu (bảng lo)
+            <i class="fas fa-download"></i> Tải file mẫu (.xlsx)
           </a>
 
           <!-- Preview area -->
@@ -366,9 +367,13 @@
               (s, l) => s + (parseFloat(l.dien_tich_map) || 0),
               0,
             );
-            document.getElementById("totalLots").innerText = totalLots;
+            document.getElementById("totalLots").innerText =
+              totalLots.toLocaleString("vi-VN");
             document.getElementById("totalArea").innerHTML =
-              totalArea.toFixed(3) + " ha";
+              totalArea.toLocaleString("vi-VN", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              }) + " ha";
           }
         } catch (e) {}
       }

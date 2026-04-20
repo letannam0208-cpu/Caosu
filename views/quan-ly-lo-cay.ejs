@@ -5,7 +5,8 @@
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-    <title>WebGIS · Quản Lý Lô Cao Su</title>
+    <title>GIS · TBKRUCO</title>
+    <link rel="icon" href="/assets/image/logoTBK.jpg" type="image/jpeg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap"
@@ -315,10 +316,10 @@
         <span>Trực tuyến</span>
       </div>
       <div class="tb-pill">
-        <strong>Số lô</strong> <span id="total-lots">0</span>
+        <span>Số lô</span> <strong id="total-lots">0</strong>
       </div>
       <div class="tb-pill">
-        <strong>Diện tích</strong> <span id="total-area">0 ha</span>
+        <span>Diện tích</span> <strong id="totalArea">0 ha</strong>
       </div>
       <div class="tb-right">
         <div class="tb-user-info">
@@ -333,22 +334,22 @@
       <nav id="nav">
         <div class="nav-section-label">Tổng quan</div>
         <a href="/" class="nav-item"
-          ><i class="fas fa-home nav-icon"></i> Dashboard</a
+          ><i class="fas fa-home nav-icon"></i>Dashboard</a
         >
         <div class="nav-section-label">Quản lý dữ liệu</div>
         <a href="/quan-ly-lo-cay" class="nav-item active"
-          ><i class="fas fa-tree nav-icon"></i> Quản lý lô</a
+          ><i class="fas fa-tree nav-icon"></i>Quản lý lô</a
         >
         <a href="/them-du-lieu-lo-cay" class="nav-item"
-          ><i class="fas fa-plus-circle nav-icon"></i> Thêm dữ liệu lô</a
+          ><i class="fas fa-plus-circle nav-icon"></i>Thêm dữ liệu lô</a
         >
-        <div class="nav-section-label">Người dùng & Phân quyền</div>
+        <div class="nav-section-label">Người dùng</div>
         <a href="/quan-ly-nguoi-dung" class="nav-item"
-          ><i class="fas fa-users nav-icon"></i> Quản lý người dùng</a
+          ><i class="fas fa-users nav-icon"></i>Quản lý người dùng</a
         >
         <div class="nav-section-label">Phân tích</div>
         <a href="/thong-ke" class="nav-item"
-          ><i class="fas fa-chart-bar nav-icon"></i> Thống kê</a
+          ><i class="fas fa-chart-bar nav-icon"></i>Thống kê</a
         >
 
         <div
@@ -502,8 +503,11 @@
               (sum, l) => sum + (parseFloat(l.dien_tich_map) || 0),
               0,
             );
-            document.getElementById("total-area").innerText =
-              totalArea.toFixed(2) + " ha";
+            document.getElementById("totalArea").innerHTML =
+              totalArea.toLocaleString("vi-VN", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              }) + " ha";
             syncScrollbarWidth();
             attachHorizontalScroll();
           } else {
