@@ -591,6 +591,8 @@ const XLSX = require('xlsx');
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
+
+// Các cột cố định
 const fixedColumns = ['id_lo', 'geojson', 'xa', 'huyen', 'tinh'];
 
 // Các cột có thể cập nhật
@@ -666,7 +668,9 @@ app.post('/api/import-excel', authenticateToken, upload.single('file'), async (r
             throw new Error('Bảng lo_history chưa được tạo. Vui lòng chạy script tạo bảng trước.');
         }
 
-        // 2. Tạo bảng tạm (có cột geojson)
+        // 2. Xóa bảng tạm nếu tồn tại (tránh lỗi "already exists")
+        await client.query(`DROP TABLE IF EXISTS temp_import`);
+        // Tạo bảng tạm mới
         await client.query(`
             CREATE TEMP TABLE temp_import (
                 id_lo VARCHAR(50) PRIMARY KEY,
@@ -809,7 +813,6 @@ app.post('/api/import-excel', authenticateToken, upload.single('file'), async (r
             for (const row of newRows) {
                 flatValues.push(row.id_lo, parseInt(nam_cap_nhat));
                 for (const col of allColumns) {
-                    // Nếu giá trị là undefined hoặc null, giữ nguyên null
                     flatValues.push(row[col] !== undefined ? row[col] : null);
                 }
             }
@@ -840,6 +843,7 @@ app.post('/api/import-excel', authenticateToken, upload.single('file'), async (r
         });
     }
 });
+
 // API lấy lịch sử của một lô
 app.get('/api/lo-history/:id_lo', authenticateToken, async (req, res) => {
     const { id_lo } = req.params;
