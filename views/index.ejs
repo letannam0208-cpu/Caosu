@@ -17,7 +17,6 @@
       rel="stylesheet"
       href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.9.0/proj4.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link
@@ -2499,37 +2498,10 @@
         fullTuoiCao = new Set(),
         fullCheDoCao = new Set();
 
-      // Transform UTM to WGS84
-      function transformGeometry(geometry) {
-        if (!geometry || !geometry.coordinates) return geometry;
-        const utmProj = "+proj=utm +zone=48 +datum=WGS84 +units=m +no_defs";
-        const wgs84Proj = "+proj=longlat +datum=WGS84";
-
-        function transformCoords(coords) {
-          if (typeof coords[0] === "number") {
-            // Point
-            const [x, y] = proj4(utmProj, wgs84Proj, [coords[0], coords[1]]);
-            return [x, y];
-          } else {
-            // Array of coords
-            return coords.map(transformCoords);
-          }
-        }
-
-        return {
-          ...geometry,
-          coordinates: transformCoords(geometry.coordinates),
-        };
-      }
-
       async function loadCaosuData() {
         try {
           const data = await fetchAPI("/api/lo-cao-su");
           caosuFeatures = data.features || [];
-          // Transform geometries from UTM to WGS84
-          caosuFeatures.forEach((f) => {
-            f.geometry = transformGeometry(f.geometry);
-          });
           console.log("📦 Đã tải", caosuFeatures.length, "lô từ API");
           if (caosuFeatures.length === 0) {
             console.warn(
@@ -3549,8 +3521,8 @@
         }).setView([12.524, 105.452], 12);
 
         window.currentBaseLayer = L.tileLayer(
-          "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-          { maxZoom: 19, attribution: "© OpenStreetMap contributors" },
+          "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+          { maxZoom: 19, attribution: "Esri, Maxar, Earthstar" },
         ).addTo(dashMap);
 
         try {
