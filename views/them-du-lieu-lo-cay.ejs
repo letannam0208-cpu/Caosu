@@ -13,7 +13,11 @@
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" />
     <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
     <link href="/assets/css/style.css" rel="stylesheet" />
     <style>
       .form-container {
@@ -171,6 +175,13 @@
         outline: none;
         border-color: var(--accent);
       }
+      .form-group input.error {
+        border-color: var(--danger) !important;
+        box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.2);
+      }
+      .form-group input.error::placeholder {
+        color: var(--danger);
+      }
     </style>
   </head>
   <body>
@@ -262,13 +273,13 @@
           <!-- Nhập năm cập nhật -->
           <div class="form-group">
             <label
-              ><i class="fas fa-calendar-alt"></i> Năm cập nhật (bắt
-              buộc)</label
-            >
+              ><i class="fas fa-calendar-alt"></i> Năm cập nhật
+              <span style="color: var(--danger)">(bắt buộc)</span>
+            </label>
             <input
-              type="number"
+              type="text"
               id="namCapNhat"
-              placeholder="Ví dụ: 2027"
+              placeholder="Ví dụ: 2026"
               required />
             <div class="upload-hint">
               Dữ liệu hiện tại sẽ được lưu vào bảng lịch sử với năm tương ứng
@@ -382,6 +393,7 @@
       const uploadZone = document.getElementById("uploadZone");
       const fileInput = document.getElementById("fileInput");
       let uploadedData = null;
+      let uploadedFileName = null;
 
       uploadZone.addEventListener("click", () => fileInput.click());
       uploadZone.addEventListener("dragover", (e) => {
@@ -410,6 +422,7 @@
           const sheet = workbook.Sheets[workbook.SheetNames[0]];
           const json = XLSX.utils.sheet_to_json(sheet);
           uploadedData = json;
+          uploadedFileName = file.name;
           showPreview(json);
           addLog(
             `📁 Đã tải file: ${file.name} - Số dòng: ${json.length}`,
@@ -459,6 +472,7 @@
 
       document.getElementById("clearPreview")?.addEventListener("click", () => {
         uploadedData = null;
+        uploadedFileName = null;
         document.getElementById("previewArea").style.display = "none";
         fileInput.value = "";
         clearLog();
@@ -466,36 +480,74 @@
       });
 
       // Gửi import lên server
+      let pendingNamCapNhat = null;
+      let pendingData = null;
+
       document
         .getElementById("submitImport")
         .addEventListener("click", async () => {
           if (!uploadedData || uploadedData.length === 0) {
-            alert("Chưa có dữ liệu để nhập. Hãy chọn file Excel trước.");
+            showToast(
+              "Chưa có dữ liệu để nhập. Hãy chọn file Excel trước.",
+              "warning",
+            );
             return;
           }
-          const namCapNhat = document.getElementById("namCapNhat").value;
+          const namCapNhatInput = document.getElementById("namCapNhat");
+          const namCapNhat = namCapNhatInput.value;
+
+          // Reset error state
+          namCapNhatInput.classList.remove("error");
+
           if (!namCapNhat || isNaN(namCapNhat)) {
-            alert("Vui lòng nhập năm cập nhật (ví dụ: 2027)");
+            namCapNhatInput.classList.add("error");
+            showToast("Vui lòng nhập năm cập nhật (ví dụ: 2026)", "warning");
             return;
           }
+
+          // Lưu data để dùng trong modal confirm
+          pendingNamCapNhat = namCapNhat;
+          pendingData = uploadedData;
 
           const confirmMsg =
-            `📊 XÁC NHẬN NHẬP DỮ LIỆU\n\n` +
-            `• Bảng: Lô cây\n` +
-            `• Số dòng: ${uploadedData.length}\n` +
-            `• Năm cập nhật: ${namCapNhat}\n` +
-            `• Dữ liệu cũ sẽ được tự động lưu vào bảng lịch sử\n\n` +
-            `Bạn có chắc chắn muốn tiếp tục?`;
-          if (!confirm(confirmMsg)) return;
+            `<div style="line-height: 1.8;">` +
+            `<p style="color: var(--muted2); margin-bottom: 16px;">Bạn có chắc chắn muốn tiếp tục?</p>` +
+            `<div style="background: var(--s2); padding: 12px; border-radius: 8px; font-size: 13px;">` +
+            `<div><i class="fas fa-file-excel me-2" style="color: var(--accent);"></i><strong>Tên File:</strong> ${uploadedFileName}</div>` +
+            `<div><i class="fas fa-list me-2" style="color: var(--accent);"></i><strong>Số lô cập nhật:</strong> ${uploadedData.length}</div>` +
+            `<div><i class="fas fa-calendar me-2" style="color: var(--accent);"></i><strong>Năm cập nhật:</strong> ${namCapNhat}</div>` +
+            `</div>` +
+            `<p style="color: var(--warn); margin-top: 12px; margin-bottom: 0;"><i class="fas fa-info-circle me-1"></i> Dữ liệu cũ sẽ được tự động lưu vào bảng lịch sử</p>` +
+            `</div>`;
 
-          clearLog();
-          addLog(`🚀 BẮT ĐẦU NHẬP LIỆU - Năm: ${namCapNhat}`, "info");
-          addLog(`📊 Tổng số dòng cần xử lý: ${uploadedData.length}`, "info");
+          document.getElementById("confirmModalBody").innerHTML = confirmMsg;
+          const modal = new bootstrap.Modal(
+            document.getElementById("confirmModal"),
+          );
+          modal.show();
+        });
+
+      // Xử lý khi bấm xác nhận trong modal
+      document.addEventListener('DOMContentLoaded', function() {
+        document
+          .getElementById("confirmImportBtn")
+          .addEventListener("click", async () => {
+            const modal = bootstrap.Modal.getInstance(
+              document.getElementById("confirmModal"),
+            );
+            modal.hide();
+
+            const namCapNhat = pendingNamCapNhat;
+            const dataToImport = pendingData;
+
+            clearLog();
+            addLog(`🚀 BẮT ĐẦU NHẬP LIỆU - Năm: ${namCapNhat}`, "info");
+            addLog(`📊 Tổng số dòng cần xử lý: ${dataToImport.length}`, "info");
 
           // Tạo FormData để gửi file
           const formData = new FormData();
           // Chuyển đổi uploadedData (mảng JSON) thành file Blob
-          const ws = XLSX.utils.json_to_sheet(uploadedData);
+          const ws = XLSX.utils.json_to_sheet(dataToImport);
           const wb = XLSX.utils.book_new();
           XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
           const excelBuffer = XLSX.write(wb, {
@@ -513,7 +565,7 @@
 
           const statusDiv = document.getElementById("importStatus");
           statusDiv.innerHTML =
-            '<i class="fas fa-spinner fa-pulse"></i> Đang xử lý, vui lòng chờ...';
+            '<div class="spinner-border spinner-border-sm text-success me-2" role="status"></div> Đang xử lý, vui lòng chờ...';
 
           try {
             const res = await fetch("/api/import-excel", {
@@ -522,7 +574,8 @@
             });
             const result = await res.json();
             if (result.success) {
-              statusDiv.innerHTML = `<span style="color:var(--accent)">✅ ${result.message}</span>`;
+              statusDiv.innerHTML = "";
+              showToast(result.message, "success");
               addLog(`✅ ${result.message}`, "insert");
               addLog(
                 `💾 Dữ liệu cũ đã được lưu vào bảng lịch sử (lo_history)`,
@@ -531,21 +584,117 @@
               updateStats();
               // Reset sau khi thành công
               uploadedData = null;
+              uploadedFileName = null;
               document.getElementById("previewArea").style.display = "none";
               fileInput.value = "";
               document.getElementById("namCapNhat").value = "";
+              pendingNamCapNhat = null;
+              pendingData = null;
             } else {
-              statusDiv.innerHTML = `<span style="color:var(--danger)">❌ Lỗi: ${result.error}</span>`;
+              statusDiv.innerHTML = "";
+              showToast(result.error || "Đã xảy ra lỗi", "danger");
               addLog(`❌ Lỗi: ${result.error}`, "error");
             }
           } catch (err) {
-            statusDiv.innerHTML = `<span style="color:var(--danger)">❌ Lỗi kết nối: ${err.message}</span>`;
+            statusDiv.innerHTML = "";
+            showToast("Lỗi kết nối: " + err.message, "danger");
             addLog(`❌ Lỗi kết nối: ${err.message}`, "error");
           }
         });
+      });
 
       // Khởi tạo thống kê
       updateStats();
+
+      // Toast notification
+      function showToast(message, type = "info") {
+        const toastEl = document.getElementById("liveToast");
+        const toastBody = toastEl.querySelector(".toast-body");
+        const toast = new bootstrap.Toast(toastEl);
+
+        toastBody.textContent = message;
+        toastEl.classList.remove(
+          "bg-success",
+          "bg-danger",
+          "bg-warning",
+          "bg-info",
+        );
+        toastEl.classList.add("bg-" + type);
+        toast.show();
+      }
     </script>
+
+    <!-- Toast Container -->
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 9999">
+      <div
+        id="liveToast"
+        class="toast text-white"
+        role="alert"
+        aria-live="assertive"
+        aria-atomic="true">
+        <div class="toast-header">
+          <strong class="me-auto" id="toastTitle">Thông báo</strong>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="toast"></button>
+        </div>
+        <div class="toast-body"></div>
+      </div>
+    </div>
+
+    <!-- Confirm Modal -->
+    <div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div
+          class="modal-content"
+          style="
+            background: var(--s1);
+            border: 1px solid var(--border);
+            color: var(--text);
+          ">
+          <div
+            class="modal-header"
+            style="border-bottom: 1px solid var(--border)">
+            <h5 class="modal-title" style="color: var(--accent)">
+              <i class="fas fa-exclamation-triangle me-2"></i>Xác nhận nhập dữ
+              liệu
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              style="filter: invert(1)"></button>
+          </div>
+          <div class="modal-body" id="confirmModalBody">
+            <!-- Dynamic content -->
+          </div>
+          <div class="modal-footer" style="border-top: 1px solid var(--border)">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+              style="
+                background: rgba(255, 255, 255, 0.1);
+                border: 1px solid var(--border);
+                color: var(--muted2);
+              ">
+              Hủy
+            </button>
+            <button
+              type="button"
+              class="btn btn-confirm"
+              id="confirmImportBtn"
+              style="
+                background: linear-gradient(135deg, var(--accent), #059669);
+                border: none;
+                color: #fff;
+              ">
+              <i class="fas fa-check me-2"></i>Xác nhận
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </body>
 </html>
