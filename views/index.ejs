@@ -2480,6 +2480,7 @@
         labelsVis = true;
       let mapViewMode = "nt";
       let selectedIdx = new Set();
+      let highlightedTeam = null;
       let currentTool = "pointer";
       let filterNT = new Set(),
         filterNam = new Set(),
@@ -2579,6 +2580,7 @@
           } else {
             console.log("Ví dụ feature đầu tiên:", caosuFeatures[0]);
           }
+          highlightedTeam = null;
           fullNT.clear();
           fullNam.clear();
           fullGiong.clear();
@@ -3084,13 +3086,21 @@
           const p = feat.properties;
         if (!featureVisible(p)) return;
           const isSel = selectedIdx.has(idx);
+          const isHighlightTeam = (highlightedTeam !== null && normalizeTeamValue(p.doi) === highlightedTeam);
           const col = getLotColorReal(p, mapViewMode);
 
           if (lotsVis) {
+                        // Xác định màu viền và độ dày
+            let edgeColor = isSel ? "#ffffff" : col;
+            let edgeWeight = isSel ? 2.5 : 1;
+            if (isHighlightTeam && !isSel) {
+                edgeColor = "#ffaa00";   // viền vàng nổi bật
+                edgeWeight = 3;
+            }
             const layer = L.geoJSON(feat, {
               style: {
-                color: isSel ? "#ffffff" : col,
-                weight: isSel ? 2.5 : 1,
+                color: edgeColor,
+                weight: edgeWeight,
                 fillColor: col,
                 fillOpacity: isSel ? 0.65 : 0.52,
               },
@@ -3289,6 +3299,14 @@
           else if (type === "tuoi_cao") filterTuoiCao = new Set([val]);
           else if (type === "che_do_cao") filterCheDoCao = new Set([val]);
         }
+                // Xử lý highlight ranh giới theo Đội
+        if (type === 'NT') {
+            if (val === 'all') {
+                highlightedTeam = null;
+            } else {
+                highlightedTeam = normalizeTeamValue(val);
+            }
+        }
         // Cascade: cập nhật các dropdown khác dựa trên tập dữ liệu đã lọc
         cascadeFilterOptions(type);
         renderRealLots();
@@ -3377,7 +3395,10 @@
           } else if (currentVal !== 'all' && !availableValues.has(currentVal)) {
             // Giá trị cũ không còn hợp lệ → reset về tất cả
             el.value = 'all';
-            def.setFilter(new Set());   // reset về không lọc
+            def.setFilter(new Set()); // reset về không lọc
+            if (def.key === 'NT') {
+                highlightedTeam = null;
+            }
           }
         });
 
