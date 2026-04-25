@@ -3,8 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>GIS · TBKRUCO</title>
-    <link rel="icon" href="/assets/image/logoTBK.jpg" type="image/jpeg" />
+    <title>WebGIS · Vườn Cây Cao Su</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -24,11 +23,6 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-      integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
-      crossorigin="anonymous" />
     <link rel="stylesheet" href="/assets/css/style.css" />
     <style>
       .icon-btn {
@@ -697,51 +691,13 @@
         width: 1px;
         height: 20px;
         background: var(--border);
-        margin: 0 1px;
+        margin: 0 2px;
         flex-shrink: 0;
       }
       .map-label {
         font-size: 10px;
         color: var(--muted);
         white-space: nowrap;
-      }
-
-      /* ── FILTER DROPDOWN STYLING ── */
-      .filterIndex {
-        background: var(--s2);
-        border: 1px solid var(--border);
-        border-radius: var(--r);
-        color: var(--muted2);
-        padding: 5px 24px 5px 10px;
-        font-size: 11px;
-        font-family: var(--font);
-        cursor: pointer;
-        transition: all 0.2s;
-        max-width: 140px;
-        appearance: none;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%235a6a8a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-        background-repeat: no-repeat;
-        background-position: right 8px center;
-      }
-      .filterIndex:focus {
-        border-color: var(--accent);
-        box-shadow: 0 0 0 2px rgba(0, 214, 143, 0.15);
-        outline: none;
-      }
-      .filterIndex:hover {
-        border-color: var(--border2);
-        color: var(--text);
-      }
-      .filterIndex option {
-        background: var(--s1);
-        color: var(--text);
-      }
-      /* Active filter highlight — applied via JS */
-      .filterIndex.filter-active {
-        background-color: rgba(0, 214, 143, 0.08);
-        border-color: rgba(0, 214, 143, 0.4);
-        color: var(--accent);
-        font-weight: 600;
       }
 
       /* Map canvas wrapper */
@@ -857,14 +813,6 @@
         background: rgba(0, 214, 143, 0.18);
         color: var(--accent);
       }
-      .mc-btn-wide.danger {
-        background: rgba(239, 68, 68, 0.18);
-        color: var(--danger);
-      }
-      .mc-btn-wide.danger:hover {
-        background: rgba(239, 68, 68, 0.28);
-        color: #fff;
-      }
       .mc-btn-wide svg {
         flex-shrink: 0;
         transition: transform 0.15s;
@@ -922,7 +870,6 @@
         border-bottom: 1px solid rgba(255, 255, 255, 0.04);
         background: rgba(255, 255, 255, 0.02);
       }
-
 
       /* Pan mode cursor */
       .pan-mode #dashMap {
@@ -982,20 +929,12 @@
         font-size: 11px;
         color: var(--text);
         display: none;
-        flex-direction: column;
-        gap: 4px;
+        align-items: center;
+        gap: 8px;
         backdrop-filter: blur(8px);
       }
       .map-sel-bar.show {
         display: flex;
-      }
-      .sel-bar-area {
-        color: #f59e0b;
-        font-size: 11px;
-        font-weight: 700;
-        padding-top: 4px;
-        border-top: 1px solid rgba(255,255,255,0.12);
-        letter-spacing: 0.01em;
       }
       .map-sel-dot {
         width: 7px;
@@ -1548,7 +1487,7 @@
         color: var(--muted2);
         cursor: pointer;
         text-align: center;
-        font-family: var(--font-b);
+        font-family: var(--font);
         transition: 0.15s;
       }
       .lo-popup-btn:hover {
@@ -1733,7 +1672,9 @@
           <div class="page-header">
             <div>
               <div class="page-title" data-lang="dashboard">Dashboard</div>
-              <div class="page-subtitle">Tổng quan vườn cây</div>
+              <div class="page-subtitle">
+                Tổng quan hoạt động vườn cây — cập nhật lúc 07:42, 16/03/2026
+              </div>
             </div>
             <div style="display: flex; gap: 8px; justify-content: flex-end">
               <button
@@ -1852,10 +1793,10 @@
                   max-width: 120px;
                 "
                 onchange="changeBaseMap(this.value)">
-                <option value="satellite">Vệ tinh (ESRI)</option>
+                <option value="satellite">Vệ tinh (Esri)</option>
                 <option value="osm">OpenStreetMap</option>
                 <option value="carto">CartoDB Positron</option>
-                <option value="gray">ESRI Gray</option>
+                <option value="gray">Esri Gray</option>
               </select>
               <div class="map-sep"></div>
 
@@ -1913,6 +1854,15 @@
               </select>
               <div class="map-sep"></div>
 
+              <span class="map-label" style="flex-shrink: 0">QH tái canh:</span>
+              <select
+                id="filter-quy_hoach_tai_canh"
+                class="filterIndex"
+                onchange="updateMapFilters('quy_hoach_tai_canh', this)">
+                <option value="all">Tất cả</option>
+              </select>
+              <div class="map-sep"></div>
+
               <span class="map-label" style="flex-shrink: 0">Khu vực:</span>
               <select
                 id="filter-khu-vuc"
@@ -1936,13 +1886,6 @@
                 id="filter-che-do-cao"
                 class="filterIndex"
                 onchange="updateMapFilters('che_do_cao', this)">
-                <option value="all">Tất cả</option>
-              </select>
-              <span class="map-label" style="flex-shrink: 0">QH tái canh:</span>
-              <select
-                id="filter-quy_hoach_tai_canh"
-                class="filterIndex"
-                onchange="updateMapFilters('quy_hoach_tai_canh', this)">
                 <option value="all">Tất cả</option>
               </select>
             </div>
@@ -2058,7 +2001,7 @@
                 <!-- HOME group -->
                 <div class="map-ctrl-group">
                   <div class="mc-group-label">Vị trí</div>
-                  <!-- <button
+                  <button
                     class="mc-btn-wide mc-btn-home"
                     id="btn-home"
                     onclick="goHome()">
@@ -2077,15 +2020,10 @@
                     <span class="mc-tooltip"
                       >Về vị trí mặc định &nbsp; [ H ]</span
                     >
-                  </button> -->
+                  </button>
                   <button
-                    type="button"
                     class="mc-btn-wide"
                     id="gps-btn"
-                    data-bs-toggle="tooltip"
-                    data-bs-placement="right"
-                    title="Xác định vị trí GPS của bạn"
-                    animation="true"
                     onclick="locateUser()">
                     <svg
                       width="14"
@@ -2098,14 +2036,14 @@
                       <path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
                       <circle cx="12" cy="12" r="7" stroke-dasharray="2 2" />
                     </svg>
-                    Vị trí của tôi
+                    Vị trí tôi
                     <span class="mc-tooltip">Xác định vị trí GPS của bạn</span>
                   </button>
                 </div>
 
                 <!-- COMPASS -->
-                <!-- <div class="map-ctrl-group">
-                  <button class="mc-btn mc-compass" style="width: 40px" type="button">
+                <div class="map-ctrl-group">
+                  <button class="mc-btn mc-compass" style="width: 40px">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                       <circle
                         cx="12"
@@ -2133,10 +2071,9 @@
                         N
                       </text>
                     </svg>
-
                     <span class="mc-tooltip">Hướng Bắc cố định</span>
                   </button>
-                </div> -->
+                </div>
               </div>
 
               <!-- RIGHT TOOLBAR-->
@@ -2374,19 +2311,18 @@
 
               <!-- SELECTED BAR -->
               <div class="map-sel-bar" id="mapSelBar">
-                <div style="display:flex; align-items:center; gap:8px;">
-                  <div class="map-sel-dot"></div>
-                  <span id="selBarText">Đã chọn: 0 lô</span>
-                  <span style="color: var(--muted); margin: 0 4px">|</span>
-                  <span
-                    style="color: var(--accentB); cursor: pointer; font-size: 11px;"
-                    onclick="clearSelection()"
-                    >Bỏ chọn</span
-                  >
-                </div>
-                <div class="sel-bar-area" id="selBarArea" style="display:none;">
-                  📐 Tổng DT: <span id="selBarAreaVal">0</span> ha
-                </div>
+                <div class="map-sel-dot"></div>
+                <span id="selBarText">Đối tượng được chọn: 0</span>
+                <span style="color: var(--muted); margin: 0 4px">|</span>
+                <span
+                  style="
+                    color: var(--accentB);
+                    cursor: pointer;
+                    font-size: 11px;
+                  "
+                  onclick="clearSelection()"
+                  >Bỏ chọn</span
+                >
               </div>
 
               <!-- COORD BAR -->
@@ -2562,14 +2498,9 @@
         fullTuoiCao = new Set(),
         fullCheDoCao = new Set();
 
-      const originalData = [];
-      const filteredData = [];
-
       async function loadCaosuData() {
         try {
           const data = await fetchAPI("/api/lo-cao-su");
-            // originalData = await data.json(); // Lưu trữ dữ liệu gốc để sử dụng cho tìm kiếm
-          // filteredData = [...originalData]; // Khởi tạo filteredData bằng dữ liệu gốc
           caosuFeatures = data.features || [];
           console.log("📦 Đã tải", caosuFeatures.length, "lô từ API");
           if (caosuFeatures.length === 0) {
@@ -2591,7 +2522,8 @@
 
           caosuFeatures.forEach((f) => {
             const p = f.properties;
-            fullNT.add(normalizeTeamValue(p.doi));
+            if (p.doi) fullNT.add(p.doi);
+            else fullNT.add("");
             if (p.nam_trong) fullNam.add(String(p.nam_trong));
             else fullNam.add("");
             if (p.giong) fullGiong.add(p.giong);
@@ -2633,90 +2565,18 @@
           console.error("❌ Lỗi loadCaosuData:", err);
           caosuFeatures = [];
         }
-
-        // initFilters();
       }
-
-      //Lấy giá trị duy nhất cho dropdown
-      function getUniqueValues(data, field) {
-        return [...new Set(data.map((item) => item[field]).filter(Boolean))];
-      }
-
-      //Render dropdown
-      function renderSelect(id, values) {
-        const select = document.getElementById(id);
-        const currentValue = select.value;
-
-        select.innerHTML = '<option value="">-- Tất cả --</option>';
-
-        values.forEach((val) => {
-          const option = document.createElement("option");
-          option.value = val;
-          option.textContent = val;
-          select.appendChild(option);
-        });
-
-        // giữ lại value nếu còn hợp lệ
-        if (values.includes(currentValue)) {
-          select.value = currentValue;
-        }
-      }
-
-      //Init filter ban đầu
-      function initFilters() {
-        renderAllFilters(originalData);
-      }
-
-      //Render toàn bộ filter (KEY)
-      function renderAllFilters(data) {
-        renderSelect("filter-doi", getUniqueValues(data, "doi"));
-        renderSelect("filter-namtrong", getUniqueValues(data, "nam_trong"));
-        renderSelect("filter-giong", getUniqueValues(data, "giong"));
-        renderSelect("filter-khuvuc", getUniqueValues(data, "khu_vuc"));
-        renderSelect("filter-tuoi", getUniqueValues(data, "tuoi_cao"));
-        renderSelect("filter-namcao", getUniqueValues(data, "nam_cao"));
-      }
-
-      //Lọc dữ liệu theo selection
-      function applyFilters() {
-        const doi = document.getElementById("filter-doi").value;
-        const namtrong = document.getElementById("filter-namtrong").value;
-        const giong = document.getElementById("filter-giong").value;
-        const khuvuc = document.getElementById("filter-khuvuc").value;
-        const tuoi = document.getElementById("filter-tuoi").value;
-        const namcao = document.getElementById("filter-namcao").value;
-
-        filteredData = originalData.filter((item) => {
-          return (
-            (!doi || item.doi == doi) &&
-            (!namtrong || item.nam_trong == namtrong) &&
-            (!giong || item.giong == giong) &&
-            (!khuvuc || item.khu_vuc == khuvuc) &&
-            (!tuoi || item.tuoi_cao == tuoi) &&
-            (!namcao || item.nam_cao == namcao)
-          );
-        });
-
-        // 🔥 CẬP NHẬT NGƯỢC dropdown
-        renderAllFilters(filteredData);
-
-        // nếu có chart/table thì update ở đây
-        renderTable(filteredData);
-      }
-
-      // Legacy global select listener removed - using dedicated onchange handlers per filter
 
       async function buildFilterUI() {
         const ntEl = document.getElementById("filter-Doi");
         if (ntEl) {
           ntEl.innerHTML = '<option value="all">Tất cả</option>';
           Array.from(fullNT)
-            .filter((v) => v !== "")
-            .sort(sortFilterValues)
+            .sort()
             .forEach((nt) => {
               const opt = document.createElement("option");
               opt.value = nt;
-              opt.textContent = /^\d+$/.test(nt) ? `Đội ${nt}` : nt;
+              opt.textContent = nt;
               ntEl.appendChild(opt);
             });
         }
@@ -2832,171 +2692,9 @@
         }
       }
 
-      function normalizeFilterValue(value) {
-        return value == null ? "" : String(value).trim();
-      }
-
-      function normalizeTeamValue(value) {
-        const raw = normalizeFilterValue(value);
-        if (!raw) return "";
-        const digits = raw.match(/\d+/g);
-        if (digits && digits.length === 1) return digits[0];
-        return raw;
-      }
-
-      function sortFilterValues(a, b) {
-        const na = Number(a);
-        const nb = Number(b);
-        if (!Number.isNaN(na) && !Number.isNaN(nb)) return na - nb;
-        return a.localeCompare(b, "vi", { numeric: true, sensitivity: "base" });
-      }
-
-      function buildSelectOptions(
-        selectId,
-        values,
-        selectedValue,
-        filterSet,
-        fullSet,
-      ) {
-        const el = document.getElementById(selectId);
-        if (!el) return false;
-
-        const uniqueValues = Array.from(
-          new Set(values.filter((v) => v !== "")),
-        );
-        uniqueValues.sort(sortFilterValues);
-
-        const validSelected =
-          selectedValue && uniqueValues.includes(selectedValue);
-        const preservedValue = validSelected ? selectedValue : "all";
-
-        el.innerHTML = '<option value="all">Tất cả</option>';
-        uniqueValues.forEach((value) => {
-          const opt = document.createElement("option");
-          opt.value = value;
-          opt.textContent = value;
-          if (value === preservedValue) opt.selected = true;
-          el.appendChild(opt);
-        });
-        if (preservedValue === "all") el.value = "all";
-
-        if (!validSelected && filterSet && fullSet) {
-          filterSet.clear();
-          fullSet.forEach((item) => filterSet.add(item));
-          return true;
-        }
-
-        return false;
-      }
-
-      function refreshFilterOptions() {
-        const visibleFeatures = caosuFeatures.filter(featureVisible);
-
-        const currentSelections = {
-          NT: document.getElementById("filter-Doi")?.value || "all",
-          nam: document.getElementById("filter-nam")?.value || "all",
-          giong: document.getElementById("filter-giong")?.value || "all",
-          phien_cao:
-            document.getElementById("filter-phien_cao")?.value || "all",
-          nhip_do_cao:
-            document.getElementById("filter-Nhip_do_cao")?.value || "all",
-          quy_hoach_tai_canh:
-            document.getElementById("filter-quy_hoach_tai_canh")?.value ||
-            "all",
-          khu_vuc: document.getElementById("filter-khu-vuc")?.value || "all",
-          tuoi_cao: document.getElementById("filter-tuoi-cao")?.value || "all",
-          che_do_cao:
-            document.getElementById("filter-che-do-cao")?.value || "all",
-        };
-
-        const didReset =
-          buildSelectOptions(
-            "filter-Doi",
-            visibleFeatures.map((f) => normalizeTeamValue(f.properties.doi)),
-            currentSelections.NT,
-            filterNT,
-            fullNT,
-          ) ||
-          buildSelectOptions(
-            "filter-nam",
-            visibleFeatures.map((f) =>
-              normalizeFilterValue(f.properties.nam_trong),
-            ),
-            currentSelections.nam,
-            filterNam,
-            fullNam,
-          ) ||
-          buildSelectOptions(
-            "filter-giong",
-            visibleFeatures.map((f) =>
-              normalizeFilterValue(f.properties.giong),
-            ),
-            currentSelections.giong,
-            filterGiong,
-            fullGiong,
-          ) ||
-          buildSelectOptions(
-            "filter-phien_cao",
-            visibleFeatures.map((f) =>
-              normalizeFilterValue(f.properties.phien_cao),
-            ),
-            currentSelections.phien_cao,
-            filterPhienCao,
-            fullPhienCao,
-          ) ||
-          buildSelectOptions(
-            "filter-Nhip_do_cao",
-            visibleFeatures.map((f) =>
-              normalizeFilterValue(f.properties.nhip_do_cao),
-            ),
-            currentSelections.nhip_do_cao,
-            filterNhipDo,
-            fullNhipDo,
-          ) ||
-          buildSelectOptions(
-            "filter-quy_hoach_tai_canh",
-            visibleFeatures.map((f) =>
-              normalizeFilterValue(f.properties.tai_canh_nam),
-            ),
-            currentSelections.quy_hoach_tai_canh,
-            filterQuyHoach,
-            fullQuyHoach,
-          ) ||
-          buildSelectOptions(
-            "filter-khu-vuc",
-            visibleFeatures.map((f) =>
-              normalizeFilterValue(f.properties.khu_vuc),
-            ),
-            currentSelections.khu_vuc,
-            filterKhuVuc,
-            fullKhuVuc,
-          ) ||
-          buildSelectOptions(
-            "filter-tuoi-cao",
-            visibleFeatures.map((f) =>
-              normalizeFilterValue(f.properties.tuoi_cao),
-            ),
-            currentSelections.tuoi_cao,
-            filterTuoiCao,
-            fullTuoiCao,
-          ) ||
-          buildSelectOptions(
-            "filter-che-do-cao",
-            visibleFeatures.map((f) =>
-              normalizeFilterValue(f.properties.che_do_cao),
-            ),
-            currentSelections.che_do_cao,
-            filterCheDoCao,
-            fullCheDoCao,
-          );
-        return didReset;
-      }
-
-      // Chấp nhận cả feature object lẫn properties object
-      function featureVisible(input) {
-        const p = input && input.properties ? input.properties : input;
-        if (!p || !p.id_lo) return false;
-        const nt = normalizeTeamValue(p.doi);
+      function featureVisible(p) {
+        if (!p.ten_lo) return false;
+        const nt = p.doi ?? "";
         const nam = p.nam_trong != null ? String(p.nam_trong) : "";
         const g = p.giong ?? "";
         const pc = p.phien_cao != null ? String(p.phien_cao) : "";
@@ -3123,7 +2821,7 @@
     </div>
   </div>
   <div class="lo-popup-actions">
-    
+    <div class="lo-popup-btn" onclick="viewLotDetail('${p.id_lo}')">Chi tiết</div>
     <div class="lo-popup-btn" onclick="editLot('${p.id_lo}')">Sửa</div>
   </div>
 `,
@@ -3237,23 +2935,6 @@
           ? `${n} lô đã chọn`
           : `${lotLayers.length} lô hiển thị`;
         document.getElementById("mapSelBar").classList.toggle("show", n > 0);
-
-        let totalArea = 0;
-        selectedIdx.forEach(idx => {
-          const p = caosuFeatures[idx]?.properties;
-          totalArea += parseFloat(p?.dien_tich_map) || 0;
-        });
-        const areaEl = document.getElementById("selBarArea");
-        const areaValEl = document.getElementById("selBarAreaVal");
-        if (areaEl && areaValEl) {
-          if (n > 0) {
-            areaValEl.textContent = totalArea.toFixed(2);
-            areaEl.style.display = "block";
-          } else {
-            areaEl.style.display = "none";
-          }
-        }
-
         renderMapLegend();
       }
 
@@ -3281,7 +2962,7 @@
           else if (type === "che_do_cao")
             filterCheDoCao = new Set(fullCheDoCao);
         } else {
-          if (type === "NT") filterNT = new Set([normalizeTeamValue(val)]);
+          if (type === "NT") filterNT = new Set([val]);
           else if (type === "nam") filterNam = new Set([val]);
           else if (type === "giong") filterGiong = new Set([val]);
           else if (type === "phien_cao") filterPhienCao = new Set([val]);
@@ -3292,98 +2973,7 @@
           else if (type === "tuoi_cao") filterTuoiCao = new Set([val]);
           else if (type === "che_do_cao") filterCheDoCao = new Set([val]);
         }
-        // Cascade: cập nhật các dropdown khác dựa trên tập dữ liệu đã lọc
-        cascadeFilterOptions(type);
         renderRealLots();
-      }
-
-      /**
-       * CASCADING FILTERS: Khi thay đổi 1 bộ lọc, MỖI dropdown khác
-       * chỉ hiển thị giá trị tồn tại khi áp dụng tất cả filter NGOẠI TRỪ
-       * chính nó. Nghĩa là dropdown Đội luôn hiển thị tất cả đội phù hợp
-       * với các filter khác (năm trồng, giống, ...), không bị giới hạn bởi
-       * giá trị Đội đang chọn.
-       */
-      function cascadeFilterOptions(changedType) {
-        // Định nghĩa mapping: filterKey → { selectId, extractor, filterSet, fullSet, checker }
-        const filterDefs = [
-          { key: 'NT',                  selectId: 'filter-Doi',                extractor: p => normalizeTeamValue(p.doi),           filterSet: () => filterNT,       fullSet: fullNT,       setFilter: v => { filterNT = v; },       labelFn: v => /^\d+$/.test(v) ? `Đội ${v}` : v },
-          { key: 'nam',                 selectId: 'filter-nam',                extractor: p => normalizeFilterValue(p.nam_trong),   filterSet: () => filterNam,      fullSet: fullNam,      setFilter: v => { filterNam = v; },      labelFn: null },
-          { key: 'giong',               selectId: 'filter-giong',              extractor: p => normalizeFilterValue(p.giong),       filterSet: () => filterGiong,    fullSet: fullGiong,    setFilter: v => { filterGiong = v; },    labelFn: null },
-          { key: 'phien_cao',           selectId: 'filter-phien_cao',          extractor: p => normalizeFilterValue(p.phien_cao),   filterSet: () => filterPhienCao, fullSet: fullPhienCao, setFilter: v => { filterPhienCao = v; }, labelFn: null },
-          { key: 'nhip_do_cao',         selectId: 'filter-Nhip_do_cao',        extractor: p => normalizeFilterValue(p.nhip_do_cao), filterSet: () => filterNhipDo,   fullSet: fullNhipDo,   setFilter: v => { filterNhipDo = v; },   labelFn: null },
-          { key: 'quy_hoach_tai_canh',  selectId: 'filter-quy_hoach_tai_canh', extractor: p => normalizeFilterValue(p.tai_canh_nam),filterSet: () => filterQuyHoach, fullSet: fullQuyHoach, setFilter: v => { filterQuyHoach = v; }, labelFn: null },
-          { key: 'khu_vuc',             selectId: 'filter-khu-vuc',            extractor: p => normalizeFilterValue(p.khu_vuc),     filterSet: () => filterKhuVuc,   fullSet: fullKhuVuc,   setFilter: v => { filterKhuVuc = v; },   labelFn: null },
-          { key: 'tuoi_cao',            selectId: 'filter-tuoi-cao',           extractor: p => normalizeFilterValue(p.tuoi_cao),    filterSet: () => filterTuoiCao,  fullSet: fullTuoiCao,  setFilter: v => { filterTuoiCao = v; },  labelFn: null },
-          { key: 'che_do_cao',          selectId: 'filter-che-do-cao',         extractor: p => normalizeFilterValue(p.che_do_cao),  filterSet: () => filterCheDoCao, fullSet: fullCheDoCao, setFilter: v => { filterCheDoCao = v; }, labelFn: null },
-        ];
-
-        /**
-         * Hàm kiểm tra feature có thỏa TẤT CẢ filter NGOẠI TRỪ filterKey.
-         * Ví dụ: excludeKey = 'NT' → bỏ qua filter Đội, chỉ kiểm tra năm, giống, ...
-         */
-        function featureVisibleExcluding(f, excludeKey) {
-          const p = f.properties || f;
-          if (!p || !p.ten_lo) return false;
-
-          const checks = {
-            NT:                  () => { const v = normalizeTeamValue(p.doi); return filterNT.size === 0 || filterNT.has(v); },
-            nam:                 () => { const v = p.nam_trong != null ? String(p.nam_trong) : ''; return filterNam.size === 0 || filterNam.has(v); },
-            giong:               () => { const v = p.giong ?? ''; return filterGiong.size === 0 || filterGiong.has(v); },
-            phien_cao:           () => { const v = p.phien_cao != null ? String(p.phien_cao) : ''; return filterPhienCao.size === 0 || filterPhienCao.has(v); },
-            nhip_do_cao:         () => { const v = p.nhip_do_cao != null ? String(p.nhip_do_cao) : ''; return filterNhipDo.size === 0 || filterNhipDo.has(v); },
-            quy_hoach_tai_canh:  () => { const v = p.tai_canh_nam != null ? String(p.tai_canh_nam) : ''; return filterQuyHoach.size === 0 || filterQuyHoach.has(v); },
-            khu_vuc:             () => { const v = p.khu_vuc ?? ''; return filterKhuVuc.size === 0 || filterKhuVuc.has(v); },
-            tuoi_cao:            () => { const v = p.tuoi_cao != null ? String(p.tuoi_cao) : ''; return filterTuoiCao.size === 0 || filterTuoiCao.has(v); },
-            che_do_cao:          () => { const v = p.che_do_cao ?? ''; return filterCheDoCao.size === 0 || filterCheDoCao.has(v); },
-          };
-
-          // Kiểm tra tất cả filter TRỪ excludeKey
-          for (const [key, checkFn] of Object.entries(checks)) {
-            if (key === excludeKey) continue; // Bỏ qua chính nó
-            if (!checkFn()) return false;
-          }
-          return true;
-        }
-
-        // Cập nhật từng dropdown
-        filterDefs.forEach(def => {
-          const el = document.getElementById(def.selectId);
-          if (!el) return;
-
-          // Lọc features bỏ qua CHÍNH filter này → lấy danh sách giá trị khả dụng
-          const availableValues = new Set();
-          caosuFeatures.forEach(f => {
-            if (!featureVisibleExcluding(f, def.key)) return;
-            const val = def.extractor(f.properties);
-            if (val !== '') availableValues.add(val);
-          });
-
-          // Giá trị đang chọn
-          const currentVal = el.value;
-
-          // Tạo mảng sorted
-          const sortedValues = Array.from(availableValues).sort(sortFilterValues);
-
-          // Rebuild options
-          el.innerHTML = '<option value="all">Tất cả</option>';
-          sortedValues.forEach(v => {
-            const opt = document.createElement('option');
-            opt.value = v;
-            opt.textContent = def.labelFn ? def.labelFn(v) : v;
-            el.appendChild(opt);
-          });
-
-          // Giữ lại giá trị nếu vẫn có trong danh sách
-          if (currentVal !== 'all' && availableValues.has(currentVal)) {
-            el.value = currentVal;
-          } else if (currentVal !== 'all' && !availableValues.has(currentVal)) {
-            // Giá trị cũ không còn hợp lệ → reset về tất cả
-            el.value = 'all';
-            def.setFilter(new Set(def.fullSet));
-          }
-        });
-
       }
 
       function clearSelection() {
@@ -3564,18 +3154,16 @@
           wrap.classList.add("is-fullscreen");
           btn.innerHTML = `<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
       <path d="M8 3v3a2 2 0 0 1-2 2H3M21 8h-3a2 2 0 0 1-2-2V3M3 16h3a2 2 0 0 0 2 2v3M16 21v-3a2 2 0 0 1 2-2h3"/>
-    </svg>Thoát<span class="mc-tooltip mc-tooltip-right">Thoát toàn màn hình (ESC để thoát)</span>`;
+    </svg><span class="mc-tooltip mc-tooltip-right">Thoát toàn màn hình</span>`;
           btn.classList.add("active");
-          btn.classList.add("danger");
         } else {
           wrap.classList.remove("is-fullscreen");
           wrap.style.removeProperty("height");
           document.getElementById("dashMap").style.removeProperty("height");
           btn.innerHTML = `<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
       <path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"/>
-    </svg>Toàn màn hình<span class="mc-tooltip mc-tooltip-right">Phóng to bản đồ toàn màn hình (ESC để thoát)</span>`;
+    </svg><span class="mc-tooltip mc-tooltip-right">Toàn màn hình</span>`;
           btn.classList.remove("active");
-          btn.classList.remove("danger");
         }
         setTimeout(() => dashMap && dashMap.invalidateSize(), 100);
       }
@@ -3641,32 +3229,6 @@
       let msrPolygon = null;
       let msrMarkers = [];
       let msrTempLine = null;
-
-      // Right-click drag to pan in measure mode
-      let _msrRightDragging = false;
-      let _msrRightLast = null;
-      function _onMsrRightDown(e) {
-        if (e.button !== 2) return;
-        e.preventDefault();
-        _msrRightDragging = true;
-        _msrRightLast = { x: e.clientX, y: e.clientY };
-        dashMap.getContainer().style.cursor = "grabbing";
-      }
-      function _onMsrRightMove(e) {
-        if (!_msrRightDragging || !_msrRightLast) return;
-        dashMap.panBy(
-          [_msrRightLast.x - e.clientX, _msrRightLast.y - e.clientY],
-          { animate: false }
-        );
-        _msrRightLast = { x: e.clientX, y: e.clientY };
-      }
-      function _onMsrRightUp(e) {
-        if (e.button !== 2) return;
-        _msrRightDragging = false;
-        _msrRightLast = null;
-        if (msrActive) dashMap.getContainer().style.cursor = "crosshair";
-      }
-      function _preventCtxMenu(e) { e.preventDefault(); }
       let msrLabels = [];
 
       function haversine(a, b) {
@@ -3697,7 +3259,7 @@
       }
 
       function fmtDistance(m) {
-        if (m >= 1000) return (m / 1000).toFixed(3) + " m";
+        if (m >= 1000) return (m / 1000).toFixed(3) + " km";
         return Math.round(m) + " m";
       }
       function fmtArea(m2) {
@@ -3725,11 +3287,6 @@
         dashMap.on("click", onMsrClick);
         dashMap.on("mousemove", onMsrMove);
         dashMap.on("dblclick", onMsrDblClick);
-        const _c = dashMap.getContainer();
-        _c.addEventListener("mousedown", _onMsrRightDown);
-        _c.addEventListener("mousemove", _onMsrRightMove);
-        _c.addEventListener("mouseup", _onMsrRightUp);
-        _c.addEventListener("contextmenu", _preventCtxMenu);
         clearSelection();
         renderRealLots();
       }
@@ -3740,12 +3297,6 @@
         dashMap.off("click", onMsrClick);
         dashMap.off("mousemove", onMsrMove);
         dashMap.off("dblclick", onMsrDblClick);
-        const _c = dashMap.getContainer();
-        _c.removeEventListener("mousedown", _onMsrRightDown);
-        _c.removeEventListener("mousemove", _onMsrRightMove);
-        _c.removeEventListener("mouseup", _onMsrRightUp);
-        _c.removeEventListener("contextmenu", _preventCtxMenu);
-        _msrRightDragging = false;
         dashMap.dragging.enable();
         dashMap.doubleClickZoom.enable();
         if (window.previousTool === "pan") {
@@ -4575,9 +4126,5 @@
         if (e.target === modal) closeEditModal();
       });
     </script>
-    <script
-      src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
-      integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
-      crossorigin="anonymous"></script>
   </body>
 </html>
