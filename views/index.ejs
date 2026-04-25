@@ -2611,15 +2611,15 @@
           });
 
           // Khởi tạo filter mặc định là tất cả
-          filterNT = new Set(fullNT);
-          filterNam = new Set(fullNam);
-          filterGiong = new Set(fullGiong);
-          filterPhienCao = new Set(fullPhienCao);
-          filterNhipDo = new Set(fullNhipDo);
-          filterQuyHoach = new Set(fullQuyHoach);
-          filterKhuVuc = new Set(fullKhuVuc);
-          filterTuoiCao = new Set(fullTuoiCao);
-          filterCheDoCao = new Set(fullCheDoCao);
+          filterNT.clear();
+          filterNam.clear();
+          filterGiong.clear();
+          filterPhienCao.clear();
+          filterNhipDo.clear();
+          filterQuyHoach.clear();
+          filterKhuVuc.clear();
+          filterTuoiCao.clear();
+          filterCheDoCao.clear();
 
           console.log("Filters initialized:", {
             fullNT: Array.from(fullNT),
@@ -3082,7 +3082,7 @@
         let count = 0;
         caosuFeatures.forEach((feat, idx) => {
           const p = feat.properties;
-          // if (!featureVisible(p)) return;  // TẠM TẮT
+        if (!featureVisible(p)) return;
           const isSel = selectedIdx.has(idx);
           const col = getLotColorReal(p, mapViewMode);
 
@@ -3269,25 +3269,22 @@
       function updateMapFilters(type, selectEl) {
         const val = selectEl.value;
         if (val === "all") {
-          if (type === "NT") filterNT = new Set(fullNT);
-          else if (type === "nam") filterNam = new Set(fullNam);
-          else if (type === "giong") filterGiong = new Set(fullGiong);
-          else if (type === "phien_cao") filterPhienCao = new Set(fullPhienCao);
-          else if (type === "nhip_do_cao") filterNhipDo = new Set(fullNhipDo);
-          else if (type === "quy_hoach_tai_canh")
-            filterQuyHoach = new Set(fullQuyHoach);
-          else if (type === "khu_vuc") filterKhuVuc = new Set(fullKhuVuc);
-          else if (type === "tuoi_cao") filterTuoiCao = new Set(fullTuoiCao);
-          else if (type === "che_do_cao")
-            filterCheDoCao = new Set(fullCheDoCao);
+          if (type === "NT") filterNT.clear();
+          else if (type === "nam") filterNam.clear();
+          else if (type === "giong") filterGiong.clear();
+          else if (type === "phien_cao") filterPhienCao.clear();
+          else if (type === "nhip_do_cao") filterNhipDo.clear();
+          else if (type === "quy_hoach_tai_canh") filterQuyHoach.clear();
+          else if (type === "khu_vuc") filterKhuVuc.clear();
+          else if (type === "tuoi_cao") filterTuoiCao.clear();
+          else if (type === "che_do_cao") filterCheDoCao.clear();
         } else {
           if (type === "NT") filterNT = new Set([normalizeTeamValue(val)]);
           else if (type === "nam") filterNam = new Set([val]);
           else if (type === "giong") filterGiong = new Set([val]);
           else if (type === "phien_cao") filterPhienCao = new Set([val]);
           else if (type === "nhip_do_cao") filterNhipDo = new Set([val]);
-          else if (type === "quy_hoach_tai_canh")
-            filterQuyHoach = new Set([val]);
+          else if (type === "quy_hoach_tai_canh") filterQuyHoach = new Set([val]);
           else if (type === "khu_vuc") filterKhuVuc = new Set([val]);
           else if (type === "tuoi_cao") filterTuoiCao = new Set([val]);
           else if (type === "che_do_cao") filterCheDoCao = new Set([val]);
@@ -3380,7 +3377,7 @@
           } else if (currentVal !== 'all' && !availableValues.has(currentVal)) {
             // Giá trị cũ không còn hợp lệ → reset về tất cả
             el.value = 'all';
-            def.setFilter(new Set(def.fullSet));
+            def.setFilter(new Set());   // reset về không lọc
           }
         });
 
