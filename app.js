@@ -28,14 +28,12 @@ const pool = new Pool({
   database: process.env.DB_NAME,
   password: process.env.DB_PASSWORD,
   port: parseInt(process.env.DB_PORT) || 5432,
-  ssl: { rejectUnauthorized: false },
-  max: 5,                        // Neon free tier: giảm số connection
-  idleTimeoutMillis: 20000,      // Đóng connection idle sau 20s
-  connectionTimeoutMillis: 30000, // Chờ kết nối tối đa 30s (Neon cold start)
-  statement_timeout: 120000,     // 120 giây cho query lớn
-  query_timeout: 120000,
-  keepAlive: true,               // Giữ kết nối sống
-  keepAliveInitialDelayMillis: 10000,
+  ssl: { rejectUnauthorized: true },
+  max: 20,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 10000,
+  statement_timeout: 60000, // 60 giây
+  query_timeout: 60000,     // 60 giây
 });
 
 pool.on('connect', () => console.log('✅ Kết nối PostgreSQL (Neon) thành công!'));
@@ -435,8 +433,8 @@ app.post('/api/login', async (req, res) => {
         res.cookie('token', token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
+            maxAge: 24 * 60 * 60 * 1000,
             sameSite: 'lax'
-            // không set maxAge/expires → session cookie, tự xóa khi đóng trình duyệt
         });
         res.json({ success: true, message: 'Đăng nhập thành công', redirect: '/' });
     } catch (err) {
@@ -650,8 +648,7 @@ app.post('/api/import-excel', authenticateToken, upload.single('file'), async (r
                 if (numberCols.includes(key)) {
                     newRow[key] = parseDecimal(value);
                 } else {
-                    const trimmed = (value === undefined || value === null) ? '' : String(value).trim();
-                    newRow[key] = trimmed === '' ? null : trimmed;
+                    newRow[key] = value === undefined || value === null ? null : String(value).trim();
                 }
             }
             return newRow;
@@ -788,8 +785,7 @@ app.post('/api/import-excel', authenticateToken, upload.single('file'), async (r
             .filter(col => updatableColsSet.has(col));
         
         if (updateCols.length > 0 && existingIds.length > 0) {
-            // COALESCE: nếu giá trị từ Excel là NULL (ô trống) thì giữ nguyên giá trị cũ
-            const setClause = updateCols.map(col => `${col} = COALESCE(temp.${col}, lo.${col})`).join(', ');
+            const setClause = updateCols.map(col => `${col} = temp.${col}`).join(', ');
             await client.query(`
                 UPDATE lo
                 SET ${setClause}, nam_cap_nhat = $1
@@ -924,7 +920,7 @@ app.use((req, res) => {
   res.status(404).render('404', { title: 'Không tìm thấy trang', user: req.user || null, path: req.path });
 });
 
-// ====================== START SERVER ==============
+// ====================== START SERVER ======================
 const startServer = async () => {
   try {
     await pool.query('SELECT NOW()');
