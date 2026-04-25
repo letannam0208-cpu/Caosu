@@ -2568,8 +2568,8 @@
       async function loadCaosuData() {
         try {
           const data = await fetchAPI("/api/lo-cao-su");
-          // originalData = await data.json(); // Lưu trữ dữ liệu gốc để sử dụng cho tìm kiếm
-          // filteredData = [...originalData]; // Khởi tạo filteredData bằng dữ liệu gốc
+            originalData = await data.json();
+            filteredData = [...originalData];
           caosuFeatures = data.features || [];
           console.log("📦 Đã tải", caosuFeatures.length, "lô từ API");
           if (caosuFeatures.length === 0) {
