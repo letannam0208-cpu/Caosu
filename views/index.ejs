@@ -20,6 +20,7 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
@@ -2480,7 +2481,7 @@
         labelsVis = true;
       let mapViewMode = "nt";
       let selectedIdx = new Set();
-      let highlightedTeam = null;
+      let teamBoundaryLayer = null;
       let currentTool = "pointer";
       let filterNT = new Set(),
         filterNam = new Set(),
@@ -2580,7 +2581,6 @@
           } else {
             console.log("Ví dụ feature đầu tiên:", caosuFeatures[0]);
           }
-          highlightedTeam = null;
           fullNT.clear();
           fullNam.clear();
           fullGiong.clear();
@@ -2622,6 +2622,7 @@
           filterKhuVuc.clear();
           filterTuoiCao.clear();
           filterCheDoCao.clear();
+          updateTeamBoundary(null);
 
           console.log("Filters initialized:", {
             fullNT: Array.from(fullNT),
@@ -3086,21 +3087,13 @@
           const p = feat.properties;
         if (!featureVisible(p)) return;
           const isSel = selectedIdx.has(idx);
-          const isHighlightTeam = (highlightedTeam !== null && normalizeTeamValue(p.doi) === highlightedTeam);
           const col = getLotColorReal(p, mapViewMode);
 
           if (lotsVis) {
-                        // Xác định màu viền và độ dày
-            let edgeColor = isSel ? "#ffffff" : col;
-            let edgeWeight = isSel ? 2.5 : 1;
-            if (isHighlightTeam && !isSel) {
-                edgeColor = "#ffaa00";   // viền vàng nổi bật
-                edgeWeight = 3;
-            }
             const layer = L.geoJSON(feat, {
               style: {
-                color: edgeColor,
-                weight: edgeWeight,
+                color: isSel ? "#ffffff" : col,
+                weight: isSel ? 2.5 : 1,
                 fillColor: col,
                 fillOpacity: isSel ? 0.65 : 0.52,
               },
@@ -3299,12 +3292,12 @@
           else if (type === "tuoi_cao") filterTuoiCao = new Set([val]);
           else if (type === "che_do_cao") filterCheDoCao = new Set([val]);
         }
-                // Xử lý highlight ranh giới theo Đội
+                // Xử lý ranh giới đội (union)
         if (type === 'NT') {
             if (val === 'all') {
-                highlightedTeam = null;
+                updateTeamBoundary(null);
             } else {
-                highlightedTeam = normalizeTeamValue(val);
+                updateTeamBoundary(normalizeTeamValue(val));
             }
         }
         // Cascade: cập nhật các dropdown khác dựa trên tập dữ liệu đã lọc
@@ -3397,7 +3390,7 @@
             el.value = 'all';
             def.setFilter(new Set()); // reset về không lọc
             if (def.key === 'NT') {
-                highlightedTeam = null;
+                updateTeamBoundary(null);
             }
           }
         });
@@ -3408,6 +3401,72 @@
         selectedIdx.clear();
         updateSelBar();
         renderRealLots();
+      }
+            /* ==================== RANH GIỚI ĐỘI (UNION) ==================== */
+      async function updateTeamBoundary(teamValue) {
+        // Xóa layer cũ
+        if (teamBoundaryLayer) {
+          dashMap.removeLayer(teamBoundaryLayer);
+          teamBoundaryLayer = null;
+        }
+        if (!teamValue) return;
+
+        // Lọc các lô thuộc đội (dùng normalizeTeamValue)
+        const teamFeatures = caosuFeatures.filter(f => normalizeTeamValue(f.properties.doi) === teamValue);
+        if (teamFeatures.length === 0) return;
+
+        // Chuyển đổi geometry sang turf polygon (hỗ trợ Multipolygon)
+        const polygons = [];
+        teamFeatures.forEach(f => {
+          const geom = f.geometry;
+          if (geom.type === 'Polygon') {
+            polygons.push(turf.polygon(geom.coordinates));
+          } else if (geom.type === 'MultiPolygon') {
+            geom.coordinates.forEach(polyCoords => {
+              polygons.push(turf.polygon(polyCoords));
+            });
+          }
+        });
+        if (polygons.length === 0) return;
+
+        let unionPoly;
+        try {
+          unionPoly = polygons[0];
+          for (let i = 1; i < polygons.length; i++) {
+            if (!unionPoly) break;
+            unionPoly = turf.union(unionPoly, polygons[i]);
+          }
+          if (!unionPoly) throw new Error('Union failed');
+        } catch(e) {
+          console.warn("Turf union failed, fallback to convex hull", e);
+          // Fallback: tạo convex hull từ tất cả điểm của đội
+          const allPoints = [];
+          teamFeatures.forEach(f => {
+            const coords = turf.getCoords(f.geometry);
+            // Đi qua tất cả tọa độ
+            const flatten = (arr) => {
+              if (Array.isArray(arr[0])) return arr.flatMap(flatten);
+              return [arr];
+            };
+            const points = flatten(coords).map(c => turf.point(c));
+            allPoints.push(...points);
+          });
+          const fc = turf.featureCollection(allPoints);
+          unionPoly = turf.convex(fc);
+        }
+
+        if (unionPoly) {
+          teamBoundaryLayer = L.geoJSON(unionPoly, {
+            style: {
+              color: "#ff6600",
+              weight: 4,
+              opacity: 0.9,
+              fillColor: "#ff6600",
+              fillOpacity: 0.1,
+              dashArray: "8, 6"
+            }
+          }).addTo(dashMap);
+        }
       }
 
       /* ==================== CÁC CÔNG CỤ BẢN ĐỒ ==================== */
