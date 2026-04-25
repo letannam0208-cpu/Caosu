@@ -3082,7 +3082,7 @@
         let count = 0;
         caosuFeatures.forEach((feat, idx) => {
           const p = feat.properties;
-          if (!featureVisible(p)) return;
+          // if (!featureVisible(p)) return;  // TẠM TẮT
           const isSel = selectedIdx.has(idx);
           const col = getLotColorReal(p, mapViewMode);
 
