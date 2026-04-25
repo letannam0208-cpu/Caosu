@@ -601,16 +601,21 @@
         window.location.href = "/";
       }
 
+     
+
       async function editLo(id) {
         try {
           const res = await fetch(`/api/lo-cay/${id}`);
           const data = await res.json();
+         
           if (data.success) showForm(data.data);
           else alert("Không tìm thấy dữ liệu lô cây");
         } catch (err) {
           alert("Lỗi kết nối khi sửa");
         }
       }
+
+
 
       async function deleteLo(id) {
         if (
