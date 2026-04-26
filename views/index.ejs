@@ -3134,54 +3134,35 @@
         }
 
         if (labelsVis && p.ten_lo) {
-  const z = dashMap.getZoom();
-  if (z > 13) {
-    const fs = Math.max(2, (z - 3) * 0.75);
-    if (fs > 0) {
-      let center = null;
-      if (typeof turf !== 'undefined') {
-        try {
-          // Flatten nếu là MultiPolygon
-          let geom = feat.geometry;
-          if (geom.type === 'MultiPolygon') {
-            const flattened = turf.flatten(feat);
-            // Chọn polygon có diện tích lớn nhất
-            let maxArea = 0;
-            let bestPoly = null;
-            flattened.features.forEach(f => {
-              const area = turf.area(f);
-              if (area > maxArea) {
-                maxArea = area;
-                bestPoly = f;
+          const z = dashMap.getZoom();
+          if (z > 13) {
+            const fs = Math.max(2, (z - 3) * 0.75);
+            if (fs > 0) {
+              let center;
+              try {
+                const insidePoint = turf.pointOnFeature(feat);
+                center = [insidePoint.geometry.coordinates[1], insidePoint.geometry.coordinates[0]];
+              } catch(e) {
+                // fallback nếu lỗi
+                try {
+                  const centroid = turf.centroid(feat.geometry);
+                  center = [centroid.geometry.coordinates[1], centroid.geometry.coordinates[0]];
+                } catch(e2) {
+                  center = L.geoJSON(feat).getBounds().getCenter();
+                }
               }
-            });
-            if (bestPoly) geom = bestPoly.geometry;
+              const col = getLotColorReal(p, mapViewMode);
+              const cleanName = p.ten_lo.replace(/\s*-\s*KV\s*\d+\s*$/i, "");
+              const namCuoi = p.nam_trong ? String(p.nam_trong).slice(-2) : "";
+              const line1 = namCuoi ? `${cleanName} - ${namCuoi}` : cleanName;
+              const html = `<div style="background:transparent; color:#fff; font-size:${fs}px; padding:${Math.max(2, fs * 0.4)}px ${Math.max(4, fs * 0.7)}px; border-radius:4px; border-left:${Math.max(2, fs * 0.25)}px solid ${col}; white-space:nowrap; pointer-events:none; font-family:'Inter', sans-serif; line-height:1.6; font-weight:700; text-shadow:0 1px 3px rgba(0,0,0,0.5); transform: translate(-50%, -50%) scale(${z / 16}); text-align:center;"><strong style="display:block">${line1}</strong>${p.giong ? `<span style="display:block; margin-top:2px">${p.giong}</span>` : ""}</div>`;
+              const lbl = L.marker(center, {
+                icon: L.divIcon({ html, className: "", iconAnchor: [0, 0] })
+              }).addTo(dashMap);
+              labelLayers.push(lbl);
+            }
           }
-          // Rewind để đảm bảo hướng
-          geom = turf.rewind(geom);
-          const pt = turf.pointOnSurface(geom);
-          center = [pt.geometry.coordinates[1], pt.geometry.coordinates[0]];
-        } catch(e) {
-          console.warn(e);
-          center = L.geoJSON(feat).getBounds().getCenter();
         }
-      } else {
-        center = L.geoJSON(feat).getBounds().getCenter();
-      }
-      // Debug: vẽ chấm đỏ
-      // L.circleMarker(center, { radius: 5, color: 'red' }).addTo(dashMap);
-      const col = getLotColorReal(p, mapViewMode);
-      const cleanName = p.ten_lo.replace(/\s*-\s*KV\s*\d+\s*$/i, "");
-      const namCuoi = p.nam_trong ? String(p.nam_trong).slice(-2) : "";
-      const line1 = namCuoi ? `${cleanName} - ${namCuoi}` : cleanName;
-      const html = `<div style="background:rgba(0,0,0,0.75); color:#fff; font-size:${fs}px; padding:2px 6px; border-radius:4px; border-left:3px solid ${col}; white-space:nowrap; font-family:'Inter';">${line1}<br><span style="font-size:${Math.max(8, fs-2)}px">${p.giong || ''}</span></div>`;
-      const lbl = L.marker(center, {
-        icon: L.divIcon({ html, className: '', iconAnchor: [0, 0] })
-      }).addTo(dashMap);
-      labelLayers.push(lbl);
-    }
-  }
-}
       });
 
       renderMapLegend();
