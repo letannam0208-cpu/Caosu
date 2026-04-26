@@ -3141,27 +3141,35 @@
       let center = null;
       if (typeof turf !== 'undefined') {
         try {
-          // Đảo hướng polygon nếu cần (hướng ngoài)
+          // Flatten nếu là MultiPolygon
           let geom = feat.geometry;
-          if (geom.type === 'Polygon') {
-            geom = turf.rewind(geom, { reverse: true });
-          } else if (geom.type === 'MultiPolygon') {
-            geom = turf.rewind(geom, { reverse: true });
+          if (geom.type === 'MultiPolygon') {
+            const flattened = turf.flatten(feat);
+            // Chọn polygon có diện tích lớn nhất
+            let maxArea = 0;
+            let bestPoly = null;
+            flattened.features.forEach(f => {
+              const area = turf.area(f);
+              if (area > maxArea) {
+                maxArea = area;
+                bestPoly = f;
+              }
+            });
+            if (bestPoly) geom = bestPoly.geometry;
           }
-          const fixedFeat = { type: 'Feature', geometry: geom, properties: {} };
-          const pt = turf.pointOnSurface(fixedFeat);
+          // Rewind để đảm bảo hướng
+          geom = turf.rewind(geom);
+          const pt = turf.pointOnSurface(geom);
           center = [pt.geometry.coordinates[1], pt.geometry.coordinates[0]];
         } catch(e) {
-          console.warn('pointOnSurface error', e);
-          try {
-            const ct = turf.centroid(feat);
-            center = [ct.geometry.coordinates[1], ct.geometry.coordinates[0]];
-          } catch(e2) {}
+          console.warn(e);
+          center = L.geoJSON(feat).getBounds().getCenter();
         }
-      }
-      if (!center) {
+      } else {
         center = L.geoJSON(feat).getBounds().getCenter();
       }
+      // Debug: vẽ chấm đỏ
+      // L.circleMarker(center, { radius: 5, color: 'red' }).addTo(dashMap);
       const col = getLotColorReal(p, mapViewMode);
       const cleanName = p.ten_lo.replace(/\s*-\s*KV\s*\d+\s*$/i, "");
       const namCuoi = p.nam_trong ? String(p.nam_trong).slice(-2) : "";
