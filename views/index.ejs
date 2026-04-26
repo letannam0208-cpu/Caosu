@@ -3161,22 +3161,28 @@
         } catch(e) {
           console.warn('pointOnSurface failed', e);
           try {
-            const ct = turf.centroid(feat.geometry);
-            center = [ct.geometry.coordinates[1], ct.geometry.coordinates[0]];
-          } catch(e2) {}
+            // Fallback: pointOnFeature (cũ hơn nhưng vẫn ổn định)
+            const insidePoint = turf.pointOnFeature(feat);
+            center = [insidePoint.geometry.coordinates[1], insidePoint.geometry.coordinates[0]];
+          } catch(e2) {
+            try {
+              const ct = turf.centroid(feat.geometry);
+              center = [ct.geometry.coordinates[1], ct.geometry.coordinates[0]];
+            } catch(e3) {
+              center = L.geoJSON(feat).getBounds().getCenter();
+            }
+          }
         }
-      }
-      if (!center) {
+      } else {
         center = L.geoJSON(feat).getBounds().getCenter();
       }
 
-      // Tạo nhãn HTML
       const col = getLotColorReal(p, mapViewMode);
       const cleanName = p.ten_lo.replace(/\s*-\s*KV\s*\d+\s*$/i, "");
       const namCuoi = p.nam_trong ? String(p.nam_trong).slice(-2) : "";
       const line1 = namCuoi ? `${cleanName} - ${namCuoi}` : cleanName;
 
-      // Đo kích thước thực của nhãn để đặt anchor chính xác
+      // Đo kích thước thực của nhãn để đặt iconAnchor chính xác
       const tempDiv = document.createElement('div');
       tempDiv.style.cssText = `position:absolute; visibility:hidden; font-size:${fs}px; font-family:'Inter'; white-space:nowrap; padding:${Math.max(2, fs * 0.4)}px ${Math.max(4, fs * 0.7)}px; border-left:3px solid ${col}; background:rgba(0,0,0,0.75); color:#fff; border-radius:4px;`;
       tempDiv.innerHTML = `<strong>${line1}</strong><br>${p.giong || ''}`;
