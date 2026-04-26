@@ -3140,10 +3140,16 @@
             if (fs > 0) {
               let center;
               try {
-                const centroid = turf.centroid(feat.geometry);
-                center = [centroid.geometry.coordinates[1], centroid.geometry.coordinates[0]];
+                const insidePoint = turf.pointOnFeature(feat);
+                center = [insidePoint.geometry.coordinates[1], insidePoint.geometry.coordinates[0]];
               } catch(e) {
-                center = L.geoJSON(feat).getBounds().getCenter();
+                // fallback nếu lỗi
+                try {
+                  const centroid = turf.centroid(feat.geometry);
+                  center = [centroid.geometry.coordinates[1], centroid.geometry.coordinates[0]];
+                } catch(e2) {
+                  center = L.geoJSON(feat).getBounds().getCenter();
+                }
               }
               const col = getLotColorReal(p, mapViewMode);
               const cleanName = p.ten_lo.replace(/\s*-\s*KV\s*\d+\s*$/i, "");
