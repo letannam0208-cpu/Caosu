@@ -337,7 +337,6 @@ body {
     background: linear-gradient(135deg,
             rgba(10, 14, 26, 0),
             rgba(0, 214, 143, 0.03)) !important;
-    z-index: 1001;
 }
 
 .page-header {

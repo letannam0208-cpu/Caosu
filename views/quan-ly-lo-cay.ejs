@@ -81,7 +81,7 @@
       th,
       td {
         padding: 10px 12px;
-        text-align: left;
+        text-align: center;
         border-bottom: 1px solid var(--border);
         white-space: nowrap;
       }
@@ -185,7 +185,7 @@
         width: 100%;
         height: 100%;
         background: rgba(0, 0, 0, 0.85);
-        z-index: 1000;
+        z-index: 9999;
         display: none;
         align-items: center;
         justify-content: center;
@@ -403,7 +403,7 @@
         </div>
         <div class="show-info">
           <i class="fas fa-info-circle"></i> Hiển thị
-          <strong id="resultCount">0</strong> lô cây
+          <strong id="resultCount">0</strong> lô
         </div>
 
         <div class="table-wrapper">
@@ -411,7 +411,7 @@
             <table id="mainTable">
               <thead>
                 <tr>
-                  <th>ID Lô</th>
+                  <th>ID lô</th>
                   <th>Dự án</th>
                   <th>Đội</th>
                   <th>Khu vực</th>
@@ -428,16 +428,16 @@
                   <th>Diện tích map</th>
                   <th>Tổng hố KK</th>
                   <th>Cây cạo</th>
-                  <th>Cây chưa cao</th>
+                  <th>Cây chưa cạo</th>
                   <th>Cây khô mủ</th>
                   <th>Cây không PT</th>
                   <th>Hố trống</th>
-                  <th>Mật độ cây cạo</th>
+                  <th>Mật độ CC</th>
                   <th>Chế độ cạo</th>
                   <th>Năm MC</th>
                   <th>Tuổi cạo</th>
-                  <th>Năm cạo up</th>
-                  <th>Tình trạng mủ</th>
+                  <th>Năm cạo úp</th>
+                  <th>Tình trạng MC</th>
                   <th>NS25 kg/ha</th>
                   <th>NS25 kg/cây</th>
                   <th>Tổng lát cạo</th>
@@ -537,24 +537,45 @@
           row.insertCell(9).innerText = l.khoang_cach_trong || "";
           row.insertCell(10).innerText = l.mat_do_tk || "";
           row.insertCell(11).innerText = l.giong || "";
-          row.insertCell(12).innerText = l.dien_tich_010125 || "";
-          row.insertCell(13).innerText = l.dien_tich_010126 || "";
-          row.insertCell(14).innerText = l.dien_tich_map || "";
-          row.insertCell(15).innerText = l.tong_ho_kk || "";
-          row.insertCell(16).innerText = l.cay_cao || "";
-          row.insertCell(17).innerText = l.cay_chua_cao || "";
-          row.insertCell(18).innerText = l.cay_kho_mu || "";
-          row.insertCell(19).innerText = l.cay_khong_pt || "";
-          row.insertCell(20).innerText = l.ho_trong || "";
-          row.insertCell(21).innerText = l.mat_do_cc || "";
+          row.insertCell(12).innerText = l.dien_tich_010125.toLocaleString(
+            "vi-VN",
+            {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            },
+          );
+          row.insertCell(13).innerText = l.dien_tich_010126.toLocaleString(
+            "vi-VN",
+            {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            },
+          );
+          row.insertCell(14).innerText = l.dien_tich_map.toLocaleString("vi-VN", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          }) || "";
+          row.insertCell(15).innerText = l.tong_ho_kk.toLocaleString("vi-VN") || "";
+          row.insertCell(16).innerText = l.cay_cao.toLocaleString("vi-VN") || "";
+          row.insertCell(17).innerText = l.cay_chua_cao.toLocaleString("vi-VN") || "";
+          row.insertCell(18).innerText = l.cay_kho_mu.toLocaleString("vi-VN") || "";
+          row.insertCell(19).innerText = l.cay_khong_pt.toLocaleString("vi-VN") || "";
+          row.insertCell(20).innerText = l.ho_trong.toLocaleString("vi-VN") || "";
+          row.insertCell(21).innerText = l.mat_do_cc != null ? Math.ceil(parseFloat(l.mat_do_cc)).toLocaleString("vi-VN") : "";
           row.insertCell(22).innerText = l.che_do_cao || "";
           row.insertCell(23).innerText = l.nam_mc || "";
           row.insertCell(24).innerText = l.tuoi_cao || "";
           row.insertCell(25).innerText = l.nam_cao_up || "";
           row.insertCell(26).innerText = l.tinh_trang_mc || "";
-          row.insertCell(27).innerText = l.ns25_kg_ha || "";
-          row.insertCell(28).innerText = l.ns25_kg_cay || "";
-          row.insertCell(29).innerText = l.tong_lat_cao || "";
+          row.insertCell(27).innerText = l.ns25_kg_ha!= null ? Math.ceil(parseFloat(l.ns25_kg_ha)).toLocaleString("vi-VN") : "";
+          row.insertCell(28).innerText = l.ns25_kg_cay.toLocaleString("vi-VN", {
+            minimumFractionDigits: 1,
+            maximumFractionDigits: 1,
+          }) || "";
+          row.insertCell(29).innerText = l.tong_lat_cao.toLocaleString("vi-VN", {
+            minimumFractionDigits: 1,
+            maximumFractionDigits: 1,
+          }) || "";;
           row.insertCell(30).innerText = l.phan_loai || "";
           row.insertCell(31).innerText = l.xa || "";
           row.insertCell(32).innerText = l.huyen || "";
@@ -609,7 +630,7 @@
           const data = await res.json();
          
           if (data.success) showForm(data.data);
-          else alert("Không tìm thấy dữ liệu lô cây");
+          else alert("Không tìm thấy dữ liệu lô");
         } catch (err) {
           alert("Lỗi kết nối khi sửa");
         }
@@ -620,7 +641,7 @@
       async function deleteLo(id) {
         if (
           confirm(
-            "Xóa lô cây này sẽ xóa tất cả dữ liệu liên quan. Bạn có chắc?",
+            "Xóa lô này sẽ xóa tất cả dữ liệu liên quan. Bạn có chắc?",
           )
         ) {
           try {
@@ -681,7 +702,7 @@
           data.map((l) => l.phan_loai).filter((v) => v),
         );
         const plSel = document.getElementById("phanLoaiFilter");
-        plSel.innerHTML = '<option value="">Phân loại SL</option>';
+        plSel.innerHTML = '<option value="">Phân loại</option>';
         [...phanLoaiSet].sort().forEach((p) => {
           let opt = document.createElement("option");
           opt.value = p;
