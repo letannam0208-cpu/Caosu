@@ -3141,16 +3141,22 @@
       let center = null;
       if (typeof turf !== 'undefined') {
         try {
-          const pt = turf.pointOnSurface(feat);
+          // Đảo hướng polygon nếu cần (hướng ngoài)
+          let geom = feat.geometry;
+          if (geom.type === 'Polygon') {
+            geom = turf.rewind(geom, { reverse: true });
+          } else if (geom.type === 'MultiPolygon') {
+            geom = turf.rewind(geom, { reverse: true });
+          }
+          const fixedFeat = { type: 'Feature', geometry: geom, properties: {} };
+          const pt = turf.pointOnSurface(fixedFeat);
           center = [pt.geometry.coordinates[1], pt.geometry.coordinates[0]];
         } catch(e) {
+          console.warn('pointOnSurface error', e);
           try {
-            const mass = turf.centerOfMass(feat);
-            center = [mass.geometry.coordinates[1], mass.geometry.coordinates[0]];
-          } catch(e2) {
             const ct = turf.centroid(feat);
             center = [ct.geometry.coordinates[1], ct.geometry.coordinates[0]];
-          }
+          } catch(e2) {}
         }
       }
       if (!center) {
@@ -3160,7 +3166,7 @@
       const cleanName = p.ten_lo.replace(/\s*-\s*KV\s*\d+\s*$/i, "");
       const namCuoi = p.nam_trong ? String(p.nam_trong).slice(-2) : "";
       const line1 = namCuoi ? `${cleanName} - ${namCuoi}` : cleanName;
-      const html = `<div style="background:rgba(0,0,0,0.7); color:#fff; font-size:${fs}px; padding:2px 5px; border-radius:4px; border-left:3px solid ${col}; white-space:nowrap; font-family:'Inter';">${line1}<br><span style="font-size:${Math.max(8, fs-2)}px">${p.giong || ''}</span></div>`;
+      const html = `<div style="background:rgba(0,0,0,0.75); color:#fff; font-size:${fs}px; padding:2px 6px; border-radius:4px; border-left:3px solid ${col}; white-space:nowrap; font-family:'Inter';">${line1}<br><span style="font-size:${Math.max(8, fs-2)}px">${p.giong || ''}</span></div>`;
       const lbl = L.marker(center, {
         icon: L.divIcon({ html, className: '', iconAnchor: [0, 0] })
       }).addTo(dashMap);
