@@ -924,7 +924,7 @@ app.use((req, res) => {
   res.status(404).render('404', { title: 'Không tìm thấy trang', user: req.user || null, path: req.path });
 });
 
-// ====================== START SERVER ======================
+// ====================== START SERVER ==================
 const startServer = async () => {
   try {
     await pool.query('SELECT NOW()');
