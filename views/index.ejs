@@ -3134,71 +3134,35 @@
         }
 
         if (labelsVis && p.ten_lo) {
-  const z = dashMap.getZoom();
-  if (z > 13) {
-    const fs = Math.max(2, (z - 3) * 0.75);
-    if (fs > 0) {
-      let center = null;
-      if (typeof turf !== 'undefined') {
-        try {
-          // Xử lý MultiPolygon: lấy polygon có diện tích lớn nhất
-          let geom = feat.geometry;
-          if (geom.type === 'MultiPolygon') {
-            let maxArea = 0;
-            let largestPoly = null;
-            geom.coordinates.forEach(polyCoords => {
-              const poly = turf.polygon(polyCoords);
-              const area = turf.area(poly);
-              if (area > maxArea) {
-                maxArea = area;
-                largestPoly = poly;
+          const z = dashMap.getZoom();
+          if (z > 13) {
+            const fs = Math.max(2, (z - 3) * 0.75);
+            if (fs > 0) {
+              let center;
+              try {
+                const insidePoint = turf.pointOnFeature(feat);
+                center = [insidePoint.geometry.coordinates[1], insidePoint.geometry.coordinates[0]];
+              } catch(e) {
+                // fallback nếu lỗi
+                try {
+                  const centroid = turf.centroid(feat.geometry);
+                  center = [centroid.geometry.coordinates[1], centroid.geometry.coordinates[0]];
+                } catch(e2) {
+                  center = L.geoJSON(feat).getBounds().getCenter();
+                }
               }
-            });
-            if (largestPoly) geom = largestPoly.geometry;
-          }
-          const pt = turf.pointOnSurface(geom);
-          center = [pt.geometry.coordinates[1], pt.geometry.coordinates[0]];
-        } catch(e) {
-          console.warn('pointOnSurface failed', e);
-          try {
-            // Fallback: pointOnFeature (cũ hơn nhưng vẫn ổn định)
-            const insidePoint = turf.pointOnFeature(feat);
-            center = [insidePoint.geometry.coordinates[1], insidePoint.geometry.coordinates[0]];
-          } catch(e2) {
-            try {
-              const ct = turf.centroid(feat.geometry);
-              center = [ct.geometry.coordinates[1], ct.geometry.coordinates[0]];
-            } catch(e3) {
-              center = L.geoJSON(feat).getBounds().getCenter();
+              const col = getLotColorReal(p, mapViewMode);
+              const cleanName = p.ten_lo.replace(/\s*-\s*KV\s*\d+\s*$/i, "");
+              const namCuoi = p.nam_trong ? String(p.nam_trong).slice(-2) : "";
+              const line1 = namCuoi ? `${cleanName} - ${namCuoi}` : cleanName;
+              const html = `<div style="background:transparent; color:#fff; font-size:${fs}px; padding:${Math.max(2, fs * 0.4)}px ${Math.max(4, fs * 0.7)}px; border-radius:4px; border-left:${Math.max(2, fs * 0.25)}px solid ${col}; white-space:nowrap; pointer-events:none; font-family:'Inter', sans-serif; line-height:1.6; font-weight:700; text-shadow:0 1px 3px rgba(0,0,0,0.5); transform: translate(-50%, -50%) scale(${z / 16}); text-align:center;"><strong style="display:block">${line1}</strong>${p.giong ? `<span style="display:block; margin-top:2px">${p.giong}</span>` : ""}</div>`;
+              const lbl = L.marker(center, {
+                icon: L.divIcon({ html, className: "", iconAnchor: [0, 0] })
+              }).addTo(dashMap);
+              labelLayers.push(lbl);
             }
           }
         }
-      } else {
-        center = L.geoJSON(feat).getBounds().getCenter();
-      }
-
-      const col = getLotColorReal(p, mapViewMode);
-      const cleanName = p.ten_lo.replace(/\s*-\s*KV\s*\d+\s*$/i, "");
-      const namCuoi = p.nam_trong ? String(p.nam_trong).slice(-2) : "";
-      const line1 = namCuoi ? `${cleanName} - ${namCuoi}` : cleanName;
-
-      // Đo kích thước thực của nhãn để đặt iconAnchor chính xác
-      const tempDiv = document.createElement('div');
-      tempDiv.style.cssText = `position:absolute; visibility:hidden; font-size:${fs}px; font-family:'Inter'; white-space:nowrap; padding:${Math.max(2, fs * 0.4)}px ${Math.max(4, fs * 0.7)}px; border-left:3px solid ${col}; background:rgba(0,0,0,0.75); color:#fff; border-radius:4px;`;
-      tempDiv.innerHTML = `<strong>${line1}</strong><br>${p.giong || ''}`;
-      document.body.appendChild(tempDiv);
-      const w = tempDiv.offsetWidth;
-      const h = tempDiv.offsetHeight;
-      document.body.removeChild(tempDiv);
-
-      const html = `<div style="background:rgba(0,0,0,0.75); color:#fff; font-size:${fs}px; padding:${Math.max(2, fs * 0.4)}px ${Math.max(4, fs * 0.7)}px; border-radius:4px; border-left:3px solid ${col}; white-space:nowrap; font-family:'Inter';">${line1}<br><span style="font-size:${Math.max(8, fs-2)}px">${p.giong || ''}</span></div>`;
-      const lbl = L.marker(center, {
-        icon: L.divIcon({ html, className: '', iconAnchor: [w/2, h/2] })
-      }).addTo(dashMap);
-      labelLayers.push(lbl);
-    }
-  }
-}
       });
 
       renderMapLegend();
