@@ -700,6 +700,7 @@
       border-radius: var(--r-lg);
       overflow: hidden;
       margin-bottom: 18px;
+      /* max-height: calc(var(--vh, 1vh) * 100 - 180px); */
     }
 
     .map-topbar {
@@ -1086,7 +1087,7 @@
     .map-sel-bar {
       position: absolute;
       bottom: 36px;
-      right: 12px;
+      left: 12px;
       z-index: 1000;
       background: rgba(15, 23, 41, 0.92);
       border: 1px solid rgba(255, 255, 255, 0.15);
@@ -1631,6 +1632,10 @@
       display: flex;
     }
 
+    .map-canvas-wrap.is-fullscreen .map-legend {
+      z-index: 2000;
+    }
+
     .map-leg-title {
       font-size: 10px;
       font-weight: 700;
@@ -1860,6 +1865,143 @@
     .btn-add:hover {
       transform: translateY(-2px);
     }
+
+    /* ── PDF EXPORT MODAL ── */
+    .pdf-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.65);
+      z-index: 9999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .pdf-modal-overlay.show {
+      display: flex;
+    }
+
+    .pdf-modal-box {
+      background: var(--s1);
+      border: 1px solid var(--border2);
+      border-radius: var(--r-lg);
+      padding: 28px 28px 22px;
+      width: 380px;
+      max-width: 94vw;
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6);
+    }
+
+    .pdf-modal-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pdf-modal-field {
+      margin-bottom: 16px;
+    }
+
+    .pdf-modal-label {
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 6px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .pdf-modal-input {
+      width: 100%;
+      background: var(--s2);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      color: var(--text);
+      font-size: 13px;
+      padding: 9px 12px;
+      font-family: var(--font-b);
+      transition: 0.15s;
+    }
+
+    .pdf-modal-input:focus {
+      outline: none;
+      border-color: var(--accentB);
+    }
+
+    .pdf-modal-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .pdf-modal-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 22px;
+    }
+
+    .pdf-btn-cancel {
+      background: transparent;
+      border: 1px solid var(--border2);
+      color: var(--muted2);
+      padding: 9px 18px;
+      border-radius: var(--r);
+      font-size: 13px;
+      cursor: pointer;
+      transition: 0.15s;
+    }
+
+    .pdf-btn-cancel:hover {
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+
+    .pdf-btn-confirm {
+      background: linear-gradient(135deg, var(--accentB), #0077cc);
+      color: #fff;
+      border: none;
+      padding: 9px 22px;
+      border-radius: var(--r);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      transition: 0.15s;
+      box-shadow: 0 4px 12px rgba(0, 180, 255, 0.25);
+    }
+
+    .pdf-btn-confirm:hover {
+      transform: translateY(-1px);
+    }
+
+    /* Hint bar while drawing */
+    .pdf-draw-hint {
+      position: absolute;
+      top: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1002;
+      background: rgba(0, 180, 255, 0.92);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 7px 18px;
+      border-radius: 20px;
+      display: none;
+      pointer-events: none;
+      white-space: nowrap;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    }
+
+    .pdf-draw-hint.show {
+      display: block;
+    }
   </style>
 </head>
 
@@ -2068,10 +2210,22 @@
             <select id="filter-che-do-cao" class="filterIndex" onchange="updateMapFilters('che_do_cao', this)">
               <option value="all">Tất cả</option>
             </select>
+            <div class="map-sep"></div>
+
             <span class="map-label" style="flex-shrink: 0">QH tái canh:</span>
             <select id="filter-quy_hoach_tai_canh" class="filterIndex"
               onchange="updateMapFilters('quy_hoach_tai_canh', this)">
               <option value="all">Tất cả</option>
+            </select>
+            <div class="map-sep"></div>
+
+            <span class="map-label" style="flex-shrink: 0">Năng suất:</span>
+            <select id="filter-nang-suat" class="filterIndex" onchange="updateMapFilters('nang_suat', this)">
+              <option value="all">Tất cả</option>
+              <option value="lt1000">&lt; 1.000 kg/ha</option>
+              <option value="lt1500">&lt; 1.500 kg/ha</option>
+              <option value="lt2000">&lt; 2.000 kg/ha</option>
+              <option value="gt2000">≥ 2.000 kg/ha</option>
             </select>
           </div>
 
@@ -2259,7 +2413,25 @@
                   <span class="mc-tooltip mc-tooltip-right">Phóng to bản đồ toàn màn hình (ESC để thoát)</span>
                 </button>
               </div>
+
+              <!-- Xuất bản đồ -->
+              <div class="map-ctrl-group">
+                <div class="mc-group-label">📄 Xuất bản đồ</div>
+                <button class="mc-btn-wide" id="btn-pdf-region" onclick="startPDFRegionExport()">
+                  <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                    <line x1="9" y1="13" x2="15" y2="13" />
+                    <line x1="9" y1="17" x2="15" y2="17" />
+                  </svg>
+                  Xuất PDF vùng
+                  <span class="mc-tooltip mc-tooltip-right">Quét vùng bản đồ để xuất PDF</span>
+                </button>
+              </div>
             </div>
+
+            <!-- draw hint bar -->
+            <div class="pdf-draw-hint" id="pdfDrawHint">📐 Kéo chuột để chọn vùng xuất PDF — nhấn ESC để hủy</div>
 
             <!-- MEASURE PANEL -->
             <div class="measure-panel" id="measure-panel">
@@ -2408,6 +2580,54 @@
     </div>
   </div>
 
+  <!-- PDF EXPORT CONFIG MODAL -->
+  <div class="pdf-modal-overlay" id="pdfExportModal">
+    <div class="pdf-modal-box">
+      <div class="pdf-modal-title">
+        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+          <polyline points="14 2 14 8 20 8" />
+          <line x1="9" y1="13" x2="15" y2="13" />
+          <line x1="9" y1="17" x2="15" y2="17" />
+        </svg>
+        Cấu hình xuất PDF
+      </div>
+
+      <div class="pdf-modal-field">
+        <div class="pdf-modal-label">Tiêu đề bản đồ</div>
+        <input type="text" class="pdf-modal-input" id="pdfTitleInput" placeholder="BÁO CÁO BẢN ĐỒ VƯỜN CÂY CAO SU"
+          value="BÁO CÁO BẢN ĐỒ VƯỜN CÂY CAO SU" />
+      </div>
+
+      <div class="pdf-modal-row">
+        <div class="pdf-modal-field">
+          <div class="pdf-modal-label">Khổ giấy</div>
+          <select class="pdf-modal-input" id="pdfPaperSize">
+            <option value="a4">A4</option>
+            <option value="a3">A3</option>
+          </select>
+        </div>
+        <div class="pdf-modal-field">
+          <div class="pdf-modal-label">Chiều</div>
+          <select class="pdf-modal-input" id="pdfOrientation">
+            <option value="landscape">Ngang</option>
+            <option value="portrait">Dọc</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="pdf-modal-actions">
+        <button class="pdf-btn-cancel" onclick="closePDFConfigModal()">Hủy</button>
+        <button class="pdf-btn-confirm" onclick="confirmPDFExport()">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+          Xuất PDF
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- TOAST (chỉ một) -->
   <div class="toast" id="toast">
     <span class="toast-icon" id="toastIcon">✅</span>
@@ -2456,6 +2676,7 @@
     let filterKhuVuc = new Set(),
       filterTuoiCao = new Set(),
       filterCheDoCao = new Set();
+    let filterNangSuat = 'all'; // 'all' | 'lt1000' | 'lt1500' | 'lt2000' | 'gt2000'
     let caosuFeatures = [];
     let userLocationMarker = null;
     let userLocationCircle = null;
@@ -2532,14 +2753,9 @@
       fullTuoiCao = new Set(),
       fullCheDoCao = new Set();
 
-    const originalData = [];
-    const filteredData = [];
-
     async function loadCaosuData() {
       try {
         const data = await fetchAPI("/api/lo-cao-su");
-        // originalData = await data.json(); // Lưu trữ dữ liệu gốc để sử dụng cho tìm kiếm
-        // filteredData = [...originalData]; // Khởi tạo filteredData bằng dữ liệu gốc
         caosuFeatures = data.features || [];
         console.log("📦 Đã tải", caosuFeatures.length, "lô từ API");
         if (caosuFeatures.length === 0) {
@@ -2611,77 +2827,7 @@
         caosuFeatures = [];
       }
 
-      // initFilters();
     }
-
-    //Lấy giá trị duy nhất cho dropdown
-    function getUniqueValues(data, field) {
-      return [...new Set(data.map((item) => item[field]).filter(Boolean))];
-    }
-
-    //Render dropdown
-    function renderSelect(id, values) {
-      const select = document.getElementById(id);
-      const currentValue = select.value;
-
-      select.innerHTML = '<option value="">-- Tất cả --</option>';
-
-      values.forEach((val) => {
-        const option = document.createElement("option");
-        option.value = val;
-        option.textContent = val;
-        select.appendChild(option);
-      });
-
-      // giữ lại value nếu còn hợp lệ
-      if (values.includes(currentValue)) {
-        select.value = currentValue;
-      }
-    }
-
-    //Init filter ban đầu
-    function initFilters() {
-      renderAllFilters(originalData);
-    }
-
-    //Render toàn bộ filter (KEY)
-    function renderAllFilters(data) {
-      renderSelect("filter-doi", getUniqueValues(data, "doi"));
-      renderSelect("filter-namtrong", getUniqueValues(data, "nam_trong"));
-      renderSelect("filter-giong", getUniqueValues(data, "giong"));
-      renderSelect("filter-khuvuc", getUniqueValues(data, "khu_vuc"));
-      renderSelect("filter-tuoi", getUniqueValues(data, "tuoi_cao"));
-      renderSelect("filter-namcao", getUniqueValues(data, "nam_cao"));
-    }
-
-    //Lọc dữ liệu theo selection
-    function applyFilters() {
-      const doi = document.getElementById("filter-doi").value;
-      const namtrong = document.getElementById("filter-namtrong").value;
-      const giong = document.getElementById("filter-giong").value;
-      const khuvuc = document.getElementById("filter-khuvuc").value;
-      const tuoi = document.getElementById("filter-tuoi").value;
-      const namcao = document.getElementById("filter-namcao").value;
-
-      filteredData = originalData.filter((item) => {
-        return (
-          (!doi || item.doi == doi) &&
-          (!namtrong || item.nam_trong == namtrong) &&
-          (!giong || item.giong == giong) &&
-          (!khuvuc || item.khu_vuc == khuvuc) &&
-          (!tuoi || item.tuoi_cao == tuoi) &&
-          (!namcao || item.nam_cao == namcao)
-        );
-      });
-
-      // 🔥 CẬP NHẬT NGƯỢC dropdown
-      renderAllFilters(filteredData);
-
-      // nếu có chart/table thì update ở đây
-      renderTable(filteredData);
-    }
-
-    // Legacy global select listener removed - using dedicated onchange handlers per filter
 
     async function buildFilterUI() {
       const ntEl = document.getElementById("filter-Doi");
@@ -2828,6 +2974,17 @@
       return a.localeCompare(b, "vi", { numeric: true, sensitivity: "base" });
     }
 
+    function nsPassFilter(raw, range) {
+      if (range === 'all') return true;
+      const v = parseFloat(raw);
+      if (isNaN(v)) return false;
+      if (range === 'lt1000') return v < 1000;
+      if (range === 'lt1500') return v < 1500;
+      if (range === 'lt2000') return v < 2000;
+      if (range === 'gt2000') return v >= 2000;
+      return true;
+    }
+
     function buildSelectOptions(
       selectId,
       values,
@@ -2866,109 +3023,6 @@
       return false;
     }
 
-    function refreshFilterOptions() {
-      const visibleFeatures = caosuFeatures.filter(featureVisible);
-
-      const currentSelections = {
-        NT: document.getElementById("filter-Doi")?.value || "all",
-        nam: document.getElementById("filter-nam")?.value || "all",
-        giong: document.getElementById("filter-giong")?.value || "all",
-        phien_cao:
-          document.getElementById("filter-phien_cao")?.value || "all",
-        nhip_do_cao:
-          document.getElementById("filter-Nhip_do_cao")?.value || "all",
-        quy_hoach_tai_canh:
-          document.getElementById("filter-quy_hoach_tai_canh")?.value ||
-          "all",
-        khu_vuc: document.getElementById("filter-khu-vuc")?.value || "all",
-        tuoi_cao: document.getElementById("filter-tuoi-cao")?.value || "all",
-        che_do_cao:
-          document.getElementById("filter-che-do-cao")?.value || "all",
-      };
-
-      const didReset =
-        buildSelectOptions(
-          "filter-Doi",
-          visibleFeatures.map((f) => normalizeTeamValue(f.properties.doi)),
-          currentSelections.NT,
-          filterNT,
-          fullNT,
-        ) ||
-        buildSelectOptions(
-          "filter-nam",
-          visibleFeatures.map((f) =>
-            normalizeFilterValue(f.properties.nam_trong),
-          ),
-          currentSelections.nam,
-          filterNam,
-          fullNam,
-        ) ||
-        buildSelectOptions(
-          "filter-giong",
-          visibleFeatures.map((f) =>
-            normalizeFilterValue(f.properties.giong),
-          ),
-          currentSelections.giong,
-          filterGiong,
-          fullGiong,
-        ) ||
-        buildSelectOptions(
-          "filter-phien_cao",
-          visibleFeatures.map((f) =>
-            normalizeFilterValue(f.properties.phien_cao),
-          ),
-          currentSelections.phien_cao,
-          filterPhienCao,
-          fullPhienCao,
-        ) ||
-        buildSelectOptions(
-          "filter-Nhip_do_cao",
-          visibleFeatures.map((f) =>
-            normalizeFilterValue(f.properties.nhip_do_cao),
-          ),
-          currentSelections.nhip_do_cao,
-          filterNhipDo,
-          fullNhipDo,
-        ) ||
-        buildSelectOptions(
-          "filter-quy_hoach_tai_canh",
-          visibleFeatures.map((f) =>
-            normalizeFilterValue(f.properties.tai_canh_nam),
-          ),
-          currentSelections.quy_hoach_tai_canh,
-          filterQuyHoach,
-          fullQuyHoach,
-        ) ||
-        buildSelectOptions(
-          "filter-khu-vuc",
-          visibleFeatures.map((f) =>
-            normalizeFilterValue(f.properties.khu_vuc),
-          ),
-          currentSelections.khu_vuc,
-          filterKhuVuc,
-          fullKhuVuc,
-        ) ||
-        buildSelectOptions(
-          "filter-tuoi-cao",
-          visibleFeatures.map((f) =>
-            normalizeFilterValue(f.properties.tuoi_cao),
-          ),
-          currentSelections.tuoi_cao,
-          filterTuoiCao,
-          fullTuoiCao,
-        ) ||
-        buildSelectOptions(
-          "filter-che-do-cao",
-          visibleFeatures.map((f) =>
-            normalizeFilterValue(f.properties.che_do_cao),
-          ),
-          currentSelections.che_do_cao,
-          filterCheDoCao,
-          fullCheDoCao,
-        );
-      return didReset;
-    }
-
     // Chấp nhận cả feature object lẫn properties object
     function featureVisible(input) {
       const p = input && input.properties ? input.properties : input;
@@ -2992,18 +3046,9 @@
       const okKV = filterKhuVuc.size === 0 || filterKhuVuc.has(kv);
       const okTC = filterTuoiCao.size === 0 || filterTuoiCao.has(tc);
       const okCDC = filterCheDoCao.size === 0 || filterCheDoCao.has(cdc);
+      const okNS = nsPassFilter(p.ns25_kg_ha, filterNangSuat);
 
-      return (
-        okNT &&
-        okNam &&
-        okGiong &&
-        okPC &&
-        okND &&
-        okQH &&
-        okKV &&
-        okTC &&
-        okCDC
-      );
+      return okNT && okNam && okGiong && okPC && okND && okQH && okKV && okTC && okCDC && okNS;
     }
 
     function getLotColorReal(p, mode) {
@@ -3136,21 +3181,19 @@
         if (labelsVis && p.ten_lo) {
           const z = dashMap.getZoom();
           if (z > 13) {
-            const fs = Math.max(2, (z - 3) * 0.75);
-            if (fs > 0) {
-              const center = L.geoJSON(feat).getBounds().getCenter();
-              const col = getLotColorReal(p, mapViewMode);
-              const cleanName = p.ten_lo.replace(/\s*-\s*KV\s*\d+\s*$/i, "");
-              const namCuoi = p.nam_trong
-                ? String(p.nam_trong).slice(-2)
-                : "";
-              const line1 = namCuoi ? `${cleanName} - ${namCuoi}` : cleanName;
-              const html = `<div style="background:transparent; color:#fff; font-size:${fs}px; padding:${Math.max(2, fs * 0.4)}px ${Math.max(4, fs * 0.7)}px; border-radius:4px; border-left:${Math.max(2, fs * 0.25)}px solid ${col}; white-space:nowrap; pointer-events:none; font-family:'Inter', sans-serif; line-height:1.6; font-weight:700; text-shadow:0 1px 3px rgba(0,0,0,0.5); transform:scale(${z / 16}); transform-origin:top left; text-align:center;"><strong style="display:block">${line1}</strong>${p.giong ? `<span style="display:block; margin-top:2px">${p.giong}</span>` : ""}</div>`;
-              const lbl = L.marker(center, {
-                icon: L.divIcon({ html, className: "", iconAnchor: [0, 0] }),
-              }).addTo(dashMap);
-              labelLayers.push(lbl);
-            }
+            const fs = Math.max(3, (z - 3) * 0.75 + 1);
+            const center = L.geoJSON(feat).getBounds().getCenter();
+            const col = getLotColorReal(p, mapViewMode);
+            const cleanName = p.ten_lo.replace(/\s*-\s*KV\s*\d+\s*$/i, "");
+            const namCuoi = p.nam_trong
+              ? String(p.nam_trong).slice(-2)
+              : "";
+            const line1 = namCuoi ? `${cleanName} - ${namCuoi}` : cleanName;
+            const html = `<div style="background:transparent; color:#fff; font-size:${fs}px; padding:${Math.max(2, fs * 0.4)}px ${Math.max(4, fs * 0.7)}px; border-radius:4px; border-left:${Math.max(2, fs * 0.25)}px solid ${col}; white-space:nowrap; pointer-events:none; font-family:'Inter', sans-serif; line-height:1.6; font-weight:700; text-shadow:0 1px 3px rgba(0,0,0,0.5); transform:translate(-50%,-50%); text-align:center;"><strong style="display:block">${line1}</strong>${p.giong ? `<span style="display:block; margin-top:2px">${p.giong}</span>` : ""}</div>`;
+            const lbl = L.marker(center, {
+              icon: L.divIcon({ html, className: "", iconAnchor: [0, 0] }),
+            }).addTo(dashMap);
+            labelLayers.push(lbl);
           }
         }
       });
@@ -3256,6 +3299,7 @@
         else if (type === "khu_vuc") filterKhuVuc.clear();
         else if (type === "tuoi_cao") filterTuoiCao.clear();
         else if (type === "che_do_cao") filterCheDoCao.clear();
+        else if (type === "nang_suat") filterNangSuat = 'all';
       } else {
         if (type === "NT") filterNT = new Set([normalizeTeamValue(val)]);
         else if (type === "nam") filterNam = new Set([val]);
@@ -3266,6 +3310,7 @@
         else if (type === "khu_vuc") filterKhuVuc = new Set([val]);
         else if (type === "tuoi_cao") filterTuoiCao = new Set([val]);
         else if (type === "che_do_cao") filterCheDoCao = new Set([val]);
+        else if (type === "nang_suat") filterNangSuat = val;
       }
       // Xử lý ranh giới đội (union)
       if (type === 'NT') {
@@ -3319,6 +3364,7 @@
           khu_vuc: () => { const v = p.khu_vuc ?? ''; return filterKhuVuc.size === 0 || filterKhuVuc.has(v); },
           tuoi_cao: () => { const v = p.tuoi_cao != null ? String(p.tuoi_cao) : ''; return filterTuoiCao.size === 0 || filterTuoiCao.has(v); },
           che_do_cao: () => { const v = p.che_do_cao ?? ''; return filterCheDoCao.size === 0 || filterCheDoCao.has(v); },
+          nang_suat: () => nsPassFilter(p.ns25_kg_ha, filterNangSuat),
         };
 
         // Kiểm tra tất cả filter TRỪ excludeKey
@@ -3599,7 +3645,7 @@
           `
     <b>📍 Vị trí </b><br>
     ${fixedLat.toFixed(6)}, ${fixedLng.toFixed(6)}<br>
-    <small>Công Ty TNHH phát triển cao su Tân Biên - Kampong Thom</small>
+    <small>Công Ty TNHH Phát Triển Cao Su Tân Biên - Kampong Thom</small>
   `,
         )
         .openPopup();
@@ -4117,54 +4163,179 @@
       setTimeout(() => t.classList.remove("show"), 3000);
     }
 
-    /* ==================== ĐIỀU HƯỚNG TRANG ==================== */
-    function goTo(id, el) {
-      document
-        .querySelectorAll(".page")
-        .forEach((p) => p.classList.remove("active"));
-      document
-        .querySelectorAll(".nav-item")
-        .forEach((n) => n.classList.remove("active"));
-      document.getElementById("page-" + id).classList.add("active");
-      if (el) el.classList.add("active");
-      if (id === "dashboard")
-        setTimeout(() => dashMap && dashMap.invalidateSize(), 120);
-    }
-
     /* ==================== XUẤT BẢN ĐỒ ==================== */
-    async function waitForMapStable() {
-      if (dashMap) dashMap.invalidateSize();
-      return new Promise((resolve) => setTimeout(resolve, 800));
-    }
+    /* ---- PDF vùng ---- */
+    let _pdfDrawHandler = null;
+    let _pdfDrawnRect = null;
+    let _pdfPixelCrop = null; // {x,y,w,h} in CSS pixels, captured the moment rect is drawn
 
-    async function exportMapToPDF() {
-      const mapContainer = document.querySelector(".map-canvas-wrap");
-      const legend = document.getElementById("mapLegend");
+    function startPDFRegionExport() {
+      const btn = document.getElementById("btn-pdf-region");
+      const hint = document.getElementById("pdfDrawHint");
 
-      if (!mapContainer) {
-        showToast("Không tìm thấy vùng bản đồ", "⚠️");
+      if (_pdfDrawHandler) {
+        _pdfDrawHandler.disable();
+        _pdfDrawHandler = null;
+        btn && btn.classList.remove("active");
+        hint && hint.classList.remove("show");
         return;
       }
 
-      showToast("Đang xuất PDF (giữ nhãn lô)...", "⏳");
+      if (_pdfDrawnRect) {
+        dashMap.removeLayer(_pdfDrawnRect);
+        _pdfDrawnRect = null;
+        _pdfPixelCrop = null;
+      }
+
+      btn && btn.classList.add("active");
+      hint && hint.classList.add("show");
+
+      _pdfDrawHandler = new L.Draw.Rectangle(dashMap, {
+        shapeOptions: {
+          color: "#00b4ff",
+          weight: 2,
+          dashArray: "5 4",
+          fillColor: "#00b4ff",
+          fillOpacity: 0.08,
+        },
+        metric: true,
+      });
+      _pdfDrawHandler.enable();
+    }
+
+    // Listen for Leaflet.Draw CREATED event
+    (function attachPDFDrawListener() {
+      function onCreated(e) {
+        if (e.layerType !== "rectangle") return;
+
+        const btn = document.getElementById("btn-pdf-region");
+        const hint = document.getElementById("pdfDrawHint");
+
+        _pdfDrawnRect = e.layer;
+
+        // Add to map first so the SVG <path> element is created in the DOM
+        _pdfDrawnRect.addTo(dashMap);
+
+        // ── Use getBoundingClientRect on the SVG path for pixel-perfect accuracy ──
+        // This reads the exact visual rectangle the user drew, including any
+        // Leaflet transform offsets, without coordinate-system conversion errors.
+        const mapWrapEl = document.querySelector(".map-canvas-wrap");
+        const wrapRect = mapWrapEl.getBoundingClientRect();
+        const svgPath = _pdfDrawnRect._path;
+
+        if (svgPath) {
+          const pRect = svgPath.getBoundingClientRect();
+          _pdfPixelCrop = {
+            x: Math.max(0, Math.round(pRect.left - wrapRect.left)),
+            y: Math.max(0, Math.round(pRect.top - wrapRect.top)),
+            w: Math.round(pRect.width),
+            h: Math.round(pRect.height),
+          };
+        } else {
+          // Fallback: latLngToContainerPoint + correct for any offset between
+          // #dashMap and .map-canvas-wrap
+          const bounds = _pdfDrawnRect.getBounds();
+          const sw = dashMap.latLngToContainerPoint(bounds.getSouthWest());
+          const ne = dashMap.latLngToContainerPoint(bounds.getNorthEast());
+          const mapEl = dashMap.getContainer();
+          const mapRect = mapEl.getBoundingClientRect();
+          const ox = mapRect.left - wrapRect.left;
+          const oy = mapRect.top - wrapRect.top;
+          _pdfPixelCrop = {
+            x: Math.max(0, Math.min(sw.x, ne.x) + ox),
+            y: Math.max(0, Math.min(sw.y, ne.y) + oy),
+            w: Math.abs(ne.x - sw.x),
+            h: Math.abs(ne.y - sw.y),
+          };
+        }
+
+        if (_pdfDrawHandler) {
+          _pdfDrawHandler.disable();
+          _pdfDrawHandler = null;
+        }
+        btn && btn.classList.remove("active");
+        hint && hint.classList.remove("show");
+
+        document.getElementById("pdfExportModal").classList.add("show");
+      }
+
+      const _initPdfListener = setInterval(() => {
+        if (dashMap) {
+          clearInterval(_initPdfListener);
+          dashMap.on(L.Draw.Event.CREATED, onCreated);
+        }
+      }, 100);
+    })();
+
+    // ESC: cancel draw mode
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && _pdfDrawHandler) {
+        _pdfDrawHandler.disable();
+        _pdfDrawHandler = null;
+        const btn = document.getElementById("btn-pdf-region");
+        const hint = document.getElementById("pdfDrawHint");
+        btn && btn.classList.remove("active");
+        hint && hint.classList.remove("show");
+      }
+    });
+
+    function closePDFConfigModal() {
+      document.getElementById("pdfExportModal").classList.remove("show");
+      if (_pdfDrawnRect) {
+        dashMap.removeLayer(_pdfDrawnRect);
+        _pdfDrawnRect = null;
+        _pdfPixelCrop = null;
+      }
+    }
+
+    async function confirmPDFExport() {
+      const title =
+        document.getElementById("pdfTitleInput").value.trim() ||
+        "BÁO CÁO BẢN ĐỒ VƯỜN CÂY CAO SU";
+      const paperSize = document.getElementById("pdfPaperSize").value;
+      const orientation = document.getElementById("pdfOrientation").value;
+
+      // Save pixel crop before clearing state
+      const pixelCrop = _pdfPixelCrop;
+
+      document.getElementById("pdfExportModal").classList.remove("show");
+      if (_pdfDrawnRect) {
+        dashMap.removeLayer(_pdfDrawnRect);
+        _pdfDrawnRect = null;
+        _pdfPixelCrop = null;
+      }
+
+      await doRegionPDFExport(pixelCrop, title, paperSize, orientation);
+    }
+
+    async function doRegionPDFExport(pixelCrop, title, paperSize, orientation) {
+      const mapContainer = document.querySelector(".map-canvas-wrap");
+      if (!mapContainer) {
+        showToast("Không tìm thấy bản đồ", "⚠️");
+        return;
+      }
+
+      showToast("Đang xuất PDF...", "⏳");
+
+      // Hide UI overlays with visibility:hidden (preserves layout so pixel coords stay valid)
+      const leftToolbar = document.querySelector(".map-ctrl-left");
+      const rightToolbar = document.querySelector(".map-ctrl-right");
+      const coordBar = document.querySelector(".map-coord-bar");
+      const selBar = document.querySelector(".map-sel-bar");
+      const measurePanel = document.getElementById("measure-panel");
+
+      if (leftToolbar) leftToolbar.style.visibility = "hidden";
+      if (rightToolbar) rightToolbar.style.visibility = "hidden";
+      if (coordBar) coordBar.style.visibility = "hidden";
+      if (selBar) selBar.style.visibility = "hidden";
+      if (measurePanel) measurePanel.style.visibility = "hidden";
 
       try {
-        const leftToolbar = document.querySelector(".map-ctrl-left");
-        const rightToolbar = document.querySelector(".map-ctrl-right");
-        const coordBar = document.querySelector(".map-coord-bar");
-        const selBar = document.querySelector(".map-sel-bar");
-        const measurePanel = document.getElementById("measure-panel");
-
-        if (leftToolbar) leftToolbar.style.visibility = "hidden";
-        if (rightToolbar) rightToolbar.style.visibility = "hidden";
-        if (coordBar) coordBar.style.visibility = "hidden";
-        if (selBar) selBar.style.visibility = "hidden";
-        if (measurePanel) measurePanel.style.visibility = "hidden";
-
-        await waitForMapStable();
+        // Short delay only — no invalidateSize() which could shift the map
+        await new Promise(resolve => setTimeout(resolve, 300));
 
         const mapCanvas = await html2canvas(mapContainer, {
-          scale: 4,
+          scale: 2,
           backgroundColor: "#0a0e1a",
           logging: false,
           useCORS: true,
@@ -4172,192 +4343,80 @@
           imageTimeout: 0,
         });
 
-        let legendCanvas = null;
-        if (legend) {
-          legendCanvas = await html2canvas(legend, {
-            scale: 3,
-            backgroundColor: "#0a0e1a",
-          });
-        }
-
+        // Restore UI
         if (leftToolbar) leftToolbar.style.visibility = "visible";
         if (rightToolbar) rightToolbar.style.visibility = "visible";
         if (coordBar) coordBar.style.visibility = "visible";
         if (selBar) selBar.style.visibility = "visible";
         if (measurePanel) measurePanel.style.visibility = "visible";
 
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF({
-          orientation: "landscape",
-          unit: "mm",
-          format: "a4",
-        });
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = pdf.internal.pageSize.getHeight();
-
-        const mapImgData = mapCanvas.toDataURL("image/jpeg", 1.0);
-        const mapImgWidth = pdfWidth;
-        const mapImgHeight =
-          (mapCanvas.height * mapImgWidth) / mapCanvas.width;
-
-        let yOffset = 0;
-        pdf.addImage(
-          mapImgData,
-          "JPEG",
-          0,
-          yOffset,
-          mapImgWidth,
-          mapImgHeight,
-        );
-
-        if (legendCanvas) {
-          const legendWidth = pdfWidth * 0.7;
-          const legendHeight =
-            (legendCanvas.height * legendWidth) / legendCanvas.width;
-          yOffset = mapImgHeight + 5;
-          if (yOffset + legendHeight > pdfHeight) {
-            pdf.addPage();
-            yOffset = 0;
-          }
-          pdf.addImage(
-            legendCanvas,
-            "JPEG",
-            (pdfWidth - legendWidth) / 2,
-            yOffset,
-            legendWidth,
-            legendHeight,
-          );
+        // Crop to the drawn rectangle (html2canvas scale = 2)
+        const captureScale = mapCanvas.width / mapContainer.offsetWidth;
+        let mapCrop = mapCanvas;
+        if (pixelCrop && pixelCrop.w > 10 && pixelCrop.h > 10) {
+          const cx = Math.round(pixelCrop.x * captureScale);
+          const cy = Math.round(pixelCrop.y * captureScale);
+          const cw = Math.round(pixelCrop.w * captureScale);
+          const ch = Math.round(pixelCrop.h * captureScale);
+          const cropCanvas = document.createElement("canvas");
+          cropCanvas.width = cw;
+          cropCanvas.height = ch;
+          cropCanvas.getContext("2d").drawImage(mapCanvas, cx, cy, cw, ch, 0, 0, cw, ch);
+          mapCrop = cropCanvas;
         }
 
-        const title = "BÁO CÁO BẢN ĐỒ VƯỜN CÂY CAO SU";
-        const date = new Date().toLocaleString("vi-VN");
-        pdf.setFontSize(12);
-        pdf.setTextColor(200, 200, 200);
-        pdf.text(title, pdfWidth / 2, 10, { align: "center" });
-        pdf.setFontSize(9);
-        pdf.text(`Xuất ngày: ${date}`, pdfWidth - 20, 10, { align: "right" });
+        // Build composite: dark title bar (Canvas 2D → correct Vietnamese rendering) + map
+        const px = captureScale;
+        const titleH = Math.round(40 * px);
+        const composite = document.createElement("canvas");
+        composite.width = mapCrop.width;
+        composite.height = mapCrop.height + titleH;
+        const ctx = composite.getContext("2d");
 
-        pdf.save(`ban_do_cao_su_${Date.now()}.pdf`);
+        // Header bg
+        ctx.fillStyle = "#111827";
+        ctx.fillRect(0, 0, composite.width, titleH);
+        // Accent line
+        ctx.fillStyle = "#00d68f";
+        ctx.fillRect(0, titleH - Math.round(2 * px), composite.width, Math.round(2 * px));
+        // Title
+        ctx.font = `bold ${Math.round(13 * px)}px Inter, "Segoe UI", sans-serif`;
+        ctx.fillStyle = "#f0f4f9";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(title, composite.width / 2, titleH * 0.42);
+        // Date
+        const date = new Date().toLocaleString("vi-VN");
+        ctx.font = `${Math.round(8.5 * px)}px Inter, "Segoe UI", sans-serif`;
+        ctx.fillStyle = "#6b7c9d";
+        ctx.textAlign = "right";
+        ctx.fillText("Xuất ngày: " + date, composite.width - Math.round(10 * px), titleH * 0.68);
+        // Map
+        ctx.drawImage(mapCrop, 0, titleH);
+
+        // PDF — always fill full width, vertical center if shorter than page
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({ orientation, unit: "mm", format: paperSize });
+        const pdfW = pdf.internal.pageSize.getWidth();
+        const pdfH = pdf.internal.pageSize.getHeight();
+
+        const imgAspect = composite.width / composite.height;
+        const imgW = pdfW;
+        const imgH = pdfW / imgAspect;
+        const imgX = 0;
+        const imgY = Math.max(0, (pdfH - imgH) / 2);
+
+        pdf.addImage(composite.toDataURL("image/jpeg", 0.95), "JPEG", imgX, imgY, imgW, imgH);
+        pdf.save(`ban_do_cao_su_${paperSize.toUpperCase()}_${Date.now()}.pdf`);
         showToast("Xuất PDF thành công!", "✅");
       } catch (err) {
         console.error(err);
         showToast("Lỗi xuất PDF: " + err.message, "❌");
-        const leftToolbar = document.querySelector(".map-ctrl-left");
-        const rightToolbar = document.querySelector(".map-ctrl-right");
-        const coordBar = document.querySelector(".map-coord-bar");
-        const selBar = document.querySelector(".map-sel-bar");
-        const measurePanel = document.getElementById("measure-panel");
         if (leftToolbar) leftToolbar.style.visibility = "visible";
         if (rightToolbar) rightToolbar.style.visibility = "visible";
         if (coordBar) coordBar.style.visibility = "visible";
         if (selBar) selBar.style.visibility = "visible";
         if (measurePanel) measurePanel.style.visibility = "visible";
-      }
-    }
-
-    async function exportMapToJPEG() {
-      const mapContainer = document.querySelector(".map-canvas-wrap");
-      const legend = document.getElementById("mapLegend");
-
-      if (!mapContainer) {
-        showToast("Không tìm thấy vùng bản đồ", "⚠️");
-        return;
-      }
-
-      showToast("Đang xuất JPEG (giữ nhãn lô)...", "⏳");
-
-      try {
-        const leftToolbar = document.querySelector(".map-ctrl-left");
-        const rightToolbar = document.querySelector(".map-ctrl-right");
-        const coordBar = document.querySelector(".map-coord-bar");
-        const selBar = document.querySelector(".map-sel-bar");
-        const measurePanel = document.getElementById("measure-panel");
-
-        if (leftToolbar) leftToolbar.style.visibility = "hidden";
-        if (rightToolbar) rightToolbar.style.visibility = "hidden";
-        if (coordBar) coordBar.style.visibility = "hidden";
-        if (selBar) selBar.style.visibility = "hidden";
-        if (measurePanel) measurePanel.style.visibility = "hidden";
-
-        await waitForMapStable();
-
-        const mapCanvas = await html2canvas(mapContainer, {
-          scale: 3,
-          backgroundColor: "#0a0e1a",
-          logging: false,
-          useCORS: true,
-          allowTaint: false,
-        });
-
-        let legendCanvas = null;
-        if (legend) {
-          legendCanvas = await html2canvas(legend, {
-            scale: 2,
-            backgroundColor: "#0a0e1a",
-          });
-        }
-
-        if (leftToolbar) leftToolbar.style.visibility = "visible";
-        if (rightToolbar) rightToolbar.style.visibility = "visible";
-        if (coordBar) coordBar.style.visibility = "visible";
-        if (selBar) selBar.style.visibility = "visible";
-        if (measurePanel) measurePanel.style.visibility = "visible";
-
-        const finalCanvas = document.createElement("canvas");
-        const mapWidth = mapCanvas.width;
-        const mapHeight = mapCanvas.height;
-        let legendHeight = legendCanvas ? legendCanvas.height : 0;
-        const padding = 30;
-        finalCanvas.width = mapWidth;
-        finalCanvas.height = mapHeight + legendHeight + padding + 70;
-        const ctx = finalCanvas.getContext("2d");
-        ctx.fillStyle = "#0a0e1a";
-        ctx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
-
-        ctx.font = 'bold 32px "Inter", sans-serif';
-        ctx.fillStyle = "#e8eeff";
-        ctx.fillText("BÁO CÁO BẢN ĐỒ VƯỜN CÂY CAO SU", 20, 55);
-        ctx.font = '16px "Inter", sans-serif';
-        ctx.fillStyle = "#8a9ab8";
-        const dateStr = `Xuất ngày: ${new Date().toLocaleString("vi-VN")}`;
-        ctx.fillText(
-          dateStr,
-          finalCanvas.width - ctx.measureText(dateStr).width - 20,
-          55,
-        );
-
-        ctx.drawImage(mapCanvas, 0, 85);
-
-        if (legendCanvas) {
-          const legendX = (mapWidth - legendCanvas.width) / 2;
-          const legendY = 85 + mapHeight + 15;
-          ctx.drawImage(legendCanvas, legendX, legendY);
-        }
-
-        ctx.font = '12px "Inter", sans-serif';
-        ctx.fillStyle = "#5a6a8a";
-        ctx.fillText(
-          "WebGIS Cao Su - Hệ thống quản lý vườn cây thông minh",
-          finalCanvas.width - 280,
-          finalCanvas.height - 12,
-        );
-
-        finalCanvas.toBlob(
-          (blob) => {
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = `ban_do_cao_su_${Date.now()}.jpg`;
-            a.click();
-            URL.revokeObjectURL(url);
-            showToast("Xuất JPEG thành công!", "✅");
-          },
-          "image/jpeg",
-          0.95,
-        );
-      } catch (err) {
-        console.error(err);
-        showToast("Lỗi xuất JPEG: " + err.message, "❌");
       }
     }
 
@@ -4489,16 +4548,6 @@
         }
       });
     });
-    function logout() {
-      if (confirm("Bạn có chắc muốn đăng xuất?"))
-        window.location.href = "/logout";
-    }
-    // Chuyển đến trang quản lý lô cây và hiển thị chi tiết lô
-    function viewLotDetail(idLo) {
-      localStorage.setItem("view_lot_id", idLo);
-      window.location.href = "/quan-ly-lo-cay";
-    }
-
     /* ==================== SỬA LÔ NGAY TRÊN DASHBOARD ==================== */
     async function editLot(idLo) {
       try {
