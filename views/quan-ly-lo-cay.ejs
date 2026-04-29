@@ -450,6 +450,10 @@
                   <th>Sản lượng</th>
                   <th>Phiên cạo</th>
                   <th>Nhịp độ cạo</th>
+                  <th>Số phân cạo</th>
+                  <th>BQ cây cạo phân</th>
+                  <th>PC bắt đầu</th>
+                  <th>PC kết thúc</th>
                   <th>Tái canh năm</th>
                   <th>Đối tượng</th>
                   <th>Hành động</th>
@@ -585,9 +589,13 @@
           row.insertCell(36).innerText = l.san_luong || "";
           row.insertCell(37).innerText = l.phien_cao || "";
           row.insertCell(38).innerText = l.nhip_do_cao || "";
-          row.insertCell(39).innerText = l.tai_canh_nam || "";
-          row.insertCell(40).innerText = l.doi_tuong || "";
-          const actionCell = row.insertCell(41);
+          row.insertCell(39).innerText = l.so_phan_cao || "";
+          row.insertCell(40).innerText = l.bq_cay_cao_phan || "";
+          row.insertCell(41).innerText = l.pc_bat_dau || "";
+          row.insertCell(42).innerText = l.pc_ket_thuc || "";
+          row.insertCell(43).innerText = l.tai_canh_nam || "";
+          row.insertCell(44).innerText = l.doi_tuong || "";
+          const actionCell = row.insertCell(45);
           actionCell.innerHTML = `
       <button class="btn-location location-lo" data-id="${l.id_lo}" title="Xem vị trí trên bản đồ"><i class="fas fa-map-marker-alt"></i> 📍</button>
       <button class="btn-dash edit-lo" data-id="${l.id_lo}"><i class="fas fa-edit"></i> Sửa</button>
@@ -806,6 +814,10 @@
       <div class="form-field"><label>Chế độ cạo</label><input type="text" name="che_do_cao" value="${val(l, "che_do_cao")}"></div>
       <div class="form-field"><label>Phiên cạo</label><input type="text" name="phien_cao" value="${val(l, "phien_cao")}"></div>
       <div class="form-field"><label>Nhịp độ cạo</label><input type="text" name="nhip_do_cao" value="${val(l, "nhip_do_cao")}"></div>
+      <div class="form-field"><label>Số phân cạo</label><input type="number" name="so_phan_cao" value="${val(l, "so_phan_cao")}"></div>
+      <div class="form-field"><label>Bình quân cây cạo phân</label><input type="number" name="bq_cay_cao_phan" value="${val(l, "bq_cay_cao_phan")}"></div>
+      <div class="form-field"><label>Phân cạo bắt đầu</label><input type="number" name="pc_bat_dau" value="${val(l, "pc_bat_dau")}"></div>
+      <div class="form-field"><label>Phân cạo kết thúc</label><input type="number" name="pc_ket_thuc" value="${val(l, "pc_ket_thuc")}"></div>
       <div class="form-field"><label>Năm MC</label><input type="number" name="nam_mc" value="${val(l, "nam_mc")}"></div>
       <div class="form-field"><label>Tuổi cạo</label><input type="number" name="tuoi_cao" value="${val(l, "tuoi_cao")}"></div>
       <div class="form-field"><label>Năm cạo up</label><input type="number" name="nam_cao_up" value="${val(l, "nam_cao_up")}"></div>

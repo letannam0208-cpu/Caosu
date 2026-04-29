@@ -167,6 +167,7 @@ app.get('/api/lo-cao-su', authenticateToken, async (req, res) => {
         ns25_kg_ha, ns25_kg_cay, tong_lat_cao, ns26_kg_cay, phan_loai,
         xa, huyen, tinh, ns26_kg_ha, san_luong, phien_cao, nhip_do_cao,
         tai_canh_nam, doi_tuong, nam_cap_nhat,
+        so_phan_cao, bq_cay_cao_phan, pc_bat_dau, pc_ket_thuc,
         geojson
       FROM lo
       ${whereClause}
@@ -237,7 +238,11 @@ app.get('/api/lo-cao-su', authenticateToken, async (req, res) => {
           nhip_do_cao: row.nhip_do_cao,
           tai_canh_nam: row.tai_canh_nam,
           doi_tuong: row.doi_tuong,
-          nam_cap_nhat: row.nam_cap_nhat
+          nam_cap_nhat: row.nam_cap_nhat,
+          so_phan_cao: row.so_phan_cao,
+          bq_cay_cao_phan: row.bq_cay_cao_phan,
+          pc_bat_dau: row.pc_bat_dau,
+          pc_ket_thuc: row.pc_ket_thuc
         };
         return feature;
       })
@@ -472,7 +477,8 @@ app.get('/api/lo-cay', authenticateToken, async (req, res) => {
         tong_ho_kk, cay_cao, cay_chua_cao, cay_kho_mu, cay_khong_pt, ho_trong, mat_do_cc,
         che_do_cao, phien_cao, nhip_do_cao, nam_mc, tuoi_cao, nam_cao_up, tinh_trang_mc,
         ns25_kg_ha, ns25_kg_cay, ns26_kg_ha, ns26_kg_cay, tong_lat_cao, san_luong, phan_loai, doi_tuong, tai_canh_nam,
-        hang_dat, phuong_phap_trong, khoang_cach_trong, mat_do_tk
+        hang_dat, phuong_phap_trong, khoang_cach_trong, mat_do_tk,
+        so_phan_cao, bq_cay_cao_phan, pc_bat_dau, pc_ket_thuc
       FROM lo
       ORDER BY ten_lo
     `);
@@ -503,7 +509,8 @@ app.post('/api/lo-cay', authenticateToken, async (req, res) => {
       tong_ho_kk, cay_cao, cay_chua_cao, cay_kho_mu, cay_khong_pt, ho_trong, mat_do_cc,
       che_do_cao, phien_cao, nhip_do_cao, nam_mc, tuoi_cao, nam_cao_up, tinh_trang_mc,
       ns25_kg_ha, ns25_kg_cay, ns26_kg_ha, ns26_kg_cay, tong_lat_cao, san_luong, phan_loai, doi_tuong, tai_canh_nam,
-      hang_dat, phuong_phap_trong, khoang_cach_trong, mat_do_tk
+      hang_dat, phuong_phap_trong, khoang_cach_trong, mat_do_tk,
+      so_phan_cao, bq_cay_cao_phan, pc_bat_dau, pc_ket_thuc
     } = req.body;
 
     const newId = id_lo || ('LO_' + Date.now() + '_' + Math.floor(Math.random() * 10000));
@@ -516,8 +523,9 @@ app.post('/api/lo-cay', authenticateToken, async (req, res) => {
         tong_ho_kk, cay_cao, cay_chua_cao, cay_kho_mu, cay_khong_pt, ho_trong, mat_do_cc,
         che_do_cao, phien_cao, nhip_do_cao, nam_mc, tuoi_cao, nam_cao_up, tinh_trang_mc,
         ns25_kg_ha, ns25_kg_cay, ns26_kg_ha, ns26_kg_cay, tong_lat_cao, san_luong, phan_loai, doi_tuong, tai_canh_nam,
-        hang_dat, phuong_phap_trong, khoang_cach_trong, mat_do_tk
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40, $41, $42)
+        hang_dat, phuong_phap_trong, khoang_cach_trong, mat_do_tk,
+        so_phan_cao, bq_cay_cao_phan, pc_bat_dau, pc_ket_thuc
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40, $41, $42, $43, $44, $45)
     `, [
       newId, ten_lo, nam_trong, giong, cao_trinh_tb,
       du_an, doi, khu_vuc, xa, huyen, tinh,
@@ -525,7 +533,8 @@ app.post('/api/lo-cay', authenticateToken, async (req, res) => {
       tong_ho_kk, cay_cao, cay_chua_cao, cay_kho_mu, cay_khong_pt, ho_trong, mat_do_cc,
       che_do_cao, phien_cao, nhip_do_cao, nam_mc, tuoi_cao, nam_cao_up, tinh_trang_mc,
       ns25_kg_ha, ns25_kg_cay, ns26_kg_ha, ns26_kg_cay, tong_lat_cao, san_luong, phan_loai, doi_tuong, tai_canh_nam,
-      hang_dat, phuong_phap_trong, khoang_cach_trong, mat_do_tk
+      hang_dat, phuong_phap_trong, khoang_cach_trong, mat_do_tk,
+      so_phan_cao, bq_cay_cao_phan, pc_bat_dau, pc_ket_thuc
     ]);
     res.json({ success: true, message: 'Thêm lô cây thành công', id: newId });
   } catch (err) {
@@ -544,7 +553,8 @@ app.put('/api/lo-cay/:id', authenticateToken, async (req, res) => {
     tong_ho_kk, cay_cao, cay_chua_cao, cay_kho_mu, cay_khong_pt, ho_trong, mat_do_cc,
     che_do_cao, phien_cao, nhip_do_cao, nam_mc, tuoi_cao, nam_cao_up, tinh_trang_mc,
     ns25_kg_ha, ns25_kg_cay, ns26_kg_ha, ns26_kg_cay, tong_lat_cao, san_luong, phan_loai, doi_tuong, tai_canh_nam,
-    hang_dat, phuong_phap_trong, khoang_cach_trong, mat_do_tk
+    hang_dat, phuong_phap_trong, khoang_cach_trong, mat_do_tk,
+    so_phan_cao, bq_cay_cao_phan, pc_bat_dau, pc_ket_thuc
   } = req.body;
 
   try {
@@ -556,8 +566,9 @@ app.put('/api/lo-cay/:id', authenticateToken, async (req, res) => {
         tong_ho_kk = $14, cay_cao = $15, cay_chua_cao = $16, cay_kho_mu = $17, cay_khong_pt = $18, ho_trong = $19, mat_do_cc = $20,
         che_do_cao = $21, phien_cao = $22, nhip_do_cao = $23, nam_mc = $24, tuoi_cao = $25, nam_cao_up = $26, tinh_trang_mc = $27,
         ns25_kg_ha = $28, ns25_kg_cay = $29, ns26_kg_ha = $30, ns26_kg_cay = $31, tong_lat_cao = $32, san_luong = $33, phan_loai = $34, doi_tuong = $35, tai_canh_nam = $36,
-        hang_dat = $37, phuong_phap_trong = $38, khoang_cach_trong = $39, mat_do_tk = $40
-      WHERE id_lo = $41
+        hang_dat = $37, phuong_phap_trong = $38, khoang_cach_trong = $39, mat_do_tk = $40,
+        so_phan_cao = $41,bq_cay_cao_phan = $42, pc_bat_dau = $43, pc_ket_thuc = $44
+      WHERE id_lo = $45
     `, [
       ten_lo, nam_trong, giong, cao_trinh_tb,
       du_an, doi, khu_vuc, xa, huyen, tinh,
@@ -566,6 +577,7 @@ app.put('/api/lo-cay/:id', authenticateToken, async (req, res) => {
       che_do_cao, phien_cao, nhip_do_cao, nam_mc, tuoi_cao, nam_cao_up, tinh_trang_mc,
       ns25_kg_ha, ns25_kg_cay, ns26_kg_ha, ns26_kg_cay, tong_lat_cao, san_luong, phan_loai, doi_tuong, tai_canh_nam,
       hang_dat, phuong_phap_trong, khoang_cach_trong, mat_do_tk,
+      so_phan_cao, bq_cay_cao_phan, pc_bat_dau, pc_ket_thuc,
       id_lo
     ]);
     res.json({ success: true, message: 'Cập nhật lô cây thành công' });
@@ -606,7 +618,8 @@ const updatableCols = [
     'cay_cao', 'cay_chua_cao', 'cay_kho_mu', 'cay_khong_pt', 'ho_trong', 'mat_do_cc',
     'che_do_cao', 'nam_mc', 'tuoi_cao', 'nam_cao_up', 'tinh_trang_mc',
     'ns25_kg_ha', 'ns25_kg_cay', 'tong_lat_cao', 'ns26_kg_cay', 'phan_loai',
-    'ns26_kg_ha', 'san_luong', 'phien_cao', 'nhip_do_cao', 'tai_canh_nam', 'doi_tuong'
+    'ns26_kg_ha', 'san_luong', 'phien_cao', 'nhip_do_cao', 'tai_canh_nam', 'doi_tuong',
+    'so_phan_cao', 'bq_cay_cao_phan', 'pc_bat_dau', 'pc_ket_thuc'
 ];
 
 app.post('/api/import-excel', authenticateToken, upload.single('file'), async (req, res) => {
@@ -717,6 +730,10 @@ app.post('/api/import-excel', authenticateToken, upload.single('file'), async (r
                 nhip_do_cao VARCHAR(50),
                 tai_canh_nam INTEGER,
                 doi_tuong VARCHAR(100),
+                so_phan_cao INTEGER,
+                bq_cay_cao_phan INTEGER,
+                pc_bat_dau INTEGER,
+                pc_ket_thuc INTEGER,
                 geojson JSONB
             )
         `);
@@ -762,7 +779,8 @@ app.post('/api/import-excel', authenticateToken, upload.single('file'), async (r
                     cay_kho_mu, cay_khong_pt, ho_trong, mat_do_cc, che_do_cao, nam_mc, tuoi_cao,
                     nam_cao_up, tinh_trang_mc, ns25_kg_ha, ns25_kg_cay, tong_lat_cao, ns26_kg_cay,
                     phan_loai, xa, huyen, tinh, ns26_kg_ha, san_luong, phien_cao, nhip_do_cao,
-                    tai_canh_nam, doi_tuong, geojson, nam_cap_nhat_history, ngay_luu
+                    tai_canh_nam, doi_tuong, so_phan_cao, bq_cay_cao_phan, pc_bat_dau, pc_ket_thuc,
+                    geojson, nam_cap_nhat_history, ngay_luu
                 )
                 SELECT 
                     l.id_lo, l.ten_lo, l.nam_trong, l.cao_trinh_tb, l.giong,
@@ -771,7 +789,8 @@ app.post('/api/import-excel', authenticateToken, upload.single('file'), async (r
                     l.cay_kho_mu, l.cay_khong_pt, l.ho_trong, l.mat_do_cc, l.che_do_cao, l.nam_mc, l.tuoi_cao,
                     l.nam_cao_up, l.tinh_trang_mc, l.ns25_kg_ha, l.ns25_kg_cay, l.tong_lat_cao, l.ns26_kg_cay,
                     l.phan_loai, l.xa, l.huyen, l.tinh, l.ns26_kg_ha, l.san_luong, l.phien_cao, l.nhip_do_cao,
-                    l.tai_canh_nam, l.doi_tuong, l.geojson, l.nam_cap_nhat, NOW()
+                    l.tai_canh_nam, l.doi_tuong, l.so_phan_cao, l.bq_cay_cao_phan, l.pc_bat_dau, l.pc_ket_thuc,
+                    l.geojson, l.nam_cap_nhat, NOW()
                 FROM lo l
                 WHERE l.id_lo = ANY($1::text[])
             `, [existingIds]);
