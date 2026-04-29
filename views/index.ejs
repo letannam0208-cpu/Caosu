@@ -152,7 +152,10 @@
     }
 
     .page.active {
-      display: block;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
     }
 
     @keyframes pageIn {
@@ -168,26 +171,7 @@
     }
 
     /* ── COMMON ── */
-    .page-header {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      margin-bottom: 24px;
-    }
 
-    .page-title {
-      font-family: var(--font);
-      font-size: 22px;
-      font-weight: 800;
-      color: var(--text);
-      letter-spacing: 0.03em;
-    }
-
-    .page-subtitle {
-      font-size: 12px;
-      color: var(--muted);
-      margin-top: 3px;
-    }
 
     .btn {
       padding: 9px 18px;
@@ -699,8 +683,10 @@
       border: 1px solid var(--border);
       border-radius: var(--r-lg);
       overflow: hidden;
-      margin-bottom: 18px;
-      /* max-height: calc(var(--vh, 1vh) * 100 - 180px); */
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
     }
 
     .map-topbar {
@@ -1347,12 +1333,11 @@
       width: 100vw !important;
     }
 
-    /* Default (non-fullscreen) — chiếm phần còn lại của màn hình */
+    /* Default (non-fullscreen) — tự điền phần còn lại của map-section */
     .map-canvas-wrap:not(.is-fullscreen) {
-      height: calc(100vh - 220px) !important;
-      /* trừ đi chiều cao topbar + padding */
+      flex: 1 !important;
+      height: auto !important;
       min-height: 460px;
-      /* đảm bảo tối thiểu */
     }
 
     .map-canvas-wrap:not(.is-fullscreen) #dashMap {
@@ -1613,8 +1598,8 @@
     /* Legend panel – floating bottom-right */
     .map-legend {
       position: absolute;
-      bottom: 40px;
-      right: 44px;
+      bottom: 30px;
+      right: 12px;
       z-index: 1001;
       background: rgba(15, 23, 41, 0.96);
       border: 1px solid rgba(255, 255, 255, 0.12);
@@ -1632,11 +1617,22 @@
       display: flex;
     }
 
+    .map-legend--wide {
+      width: 250px;
+    }
+
+    .map-leg-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px 7px;
+    }
+
     .map-canvas-wrap.is-fullscreen .map-legend {
       z-index: 2000;
     }
 
     .map-leg-title {
+      text-align: center;
       font-size: 10px;
       font-weight: 700;
       color: var(--muted);
@@ -2010,7 +2006,7 @@
   <div id="topbar">
     <div class="tb-logo">
       <div class="">
-        <img src="/assets/image/logoTBK.jpg" alt="Logo" style="width: 32px; height: 32px" />
+        <img src="/assets/image/logoTBK.jpg" alt="Logo" />
       </div>
       <div>
         <div class="tb-title">GIS TBKRUCO</div>
@@ -2428,7 +2424,10 @@
                   <span class="mc-tooltip mc-tooltip-right">Quét vùng bản đồ để xuất PDF</span>
                 </button>
               </div>
+
             </div>
+
+            <div class="map-legend" id="mapLegend"></div>
 
             <!-- draw hint bar -->
             <div class="pdf-draw-hint" id="pdfDrawHint">📐 Kéo chuột để chọn vùng xuất PDF — nhấn ESC để hủy</div>
@@ -2573,8 +2572,7 @@
             </div>
           </div>
 
-          <!-- Legend bar -->
-          <div class="map-legend" id="mapLegend"></div>
+
         </div>
       </div>
     </div>
@@ -3125,14 +3123,14 @@
             layer.bindPopup(
               `
   <div style="background: ${col}22; color: ${col}; border: 1px solid ${col}55; padding: 6px 12px; border-radius: 8px; margin-bottom: 12px; text-align: center; font-weight: bold; font-size: 18px;">
-    ${p.ten_lo || p.id_lo || "—"}
+    ${p.ten_lo + " - " + p.nam_trong || p.id_lo || "—"}
   </div>
   <div style="max-height: 300px; overflow-y: auto; padding-right: 6px; margin-bottom: 12px;">
     <div class="lo-popup-grid">
       <span class="lo-popup-label">Mã lô</span><span class="lo-popup-val">${p.id_lo || "—"}</span>
       <span class="lo-popup-label">Đội</span><span class="lo-popup-val">${p.doi || "—"}</span>
       <span class="lo-popup-label">Năm trồng</span><span class="lo-popup-val">${p.nam_trong || "—"}</span>
-      <span class="lo-popup-label">Diện tích</span><span class="lo-popup-val">${p.dien_tich_map ? p.dien_tich_map + " ha" : "—"}</span>
+      <span class="lo-popup-label">Diện tích 01/01/2026</span><span class="lo-popup-val">${p.dien_tich_010126 != null ? Number(p.dien_tich_010126).toFixed(2) : "—"}</span>
       <span class="lo-popup-label">Năm cạo</span><span class="lo-popup-val">${p.nam_mc || "—"}</span>
       <span class="lo-popup-label">Tuổi cạo</span><span class="lo-popup-val">${p.tuoi_cao || "—"}</span>
       <span class="lo-popup-label">Giống</span><span class="lo-popup-val">${p.giong || "—"}</span>
@@ -3141,13 +3139,15 @@
       <span class="lo-popup-label">Mật độ thiết kế</span><span class="lo-popup-val">${p.mat_do_tk || "—"}</span>
       <span class="lo-popup-label">Nhịp độ cạo</span><span class="lo-popup-val">${p.nhip_do_cao || "—"}</span>
       <span class="lo-popup-label">Chế độ cạo</span><span class="lo-popup-val">${p.che_do_cao || "—"}</span>
-      <span class="lo-popup-label">NSBQ 2025(kg/ha)</span><span class="lo-popup-val">${p.ns25_kg_ha || "—"}</span>
-      <span class="lo-popup-label">NSBQ 2026(kg/ha)</span><span class="lo-popup-val">${p.ns26_kg_ha || "—"}</span>
-      <span class="lo-popup-label">Số phân cạo</span><span class="lo-popup-val">${p.so_phan_cao || "—"}</span>
-      <span class="lo-popup-label">Bình quân cây cạo/phân</span><span class="lo-popup-val">${p.bq_cay_cao_phan || "—"}</span>
-      <span class="lo-popup-label">Phân cạo bắt đầu</span><span class="lo-popup-val">${p.pc_bat_dau || "—"}</span>
-      <span class="lo-popup-label">Phân cạo kết thúc</span><span class="lo-popup-val">${p.pc_ket_thuc || "—"}</span>
-      <span class="lo-popup-label">Sản lượng 2026(kg)</span><span class="lo-popup-val">${p.san_luong || "—"}</span>
+      <span class="lo-popup-label">NSBQ 2025 (kg/ha)</span><span class="lo-popup-val">${p.ns25_kg_ha != null ? Math.round(Number(p.ns25_kg_ha)).toLocaleString("vi-VN") : "—"}</span>
+      <span class="lo-popup-label">NSBQ 2025 (kg/cây)</span><span class="lo-popup-val">${p.ns25_kg_cay || "—"}</span>
+      <span class="lo-popup-label">Số PC</span><span class="lo-popup-val">${p.so_phan_cao || "—"}</span>
+      <span class="lo-popup-label">BQ CC/phần</span><span class="lo-popup-val">${p.bq_cay_cao_phan || "—"}</span>
+      <span class="lo-popup-label">PC bắt đầu</span><span class="lo-popup-val">${p.pc_bat_dau || "—"}</span>
+      <span class="lo-popup-label">PC kết thúc</span><span class="lo-popup-val">${p.pc_ket_thuc || "—"}</span>
+      <span class="lo-popup-label">Sản lượng 2026 (kg)</span><span class="lo-popup-val">${p.san_luong || "—"}</span>
+      <span class="lo-popup-label">NSBQ 2026 (kg/ha)</span><span class="lo-popup-val">${p.ns26_kg_ha || "—"}</span>
+      <span class="lo-popup-label">NSBQ 2026 (kg/cây)</span><span class="lo-popup-val">${p.ns26_kg_cay || "—"}</span>
     </div>
   </div>
   <div class="lo-popup-actions">
@@ -3260,11 +3260,14 @@
         return;
       }
       leg.classList.add("show");
+      const wide = entries.length > 6; //Nếu số phần tử lớn hơn 6 thì chia thành 2 cột
+      leg.classList.toggle("map-legend--wide", wide);
+      const items = entries.map(([k, v]) =>
+        `<div class="map-leg-item"><div class="map-leg-dot" style="background:${v}"></div><span>${k}</span></div>`
+      ).join("");
       leg.innerHTML =
         `<div class="map-leg-title">${title}</div>` +
-        entries.map(([k, v]) =>
-          `<div class="map-leg-item"><div class="map-leg-dot" style="background:${v}"></div><span>${k}</span></div>`
-        ).join("");
+        (wide ? `<div class="map-leg-grid">${items}</div>` : items);
     }
 
     function updateSelBar() {

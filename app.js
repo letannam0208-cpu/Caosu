@@ -10,6 +10,17 @@ const cookieParser = require('cookie-parser');
 const app = express();
 const port = process.env.PORT || 3000;
 
+// ====================== LIVE RELOAD (dev only) ======================
+if (process.env.NODE_ENV !== 'production') {
+  const livereload = require('livereload');
+  const connectLivereload = require('connect-livereload');
+  const lrServer = livereload.createServer();
+  lrServer.watch([
+    path.join(__dirname, 'views'),
+    path.join(__dirname, 'public'),
+  ]);
+  app.use(connectLivereload());
+}
 
 // ====================== MIDDLEWARE ======================
 app.use(cors());

@@ -1,1 +1,31 @@
+# ================== ENV ==================
 .env
+.env.local
+.env.*.local
+
+# ================== WINDOWS ==================
+Thumbs.db
+Desktop.ini
+
+# ================== DATABASE BACKUP ==================
+*.sql
+
+# ================== ARCHIVES ==================
+*.zip
+*.rar
+*.tar.gz
+
+# ================== PROJECT SPECIFIC ==================
+.sixth/
+.claude
+.ai/
+.claudeignore
+
+# ================== NODE ==================
+node_modules/
+# ================== IDE ==================
+.vscode/
+
+# ================== BUILD ==================
+dist/
+build/
