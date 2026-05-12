@@ -324,7 +324,7 @@ app.get('/api/boundary', authenticateToken, async (req, res) => {
 // ====================== API QUẢN LÝ NGƯỜI DÙNG ======================
 
 // Lấy danh sách users (có filter)
-app.get('/api/users', authenticateToken, async (req, res) => {
+app.get('/api/users', authenticateToken, requireAdmin, async (req, res) => {
     try {
         const { role, status, search } = req.query;
         let sql = `SELECT id, username, fullname, email, role, status, unit, avatar_color, last_login, created_at
@@ -345,8 +345,8 @@ app.get('/api/users', authenticateToken, async (req, res) => {
 });
 
 // Lấy thông tin user theo id
-app.get('/api/users/:id', authenticateToken, async (req, res) => {
-    try {
+app.get('/api/users/:id', authenticateToken, requireAdmin, async (req, res) => {
+      try {
         const { id } = req.params;
         const result = await pool.query(`SELECT id, username, fullname, email, role, status, unit, avatar_color, last_login
                                          FROM users WHERE id = $1`, [id]);
@@ -460,6 +460,33 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
+// Đăng ký tài khoản mới (staff, active ngay)
+app.post('/api/register', async (req, res) => {
+    const { username, password, fullname, email } = req.body;
+    if (!username || !password || !fullname) {
+        return res.status(400).json({ success: false, error: 'Thiếu thông tin bắt buộc' });
+    }
+    try {
+        // Kiểm tra username đã tồn tại
+        const exist = await pool.query('SELECT id FROM users WHERE username = $1', [username]);
+        if (exist.rows.length > 0) {
+            return res.status(400).json({ success: false, error: 'Tên đăng nhập đã tồn tại' });
+        }
+        // Mã hóa mật khẩu
+        const hashed = await bcrypt.hash(password, 10);
+        // Tạo user mới: role='staff', status='active'
+        await pool.query(
+            `INSERT INTO users (username, password_hash, fullname, email, role, status, avatar_color)
+             VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+            [username, hashed, fullname, email || null, 'staff', 'active', '#10b981']
+        );
+        res.json({ success: true, message: 'Đăng ký thành công! Bạn có thể đăng nhập ngay.' });
+    } catch (err) {
+        console.error('Lỗi đăng ký:', err);
+        res.status(500).json({ success: false, error: 'Lỗi server, vui lòng thử lại sau' });
+    }
+});
+
 // Đăng xuất (xóa cookie)
 app.post('/api/logout', (req, res) => {
     res.clearCookie('token');
@@ -510,8 +537,7 @@ app.get('/api/lo-cay/:id', authenticateToken, async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
-
-app.post('/api/lo-cay', authenticateToken, async (req, res) => {
+app.post('/api/lo-cay', authenticateToken, requireAdmin, async (req, res) => {
   try {
     const {
       id_lo, ten_lo, nam_trong, giong, cao_trinh_tb,
@@ -555,7 +581,7 @@ app.post('/api/lo-cay', authenticateToken, async (req, res) => {
 });
 
 // ====================== API CẬP NHẬT LÔ CÂY (ĐÃ SỬA) ======================
-app.put('/api/lo-cay/:id', authenticateToken, async (req, res) => {
+app.put('/api/lo-cay/:id', authenticateToken, requireAdmin, async (req, res) => {
   const id_lo = req.params.id;
   const {
     ten_lo, nam_trong, giong, cao_trinh_tb,
@@ -599,7 +625,7 @@ app.put('/api/lo-cay/:id', authenticateToken, async (req, res) => {
 });
 
 // ====================== API XÓA LÔ CÂY ======================
-app.delete('/api/lo-cay/:id', authenticateToken, async (req, res) => {
+app.delete('/api/lo-cay/:id', authenticateToken, requireAdmin, async (req, res) => {
   const id_lo = req.params.id;
   try {
     await pool.query('DELETE FROM lo WHERE id_lo = $1', [id_lo]);
@@ -633,7 +659,7 @@ const updatableCols = [
     'so_phan_cao', 'bq_cay_cao_phan', 'pc_bat_dau', 'pc_ket_thuc'
 ];
 
-app.post('/api/import-excel', authenticateToken, upload.single('file'), async (req, res) => {
+app.post('/api/import-excel', authenticateToken, requireAdmin, upload.single('file'), async (req, res) => {
     const { nam_cap_nhat } = req.body;
     if (!nam_cap_nhat) {
         return res.status(400).json({ success: false, error: 'Vui lòng cung cấp năm cập nhật' });
@@ -901,6 +927,13 @@ app.get('/login', (req, res) => {
     res.render('login', { title: 'Đăng nhập' });
 });
 
+app.get('/register', (req, res) => {
+    if (req.cookies.token) {
+        return res.redirect('/');
+    }
+    res.render('register', { title: 'Đăng ký tài khoản' });
+});
+
 app.get('/', authenticateToken, (req, res) => {
     res.render('index', {
         title: 'WebGIS · Vườn Cây Cao Su',
@@ -925,7 +958,7 @@ app.get('/quan-ly-lo-cay', authenticateToken, (req, res) => {
     });
 });
 
-app.get('/them-du-lieu-lo-cay', authenticateToken, (req, res) => {
+app.get('/them-du-lieu-lo-cay', authenticateToken, requireAdmin, (req, res) => {
     res.render('them-du-lieu-lo-cay', {
         title: 'Thêm dữ liệu lô cây',
         user: req.user,
@@ -941,7 +974,7 @@ app.get('/thong-ke', authenticateToken, (req, res) => {
     });
 });
 
-app.get('/quan-ly-nguoi-dung', authenticateToken, (req, res) => {
+app.get('/quan-ly-nguoi-dung', authenticateToken, requireAdmin, (req, res) => {
     res.render('quan-ly-nguoi-dung', {
         title: 'Quản lý người dùng',
         user: req.user,

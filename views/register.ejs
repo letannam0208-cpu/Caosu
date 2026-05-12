@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Đăng nhập · GIS TBKRUCO</title>
+    <title>Đăng ký · GIS TBKRUCO</title>
     <link rel="icon" href="/assets/image/logoTBK.jpg" type="image/jpeg" />
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap"
@@ -23,7 +23,7 @@
         padding: 20px;
       }
       .login-container {
-        max-width: 440px;
+        max-width: 480px;
         width: 100%;
       }
       .login-card {
@@ -125,6 +125,16 @@
         margin-bottom: 20px;
         display: none;
       }
+      .success-message {
+        background: rgba(16, 185, 129, 0.15);
+        border: 1px solid rgba(16, 185, 129, 0.3);
+        border-radius: 10px;
+        padding: 12px;
+        font-size: 12px;
+        color: #86efac;
+        margin-bottom: 20px;
+        display: none;
+      }
       .info-text {
         text-align: center;
         margin-top: 24px;
@@ -151,11 +161,26 @@
               alt="Logo"
               style="width: 100px; height: 100px" />
           </div>
-          <h1>GIS TBKRUCO</h1>
-          <p>Quản lý vườn cây thông minh</p>
+          <h1>Đăng ký tài khoản</h1>
+          <p>Tham gia hệ thống quản lý vườn cây thông minh</p>
         </div>
+
         <div class="error-message" id="errorMsg"></div>
-        <form id="loginForm">
+        <div class="success-message" id="successMsg"></div>
+
+        <form id="registerForm">
+          <div class="input-group">
+            <label>Họ và tên</label>
+            <div class="input-wrapper">
+              <i class="fas fa-user-circle"></i>
+              <input
+                type="text"
+                id="fullname"
+                placeholder="Nguyễn Văn A"
+                required />
+            </div>
+          </div>
+
           <div class="input-group">
             <label>Tên đăng nhập</label>
             <div class="input-wrapper">
@@ -163,11 +188,22 @@
               <input
                 type="text"
                 id="username"
-                placeholder="admin"
-                required
-                autofocus />
+                placeholder="username"
+                required />
             </div>
           </div>
+
+          <div class="input-group">
+            <label>Email</label>
+            <div class="input-wrapper">
+              <i class="fas fa-envelope"></i>
+              <input
+                type="email"
+                id="email"
+                placeholder="example@tbkruco.com" />
+            </div>
+          </div>
+
           <div class="input-group">
             <label>Mật khẩu</label>
             <div class="input-wrapper">
@@ -179,36 +215,81 @@
                 required />
             </div>
           </div>
+
+          <div class="input-group">
+            <label>Xác nhận mật khẩu</label>
+            <div class="input-wrapper">
+              <i class="fas fa-lock"></i>
+              <input
+                type="password"
+                id="confirmPassword"
+                placeholder="••••••••"
+                required />
+            </div>
+          </div>
+
           <button type="submit" class="btn-login">
-            <i class="fas fa-arrow-right-to-bracket"></i> Đăng nhập
+            <i class="fas fa-user-plus"></i> Đăng ký
           </button>
         </form>
+
         <div class="info-text">
-          Chưa có tài khoản? <a href="/register" class="login-link">Đăng ký ngay</a>
+          Đã có tài khoản? <a href="/login" class="login-link">Đăng nhập ngay</a>
           <br />
           © 2026 GIS TBKRUCO - Bản quyền thuộc TBKRUCO
         </div>
       </div>
     </div>
+
     <script>
-      const form = document.getElementById("loginForm");
+      const form = document.getElementById("registerForm");
       const errorDiv = document.getElementById("errorMsg");
+      const successDiv = document.getElementById("successMsg");
+
       form.addEventListener("submit", async (e) => {
         e.preventDefault();
         errorDiv.style.display = "none";
+        successDiv.style.display = "none";
+
+        const fullname = document.getElementById("fullname").value.trim();
         const username = document.getElementById("username").value.trim();
+        const email = document.getElementById("email").value.trim();
         const password = document.getElementById("password").value;
+        const confirmPassword = document.getElementById("confirmPassword").value;
+
+        // Validate
+        if (!fullname || !username || !password) {
+          errorDiv.textContent = "Vui lòng điền đầy đủ họ tên, tên đăng nhập và mật khẩu";
+          errorDiv.style.display = "block";
+          return;
+        }
+        if (password !== confirmPassword) {
+          errorDiv.textContent = "Mật khẩu xác nhận không khớp";
+          errorDiv.style.display = "block";
+          return;
+        }
+        if (password.length < 6) {
+          errorDiv.textContent = "Mật khẩu phải có ít nhất 6 ký tự";
+          errorDiv.style.display = "block";
+          return;
+        }
+
         try {
-          const res = await fetch("/api/login", {
+          const res = await fetch("/api/register", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ username, password }),
+            body: JSON.stringify({ username, password, fullname, email }),
           });
           const data = await res.json();
           if (data.success) {
-            window.location.href = data.redirect;
+            successDiv.textContent = data.message || "Đăng ký thành công! Bạn có thể đăng nhập ngay.";
+            successDiv.style.display = "block";
+            // Tự động chuyển về login sau 2 giây
+            setTimeout(() => {
+              window.location.href = "/login";
+            }, 2000);
           } else {
-            errorDiv.textContent = data.error || "Đăng nhập thất bại";
+            errorDiv.textContent = data.error || "Đăng ký thất bại";
             errorDiv.style.display = "block";
           }
         } catch (err) {

@@ -231,17 +231,23 @@
           class="nav-item <%= path === '/quan-ly-lo-cay' ? 'active' : '' %>"
           ><i class="fas fa-tree nav-icon"></i>Quản lý lô</a
         >
+        <!-- Chỉ admin mới thấy menu Thêm dữ liệu lô -->
+        <% if (user.role === 'admin') { %>
         <a
           href="/them-du-lieu-lo-cay"
           class="nav-item <%= path === '/them-du-lieu-lo-cay' ? 'active' : '' %>"
           ><i class="fas fa-plus-circle nav-icon"></i>Thêm dữ liệu lô</a
         >
+        <% } %>
         <div class="nav-section-label">Người dùng</div>
+        <!-- Chỉ admin mới thấy menu Quản lý người dùng -->
+        <% if (user.role === 'admin') { %>
         <a
           href="/quan-ly-nguoi-dung"
           class="nav-item <%= path === '/quan-ly-nguoi-dung' ? 'active' : '' %>"
           ><i class="fas fa-users nav-icon"></i>Quản lý người dùng</a
         >
+        <% } %>
         <div class="nav-section-label">Phân tích</div>
         <a
           href="/thong-ke"
@@ -256,6 +262,8 @@
       </nav>
 
       <div id="content">
+        <% if (user.role === 'admin') { %>
+        <!-- ========== NỘI DUNG IMPORT (CHỈ ADMIN) ========== -->
         <div class="page-header">
           <div>
             <h1 class="page-title">Nhập dữ liệu từ Excel</h1>
@@ -347,6 +355,17 @@
             <div id="logContent"></div>
           </div>
         </div>
+        <% } else { %>
+        <!-- ========== THÔNG BÁO TỪ CHỐI CHO STAFF ========== -->
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Truy cập bị từ chối</h1>
+            <p class="page-subtitle">
+              Bạn không có quyền sử dụng chức năng nhập dữ liệu.
+            </p>
+          </div>
+        </div>
+        <% } %>
       </div>
     </div>
 
@@ -395,24 +414,26 @@
       let uploadedData = null;
       let uploadedFileName = null;
 
-      uploadZone.addEventListener("click", () => fileInput.click());
-      uploadZone.addEventListener("dragover", (e) => {
-        e.preventDefault();
-        uploadZone.style.borderColor = "var(--accent)";
-      });
-      uploadZone.addEventListener(
-        "dragleave",
-        () => (uploadZone.style.borderColor = "var(--border2)"),
-      );
-      uploadZone.addEventListener("drop", (e) => {
-        e.preventDefault();
-        uploadZone.style.borderColor = "var(--border2)";
-        const file = e.dataTransfer.files[0];
-        if (file) handleFile(file);
-      });
-      fileInput.addEventListener("change", (e) => {
-        if (e.target.files.length) handleFile(e.target.files[0]);
-      });
+      if (uploadZone) {
+        uploadZone.addEventListener("click", () => fileInput.click());
+        uploadZone.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          uploadZone.style.borderColor = "var(--accent)";
+        });
+        uploadZone.addEventListener(
+          "dragleave",
+          () => (uploadZone.style.borderColor = "var(--border2)"),
+        );
+        uploadZone.addEventListener("drop", (e) => {
+          e.preventDefault();
+          uploadZone.style.borderColor = "var(--border2)";
+          const file = e.dataTransfer.files[0];
+          if (file) handleFile(file);
+        });
+        fileInput.addEventListener("change", (e) => {
+          if (e.target.files.length) handleFile(e.target.files[0]);
+        });
+      }
 
       function handleFile(file) {
         const reader = new FileReader();
@@ -450,7 +471,7 @@
           '<div style="margin-bottom:8px; color:var(--accent);">📊 ' +
           data.length +
           " dòng dữ liệu</div>";
-        html += "<table><thead><tr>";
+        html += "<tr><thead><tr>";
         headers.forEach((h) => (html += `<th>${h}</th>`));
         html += "</tr></thead><tbody>";
         const displayData = data.slice(0, 200);
@@ -485,7 +506,7 @@
 
       document
         .getElementById("submitImport")
-        .addEventListener("click", async () => {
+        ?.addEventListener("click", async () => {
           if (!uploadedData || uploadedData.length === 0) {
             showToast(
               "Chưa có dữ liệu để nhập. Hãy chọn file Excel trước.",
@@ -531,7 +552,7 @@
       document.addEventListener('DOMContentLoaded', function() {
         document
           .getElementById("confirmImportBtn")
-          .addEventListener("click", async () => {
+          ?.addEventListener("click", async () => {
             const modal = bootstrap.Modal.getInstance(
               document.getElementById("confirmModal"),
             );
@@ -544,63 +565,65 @@
             addLog(`🚀 BẮT ĐẦU NHẬP LIỆU - Năm: ${namCapNhat}`, "info");
             addLog(`📊 Tổng số dòng cần xử lý: ${dataToImport.length}`, "info");
 
-          // Tạo FormData để gửi file
-          const formData = new FormData();
-          // Chuyển đổi uploadedData (mảng JSON) thành file Blob
-          const ws = XLSX.utils.json_to_sheet(dataToImport);
-          const wb = XLSX.utils.book_new();
-          XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
-          const excelBuffer = XLSX.write(wb, {
-            bookType: "xlsx",
-            type: "array",
-          });
-          const blob = new Blob([excelBuffer], {
-            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-          });
-          const file = new File([blob], "import_data.xlsx", {
-            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-          });
-          formData.append("file", file);
-          formData.append("nam_cap_nhat", namCapNhat);
-
-          const statusDiv = document.getElementById("importStatus");
-          statusDiv.innerHTML =
-            '<div class="spinner-border spinner-border-sm text-success me-2" role="status"></div> Đang xử lý, vui lòng chờ...';
-
-          try {
-            const res = await fetch("/api/import-excel", {
-              method: "POST",
-              body: formData,
+            // Tạo FormData để gửi file
+            const formData = new FormData();
+            // Chuyển đổi uploadedData (mảng JSON) thành file Blob
+            const ws = XLSX.utils.json_to_sheet(dataToImport);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+            const excelBuffer = XLSX.write(wb, {
+              bookType: "xlsx",
+              type: "array",
             });
-            const result = await res.json();
-            if (result.success) {
-              statusDiv.innerHTML = "";
-              showToast(result.message, "success");
-              addLog(`✅ ${result.message}`, "insert");
-              addLog(
-                `💾 Dữ liệu cũ đã được lưu vào bảng lịch sử (lo_history)`,
-                "info",
-              );
-              updateStats();
-              // Reset sau khi thành công
-              uploadedData = null;
-              uploadedFileName = null;
-              document.getElementById("previewArea").style.display = "none";
-              fileInput.value = "";
-              document.getElementById("namCapNhat").value = "";
-              pendingNamCapNhat = null;
-              pendingData = null;
-            } else {
-              statusDiv.innerHTML = "";
-              showToast(result.error || "Đã xảy ra lỗi", "danger");
-              addLog(`❌ Lỗi: ${result.error}`, "error");
+            const blob = new Blob([excelBuffer], {
+              type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            });
+            const file = new File([blob], "import_data.xlsx", {
+              type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            });
+            formData.append("file", file);
+            formData.append("nam_cap_nhat", namCapNhat);
+
+            const statusDiv = document.getElementById("importStatus");
+            if (statusDiv) {
+              statusDiv.innerHTML =
+                '<div class="spinner-border spinner-border-sm text-success me-2" role="status"></div> Đang xử lý, vui lòng chờ...';
             }
-          } catch (err) {
-            statusDiv.innerHTML = "";
-            showToast("Lỗi kết nối: " + err.message, "danger");
-            addLog(`❌ Lỗi kết nối: ${err.message}`, "error");
-          }
-        });
+
+            try {
+              const res = await fetch("/api/import-excel", {
+                method: "POST",
+                body: formData,
+              });
+              const result = await res.json();
+              if (result.success) {
+                if (statusDiv) statusDiv.innerHTML = "";
+                showToast(result.message, "success");
+                addLog(`✅ ${result.message}`, "insert");
+                addLog(
+                  `💾 Dữ liệu cũ đã được lưu vào bảng lịch sử (lo_history)`,
+                  "info",
+                );
+                updateStats();
+                // Reset sau khi thành công
+                uploadedData = null;
+                uploadedFileName = null;
+                document.getElementById("previewArea").style.display = "none";
+                fileInput.value = "";
+                document.getElementById("namCapNhat").value = "";
+                pendingNamCapNhat = null;
+                pendingData = null;
+              } else {
+                if (statusDiv) statusDiv.innerHTML = "";
+                showToast(result.error || "Đã xảy ra lỗi", "danger");
+                addLog(`❌ Lỗi: ${result.error}`, "error");
+              }
+            } catch (err) {
+              if (statusDiv) statusDiv.innerHTML = "";
+              showToast("Lỗi kết nối: " + err.message, "danger");
+              addLog(`❌ Lỗi kết nối: ${err.message}`, "error");
+            }
+          });
       });
 
       // Khởi tạo thống kê
@@ -609,6 +632,7 @@
       // Toast notification
       function showToast(message, type = "info") {
         const toastEl = document.getElementById("liveToast");
+        if (!toastEl) return;
         const toastBody = toastEl.querySelector(".toast-body");
         const toast = new bootstrap.Toast(toastEl);
 

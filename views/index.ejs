@@ -2048,10 +2048,12 @@
         <i class="fas fa-plus-circle nav-icon"></i>Thêm dữ liệu lô
       </a>
 
+      <% if (user.role === 'admin') { %>
       <div class="nav-section-label">Người dùng</div>
       <a href="/quan-ly-nguoi-dung" class="nav-item">
         <i class="fas fa-users nav-icon"></i>Quản lý người dùng
       </a>
+      <% } %>
 
       <div class="nav-section-label">Phân tích</div>
       <a href="/thong-ke" class="nav-item">
@@ -2078,6 +2080,7 @@
             <div class="page-title" data-lang="dashboard">Dashboard</div>
             <div class="page-subtitle">Tổng quan vườn cây</div>
           </div>
+          <% if (user.role === 'admin') { %>
           <div style="display: flex; gap: 8px; justify-content: flex-end">
             <button class="btn btn-primary btn-sm" onclick="window.location.href = '/them-du-lieu-lo-cay'">
               <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -2087,7 +2090,7 @@
               <span data-lang="them-du-lieu">Import từ Excel</span>
             </button>
           </div>
-        </div>
+          <% } %>
 
         <!-- ── BẢN ĐỒ TRUNG TÂM ── -->
         <div class="map-section">
@@ -2733,7 +2736,8 @@
       "#fbbf24", "#c084fc", "#f472b6", "#22d3ee", "#a3e635",
     ];
     let khuVucPalette = {};
-
+// ==================== PHÂN QUYỀN ====================
+window.userRole = '<%= user.role %>';   // "admin" hoặc "staff"
     /* ==================== LẤY DỮ LIỆU TỪ API ==================== */
     async function fetchAPI(url) {
       const res = await fetch(url);
@@ -3151,9 +3155,8 @@
     </div>
   </div>
   <div class="lo-popup-actions">
-    
-    <div class="lo-popup-btn" onclick="editLot('${p.id_lo}')">Sửa</div>
-  </div>
+  ${window.userRole === 'admin' ? `<div class="lo-popup-btn" onclick="editLot('${p.id_lo}')">Sửa</div>` : ''}
+</div>
 `,
               { maxWidth: 320 },
             );
@@ -4569,19 +4572,23 @@
     });
     /* ==================== SỬA LÔ NGAY TRÊN DASHBOARD ==================== */
     async function editLot(idLo) {
-      try {
-        const res = await fetch(`/api/lo-cay/${idLo}`);
-        const data = await res.json();
-        if (data.success) {
-          showEditForm(data.data);
-        } else {
-          showToast("Không tìm thấy dữ liệu lô", "⚠️");
-        }
-      } catch (err) {
-        console.error(err);
-        showToast("Lỗi kết nối khi lấy thông tin lô", "❌");
-      }
+  if (window.userRole !== 'admin') {
+    showToast('Bạn không có quyền sửa dữ liệu', '🔒');
+    return;
+  }
+  try {
+    const res = await fetch(`/api/lo-cay/${idLo}`);
+    const data = await res.json();
+    if (data.success) {
+      showEditForm(data.data);
+    } else {
+      showToast("Không tìm thấy dữ liệu lô", "⚠️");
     }
+  } catch (err) {
+    console.error(err);
+    showToast("Lỗi kết nối khi lấy thông tin lô", "❌");
+  }
+}
 
     function closeEditModal() {
       document.getElementById("editModal").style.display = "none";

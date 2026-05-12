@@ -380,78 +380,89 @@
       </nav>
 
       <div id="content">
-        <div class="page-header">
-          <div>
-            <div class="page-title">Quản Lý Người Dùng</div>
+        <% if (user && user.role === 'admin') { %>
+          <!-- ========== NỘI DUNG QUẢN LÝ NGƯỜI DÙNG (CHỈ ADMIN) ========== -->
+          <div class="page-header">
+            <div>
+              <div class="page-title">Quản Lý Người Dùng</div>
+              <div class="page-subtitle">
+                Phân quyền và quản lý tài khoản hệ thống
+              </div>
+            </div>
+            <button class="btn-add" id="btnAddUser">
+              <i class="fas fa-plus"></i> Thêm mới
+            </button>
+          </div>
+
+          <div class="kpi-grid">
+            <div class="kpi-card">
+              <div class="kpi-label">
+                <i class="fas fa-users"></i> Tổng người dùng
+              </div>
+              <div class="kpi-value" id="kpiTotal">0</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label"><i class="fas fa-bolt"></i> Hoạt động</div>
+              <div class="kpi-value" id="kpiActive" style="color: var(--accent)">
+                0
+              </div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">
+                <i class="fas fa-hourglass-half"></i> Chờ duyệt
+              </div>
+              <div class="kpi-value" id="kpiPending" style="color: var(--warn)">
+                0
+              </div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label"><i class="fas fa-lock"></i> Đã khóa</div>
+              <div
+                class="kpi-value"
+                id="kpiDisabled"
+                style="color: var(--danger)">
+                0
+              </div>
+            </div>
+          </div>
+
+          <div class="users-grid" id="usersGrid"></div>
+
+          <div class="table-title">
+            <i class="fas fa-list-ul"></i> Danh sách tài khoản
+          </div>
+          <div class="search-bar">
+            <input
+              type="text"
+              id="searchInput"
+              class="search-box"
+              placeholder="🔍 Tìm theo tên, email, vai trò..." />
+          </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Tên đầy đủ</th>
+                  <th>Email</th>
+                  <th>Vai trò</th>
+                  <th>Đội phụ trách</th>
+                  <th>Trạng thái</th>
+                  <th>Đăng nhập lần cuối</th>
+                  <th>Hành động</th>
+                </tr>
+              </thead>
+              <tbody id="userTableBody"></tbody>
+            </table>
+          </div>
+        <% } else { %>
+          <!-- ========== THÔNG BÁO TỪ CHỐI CHO STAFF ========== -->
+          <div class="page-header">
+            <div class="page-title">Truy cập bị từ chối</div>
             <div class="page-subtitle">
-              Phân quyền và quản lý tài khoản hệ thống
+              Bạn không có quyền xem trang quản lý người dùng.
             </div>
           </div>
-          <button class="btn-add" id="btnAddUser">
-            <i class="fas fa-plus"></i> Thêm mới
-          </button>
-        </div>
-
-        <div class="kpi-grid">
-          <div class="kpi-card">
-            <div class="kpi-label">
-              <i class="fas fa-users"></i> Tổng người dùng
-            </div>
-            <div class="kpi-value" id="kpiTotal">0</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label"><i class="fas fa-bolt"></i> Hoạt động</div>
-            <div class="kpi-value" id="kpiActive" style="color: var(--accent)">
-              0
-            </div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">
-              <i class="fas fa-hourglass-half"></i> Chờ duyệt
-            </div>
-            <div class="kpi-value" id="kpiPending" style="color: var(--warn)">
-              0
-            </div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label"><i class="fas fa-lock"></i> Đã khóa</div>
-            <div
-              class="kpi-value"
-              id="kpiDisabled"
-              style="color: var(--danger)">
-              0
-            </div>
-          </div>
-        </div>
-
-        <div class="users-grid" id="usersGrid"></div>
-
-        <div class="table-title">
-          <i class="fas fa-list-ul"></i> Danh sách tài khoản
-        </div>
-        <div class="search-bar">
-          <input
-            type="text"
-            id="searchInput"
-            class="search-box"
-            placeholder="🔍 Tìm theo tên, email, vai trò..." />
-        </div>
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>Tên đầy đủ</th>
-                <th>Email</th>
-                <th>Vai trò</th>
-                <th>Đội phụ trách</th>
-                <th>Trạng thái</th>
-                <th>Đăng nhập lần cuối</th>
-                <th>Hành động</th>
-              </tr>
-            </thead>
-            <tbody id="userTableBody"></tbody>
-          </table>
-        </div>
+        <% } %>
       </div>
     </div>
 
@@ -477,9 +488,12 @@
     </div>
 
     <script>
+      // Phân quyền từ server
+      window.userRole = '<%= user ? user.role : "" %>';
+
       let currentUsers = [];
 
-      // Hàm cập nhật thống kê lô vườn và diện tích cho top bar (giống các trang khác)
+      // Hàm cập nhật thống kê lô vườn và diện tích cho top bar
       async function updateTopBarStats() {
         try {
           const res = await fetch("/api/lo-cay");
@@ -502,6 +516,8 @@
       }
 
       async function loadUsers() {
+        // Chỉ tải nếu là admin (đã được bọc ở trên, nhưng vẫn kiểm tra để an toàn)
+        if (window.userRole !== "admin") return;
         const res = await fetch("/api/users");
         const data = await res.json();
         if (data.success) {
@@ -544,6 +560,7 @@
 
       function renderUserCards() {
         const grid = document.getElementById("usersGrid");
+        if (!grid) return;
         grid.innerHTML = "";
         currentUsers.slice(0, 6).forEach((user) => {
           const avatarColor =
@@ -560,20 +577,26 @@
               : user.status === "pending"
                 ? "Chờ duyệt"
                 : "Đã khóa";
+          let roleText = "";
+          if (user.role === "admin") roleText = "Quản trị viên";
+          else if (user.role === "manager") roleText = "Quản lý đội";
+          else if (user.role === "technician") roleText = "Kỹ thuật viên";
+          else roleText = "Nhập liệu";
           grid.innerHTML += `
-        <div class="user-card">
-          <div class="user-avatar" style="background:${avatarColor};">${user.fullname.charAt(0).toUpperCase()}</div>
-          <div class="user-name">${escapeHtml(user.fullname)}</div>
-          <div class="user-role">${user.role === "admin" ? "Quản trị viên" : user.role === "manager" ? "Quản lý đội" : user.role === "technician" ? "Kỹ thuật viên" : "Nhập liệu"}</div>
-          <div class="status-badge ${statusClass}">${statusText}</div>
-          <div class="user-unit">${user.unit || ""}</div>
-        </div>
-      `;
+            <div class="user-card">
+              <div class="user-avatar" style="background:${avatarColor};">${user.fullname.charAt(0).toUpperCase()}</div>
+              <div class="user-name">${escapeHtml(user.fullname)}</div>
+              <div class="user-role">${roleText}</div>
+              <div class="status-badge ${statusClass}">${statusText}</div>
+              <div class="user-unit">${user.unit || ""}</div>
+            </div>
+          `;
         });
       }
 
       function renderUserTable() {
         const tbody = document.getElementById("userTableBody");
+        if (!tbody) return;
         const search = document
           .getElementById("searchInput")
           .value.toLowerCase();
@@ -603,25 +626,25 @@
           const lastLogin = user.last_login
             ? new Date(user.last_login).toLocaleDateString("vi-VN")
             : "Chưa đăng nhập";
-          const roleName =
-            user.role === "admin"
-              ? "Quản trị viên"
-              : user.role === "manager"
-                ? "Quản lý đội"
-                : user.role === "technician"
-                  ? "Kỹ thuật viên"
-                  : "Nhập liệu";
+          let roleText = "";
+          if (user.role === "admin") roleText = "Quản trị viên";
+          else if (user.role === "manager") roleText = "Quản lý đội";
+          else if (user.role === "technician") roleText = "Kỹ thuật viên";
+          else roleText = "Nhập liệu";
+
+          const actionHtml = `<button class="action-btn edit-user" data-id="${user.id}">Sửa</button>
+                              <button class="action-btn btn-disable delete-user" data-id="${user.id}">Xóa</button>`;
           tbody.innerHTML += `
-        <tr>
-          <td class="avatar-cell"><div class="mini-avatar" style="background:${avatarColor};">${user.fullname.charAt(0).toUpperCase()}</div>${escapeHtml(user.fullname)}</td>
-          <td>${user.email || ""}</td>
-          <td>${roleName}</td>
-          <td>${user.unit || ""}</td>
-          <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-          <td>${lastLogin}</td>
-          <td><button class="action-btn edit-user" data-id="${user.id}">Sửa</button><button class="action-btn btn-disable delete-user" data-id="${user.id}">Xóa</button></td>
-        </tr>
-      `;
+            <tr>
+              <td class="avatar-cell"><div class="mini-avatar" style="background:${avatarColor};">${user.fullname.charAt(0).toUpperCase()}</div>${escapeHtml(user.fullname)}</td>
+              <td>${user.email || ""}</td>
+              <td>${roleText}</td>
+              <td>${user.unit || ""}</td>
+              <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+              <td>${lastLogin}</td>
+              <td>${actionHtml}</td>
+            </tr>
+          `;
         });
         document
           .querySelectorAll(".edit-user")
@@ -636,12 +659,20 @@
       }
 
       async function editUser(id) {
+        if (window.userRole !== "admin") {
+          alert("Bạn không có quyền sửa người dùng");
+          return;
+        }
         const res = await fetch(`/api/users/${id}`);
         const data = await res.json();
         if (data.success) showUserForm(data.data);
       }
 
       async function deleteUser(id) {
+        if (window.userRole !== "admin") {
+          alert("Bạn không có quyền xóa người dùng");
+          return;
+        }
         if (!confirm("Xóa người dùng này?")) return;
         const res = await fetch(`/api/users/${id}`, { method: "DELETE" });
         const data = await res.json();
@@ -652,24 +683,25 @@
       }
 
       function showUserForm(user = null) {
+        if (window.userRole !== "admin") return;
         const isEdit = !!user;
         const formHtml = `
-      <input type="hidden" id="userId" value="${user ? user.id : ""}">
-      <div style="margin-bottom:15px;"><label>Tên đăng nhập *</label><input type="text" id="username" class="search-box" style="width:100%;" value="${user ? user.username : ""}" ${isEdit ? "disabled" : ""} required></div>
-      <div style="margin-bottom:15px;"><label>Mật khẩu ${isEdit ? "(để trống nếu không đổi)" : "*"}</label><input type="password" id="password" class="search-box" style="width:100%;"></div>
-      <div style="margin-bottom:15px;"><label>Họ tên *</label><input type="text" id="fullname" class="search-box" style="width:100%;" value="${user ? user.fullname : ""}" required></div>
-      <div style="margin-bottom:15px;"><label>Email</label><input type="email" id="email" class="search-box" style="width:100%;" value="${user ? user.email : ""}"></div>
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:15px;">
-        <div><label>Vai trò</label><select id="role" class="select-filter" style="width:100%;"><option value="admin" ${user && user.role === "admin" ? "selected" : ""}>Quản trị viên</option><option value="manager" ${user && user.role === "manager" ? "selected" : ""}>Quản lý đội</option><option value="technician" ${user && user.role === "technician" ? "selected" : ""}>Kỹ thuật viên</option><option value="data_entry" ${user && user.role === "data_entry" ? "selected" : ""}>Nhập liệu</option></select></div>
-        <div><label>Trạng thái</label><select id="status" class="select-filter" style="width:100%;"><option value="active" ${user && user.status === "active" ? "selected" : ""}>Hoạt động</option><option value="pending" ${user && user.status === "pending" ? "selected" : ""}>Chờ duyệt</option><option value="disabled" ${user && user.status === "disabled" ? "selected" : ""}>Đã khóa</option></select></div>
-      </div>
-      <div style="margin-bottom:15px;"><label>Đội phụ trách</label><input type="text" id="unit" class="search-box" style="width:100%;" value="${user ? user.unit : ""}"></div>
-      <div style="margin-bottom:15px;"><label>Màu avatar (mã hex)</label><input type="text" id="avatar_color" class="search-box" style="width:100%;" value="${user ? user.avatar_color : "#10b981"}"></div>
-      <div style="margin-top:24px; text-align:right;">
-        <button type="button" id="cancelModalBtn" class="action-btn">Hủy</button>
-        <button type="submit" class="btn-add">Lưu</button>
-      </div>
-    `;
+          <input type="hidden" id="userId" value="${user ? user.id : ""}">
+          <div style="margin-bottom:15px;"><label>Tên đăng nhập *</label><input type="text" id="username" class="search-box" style="width:100%;" value="${user ? user.username : ""}" ${isEdit ? "disabled" : ""} required></div>
+          <div style="margin-bottom:15px;"><label>Mật khẩu ${isEdit ? "(để trống nếu không đổi)" : "*"}</label><input type="password" id="password" class="search-box" style="width:100%;"></div>
+          <div style="margin-bottom:15px;"><label>Họ tên *</label><input type="text" id="fullname" class="search-box" style="width:100%;" value="${user ? user.fullname : ""}" required></div>
+          <div style="margin-bottom:15px;"><label>Email</label><input type="email" id="email" class="search-box" style="width:100%;" value="${user ? user.email : ""}"></div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:15px;">
+            <div><label>Vai trò</label><select id="role" class="select-filter" style="width:100%;"><option value="admin" ${user && user.role === "admin" ? "selected" : ""}>Quản trị viên</option><option value="manager" ${user && user.role === "manager" ? "selected" : ""}>Quản lý đội</option><option value="technician" ${user && user.role === "technician" ? "selected" : ""}>Kỹ thuật viên</option><option value="data_entry" ${user && user.role === "data_entry" ? "selected" : ""}>Nhập liệu</option></select></div>
+            <div><label>Trạng thái</label><select id="status" class="select-filter" style="width:100%;"><option value="active" ${user && user.status === "active" ? "selected" : ""}>Hoạt động</option><option value="pending" ${user && user.status === "pending" ? "selected" : ""}>Chờ duyệt</option><option value="disabled" ${user && user.status === "disabled" ? "selected" : ""}>Đã khóa</option></select></div>
+          </div>
+          <div style="margin-bottom:15px;"><label>Đội phụ trách</label><input type="text" id="unit" class="search-box" style="width:100%;" value="${user ? user.unit : ""}"></div>
+          <div style="margin-bottom:15px;"><label>Màu avatar (mã hex)</label><input type="text" id="avatar_color" class="search-box" style="width:100%;" value="${user ? user.avatar_color : "#10b981"}"></div>
+          <div style="margin-top:24px; text-align:right;">
+            <button type="button" id="cancelModalBtn" class="action-btn">Hủy</button>
+            <button type="submit" class="btn-add">Lưu</button>
+          </div>
+        `;
         document.getElementById("userForm").innerHTML = formHtml;
         document.getElementById("modalTitle").innerText = isEdit
           ? "✏️ Sửa người dùng"
@@ -723,12 +755,16 @@
         });
       }
 
-      document.getElementById("btnAddUser").onclick = () => showUserForm();
-      document.getElementById("closeModal").onclick = () =>
-        (document.getElementById("modal").style.display = "none");
-      document
-        .getElementById("searchInput")
-        .addEventListener("input", () => renderUserTable());
+      // Chỉ gán sự kiện nếu là admin (các phần tử tồn tại)
+      if (window.userRole === "admin") {
+        document.getElementById("btnAddUser").onclick = () => showUserForm();
+        document.getElementById("closeModal").onclick = () =>
+          (document.getElementById("modal").style.display = "none");
+        document
+          .getElementById("searchInput")
+          .addEventListener("input", () => renderUserTable());
+      }
+
       document
         .getElementById("logoutBtn")
         .addEventListener("click", async (e) => {
@@ -738,8 +774,8 @@
           if (data.success) window.location.href = data.redirect;
         });
 
-      updateTopBarStats(); // Cập nhật số lô và diện tích
-      loadUsers();
+      updateTopBarStats();
+      if (window.userRole === "admin") loadUsers();
     </script>
   </body>
 </html>

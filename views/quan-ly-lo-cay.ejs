@@ -378,8 +378,10 @@
       <div class="nav-section-label">Quản lý dữ liệu</div>
       <a href="/quan-ly-lo-cay" class="nav-item active"><i class="fas fa-tree nav-icon"></i>Quản lý lô</a>
       <a href="/them-du-lieu-lo-cay" class="nav-item"><i class="fas fa-plus-circle nav-icon"></i>Thêm dữ liệu lô</a>
+      <% if (user.role === 'admin') { %>
       <div class="nav-section-label">Người dùng</div>
       <a href="/quan-ly-nguoi-dung" class="nav-item"><i class="fas fa-users nav-icon"></i>Quản lý người dùng</a>
+      <% } %>
       <div class="nav-section-label">Phân tích</div>
       <a href="/thong-ke" class="nav-item"><i class="fas fa-chart-bar nav-icon"></i>Thống kê</a>
 
@@ -399,9 +401,11 @@
             Toàn bộ thông tin chi tiết của từng lô cây
           </p>
         </div>
+        <% if (user.role === 'admin') { %>
         <button id="btnAddLo" class="btn-add" onclick="window.location.href = '/them-du-lieu-lo-cay'">
           <i class="fas fa-upload"></i> Import từ Excel
         </button>
+        <% } %>
       </div>
       <div class="filter-bar">
         <input type="text" id="searchInput" class="search-box"
@@ -511,6 +515,7 @@
 
   <script>
     let loCayData = [];
+    window.userRole = '<%= user.role %>';   // "admin" hoặc "staff"
 
     async function loadLoCay() {
       try {
@@ -614,11 +619,12 @@
         row.insertCell(43).innerText = l.tai_canh_nam || "";
         row.insertCell(44).innerText = l.doi_tuong || "";
         const actionCell = row.insertCell(45);
-        actionCell.innerHTML = `
-      <button class="btn-location location-lo" data-id="${l.id_lo}" title="Xem vị trí trên bản đồ"><i class="fas fa-map-marker-alt"></i> 📍</button>
-      <button class="btn-dash edit-lo" data-id="${l.id_lo}"><i class="fas fa-edit"></i> Sửa</button>
-      <button class="btn-view delete-lo" data-id="${l.id_lo}" style="margin-left:8px;"><i class="fas fa-trash"></i> Xóa</button>
-    `;
+        let actionHtml = `<button class="btn-location location-lo" data-id="${l.id_lo}" title="Xem vị trí trên bản đồ"><i class="fas fa-map-marker-alt"></i> 📍</button>`;
+          if (window.userRole === 'admin') {
+            actionHtml += `<button class="btn-dash edit-lo" data-id="${l.id_lo}"><i class="fas fa-edit"></i> Sửa</button>
+                          <button class="btn-view delete-lo" data-id="${l.id_lo}" style="margin-left:8px;"><i class="fas fa-trash"></i> Xóa</button>`;
+          }
+          actionCell.innerHTML = actionHtml;
       });
       document.getElementById("resultCount").innerText = data.length;
       attachEvents();
@@ -651,6 +657,10 @@
 
 
     async function editLo(id) {
+      if (window.userRole !== 'admin') {
+        alert('Bạn không có quyền sửa dữ liệu');
+        return;
+      }
       try {
         const res = await fetch(`/api/lo-cay/${id}`);
         const data = await res.json();
@@ -665,6 +675,10 @@
 
 
     async function deleteLo(id) {
+      if (window.userRole !== 'admin') {
+        alert('Bạn không có quyền xóa dữ liệu');
+        return;
+      }
       if (
         confirm(
           "Xóa lô này sẽ xóa tất cả dữ liệu liên quan. Bạn có chắc?",
