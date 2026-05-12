@@ -2002,6 +2002,7 @@
 </head>
 
 <body>
+  <script>window.userRole = '<%= user.role %>';</script>
   <!-- TOP BAR -->
   <div id="topbar">
     <div class="tb-logo">
@@ -2040,29 +2041,32 @@
         <i class="fas fa-home nav-icon"></i> Dashboard
       </a>
 
-      <div class="nav-section-label">Quản lý dữ liệu</div>
-      <a href="/quan-ly-lo-cay" class="nav-item">
-        <i class="fas fa-tree nav-icon"></i>Quản lý lô
-      </a>
-      <a href="/them-du-lieu-lo-cay" class="nav-item">
-        <i class="fas fa-plus-circle nav-icon"></i>Thêm dữ liệu lô
-      </a>
-
-      <div class="nav-section-label">Người dùng</div>
-      <a href="/quan-ly-nguoi-dung" class="nav-item">
-        <i class="fas fa-users nav-icon"></i>Quản lý người dùng
-      </a>
+      <% if (user.role === 'admin') { %>
+        <div class="nav-section-label">Quản lý dữ liệu</div>
+        <a href="/quan-ly-lo-cay" class="nav-item">
+          <i class="fas fa-tree nav-icon"></i>Quản lý lô
+        </a>
+        <a href="/them-du-lieu-lo-cay" class="nav-item">
+          <i class="fas fa-plus-circle nav-icon"></i>Thêm dữ liệu lô
+        </a>
+        <div class="nav-section-label">Người dùng</div>
+        <a href="/quan-ly-nguoi-dung" class="nav-item">
+          <i class="fas fa-users nav-icon"></i>Quản lý người dùng
+        </a>
+      <% } else { %>
+        <!-- Staff chỉ thấy mục Quản lý lô (chỉ xem) -->
+        <div class="nav-section-label">Quản lý dữ liệu</div>
+        <a href="/quan-ly-lo-cay" class="nav-item">
+          <i class="fas fa-tree nav-icon"></i>Quản lý lô
+        </a>
+      <% } %>
 
       <div class="nav-section-label">Phân tích</div>
       <a href="/thong-ke" class="nav-item">
         <i class="fas fa-chart-bar nav-icon"></i>Thống kê
       </a>
 
-      <div class="nav-logout" style="
-            margin-top: auto;
-            border-top: 1px solid var(--border);
-            padding-top: 12px;
-          ">
+      <div class="nav-logout" style="margin-top: auto; border-top: 1px solid var(--border); padding-top: 12px;">
         <a href="/logout" class="nav-item">
           <i class="fas fa-sign-out-alt nav-icon"></i> Đăng xuất
         </a>
@@ -2070,24 +2074,26 @@
     </nav>
 
     <!-- CONTENT -->
-    <div id="content">
-      <!-- ════════════ PAGE: DASHBOARD ════════════ -->
-      <div class="page active" id="page-dashboard">
-        <div class="page-header">
-          <div>
-            <div class="page-title" data-lang="dashboard">Dashboard</div>
-            <div class="page-subtitle">Tổng quan vườn cây</div>
-          </div>
-          <div style="display: flex; gap: 8px; justify-content: flex-end">
-            <button class="btn btn-primary btn-sm" onclick="window.location.href = '/them-du-lieu-lo-cay'">
-              <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <line x1="12" y1="5" x2="12" y2="19" />
-                <line x1="5" y1="12" x2="19" y2="12" />
-              </svg>
-              <span data-lang="them-du-lieu">Import từ Excel</span>
-            </button>
-          </div>
-        </div>
+<div id="content">
+  <!-- ════════════ PAGE: DASHBOARD ════════════ -->
+  <div class="page active" id="page-dashboard">
+    <div class="page-header">
+      <div>
+        <div class="page-title" data-lang="dashboard">Dashboard</div>
+        <div class="page-subtitle">Tổng quan vườn cây</div>
+      </div>
+      <div style="display: flex; gap: 8px; justify-content: flex-end">
+        <% if (user.role === 'admin') { %>
+          <button class="btn btn-primary btn-sm" onclick="window.location.href = '/them-du-lieu-lo-cay'">
+            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            <span data-lang="them-du-lieu">Import từ Excel</span>
+          </button>
+        <% } %>
+      </div>
+    </div>
 
         <!-- ── BẢN ĐỒ TRUNG TÂM ── -->
         <div class="map-section">
@@ -3151,11 +3157,9 @@
     </div>
   </div>
   <div class="lo-popup-actions">
-    
-    <div class="lo-popup-btn" onclick="editLot('${p.id_lo}')">Sửa</div>
+    ${window.userRole === 'admin' ? '<div class="lo-popup-btn" onclick="editLot(\'' + p.id_lo + '\')">Sửa</div>' : ''}
   </div>
-`,
-              { maxWidth: 320 },
+`, { maxWidth: 320 },
             );
 
             layer.on("mouseover", () =>
