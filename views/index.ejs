@@ -2526,6 +2526,17 @@
                 <input type="text" placeholder="Tên lô, mã, giống, năm trồng..." id="mapSearchInput"
                   oninput="mapSearch(this.value)" />
               </div>
+              <!-- Thêm ô tìm kiếm theo số PC -->
+              <div class="msp-input" style="border-top: 1px solid var(--border);">
+                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="#5a6a8a" stroke-width="2">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                  <line x1="3" y1="9" x2="21" y2="9" />
+                  <line x1="3" y1="15" x2="21" y2="15" />
+                  <line x1="9" y1="21" x2="9" y2="9" />
+                </svg>
+                <input type="number" placeholder="Tìm theo số PC (Phân cạo)..." id="mapSearchPCInput"
+                  oninput="mapSearchByPC(this.value)" />
+              </div>
               <div id="mapSearchResults">
                 <div class="msp-result" style="color: var(--muted); font-style: italic">
                   Nhập từ khóa để tìm kiếm lô...
@@ -3346,6 +3357,17 @@
       // Cascade: cập nhật các dropdown khác dựa trên tập dữ liệu đã lọc
       cascadeFilterOptions(type);
       renderRealLots();
+
+      const pcInput = document.getElementById("mapSearchPCInput");
+      if (pcInput && pcInput.value.trim()) {
+        const pcValue = pcInput.value.trim();
+        const pcNum = parseInt(pcValue);
+        if (!isNaN(pcNum)) {
+          console.log("🔄 Bộ lọc thay đổi, tự động tìm lại PC =", pcNum);
+          mapSearchByPC(pcValue);
+        }
+      }
+      
     }
 
     /**
@@ -3751,6 +3773,159 @@
       showToast(
         `Đã tìm thấy: ${feat.properties.ten_lo || feat.properties.id_lo}`,
         "📍",
+      );
+    }
+
+    /* ==================== TÌM KIẾM THEO SỐ PC (KẾT HỢP BỘ LỌC) ==================== */
+    function mapSearchByPC(pcValue) {
+      const res = document.getElementById("mapSearchResults");
+      const pcNum = parseInt(pcValue);
+      
+      if (!pcValue.trim() || isNaN(pcNum)) {
+        const nameInput = document.getElementById("mapSearchInput");
+        if (nameInput.value.trim()) {
+          mapSearch(nameInput.value);
+        } else {
+          res.innerHTML = '<div class="msp-result" style="color: var(--muted); font-style: italic">Nhập số PC để tìm kiếm lô trong phạm vi bộ lọc hiện tại...</div>';
+        }
+        return;
+      }
+      
+      // LẤY CÁC BỘ LỌC HIỆN TẠI
+      const currentFilters = {
+        NT: filterNT,
+        nam: filterNam,
+        giong: filterGiong,
+        phien_cao: filterPhienCao,
+        nhip_do_cao: filterNhipDo,
+        quy_hoach_tai_canh: filterQuyHoach,
+        khu_vuc: filterKhuVuc,
+        tuoi_cao: filterTuoiCao,
+        che_do_cao: filterCheDoCao,
+        nang_suat: filterNangSuat
+      };
+      
+      // Hàm kiểm tra feature có thỏa mãn TẤT CẢ bộ lọc hiện tại không
+      function matchesCurrentFilters(f) {
+        const p = f.properties;
+        
+        // Đội
+        const nt = normalizeTeamValue(p.doi);
+        if (currentFilters.NT.size > 0 && !currentFilters.NT.has(nt)) return false;
+        
+        // Năm trồng
+        const nam = p.nam_trong != null ? String(p.nam_trong) : "";
+        if (currentFilters.nam.size > 0 && !currentFilters.nam.has(nam)) return false;
+        
+        // Giống
+        const giong = p.giong ?? "";
+        if (currentFilters.giong.size > 0 && !currentFilters.giong.has(giong)) return false;
+        
+        // Phiên cạo
+        const phienCao = p.phien_cao != null ? String(p.phien_cao) : "";
+        if (currentFilters.phien_cao.size > 0 && !currentFilters.phien_cao.has(phienCao)) return false;
+        
+        // Nhịp độ cạo
+        const nhipDo = p.nhip_do_cao != null ? String(p.nhip_do_cao) : "";
+        if (currentFilters.nhip_do_cao.size > 0 && !currentFilters.nhip_do_cao.has(nhipDo)) return false;
+        
+        // QH tái canh
+        const quyHoach = p.tai_canh_nam != null ? String(p.tai_canh_nam) : "";
+        if (currentFilters.quy_hoach_tai_canh.size > 0 && !currentFilters.quy_hoach_tai_canh.has(quyHoach)) return false;
+        
+        // Khu vực
+        const khuVuc = p.khu_vuc ?? "";
+        if (currentFilters.khu_vuc.size > 0 && !currentFilters.khu_vuc.has(khuVuc)) return false;
+        
+        // Tuổi cạo
+        const tuoiCao = p.tuoi_cao != null ? String(p.tuoi_cao) : "";
+        if (currentFilters.tuoi_cao.size > 0 && !currentFilters.tuoi_cao.has(tuoiCao)) return false;
+        
+        // Chế độ cạo
+        const cheDoCao = p.che_do_cao ?? "";
+        if (currentFilters.che_do_cao.size > 0 && !currentFilters.che_do_cao.has(cheDoCao)) return false;
+        
+        // Năng suất
+        if (!nsPassFilter(p.ns25_kg_ha, currentFilters.nang_suat)) return false;
+        
+        return true;
+      }
+      
+      // BƯỚC 1: Lọc các lô theo bộ lọc HIỆN TẠI
+      const filteredFeatures = caosuFeatures.filter(f => matchesCurrentFilters(f));
+      
+      // BƯỚC 2: Trong số đó, tìm lô có PC nằm trong khoảng
+      const hits = filteredFeatures.filter((f) => {
+        const p = f.properties;
+        const pcBatDau = parseInt(p.pc_bat_dau);
+        const pcKetThuc = parseInt(p.pc_ket_thuc);
+        
+        if (isNaN(pcBatDau) || isNaN(pcKetThuc)) return false;
+        return pcNum >= pcBatDau && pcNum <= pcKetThuc;
+      });
+      
+      // Hiển thị thông tin bộ lọc đang áp dụng
+      const getActiveFiltersText = () => {
+        const parts = [];
+        if (currentFilters.NT.size > 0) parts.push(`Đội: ${Array.from(currentFilters.NT).join(", ")}`);
+        if (currentFilters.khu_vuc.size > 0) parts.push(`KV: ${Array.from(currentFilters.khu_vuc).join(", ")}`);
+        if (currentFilters.phien_cao.size > 0) parts.push(`Phiên: ${Array.from(currentFilters.phien_cao).join(", ")}`);
+        if (currentFilters.nam.size > 0) parts.push(`Năm: ${Array.from(currentFilters.nam).join(", ")}`);
+        if (currentFilters.giong.size > 0) parts.push(`Giống: ${Array.from(currentFilters.giong).join(", ")}`);
+        if (parts.length === 0) return "không có bộ lọc";
+        return parts.join(" · ");
+      };
+      
+      if (hits.length === 0) {
+        res.innerHTML = `
+          <div class="msp-result" style="color: var(--muted)">
+            🔍 Không tìm thấy lô nào có PC ${pcNum}
+            <span style="display: block; font-size: 10px; margin-top: 4px;">
+              ⚡ Đang áp dụng: ${getActiveFiltersText()}
+            </span>
+          </div>
+        `;
+        return;
+      }
+      
+      // Hiển thị kết quả kèm thông tin bộ lọc
+      res.innerHTML = `
+        <div class="msp-result" style="background: rgba(0,214,143,0.1); border-left: 3px solid var(--accent);">
+          <span style="font-size: 10px; color: var(--accent);">⚡ Đang lọc theo: ${getActiveFiltersText()}</span>
+        </div>
+        ${hits.map((f) => {
+          const p = f.properties;
+          const originalIdx = caosuFeatures.indexOf(f);
+          return `<div class="msp-result" onclick="flyToFeatureByPC(${originalIdx}, ${pcNum})">
+            <strong>${p.ten_lo || p.id_lo || "—"}</strong><br>
+            <span style="font-size: 10px; color: var(--muted2)">
+              🏷️ ${p.doi ? `Đội ${p.doi}` : ""} ${p.khu_vuc ? `· KV ${p.khu_vuc}` : ""} ${p.phien_cao ? `· Phiên ${p.phien_cao}` : ""}<br>
+              📊 PC: ${p.pc_bat_dau} → ${p.pc_ket_thuc} (chứa PC ${pcNum})
+            </span>
+          </div>`;
+        }).join("")}
+      `;
+    }
+
+    function flyToFeatureByPC(idx, pcNum) {
+      const feat = caosuFeatures[idx];
+      if (!feat || !feat.geometry) return;
+      
+      const tmp = L.geoJSON(feat);
+      dashMap.flyToBounds(tmp.getBounds(), { maxZoom: 16, duration: 1 });
+      
+      // Thêm lô vào danh sách đã chọn
+      selectedIdx.add(idx);
+      updateSelBar();
+      renderRealLots();
+      
+      // Đóng panel tìm kiếm
+      document.getElementById("map-search-panel").classList.remove("show");
+      
+      // Hiển thị thông báo
+      showToast(
+        `🎯 Tìm thấy lô "${feat.properties.ten_lo || feat.properties.id_lo}" chứa PC ${pcNum} (trong khoảng ${feat.properties.pc_bat_dau} - ${feat.properties.pc_ket_thuc})`,
+        "📍"
       );
     }
 
@@ -4702,6 +4877,37 @@
       const modal = document.getElementById("editModal");
       if (e.target === modal) closeEditModal();
     });
+
+    // Tự động cập nhật tìm kiếm PC khi bộ lọc thay đổi qua UI
+    function bindFilterChangeEvents() {
+      const filterSelects = [
+        'filter-Doi', 'filter-khu-vuc', 'filter-nam', 'filter-giong',
+        'filter-phien_cao', 'filter-Nhip_do_cao', 'filter-quy_hoach_tai_canh',
+        'filter-tuoi-cao', 'filter-che-do-cao', 'filter-nang-suat'
+      ];
+      
+      filterSelects.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          // Lưu lại handler cũ nếu có
+          const oldOnChange = el.getAttribute('onchange');
+          // Gán handler mới
+          el.addEventListener('change', function() {
+            const pcInput = document.getElementById("mapSearchPCInput");
+            if (pcInput && pcInput.value.trim()) {
+              const pcValue = pcInput.value.trim();
+              const pcNum = parseInt(pcValue);
+              if (!isNaN(pcNum)) {
+                setTimeout(() => mapSearchByPC(pcValue), 50);
+              }
+            }
+          });
+        }
+      });
+    }
+
+    // Gọi hàm này sau khi khởi tạo xong
+    setTimeout(bindFilterChangeEvents, 1000);
   </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
